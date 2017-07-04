@@ -124,6 +124,12 @@
 						<div><a class="button" href="http://www.gm48.net/" target="_blank" rel="noopener">Visit the website</a></div>
 					</div>
 				</div>
+				<div class="row">
+					<div class="portfolio-referral text-center">
+						You can find more projects on my <a href="/portfolio">portfolio.</a>
+					</div>
+				</div>
+
 			</section>
 		</main>
 
