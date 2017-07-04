@@ -12,7 +12,7 @@
 			 | |_) / _ \ __/ _ \ '__| | |        _  | |/ _//\| '__/ _` |/ _ \ '_ \/ __|/ _ \ '_ \
 			 |  __/  __/ ||  __/ |    | |___ _  | |_| | (//) | | | (_| |  __/ | | \__ \  __/ | | |
 			 |_|   \___|\__\___|_|     \____(_)  \___/ \//__/|_|  \__, |\___|_| |_|___/\___|_| |_|
-			                                                      |___/
+																  |___/
 										Designed and developed by
 							Peter C. Jørgensen | peterchrjoergensen.dk | @tehwave
 		 -->
@@ -54,9 +54,9 @@
 		  "name": "Peter C. Jørgensen",
 		  "jobTitle": "Multimedia Designer",
 		  "address": {
-		    "@type": "PostalAddress",
-		    "addressLocality": "Odense",
-		    "addressRegion": "Funen"
+			"@type": "PostalAddress",
+			"addressLocality": "Odense",
+			"addressRegion": "Funen"
 		  }
 		}
 		</script>
@@ -70,7 +70,7 @@
 		<link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Raleway:700,600,400,300'>
 
 		<!-- Modernizr -->
-        <script src="/js/modernizr-2.8.3.min.js" defer></script>
+		<script src="/js/modernizr-2.8.3.min.js" defer></script>
 
 		<!-- Google Tag Manager -->
 		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -156,7 +156,7 @@
 
 		<!-- JS -->
 		<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.4.min.js"><\/script>')</script>
+		<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.4.min.js"><\/script>')</script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/smoothscroll/1.4.4/SmoothScroll.min.js" defer></script>
 		<script src="/js/parallax.js" ></script>
 	</body>
