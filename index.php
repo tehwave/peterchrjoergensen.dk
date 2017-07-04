@@ -137,12 +137,12 @@
 					</div>
 					<div class="one-third column project">
 						<h2>B2B Kolding</h2>
-						<p class="lead">A website for a trade fair</p>
+						<p class="lead">A Wordpress website for a local trade fair</p>
 						<div><a class="button" href="https://www.b2bkolding.dk" target="_blank" rel="noopener">Take a browse</a></div>
 					</div>
 					<div class="one-third column project">
 						<h2>GM48</h2>
-						<p class="lead">A quarterly GameMaker game jam</p>
+						<p class="lead">A quarterly 48 hours GameMaker game jam</p>
 						<div><a class="button" href="http://www.gm48.net/" target="_blank" rel="noopener">Visit the website</a></div>
 					</div>
 				</div>
