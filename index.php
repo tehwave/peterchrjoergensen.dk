@@ -55,8 +55,8 @@
 		  "jobTitle": "Multimedia Designer",
 		  "address": {
 			"@type": "PostalAddress",
-			"addressLocality": "Odense",
-			"addressRegion": "Funen"
+			"addressLocality": "Kolding",
+			"addressRegion": "Jutland"
 		  }
 		}
 		</script>
