@@ -1,0 +1,11 @@
+{
+  "name": "peterchrjoergensen.dk",
+  "version": "1.0.0",
+  "description": "Personal website of Peter Christian Jørgensen.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Peter Christian Jørgensen",
+  "license": "ISC"
+}
