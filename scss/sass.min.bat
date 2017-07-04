@@ -1,0 +1,1 @@
+sass --watch pcj.scss:../css/pcj.min.css --style compressed
