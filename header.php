@@ -1,7 +1,9 @@
 <?php ?>
 <header class="container header text-center">
 	<!-- Title -->
-	<h1 class="title">Peter Christian Jørgensen</h1>
+	<h1 class="title">
+		<a href="/">Peter Christian Jørgensen</a>
+	</h1>
 	<hr>
 	<!-- Navigation -->
 	<nav>
