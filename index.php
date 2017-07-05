@@ -126,7 +126,7 @@
 				</div>
 				<div class="row">
 					<div class="portfolio-referral text-center">
-						You can find more projects on my <a href="/portfolio">portfolio.</a>
+						You can find more of my projects on my <a href="/portfolio">portfolio.</a>
 					</div>
 				</div>
 
