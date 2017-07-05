@@ -9,6 +9,7 @@
 	<nav>
 		<div class="row">
 			<section class="three columns"><a href="/files/CV-Peter-Christian-Jørgensen.pdf">C.V.</a></section>
+			<section class="three columns"><a href="/portfolio">Portfolio</a></section>
 			<section class="three columns">&nbsp</section>
 			<!-- <section class="three columns"><a href="#">Blog</a></section> -->
 			<!-- Social -->
