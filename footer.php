@@ -24,7 +24,7 @@
 	<!-- Copyright -->
 	<section class="container copyright">
 		<p>
-			"Wave Emoji" by Twitter / <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener"><small>CC BY 4.0</small>.</a>
+			<i>"Wave Emoji"</i> by Twitter / <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener"><small>CC BY 4.0</small>.</a>
 			<span class="nucleo">Beautiful icons by <a href="https://nucleoapp.com/?ref=tehwave" target="_blank" rel="noopener"><img src="/img/nucleo-logo.svg" height="16" width="66" alt="Nucleo"></a></span>
 		</p>
 	</section>
