@@ -69,9 +69,6 @@
 		<!-- Font -->
 		<link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Raleway:700,600,400,300'>
 
-		<!-- Modernizr -->
-		<script src="/js/modernizr-2.8.3.min.js" defer></script>
-
 		<!-- Google Tag Manager -->
 		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
