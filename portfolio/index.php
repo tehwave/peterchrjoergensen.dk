@@ -106,22 +106,20 @@
 			</section>
 
 			<!-- Projects -->
-			<section class="container projects text-center">
+			<section class="projects text-center">
 				<ul class="controls">
 					<li><button type="button" class="button" data-filter="all">All</a></li>
 					<li><button type="button" class="button" data-filter=".game">Game</a></li>
 					<li><button type="button" class="button" data-filter=".video">Video</a></li>
 					<li><button type="button" class="button" data-filter=".website">Website</a></li>
-					<li><button type="button" class="button" data-filter=".application">Application</a></li>
 					<li><button type="button" class="button" data-filter=".graphics">Graphics</a></li>
-				</ul>
-				<ul class="controls">
+					<li><button type="button" class="button" data-filter=".application">Application</a></li>
 					<li><button type="button" class="button" data-filter=".solo">Solo</a></li>
 					<li><button type="button" class="button" data-filter=".team">Team</a></li>
 					<li><button type="button" class="button" data-filter=".company">Company</a></li>
 				</ul>
-				<hr>
-				<section id="mixitup">
+				<div class="container" id="mixitup">
+					<hr>
 					<article class="project game solo">
 						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
 						<h2 class="title">FIRKANT</h2>
@@ -283,7 +281,7 @@
 							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
 						</div>
 					</article>
-				</section>
+				</div>
 			</section>
 		</main>
 
