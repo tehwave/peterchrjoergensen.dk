@@ -331,7 +331,7 @@
 				});
 
 				if (!posTop()) {
-					page.animate({ scrollTop: $("#mixitup").position().top - 100 }, 1500, function(){
+					page.animate({ scrollTop: $("#mixitup").position().top - 120 }, 1500, function(){
 						page.off("scroll mousedown wheel DOMMouseScroll mousewheel keyup touchmove");
 					});
 				};
