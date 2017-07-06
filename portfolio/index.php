@@ -131,8 +131,9 @@
 							<li>GameMaker: Studio</li>
 							<li>Solo</li>
 						</ul>
-						<p class="lead">A fast-paced, procedural platformer</p>
-						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Play it</a></div>
+						<p class="lead">FIRKANT is a a fast-paced, procedural platformer inspired by Cloudberry Kingdom and Super Meat Boy.</p>
+						<p>Made in GameMaker: Studio, it's planned for release on mobile platforms in late 2017. For more information, please visit the website.</p>
+						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
 					</article>
 					<article class="project website company">
 						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
