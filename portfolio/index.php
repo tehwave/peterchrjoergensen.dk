@@ -311,6 +311,11 @@
 			        duration: 400,
 			        nudge: true,
 			        effects: "fade translateZ(-100px)"
+			    },
+			    callbacks: {
+					onMixEnd: function() {
+						jQuery(window).trigger('resize').trigger('scroll');
+					}
 			    }
 			});
 
