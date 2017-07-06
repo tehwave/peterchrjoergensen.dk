@@ -68,20 +68,22 @@ Portfolio
 
 .portfolio {
 
-	hr {
-		margin-bottom: 5rem;
-	}
+	.projects {
+		hr {
+			margin-bottom: 5rem;
+		}
 
-	.controls {
-		padding: 0 20px;
-	    margin-left: -5px;
-	    margin-bottom: .5rem;
-	    list-style: none;
+		.controls {
+			padding: 0 20px;
+		    margin-left: -5px;
+		    margin-bottom: .5rem;
+		    list-style: none;
 
-		li {
-		    display: inline-block;
-		    padding-right: 5px;
-		    padding-left: 5px;
+			li {
+			    display: inline-block;
+			    padding-right: 5px;
+			    padding-left: 5px;
+			}
 		}
 	}
 
