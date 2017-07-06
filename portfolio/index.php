@@ -313,6 +313,25 @@
 			        effects: "fade translateZ(-100px)"
 			    }
 			});
+
+			// Detect if positioned at top
+			function posTop() {
+	            return typeof window.pageYOffset != 'undefined' ? window.pageYOffset: document.documentElement.scrollTop? document.documentElement.scrollTop: document.body.scrollTop? document.body.scrollTop:0;
+	        }
+
+	        var page = $("html, body");
+
+			$("button").click(function() {
+				page.on("scroll mousedown wheel DOMMouseScroll mousewheel keyup touchmove", function(){
+					page.stop();
+				});
+
+				if (!posTop()) {
+					page.animate({ scrollTop: $("#mixitup").position().top - 100 }, 1500, function(){
+						page.off("scroll mousedown wheel DOMMouseScroll mousewheel keyup touchmove");
+					});
+				};
+			});
 		</script>
 	</body>
 </html>
