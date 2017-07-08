@@ -303,9 +303,6 @@
 			    selectors: {
 			        target: '.project'
 			    },
-			    load: {
-        			sort: 'random'
-			    },
 			    animation: {
 			        duration: 400,
 			        nudge: true,
