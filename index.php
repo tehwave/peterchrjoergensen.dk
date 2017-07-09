@@ -101,7 +101,7 @@
 			</section>
 
 			<!-- Projects -->
-			<section class="container projects text-center">
+			<div class="container projects text-center">
 				<h3>I'm proud of these projects</h3>
 				<hr>
 				<div class="row">
@@ -126,8 +126,7 @@
 						You can find more of my projects on my <a href="/portfolio">portfolio.</a>
 					</div>
 				</div>
-
-			</section>
+			</div>
 		</main>
 
 		<!-- Footer -->
