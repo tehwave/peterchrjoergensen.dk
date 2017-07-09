@@ -120,7 +120,8 @@
 				<div class="container" id="mixitup">
 					<hr>
 					<article class="project game solo">
-						<img class="image u-max-full-width" src="img/firkant.png" alt="FIRKANT">
+						<noscript><img class="u-max-full-width image" src="img/firkant.png" width="300" height="300" alt="FIRKANT"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/firkant-lowquality.png" data-src="img/firkant.png" width="300" height="300" alt="FIRKANT">
 						<h2 class="title">FIRKANT</h2>
 						<hr>
 						<ul class="tags">
@@ -133,7 +134,8 @@
 						<div><a class="button button-primary" href="/FIRKANT" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website company">
-						<img class="image u-max-full-width" src="img/b2bkolding.png" alt="B2B Kolding">
+						<noscript><img class="u-max-full-width image" src="img/b2bkolding.png" width="300" height="300" alt="B2B Kolding"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/b2bkolding-lowquality.png" data-src="img/b2bkolding.png" width="300" height="300" alt="B2B Kolding">
 						<h2 class="title">B2B Kolding</h2>
 						<hr>
 						<ul class="tags">
@@ -146,7 +148,8 @@
 						<div><a class="button button-primary" href="https://www.b2bkolding.dk" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website solo">
-						<img class="image u-max-full-width" src="img/gm48.png" alt="gm(48)">
+						<noscript><img class="u-max-full-width image" src="img/gm48.png" width="300" height="300" alt="gm(48)"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/gm48-lowquality.png" data-src="img/gm48.png" width="300" height="300" alt="gm(48)">
 						<h2 class="title">GM48</h2>
 						<hr>
 						<ul class="tags">
@@ -159,7 +162,8 @@
 						<div><a class="button button-primary" href="https://gm48.net" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website company">
-						<img class="image u-max-full-width" src="img/grundfos.png" alt="Grundfos">
+						<noscript><img class="u-max-full-width image" src="img/grundfos.png" width="300" height="300" alt="Grundfos"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/grundfos-lowquality.png" data-src="img/grundfos.png" width="300" height="300" alt="Grundfos">
 						<h2 class="title">Grundfos Safety</h2>
 						<hr>
 						<ul class="tags">
@@ -172,7 +176,8 @@
 						<div><a class="button button-primary" href="https://tehwave.github.io/grundfos-quiz/" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project video team">
-						<img class="image u-max-full-width" src="img/author.jpg" alt="The Author">
+						<noscript><img class="u-max-full-width image" src="img/author.jpg" width="300" height="300" alt="The Author"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/author-lowquality.jpg" data-src="img/author.jpg" width="300" height="300" alt="The Author">
 						<h2 class="title">The Author</h2>
 						<hr>
 						<ul class="tags">
@@ -191,7 +196,8 @@
 						</div>
 					</article>
 					<article class="project game team">
-						<img class="image u-max-full-width" src="img/western.jpg" alt="Western World">
+						<noscript><img class="u-max-full-width image" src="img/western.jpg" width="300" height="300" alt="Western World"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/western-lowquality.jpg" data-src="img/western.jpg" width="300" height="300" alt="Western World">
 						<h2 class="title">Western World</h2>
 						<hr>
 						<ul class="tags">
@@ -210,7 +216,8 @@
 						</div>
 					</article>
 					<article class="project video solo">
-						<img class="image u-max-full-width" src="img/showreel.jpg" alt="Showreel">
+						<noscript><img class="u-max-full-width image" src="img/showreel.jpg" width="300" height="300" alt="Showreel"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/showreel-lowquality.jpg" data-src="img/showreel.jpg" width="300" height="300" alt="Showreel">
 						<h2 class="title">Showreel - 2015</h2>
 						<hr>
 						<ul class="tags">
@@ -229,7 +236,8 @@
 						</div>
 					</article>
 					<article class="project website solo">
-						<img class="image u-max-full-width" src="img/website.png" alt="Website">
+						<noscript><img class="u-max-full-width image" src="img/website.png" width="300" height="300" alt="Website"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/website-lowquality.png" data-src="img/website.png" width="300" height="300" alt="Website">
 						<h2 class="title">My Website</h2>
 						<hr>
 						<ul class="tags">
@@ -248,7 +256,8 @@
 						</div>
 					</article>
 					<article class="project game team">
-						<img class="image u-max-full-width" src="img/mordombord.png" alt="Mord Ombord">
+						<noscript><img class="u-max-full-width image" src="img/mordombord.png" width="300" height="300" alt="Mord Ombord"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/mordombord-lowquality.png" data-src="img/mordombord.png" width="300" height="300" alt="Mord Ombord">
 						<h2 class="title">Mord Ombord</h2>
 						<hr>
 						<ul class="tags">
@@ -267,7 +276,8 @@
 						</div>
 					</article>
 					<article class="project application team">
-						<img class="image u-max-full-width" src="img/odensegolfklub.png" alt="Odense Golfklub">
+						<noscript><img class="u-max-full-width image" src="img/odensegolfklub.png" width="300" height="300" alt="Odense Golfklub"></noscript>
+						<img class="u-max-full-width image lazyload lqip" src="img/odensegolfklub-lowquality.png" data-src="img/odensegolfklub.png" width="300" height="300" alt="Odense Golfklub">
 						<h2 class="title">Odense Golfklub</h2>
 						<hr>
 						<ul class="tags">
@@ -299,6 +309,9 @@
 		<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.4.min.js"><\/script>')</script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/smoothscroll/1.4.4/SmoothScroll.min.js" defer></script>
 		<script src="/js/parallax.min.js" defer></script>
+
+		<!-- LazyLoad -->
+		<script src="/js/lazysizes.min.js" async></script>
 
 		<!-- MixitUp -->
 		<script src="/js/mixitup.min.js"></script>
