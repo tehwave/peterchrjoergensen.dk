@@ -282,7 +282,7 @@
 							Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.
 						</p>
 						<div>
-							<a class="button button-primary" href="/files/OdenseGolfklub.apk" target="_blank" rel="noopener">Download APK</a>
+							<a class="button button-primary" href="files/OdenseGolfklub.apk" target="_blank" rel="noopener">Download APK</a>
 						</div>
 					</article>
 				</div>
