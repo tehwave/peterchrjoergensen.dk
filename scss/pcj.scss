@@ -302,7 +302,7 @@ Other
 
 .lqip.lazyloaded {
 	@include filter(blur(0px));
-	@include transition(filter 400ms);
+	@include transition(filter 0.5s ease-in-out);
 }
 
 .twitter-search {
