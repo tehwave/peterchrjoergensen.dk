@@ -9,6 +9,7 @@ Variables
 -------------------------------- */
 
 $white: 	white;
+$gray:		#f5f5f5;
 $teal: 		#33c3f0;
 $blue: 		#0fa0ce;
 $black: 	#222222;
@@ -153,6 +154,7 @@ Portfolio
 		position: relative;
 		display: inline-block;
 		vertical-align: top;
+		background: $gray;
 
 		margin-bottom: 2rem;
 		margin-left: 0.5rem;
