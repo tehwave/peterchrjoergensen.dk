@@ -62,8 +62,8 @@
 		</script>
 
 		<!-- CSS -->
-		<link rel="stylesheet" type="text/css" href="/css/normalize.css">
-		<link rel="stylesheet" type="text/css" href="/css/skeleton.css">
+		<link rel="stylesheet" type="text/css" href="/css/normalize.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/skeleton.min.css">
 		<link rel="stylesheet" type="text/css" href="/css/pcj.min.css">
 
 		<!-- Font -->
