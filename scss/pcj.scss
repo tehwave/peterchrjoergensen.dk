@@ -169,6 +169,60 @@ Portfolio
 	}
 }
 
+/* --------------------------------
+
+Header
+
+-------------------------------- */
+
+.header {
+	padding-top: 4rem;
+	@media (min-width: 550px) {
+		padding-top: 8rem;
+	}
+	padding-bottom: 1rem;
+
+	nav a {
+	    color: $black;
+	    font-size: 18px;
+	    font-weight: 600;
+	    line-height: 6.5rem;
+	    letter-spacing: .2rem;
+	    text-decoration: none;
+	    text-transform: uppercase;
+
+	    &.active {
+	    	color: $teal;
+	    }
+
+	    &:hover {
+	    	color: $blue;
+
+	    	svg path {
+	    		fill: $blue !important;
+	    	}
+	    }
+	}
+
+	.icon {
+		margin: 0.5em;
+	}
+
+	.title a {
+		color: black;
+		text-decoration: none;
+	}
+}
+
+.intro {
+	color: white;
+	line-height: 3rem;
+	margin-bottom: 5rem;
+	h2 { font-size: 4.0rem }
+	p, h2 { font-weight: 600 }
+	p { font-size: 2em; font-weight: 400 }
+	@media (min-width: 550px) { h2 { font-size: 5.0rem } }
+}
 
 /* --------------------------------
 
@@ -249,55 +303,6 @@ Other
 .lqip.lazyloaded {
 	@include filter(blur(0px));
 	@include transition(filter 400ms);
-}
-
-.header {
-	padding-top: 4rem;
-	@media (min-width: 550px) {
-		padding-top: 8rem;
-	}
-	padding-bottom: 1rem;
-
-	nav a {
-	    color: $black;
-	    font-size: 18px;
-	    font-weight: 600;
-	    line-height: 6.5rem;
-	    letter-spacing: .2rem;
-	    text-decoration: none;
-	    text-transform: uppercase;
-
-	    &.active {
-	    	color: $teal;
-	    }
-
-	    &:hover {
-	    	color: $blue;
-
-	    	svg path {
-	    		fill: $blue !important;
-	    	}
-	    }
-	}
-
-	.icon {
-		margin: 0.5em;
-	}
-
-	.title a {
-		color: black;
-		text-decoration: none;
-	}
-}
-
-.intro {
-	color: white;
-	line-height: 3rem;
-	margin-bottom: 5rem;
-	h2 { font-size: 4.0rem }
-	p, h2 { font-weight: 600 }
-	p { font-size: 2em; font-weight: 400 }
-	@media (min-width: 550px) { h2 { font-size: 5.0rem } }
 }
 
 .twitter-search {
