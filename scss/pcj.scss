@@ -235,9 +235,20 @@ Other
 -------------------------------- */
 
 .no-js {
-	.controls {
+	.controls, img.lazyload {
 		display: none;
 	}
+}
+
+// Lazy Load
+.lqip {
+	will-change: filter;
+	@include filter(blur(2px));
+}
+
+.lqip.lazyloaded {
+	@include filter(blur(0px));
+	@include transition(filter 400ms);
 }
 
 .header {
