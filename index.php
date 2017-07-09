@@ -108,7 +108,7 @@
 					<div class="one-third column project">
 						<h2>FIRKANT</h2>
 						<p class="lead">A fast-paced, procedural platformer</p>
-						<div><a class="button" href="/FIRKANT" target="_blank">Check it out</a></div>
+						<div><a class="button" href="/FIRKANT" target="_blank" rel="noopener">Check it out</a></div>
 					</div>
 					<div class="one-third column project">
 						<h2>B2B Kolding</h2>
