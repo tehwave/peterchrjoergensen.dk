@@ -97,7 +97,7 @@
 		<!-- Main -->
 		<main class="u-full-width">
 			<!-- Introduction -->
-			<section class="parallax intro" data-parallax="scroll" data-speed="0.6" data-image-src="/img/home.jpg" data-natural-width="1920" data-natural-height="1080" data-z-index="0">
+			<section class="parallax intro" data-parallax="scroll" data-speed="0.6" data-image-src="img/portfolio.jpg" data-natural-width="1920" data-natural-height="1080" data-z-index="0">
 				<div class="container">
 					<h2>Portfolio</h2>
 					<p>Throughout the years, I have accumulated various <b>ambitious</b> <b>and creative</b> projects, including <b>applications</b>, <b>games</b> and <b>websites.</b></p>
