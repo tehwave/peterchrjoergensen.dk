@@ -64,7 +64,7 @@
 		<!-- CSS -->
 		<link rel="stylesheet" type="text/css" href="/css/normalize.css">
 		<link rel="stylesheet" type="text/css" href="/css/skeleton.css">
-		<link rel="stylesheet" type="text/css" href="/css/pcj.min.css?v=<?php echo time() ?>">
+		<link rel="stylesheet" type="text/css" href="/css/pcj.min.css">
 
 		<!-- Font -->
 		<link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Raleway:700,600,400,300'>
