@@ -130,7 +130,7 @@
 						</ul>
 						<p class="lead">FIRKANT is a a fast-paced, procedural platformer inspired by Cloudberry Kingdom and Super Meat Boy.</p>
 						<p>Made in GameMaker: Studio, it's planned for release on mobile platforms in late 2017. For more information, please visit the website.</p>
-						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
+						<div><a class="button button-primary" href="/FIRKANT" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website company">
 						<img class="image u-max-full-width" src="img/b2bkolding.png" alt="B2B Kolding">
@@ -282,7 +282,7 @@
 							Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.
 						</p>
 						<div>
-							<a class="button button-primary" href="/files/OdenseGolfklub.apk" target="_blank">Download APK</a>
+							<a class="button button-primary" href="/files/OdenseGolfklub.apk" target="_blank" rel="noopener">Download APK</a>
 						</div>
 					</article>
 				</div>
