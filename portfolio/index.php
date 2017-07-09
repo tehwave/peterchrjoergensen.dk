@@ -112,7 +112,6 @@
 					<li><button type="button" class="button" data-filter=".game">Game</a></li>
 					<li><button type="button" class="button" data-filter=".video">Video</a></li>
 					<li><button type="button" class="button" data-filter=".website">Website</a></li>
-					<li><button type="button" class="button" data-filter=".graphics">Graphics</a></li>
 					<li><button type="button" class="button" data-filter=".application">Application</a></li>
 					<li><button type="button" class="button" data-filter=".solo">Solo</a></li>
 					<li><button type="button" class="button" data-filter=".team">Team</a></li>
@@ -121,7 +120,7 @@
 				<div class="container" id="mixitup">
 					<hr>
 					<article class="project game solo">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/firkant.png" alt="FIRKANT">
 						<h2 class="title">FIRKANT</h2>
 						<hr>
 						<ul class="tags">
@@ -134,7 +133,7 @@
 						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
 					</article>
 					<article class="project website company">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/b2bkolding.png" alt="B2B Kolding">
 						<h2 class="title">B2B Kolding</h2>
 						<hr>
 						<ul class="tags">
@@ -142,11 +141,12 @@
 							<li>Wordpress</li>
 							<li>Company</li>
 						</ul>
-						<p class="lead">A fast-paced, procedural platformer</p>
-						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
+						<p class="lead">B2B Kolding aims to strengthen the partnership between local businesses in Kolding, Denmark.</p>
+						<p>Using Wordpress as CMS, I developed a custom-built theme for the website, and optimized it with cache, SEO and analytics plugins.</p>
+						<div><a class="button button-primary" href="https://www.b2bkolding.dk" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website solo">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/gm48.png" alt="gm(48)">
 						<h2 class="title">GM48</h2>
 						<hr>
 						<ul class="tags">
@@ -154,24 +154,26 @@
 							<li>Laravel</li>
 							<li>Solo</li>
 						</ul>
-						<p class="lead">A fast-paced, procedural platformer</p>
-						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
+						<p class="lead">The gm(48) is a quarterly 48 hours GameMaker game jam from the community of /r/GameMaker.</p>
+						<p>I wrote the website in PHP, HTML, SASS and JS using the Laravel, Bootstrap and VueJS frameworks.</p>
+						<div><a class="button button-primary" href="https://gm48.net" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project website company">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
-						<h2 class="title">Grundfos Safety Quiz</h2>
+						<img class="image u-max-full-width" src="img/grundfos.png" alt="Grundfos">
+						<h2 class="title">Grundfos Safety</h2>
 						<hr>
 						<ul class="tags">
 							<li>Website</li>
 							<li>VueJS</li>
 							<li>Company</li>
 						</ul>
-						<p class="lead">A fast-paced, procedural platformer</p>
-						<div><a class="button button-primary" href="/FIRKANT" target="_blank">Check it out</a></div>
+						<p class="lead">A safety instructions and quiz web application for visitors to the Grundfos facilities.</p>
+						<p>The web application was written in VueJS, and has editable files, translation and support for browsers IE9+.</p>
+						<div><a class="button button-primary" href="https://tehwave.github.io/grundfos-quiz/" target="_blank" rel="noopener">Check it out</a></div>
 					</article>
 					<article class="project video team">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
-						<h2 class="title">The Writer</h2>
+						<img class="image u-max-full-width" src="img/author.jpg" alt="The Author">
+						<h2 class="title">The Author</h2>
 						<hr>
 						<ul class="tags">
 							<li>Video</li>
@@ -179,14 +181,17 @@
 							<li>Team</li>
 						</ul>
 						<p class="lead">
-							Lead
+							An author with writer's block goes to an abandoned house for inspiration, but find things getting too real.
+						</p>
+						<p>
+							I starred in the short film as the main character. It was colorgraded and edited in Adobe Premiere Pro by me as well.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
+							<a class="button button-primary" href="https://www.youtube.com/watch?v=S0bQYYnhtGk" target="_blank" rel="noopener">Watch it</a>
 						</div>
 					</article>
 					<article class="project game team">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/western.jpg" alt="Western World">
 						<h2 class="title">Western World</h2>
 						<hr>
 						<ul class="tags">
@@ -195,14 +200,17 @@
 							<li>Team</li>
 						</ul>
 						<p class="lead">
-							Lead
+							A small, atmospheric town, that was inspired by the good, old Western films, to explore around in.
+						</p>
+						<p>
+							Made in Unity3D as a school project, it was meant to teach us the asset pipeline between Maya and Unity.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
+							<a class="button button-primary" href="https://www.youtube.com/watch?v=0SeTUIsS5sQ" target="_blank" rel="noopener">Watch trailer</a>
 						</div>
 					</article>
 					<article class="project video solo">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/showreel.jpg" alt="Showreel">
 						<h2 class="title">Showreel - 2015</h2>
 						<hr>
 						<ul class="tags">
@@ -211,14 +219,17 @@
 							<li>Solo</li>
 						</ul>
 						<p class="lead">
-							Lead
+							A showreel for various school projects that I completed during my first two semesters in 2015.
+						</p>
+						<p>
+							Edited in Premiere Pro, it was important for me that the music matched the editing, so that it was exciting to watch.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
+							<a class="button button-primary" href="https://www.youtube.com/watch?v=cYLeWeJryOQ" target="_blank" rel="noopener">Watch it</a>
 						</div>
 					</article>
 					<article class="project website solo">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/website.png" alt="Website">
 						<h2 class="title">My Website</h2>
 						<hr>
 						<ul class="tags">
@@ -227,14 +238,17 @@
 							<li>Solo</li>
 						</ul>
 						<p class="lead">
-							Lead
+							My personal website complete with landing page, portfolio, curriculum vitae and blog.
+						</p>
+						<p>
+							I wrote the website to be static and fast using plain HTML, CSS and JS. I used MixItUp 3 for projects display & filtering.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Browse code</a>
+							<a class="button button-primary" href="https://github.com/tehwave/peterchrjoergensen.dk" target="_blank" rel="noopener">Browse code</a>
 						</div>
 					</article>
 					<article class="project game team">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/mordombord.png" alt="Mord Ombord">
 						<h2 class="title">Mord Ombord</h2>
 						<hr>
 						<ul class="tags">
@@ -243,14 +257,17 @@
 							<li>Team</li>
 						</ul>
 						<p class="lead">
-							Lead
+							Solve mysteries and puzzles in Virtual Reality as part of your base school education
+						</p>
+						<p>
+							Developed in Unity3D for use with Google Cardboard, I had to heavily optimize the game to run on old devices.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
+							<a class="button button-primary" href="https://www.youtube.com/watch?v=0U42shiUG2w" target="_blank" rel="noopener">Watch trailer</a>
 						</div>
 					</article>
 					<article class="project application team">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
+						<img class="image u-max-full-width" src="img/odensegolfklub.png" alt="Odense Golfklub">
 						<h2 class="title">Odense Golfklub</h2>
 						<hr>
 						<ul class="tags">
@@ -259,26 +276,13 @@
 							<li>Team</li>
 						</ul>
 						<p class="lead">
-							Lead
+							A mobile application for the members of Odense Golfklub with 360° imagery and 3D models of golf courses.
+						</p>
+						<p>
+							Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.
 						</p>
 						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
-						</div>
-					</article>
-					<article class="project graphics team">
-						<img class="image u-max-full-width" src="http://placehold.it/300x300" alt="FIRKANT">
-						<h2 class="title">Senior Malekursus</h2>
-						<hr>
-						<ul class="tags">
-							<li>Game</li>
-							<li>Unity3D</li>
-							<li>Team</li>
-						</ul>
-						<p class="lead">
-							Lead
-						</p>
-						<div>
-							<a class="button button-primary" href="/FIRKANT" target="_blank">Watch it</a>
+							<a class="button button-primary" href="/files/OdenseGolfklub.apk" target="_blank">Download APK</a>
 						</div>
 					</article>
 				</div>
