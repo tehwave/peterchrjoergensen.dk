@@ -234,7 +234,7 @@
 						<hr>
 						<ul class="tags">
 							<li>Website</li>
-							<li>HTML / CSS / PHP</li>
+							<li>HTML / CSS / JS</li>
 							<li>Solo</li>
 						</ul>
 						<p class="lead">
