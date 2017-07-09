@@ -102,7 +102,7 @@
 
 			<!-- Projects -->
 			<div class="container projects text-center">
-				<h3>I'm proud of these projects</h3>
+				<h3>I'm exceptionally proud of these projects</h3>
 				<hr>
 				<div class="row">
 					<div class="one-third column project">
