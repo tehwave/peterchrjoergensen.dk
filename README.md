@@ -3,8 +3,8 @@ My personal website
 
 ## Installation
 
-1. Enable RewriteEngine in `.htaccess` file.
+1. If HTTPS is not supported, please turn off RewriteEngine in the `.htaccess` file.
 
 ``` 
-RewriteEngine On
+RewriteEngine Off
 ```
