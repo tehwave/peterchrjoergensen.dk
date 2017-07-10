@@ -49,15 +49,15 @@
 		<!-- JSON-LD Person -->
 		<script type="application/ld+json" defer>
 		{
-		  "@context": "http://schema.org/",
-		  "@type": "Person",
-		  "name": "Peter C. Jørgensen",
-		  "jobTitle": "Multimedia Designer",
-		  "address": {
-			"@type": "PostalAddress",
-			"addressLocality": "Kolding",
-			"addressRegion": "Jutland"
-		  }
+			"@context": "http://schema.org/",
+			"@type": "Person",
+			"name": "Peter C. Jørgensen",
+			"jobTitle": "Multimedia Designer",
+			"address": {
+				"@type": "PostalAddress",
+				"addressLocality": "Kolding",
+				"addressRegion": "Jutland"
+			}
 		}
 		</script>
 
