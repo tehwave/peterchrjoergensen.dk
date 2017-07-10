@@ -1,4 +1,4 @@
-<?php ?>
+r<?php ?>
 <footer class="u-full-width text-center">
 	<!-- Contact -->
 	<section class="parallax contact" data-parallax="scroll" data-speed="0.6" data-image-src="/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
@@ -25,7 +25,7 @@
 	<section class="container copyright">
 		<p>
 			<i>"Wave Emoji"</i> by Twitter / <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener"><small>CC BY 4.0</small>.</a>
-			<span class="nucleo">Icons by <a href="https://nucleoapp.com/?ref=tehwave" target="_blank" rel="noopener"><img src="/img/nucleo-logo.svg" height="16" width="66" alt="Nucleo"></a></span>
+			<span class="nucleo">Icons by <a href="https://nucleoapp.com/?ref=tehwave" target="_blank" rel="noopener"><img src="/img/nucleo-logo.svg" height="16" width="66" alt="Nucleo"></a> / <a href="https://github.com/NucleoApp/license-standard/blob/master/nucleo-standard-license.txt" target="_blank" rel="noopener"><small>License</small></a></span>
 		</p>
 	</section>
 </footer>
