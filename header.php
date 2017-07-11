@@ -11,10 +11,10 @@
 	</div>
 	<nav class="row">
 		<!-- Navigation -->
-		<section class="three columns">&nbsp</section>
-		<!-- <section class="three columns"><a href="#">Blog</a></section> -->
 		<section class="three columns"><a href="/portfolio">Portfolio</a></section>
 		<section class="three columns"><a href="/files/CV-Peter-Christian-Jørgensen.pdf">C.V.</a></section>
+		<section class="three columns">&nbsp</section>
+		<!-- <section class="three columns"><a href="#">Blog</a></section> -->
 		<!-- Social -->
 		<section class="three columns">
 			<a href="mailto:hello@peterchrjoergensen.dk?subject=Hello" target="_top" class="icon" title="Send Peter an email">
