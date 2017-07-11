@@ -10,6 +10,4 @@ RewriteCond %{HTTPS} !on
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 ```
 
-In addition, you must also change the reference to HTTPS in `RewriteRule ^(.*)$ https://%1/$1 [R=301,L]` to `RewriteRule ^(.*)$ http://%1/$1 [R=301,L]` as to redirect correctly to HTTP.
-
-
+In addition, you must also change the reference to HTTPS in `RewriteRule ^(.*)$ https://%1/$1 [R=301,L]` to `RewriteRule ^(.*)$ http://%1/$1 [R=301,L]`, and do the same for `RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1`, as to redirect correctly to `http://`.
