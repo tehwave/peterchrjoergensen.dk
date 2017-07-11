@@ -1,9 +1,14 @@
-#Rewrite to non-www and HTTPS
-
 RewriteEngine On
+
+# -- Rewrite to non-www and HTTPS
 
 RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
 RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 RewriteCond %{HTTPS} !on
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# -- Redirect blog urls
+
+RewriteBase /
+RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1
