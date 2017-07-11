@@ -1,4 +1,4 @@
-r<?php ?>
+<?php ?>
 <footer class="u-full-width text-center">
 	<!-- Contact -->
 	<section class="parallax contact" data-parallax="scroll" data-speed="0.6" data-image-src="/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
