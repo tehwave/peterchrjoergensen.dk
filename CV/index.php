@@ -209,7 +209,7 @@
 			</div>
 			<div class="container">
 				<section class="offset-by-two eight columns">
-					<strong>See more on my <a href="/portfolio">portfolio</a>.</strong>
+					See more on my <a href="/portfolio">portfolio</a>.
 				</section>
 			</div>
 		</main>
