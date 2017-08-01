@@ -250,6 +250,21 @@
 					See more on my <a href="/portfolio">portfolio</a>.
 				</section>
 			</div>
+
+			<!-- Profile -->
+			<div class="container" style="margin-top: 20px;">
+				<section class="twelve columns">
+					<h2>Profile</h2>
+				</section>
+			</div>
+			<div class="container">
+				<section class="ten columns">
+					<p>I am a resourceful and creative young Danish man with lots of energy and a go-getter attitude.
+					<p>
+						I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.
+					</p>
+				</section>
+			</div>
 		</main>
 
 		<!-- Footer -->
