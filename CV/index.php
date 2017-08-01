@@ -157,7 +157,14 @@
 				<section class="eight columns">
 					<strong>Student Assistant</strong>
 					<div>Grundfos</div>
-					<small><p>A new web application developed in VueJS, and designed to guide visitors at Grundfos facilities through a safety course and -quiz.</p></small>
+					<small>
+						<p>
+							I worked on a web application, that is intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.
+						</p>
+						<p>
+							Source code can be found on <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a>.
+						</p>
+					</small>
 				</section>
 			</div>
 			<div class="container">
@@ -167,7 +174,17 @@
 				<section class="eight columns">
 					<strong>Intern</strong>
 					<div>B2B Kolding</div>
-					<small><p>Setup a website with Wordpress and a custom designed & developed theme, including a system to handle registering of booths and guests.</p></small>
+					<small>
+						<p>
+							I worked on the design and development of the company's website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.
+						</p>
+						<p>
+							I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget. In addition to that, I examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.
+						</p>
+						<p>
+							Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>
+						</p>
+					</small>
 				</section>
 			</div>
 			<div class="container">
@@ -176,8 +193,29 @@
 				</section>
 				<section class="eight columns">
 					<strong>Community Manager</strong>
-					<div>B2B Kolding</div>
-					<small><p>Maintain the day-to-day by removing any unwanted posts and comments. The forum consisted of over 15,000 members and received over 200,000 visitors.</p></small>
+					<div>/r/GameMaker via Reddit</div>
+					<small>
+						<p>
+							I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.
+						</p>
+						<p>
+							The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.
+						</p>
+					</small>
+				</section>
+			</div>
+			<div class="container">
+				<section class="two columns">
+					2009 - 2013
+				</section>
+				<section class="eight columns">
+					<strong>IT & Operation Assistant</strong>
+					<div>Janchart Shipping A/S</div>
+					<small>
+						<p>
+							I was in charge of daily shipping routines, any computer related jobs, processing of data and management of the company website.
+						</p>
+					</small>
 				</section>
 			</div>
 
