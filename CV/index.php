@@ -99,11 +99,8 @@
 			<!-- Introduction -->
 			<section class="parallax intro" data-parallax="scroll" data-speed="0.6" data-image-src="img/home.jpg" data-natural-width="1920" data-natural-height="1080" data-z-index="0">
 				<div class="container">
-					<section class="three columns">
-						<img src="img/peter.png" class="u-max-full-width">
-					</section>
-					<section class="four columns">
-						<h2>Peter Christian Jørgensen</h2>
+					<section class="twelve columns">
+						<h2>Curriculum Vitae</h2>
 					</section>
 				</div>
 			</section>
