@@ -11,7 +11,7 @@
 	</div>
 	<nav class="row">
 		<!-- Navigation -->
-		<section class="three columns"><a href="/files/CV-Peter-Christian-Jørgensen.pdf">C.V.</a></section>
+		<section class="three columns"><a href="/cv">C.V.</a></section>
 		<section class="three columns"><a href="/portfolio">Portfolio</a></section>
 		<section class="three columns"><a href="https://blog.peterchrjoergensen.dk">Blog</a></section>
 		<!-- Social -->
