@@ -265,6 +265,51 @@
 					</p>
 				</section>
 			</div>
+
+			<!-- Skills -->
+			<div class="container" style="margin-top: 20px;">
+				<section class="twelve columns">
+					<h2>Skills</h2>
+				</section>
+			</div>
+			<div class="container">
+				<section class="ten columns">
+					<section class="skills">
+						<span class="skill">Web Design</span>
+						<span class="skill">Web Development</span>
+						<span class="skill">Bootstrap</span>
+						<span class="skill">Laravel</span>
+						<span class="skill">JavaScript</span>
+						<span class="skill">CSS</span>
+						<span class="skill">SASS</span>
+						<span class="skill">HTML</span>
+						<span class="skill">PHP</span>
+						<span class="skill">SQL</span>
+						<span class="skill">SEO</span>
+					</section>
+					<section class="skills">
+						<span class="skill">Game Development</span>
+						<span class="skill">Unity3D</span>
+						<span class="skill">Unreal Engine 4</span>
+						<span class="skill">Blueprints Visual Scripting</span>
+						<span class="skill">GameMaker: Studio</span>
+						<span class="skill">GameMaker Language</span>
+						<span class="skill">C#</span>
+						<span class="skill">Java</span>
+						<span class="skill">Python</span>
+						<span class="skill">Autodesk Maya</span>
+						<span class="skill">Autodesk Inventor</span>
+					</section>
+
+					<section class="skills">
+						<span class="skill">Microsoft Office</span>
+						<span class="skill">Adobe Creative Suite</span>
+						<span class="skill">Virtual Reality</span>
+						<span class="skill">Community Management</span>
+						<span class="skill">Social Marketing</span>
+					</section>
+				</section>
+			</div>
 		</main>
 
 		<!-- Footer -->
