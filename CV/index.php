@@ -83,7 +83,7 @@
 		</script>
 	</head>
 	<!-- neck -->
-	<body class="portfolio u-full-width">
+	<body class="cv u-full-width">
 		<!-- Google Tag Manager (noscript) -->
 		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKNTXKZ"
 		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
