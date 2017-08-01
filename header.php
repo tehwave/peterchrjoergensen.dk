@@ -1,6 +1,6 @@
 <?php ?>
 <header class="container header text-center">
-	<div class="row">
+	<div>
 		<section class="u-full-width">
 			<!-- Title -->
 			<h1 class="title">
@@ -9,7 +9,7 @@
 			<hr>
 		</section>
 	</div>
-	<nav class="row">
+	<nav>
 		<!-- Navigation -->
 		<section class="three columns"><a href="/cv">C.V.</a></section>
 		<section class="three columns"><a href="/portfolio">Portfolio</a></section>
