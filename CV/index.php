@@ -109,10 +109,12 @@
 			<div class="container">
 				<section class="twelve columns">
 					<a href="files/CV-Peter-Christian-Jørgensen-English.pdf" target="_blank" rel="noopener noreferrer" class="button">
-						Download C.V. Summary (English)
+						<img src="img/download.png" height="8">
+						Download &nbsp; (English <img src="img/english.png" width="16"> )
 					</a>
 					<a href="files/CV-Peter-Christian-Jørgensen-Dansk.pdf" target="_blank" rel="noopener noreferrer" class="button">
-						Download C.V. Summary (Dansk)
+						<img src="img/download.png" height="8">
+						Download &nbsp; (Dansk <img src="img/dansk.png" width="16"> )
 					</a>
 				</section>
 			</div>
