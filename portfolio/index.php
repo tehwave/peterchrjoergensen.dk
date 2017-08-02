@@ -2,7 +2,7 @@
 
 $projects = array(
 	"FIRKANT" => array(
-    	"filters" => array("game", "solo"),
+		"filters" => array("game", "solo"),
 		"image" => "firkant",
 		"image_format" => "png",
 		"title" => "FIRKANT",
@@ -13,7 +13,7 @@ $projects = array(
 		"button_url" => "/FIRKANT"
 	),
 	"B2B Kolding" => array(
-    	"filters" => array("website", "company"),
+		"filters" => array("website", "company"),
 		"image" => "b2bkolding",
 		"image_format" => "png",
 		"title" => "B2B Kolding",
@@ -24,7 +24,7 @@ $projects = array(
 		"button_url" => "https://www.b2bkolding.dk"
 	),
 	"GM48" => array(
-    	"filters" => array("website", "solo"),
+		"filters" => array("website", "solo"),
 		"image" => "gm48",
 		"image_format" => "png",
 		"title" => "GM48",
@@ -35,7 +35,7 @@ $projects = array(
 		"button_url" => "https://gm48.net"
 	),
 	"Grundfos Safety" => array(
-    	"filters" => array("website", "company"),
+		"filters" => array("website", "company"),
 		"image" => "grundfos",
 		"image_format" => "png",
 		"title" => "Grundfos Safety",
@@ -46,7 +46,7 @@ $projects = array(
 		"button_url" => "https://tehwave.github.io/grundfos-quiz/"
 	),
 	"The Author" => array(
-    	"filters" => array("video", "team"),
+		"filters" => array("video", "team"),
 		"image" => "author",
 		"image_format" => "jpg",
 		"title" => "The Author",
@@ -57,7 +57,7 @@ $projects = array(
 		"button_url" => "https://www.youtube.com/watch?v=S0bQYYnhtGk"
 	),
 	"Western World" => array(
-    	"filters" => array("application", "team"),
+		"filters" => array("application", "team"),
 		"image" => "western",
 		"image_format" => "jpg",
 		"title" => "Western World",
@@ -68,7 +68,7 @@ $projects = array(
 		"button_url" => "https://www.youtube.com/watch?v=0SeTUIsS5sQ"
 	),
 	"Showreel - 2015" => array(
-    	"filters" => array("video", "solo"),
+		"filters" => array("video", "solo"),
 		"image" => "showreel",
 		"image_format" => "jpg",
 		"title" => "Showreel - 2015",
@@ -79,7 +79,7 @@ $projects = array(
 		"button_url" => "https://www.youtube.com/watch?v=cYLeWeJryOQ"
 	),
 	"My Website" => array(
-    	"filters" => array("website", "solo"),
+		"filters" => array("website", "solo"),
 		"image" => "website",
 		"image_format" => "png",
 		"title" => "My Website",
@@ -90,7 +90,7 @@ $projects = array(
 		"button_url" => "https://github.com/tehwave/peterchrjoergensen.dk"
 	),
 	"Mord Ombord" => array(
-    	"filters" => array("game", "team"),
+		"filters" => array("game", "team"),
 		"image" => "mordombord",
 		"image_format" => "png",
 		"title" => "Mord Ombord",
@@ -101,7 +101,7 @@ $projects = array(
 		"button_url" => "https://www.youtube.com/watch?v=0U42shiUG2w"
 	),
 	"Odense Golfklub" => array(
-    	"filters" => array("application", "team"),
+		"filters" => array("application", "team"),
 		"image" => "odensegolfklub",
 		"image_format" => "png",
 		"title" => "Odense Golfklub",
@@ -289,27 +289,27 @@ $projects = array(
 		<script src="/js/mixitup.min.js"></script>
 		<script type="text/javascript">
 			var mixer = mixitup('#mixitup', {
-			    selectors: {
-			        target: '.project'
-			    },
-			    animation: {
-			        duration: 400,
-			        nudge: true,
-			        effects: "fade translateZ(-100px)"
-			    },
-			    callbacks: {
+				selectors: {
+					target: '.project'
+				},
+				animation: {
+					duration: 400,
+					nudge: true,
+					effects: "fade translateZ(-100px)"
+				},
+				callbacks: {
 					onMixEnd: function() {
 						jQuery(window).trigger('resize').trigger('scroll');
 					}
-			    }
+				}
 			});
 
 			// Detect if positioned at top
 			function posTop() {
-	            return typeof window.pageYOffset != 'undefined' ? window.pageYOffset: document.documentElement.scrollTop? document.documentElement.scrollTop: document.body.scrollTop? document.body.scrollTop:0;
-	        }
+				return typeof window.pageYOffset != 'undefined' ? window.pageYOffset: document.documentElement.scrollTop? document.documentElement.scrollTop: document.body.scrollTop? document.body.scrollTop:0;
+			}
 
-	        var page = $("html, body");
+			var page = $("html, body");
 
 			$("button").click(function() {
 				page.on("scroll mousedown wheel DOMMouseScroll mousewheel keyup touchmove", function(){
