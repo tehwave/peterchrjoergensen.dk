@@ -116,60 +116,85 @@ Portfolio
 	}
 
 	.project {
+
 		.image {
-			margin-bottom: 2rem;
-			border-radius: 1rem;
+			display: block;
+			max-width: 100%;
+			width: 100%;
+			height: auto;
+			border-top-left-radius: 4px;
+			border-top-right-radius: 4px;
+			border-left: 1px solid;
+			border-right: 1px solid;
+			border-top: 1px solid;
+			border-color: #bbb;
 		}
 
-		.title {
-			margin-bottom: 0;
-		}
+		section {
+			padding: 30px;
+			border-bottom-left-radius: 4px;
+			border-bottom-right-radius: 4px;
+			border-left: 1px solid;
+			border-right: 1px solid;
+			border-bottom: 1px solid;
+			border-color: #bbb;
 
-		hr {
-			margin: 2rem 0;
-		}
+			// Image overflow:
+			background: white;
+			position: relative;
+			z-index: 10;
+			overflow: hidden;
 
-		.tags {
-			padding-left: 0;
-		    margin-left: -5px;
-		    margin-bottom: 4rem;
-		    list-style: none;
-
-			li {
-			    display: inline-block;
-			    padding-right: 5px;
-			    padding-left: 5px;
-
-			    padding: 0 15px;
-			    font-size: 11px;
-			    font-weight: 600;
-			    letter-spacing: .1rem;
-			    text-transform: uppercase;
-			    text-decoration: none;
-			    white-space: nowrap;
-			    background-color: transparent;
-			    border-radius: 4px;
-			    border: 1px solid #bbb;
-			    box-sizing: border-box;
+			.title {
+				margin-bottom: 0;
 			}
-		}
 
-		.lead {
-			font-weight: bold;
-		}
-
-		p {
-			text-align: justify;
-			text-align-last: center;
-
-			@media (min-width: 750px) {
-				max-width: 300px;
-				margin-left: 50px;
+			hr {
+				margin: 2rem 0;
 			}
-		}
 
-		.button {
-			margin-top: 2rem;
+			.tags {
+				padding-left: 0;
+			    margin-left: -5px;
+			    margin-bottom: 4rem;
+			    list-style: none;
+
+				li {
+				    display: inline-block;
+				    padding-right: 5px;
+				    padding-left: 5px;
+
+				    padding: 0 15px;
+				    font-size: 11px;
+				    font-weight: 600;
+				    letter-spacing: .1rem;
+				    text-transform: uppercase;
+				    text-decoration: none;
+				    white-space: nowrap;
+				    background-color: transparent;
+				    border-radius: 4px;
+				    border: 1px solid #bbb;
+				    box-sizing: border-box;
+				}
+			}
+
+			.lead {
+				font-weight: bold;
+			}
+
+			p {
+				text-align: justify;
+				text-align-last: center;
+
+				@media (min-width: 750px) {
+					max-width: 300px;
+					margin-left: 50px;
+				}
+			}
+
+			.button {
+				margin-top: 2rem;
+			}
 		}
 
 		@media (min-width: 750px) {
@@ -181,14 +206,12 @@ Portfolio
 		position: relative;
 		display: inline-block;
 		vertical-align: top;
-		background: $gray;
+		background: white;
+		overflow: hidden;
 
 		margin-bottom: 2rem;
 		margin-left: 0.5rem;
 		margin-right: 0.5rem;
-		padding: 30px;
-		border-radius: 4px;
-		border: 1px solid #bbb;
 	}
 }
 

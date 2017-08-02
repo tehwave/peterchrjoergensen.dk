@@ -258,26 +258,28 @@ $projects = array(
 								data-src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
 								width="300" height="300" alt="<?php echo $project['title'] ?>"
 							/>
-							<h2 class="title">
-								<?php echo $project['title'] ?>
-							</h2>
-							<hr>
-							<ul class="tags">
-								<?php
-									foreach ($project['tags'] as $tag) {
-										echo "<li>". $tag ."</li>\r\n";
-									}
-								?>
-							</ul>
-							<p class="lead">
-								<?php echo $project['lead'] ?>
-							</p>
-							<p>
-								<?php echo $project['paragraph'] ?>
-							</p>
-							<a class="button button-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
-								<?php echo $project['button_text'] ?>
-							</a>
+							<section>
+								<h2 class="title">
+									<?php echo $project['title'] ?>
+								</h2>
+								<hr>
+								<ul class="tags">
+									<?php
+										foreach ($project['tags'] as $tag) {
+											echo "<li>". $tag ."</li>\r\n";
+										}
+									?>
+								</ul>
+								<p class="lead">
+									<?php echo $project['lead'] ?>
+								</p>
+								<p>
+									<?php echo $project['paragraph'] ?>
+								</p>
+								<a class="button button-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
+									<?php echo $project['button_text'] ?>
+								</a>
+							</section>
 						</article>
 					<?php endforeach; ?>
 				</div>
