@@ -245,20 +245,22 @@ $projects = array(
 					<hr>
 					<?php foreach ($projects as $project): ?>
 						<article class="project <?php echo implode(" ", $project['filters']) ?>">
-							<noscript>
+							<section class="image-wrapper">
+								<noscript>
+									<img
+										class="u-max-full-width image"
+										src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
+										width="300" height="300" alt="<?php echo $project['title'] ?>"
+									/>
+								</noscript>
 								<img
-									class="u-max-full-width image"
-									src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
+									class="u-max-full-width image lazyload lqip"
+									src="img/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
+									data-src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
 									width="300" height="300" alt="<?php echo $project['title'] ?>"
 								/>
-							</noscript>
-							<img
-								class="u-max-full-width image lazyload lqip"
-								src="img/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
-								data-src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
-								width="300" height="300" alt="<?php echo $project['title'] ?>"
-							/>
-							<section>
+							</section>
+							<section class="description-wrapper">
 								<h2 class="title">
 									<?php echo $project['title'] ?>
 								</h2>
