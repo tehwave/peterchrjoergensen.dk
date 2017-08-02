@@ -1,17 +1,6 @@
 <?php
 
 $projects = array(
-	"FIRKANT" => array(
-		"filters" => array("game", "solo"),
-		"image" => "firkant",
-		"image_format" => "png",
-		"title" => "FIRKANT",
-		"tags" => array("Game", "GameMaker: Studio", "Solo"),
-		"lead" => "FIRKANT is a a fast-paced, procedural platformer inspired by Cloudberry Kingdom and Super Meat Boy.",
-		"paragraph" => "Made in GameMaker: Studio, it's planned for release on mobile platforms in late 2017. For more information, please visit the website.",
-		"button_text" => "Check it out",
-		"button_url" => "/FIRKANT"
-	),
 	"B2B Kolding" => array(
 		"filters" => array("website", "company"),
 		"image" => "b2bkolding",
@@ -45,6 +34,28 @@ $projects = array(
 		"button_text" => "Check it out",
 		"button_url" => "https://tehwave.github.io/grundfos-quiz/"
 	),
+	"My Website" => array(
+		"filters" => array("website", "solo"),
+		"image" => "website",
+		"image_format" => "png",
+		"title" => "My Website",
+		"tags" => array("Website", "HTML / CSS / JS", "Solo"),
+		"lead" => "My personal website complete with landing page, portfolio, curriculum vitae and blog.",
+		"paragraph" => "I wrote the website to be static and fast using plain HTML, CSS and JS. I used MixItUp 3 for display & filtering of projects.",
+		"button_text" => "Browse code",
+		"button_url" => "https://github.com/tehwave/peterchrjoergensen.dk"
+	),
+	"FIRKANT" => array(
+		"filters" => array("game", "solo"),
+		"image" => "firkant",
+		"image_format" => "png",
+		"title" => "FIRKANT",
+		"tags" => array("Game", "GameMaker: Studio", "Solo"),
+		"lead" => "FIRKANT is a a fast-paced, procedural platformer inspired by Cloudberry Kingdom and Super Meat Boy.",
+		"paragraph" => "Made in GameMaker: Studio, it's planned for release on mobile platforms in late 2017. For more information, please visit the website.",
+		"button_text" => "Check it out",
+		"button_url" => "/FIRKANT"
+	),
 	"The Author" => array(
 		"filters" => array("video", "team"),
 		"image" => "author",
@@ -77,17 +88,6 @@ $projects = array(
 		"paragraph" => "Edited in Premiere Pro, it was important for me that the music matched the editing, so that it was exciting to watch.",
 		"button_text" => "Watch it",
 		"button_url" => "https://www.youtube.com/watch?v=cYLeWeJryOQ"
-	),
-	"My Website" => array(
-		"filters" => array("website", "solo"),
-		"image" => "website",
-		"image_format" => "png",
-		"title" => "My Website",
-		"tags" => array("Website", "HTML / CSS / JS", "Solo"),
-		"lead" => "My personal website complete with landing page, portfolio, curriculum vitae and blog.",
-		"paragraph" => "I wrote the website to be static and fast using plain HTML, CSS and JS. I used MixItUp 3 for display & filtering of projects.",
-		"button_text" => "Browse code",
-		"button_url" => "https://github.com/tehwave/peterchrjoergensen.dk"
 	),
 	"Mord Ombord" => array(
 		"filters" => array("game", "team"),
