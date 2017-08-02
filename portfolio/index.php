@@ -239,8 +239,8 @@ $projects = array(
 						<article class="project <?php echo implode(" ", $project['filters']) ?>">
 							<noscript>
 								<img class="u-max-full-width image"
-								src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
-								width="300" height="300" alt="<?php echo $project['title'] ?>"/>
+									src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
+									width="300" height="300" alt="<?php echo $project['title'] ?>"/>
 							</noscript>
 							<img class="u-max-full-width image lazyload lqip"
 								src="img/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
