@@ -213,7 +213,15 @@ $projects = array(
 		<!-- Main -->
 		<main class="u-full-width">
 			<!-- Introduction -->
-			<section class="parallax intro" data-parallax="scroll" data-speed="0.6" data-image-src="img/portfolio.jpg" data-natural-width="1920" data-natural-height="1080" data-z-index="0">
+			<section
+				class="parallax intro"
+				data-parallax="scroll"
+				data-speed="0.6"
+				data-image-src="img/portfolio.jpg"
+				data-natural-width="1920"
+				data-natural-height="1080"
+				data-z-index="0"
+			>
 				<div class="container">
 					<h2>Portfolio</h2>
 					<p>Throughout the years, I have accumulated various <b>ambitious</b> <b>and creative</b> projects, including <b>applications</b>, <b>games</b> and <b>websites.</b></p>
@@ -238,14 +246,18 @@ $projects = array(
 					<?php foreach ($projects as $project): ?>
 						<article class="project <?php echo implode(" ", $project['filters']) ?>">
 							<noscript>
-								<img class="u-max-full-width image"
+								<img
+									class="u-max-full-width image"
 									src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
-									width="300" height="300" alt="<?php echo $project['title'] ?>"/>
+									width="300" height="300" alt="<?php echo $project['title'] ?>"
+								/>
 							</noscript>
-							<img class="u-max-full-width image lazyload lqip"
+							<img
+								class="u-max-full-width image lazyload lqip"
 								src="img/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
 								data-src="img/<?php echo $project['image'] .".". $project['image_format'] ?>"
-								width="300" height="300" alt="<?php echo $project['title'] ?>"/>
+								width="300" height="300" alt="<?php echo $project['title'] ?>"
+							/>
 							<h2 class="title">
 								<?php echo $project['title'] ?>
 							</h2>
