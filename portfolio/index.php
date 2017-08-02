@@ -224,14 +224,14 @@ $projects = array(
 			<!-- Projects -->
 			<section class="projects text-center">
 				<ul class="controls">
-					<li><button type="button" class="button" data-filter="all">All</a></li>
-					<li><button type="button" class="button" data-filter=".game">Game</a></li>
-					<li><button type="button" class="button" data-filter=".video">Video</a></li>
-					<li><button type="button" class="button" data-filter=".website">Website</a></li>
-					<li><button type="button" class="button" data-filter=".application">Application</a></li>
-					<li><button type="button" class="button" data-filter=".solo">Solo</a></li>
-					<li><button type="button" class="button" data-filter=".team">Team</a></li>
-					<li><button type="button" class="button" data-filter=".company">Company</a></li>
+					<li><button type="button" class="button" data-filter="all">All</button></li>
+					<li><button type="button" class="button" data-filter=".game">Game</button></li>
+					<li><button type="button" class="button" data-filter=".video">Video</button></li>
+					<li><button type="button" class="button" data-filter=".website">Website</button></li>
+					<li><button type="button" class="button" data-filter=".application">Application</button></li>
+					<li><button type="button" class="button" data-filter=".solo">Solo</button></li>
+					<li><button type="button" class="button" data-filter=".team">Team</button></li>
+					<li><button type="button" class="button" data-filter=".company">Company</button></li>
 				</ul>
 				<div class="container" id="mixitup">
 					<hr>
