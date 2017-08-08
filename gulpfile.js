@@ -20,3 +20,9 @@ gulp.task('styles', function(){
 gulp.task('watch', function() {
     gulp.watch(sassPath, ['styles']);
 });
+
+gulp.task('default', function() {
+    gulp.start('styles');
+});
+
+
