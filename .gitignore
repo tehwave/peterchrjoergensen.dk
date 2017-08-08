@@ -1,5 +1,6 @@
 *.scssc
 /blog
+/vendor
 /images
 /FIRKANT
 /firkant

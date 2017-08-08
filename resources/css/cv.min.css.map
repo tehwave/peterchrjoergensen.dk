@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAYC,UAAO,CACN,SAAS,CAAE,IAAI,CACf,aAAa,CAAE,GAAG,CAClB,MAAM,CAAE,cAAc,CACtB,OAAO,CAAE,YAAY,CACrB,YAAY,CAAE,IAAI,CAClB,aAAa,CAAE,IAAI,CACnB,OAAO,CAAE,OAAO,CAGjB,WAAQ,CACP,UAAU,CAAE,IAAI",
+"sources": ["../sass/cv.scss"],
+"names": [],
+"file": "cv.min.css"
+}
