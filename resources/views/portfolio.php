@@ -1,9 +1,9 @@
 <?php
-    /**
-     * peterchrjoergensen.dk
-     *
-     * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
-     */
+/**
+ * peterchrjoergensen.dk.
+ *
+ * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
+ */
 ?>
 <main class="u-full-width portfolio">
     <!-- Introduction -->
@@ -38,19 +38,19 @@
         <div class="container" id="mixitup">
             <hr>
             <?php foreach ($projects as $project): ?>
-                <article class="project <?php echo implode(" ", $project['filters']) ?>">
+                <article class="project <?php echo implode(' ', $project['filters']) ?>">
                     <section class="image-wrapper">
                         <noscript>
                             <img
                                 class="u-max-full-width image"
-                                src="/resources/img/portfolio/<?php echo $project['image'] .".". $project['image_format'] ?>"
+                                src="/resources/img/portfolio/<?php echo $project['image'].'.'.$project['image_format'] ?>"
                                 width="300" height="300" alt="<?php echo $project['title'] ?>"
                             />
                         </noscript>
                         <img
                             class="u-max-full-width image lazyload lqip"
                             src="/resources/img/portfolio/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
-                            data-src="/resources/img/portfolio/<?php echo $project['image'] .".". $project['image_format'] ?>"
+                            data-src="/resources/img/portfolio/<?php echo $project['image'].'.'.$project['image_format'] ?>"
                             width="300" height="300" alt="<?php echo $project['title'] ?>"
                         />
                     </section>
@@ -62,7 +62,7 @@
                         <ul class="tags">
                             <?php
                                 foreach ($project['tags'] as $tag) {
-                                    echo "<li>". $tag ."</li>\r\n";
+                                    echo '<li>'.$tag."</li>\r\n";
                                 }
                             ?>
                         </ul>

@@ -1,9 +1,9 @@
 <?php
-    /**
-     * peterchrjoergensen.dk
-     *
-     * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
-     */
+/**
+ * peterchrjoergensen.dk.
+ *
+ * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
+ */
 ?>
 <main class="u-full-width">
     <!-- Introduction -->
