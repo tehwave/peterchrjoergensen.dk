@@ -45,7 +45,7 @@
         <meta property="og:url" content="https://peterchrjoergensen.dk"> <!-- TODO: Get current URL instead -->
         <meta property="og:title" content="<?php echo $title ?>">
         <meta property="og:description" content="<?php echo $description ?>">
-        <meta property="og:image" content="https://peterchrjoergensen.dk/img/peter.jpg"> <!-- TODO: Get a better photo -->
+        <meta property="og:image" content="https://peterchrjoergensen.dk/resources/img/peter.jpg"> <!-- TODO: Get a better photo -->
 
         <!-- Twitter -->
         <meta name="twitter:card" content="summary">
