@@ -21,7 +21,7 @@ gulp.task('styles', function() {
 });
 
 gulp.task('images', function() {
-    gulp.src(srcPath + '/*')
+    gulp.src(srcPath + '/**/*')
         .pipe(imagemin())
         .pipe(gulp.dest(imgPath))
 });
