@@ -1,0 +1,19 @@
+{
+    "name": "tehwave/peterchrjoergensen.dk",
+    "description": "Peter Christian Jørgensen's personal website",
+    "homepage": "https://peterchrjoergensen.dk",
+    "authors": [
+        {
+            "name": "Peter Christian Jørgensen",
+            "email": "hello@peterchrjoergensen.dk",
+            "homepage": "https://peterchrjoergensen.dk",
+            "role": "Original Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require": {
+        "mikecao/flight": "^1.3"
+    }
+}

@@ -1,7 +1,9 @@
 *.scssc
 /blog
+/vendor
 /images
 /FIRKANT
 /firkant
 /liquidfun
+/node_modules
 /physicsplatformer

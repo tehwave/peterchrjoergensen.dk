@@ -1,0 +1,30 @@
+{
+  "name": "peterchrjoergensen.dk",
+  "version": "2.0.0",
+  "description": "The personal website of Peter C. Jørgensen.",
+  "main": "index.php",
+  "scripts": {
+    "prod": "gulp --production",
+    "dev": "gulp watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tehwave/peterchrjoergensen.dk.git"
+  },
+  "keywords": [
+    "personal-website"
+  ],
+  "author": "Peter Christian Jørgensen",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/tehwave/peterchrjoergensen.dk/issues"
+  },
+  "homepage": "https://github.com/tehwave/peterchrjoergensen.dk#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-imagemin": "^3.3.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.0"
+  }
+}
