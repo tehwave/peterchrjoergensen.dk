@@ -1,13 +1,13 @@
-var gulp        = require('gulp'),
-    sass        = require('gulp-sass'),
-    rename      = require('gulp-rename'),
-    imagemin    = require('gulp-imagemin'),
-    sourcemaps  = require('gulp-sourcemaps');
+const gulp        = require('gulp'),
+      sass        = require('gulp-sass'),
+      rename      = require('gulp-rename'),
+      imagemin    = require('gulp-imagemin'),
+      sourcemaps  = require('gulp-sourcemaps');
 
-var sassPath    = 'resources/sass/*.scss',
-    cssPath     = 'resources/css',
-    srcPath     = 'resources/src',
-    imgPath     = 'resources/img';
+const sassPath    = 'resources/sass/*.scss',
+      cssPath     = 'resources/css',
+      srcPath     = 'resources/src',
+      imgPath     = 'resources/img';
 
 gulp.task('styles', function() {
     gulp.src(sassPath)
