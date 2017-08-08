@@ -31,6 +31,7 @@
         <link rel="apple-touch-icon" sizes="144x144" href="/resources/img/apple-touch-icon.png">
         <link rel="icon" type="image/png" href="/resources/img/favicon-32x32.png" sizes="32x32">
         <link rel="icon" type="image/png" href="/resources/img/favicon-16x16.png" sizes="16x16">
+
         <!-- SEO -->
         <meta name="robots" content="index, follow">
         <meta name="title" content="<?php echo $title ?>">
