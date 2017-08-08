@@ -15,6 +15,11 @@
 */
 class Controller
 {
+    function __construct ()
+    {
+        Flight::cache('layout');
+    }
+
     public static function home ()
     {
         Flight::cache('home');
