@@ -9,7 +9,7 @@ var sassPath    = 'resources/sass/*.scss',
     srcPath     = 'resources/src',
     imgPath     = 'resources/img';
 
-gulp.task('styles', function(){
+gulp.task('styles', function() {
     gulp.src(sassPath)
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
