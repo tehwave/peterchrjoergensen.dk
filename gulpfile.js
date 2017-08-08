@@ -4,10 +4,10 @@ const gulp        = require('gulp'),
       imagemin    = require('gulp-imagemin'),
       sourcemaps  = require('gulp-sourcemaps');
 
-const sassPath    = 'resources/sass/*.scss',
+const srcPath     = 'resources/src',
+      imgPath     = 'resources/img',
       cssPath     = 'resources/css',
-      srcPath     = 'resources/src',
-      imgPath     = 'resources/img';
+      sassPath    = 'resources/sass/*.scss';
 
 gulp.task('stylesheets', function() {
     gulp.src(sassPath)
