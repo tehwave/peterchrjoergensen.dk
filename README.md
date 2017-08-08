@@ -28,12 +28,13 @@ npm run dev
 
 ### Deployment
 
-Pull the latest changes from the `master` branch, and use Composer to install packages.
+Pull the latest changes from the `master` branch.
 
 ```
 git pull origin master
-composer install --no-interaction --prefer-dist --optimize-autoloader
 ```
+
+Composer is not currently available on my hosting service, so I include the `vendor` directory.
 
 ### HTTPS
 
