@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/tehwave/peterchrjoergensen.dk#readme",
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.0"
   }
 }
