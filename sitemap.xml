@@ -12,19 +12,12 @@
     <priority>1.00</priority>
   </url>
   <url>
-    <loc>https://peterchrjoergensen.dk/files/CV-Peter-Christian-Jørgensen.pdf</loc>
-    <lastmod>2017-07-13T15:25:49+00:00</lastmod>
+    <loc>https://peterchrjoergensen.dk/cv/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://peterchrjoergensen.dk/portfolio/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.80</priority>
-  </url>
-  <url>
-    <loc>https://peterchrjoergensen.dk/FIRKANT/</loc>
-    <lastmod>2017-07-10T16:16:11+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
