@@ -159,7 +159,7 @@
         </footer>
 
         <!-- JS -->
-        <script src="/resources/js/jquery-1.12.4.min.js" defer></script>
+        <script src="/resources/js/jquery-1.12.4.min.js"></script>
         <script src="/resources/js/smoothscroll.min.js" defer></script>
         <script src="/resources/js/parallax.min.js" defer></script>
         <?php if (isset($scripts)): foreach ($scripts as $script): ?>
