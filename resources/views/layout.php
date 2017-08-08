@@ -31,7 +31,6 @@
         <link rel="apple-touch-icon" sizes="144x144" href="/resources/img/apple-touch-icon.png">
         <link rel="icon" type="image/png" href="/resources/img/favicon-32x32.png" sizes="32x32">
         <link rel="icon" type="image/png" href="/resources/img/favicon-16x16.png" sizes="16x16">
-
         <!-- SEO -->
         <meta name="robots" content="index, follow">
         <meta name="title" content="<?php echo $title ?>">
@@ -160,8 +159,8 @@
         </footer>
 
         <!-- JS -->
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothscroll/1.4.4/SmoothScroll.min.js" defer></script>
+        <script src="/resources/js/jquery-1.12.4.min.js" defer></script>
+        <script src="/resources/js/smoothscroll.min.js" defer></script>
         <script src="/resources/js/parallax.min.js" defer></script>
         <?php if (isset($scripts)): foreach ($scripts as $script): ?>
             <script type="text/javascript" src="<?php echo $script ?>"></script>
