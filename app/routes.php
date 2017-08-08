@@ -10,6 +10,6 @@
 |
 */
 
-Flight::route('/', array('Controller', 'home'));
-Flight::route('/cv', array('Controller', 'cv'));
-Flight::route('/portfolio', array('Controller', 'portfolio'));
+Flight::route('/', ['Controller', 'home']);
+Flight::route('/cv', ['Controller', 'cv']);
+Flight::route('/portfolio', ['Controller', 'portfolio']);
