@@ -28,6 +28,8 @@ npm run dev
 
 ### Deployment
 
+Pull the latest changes from the `master` branch, and use Composer to install packages.
+
 ```
 git pull origin master
 composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -35,18 +37,18 @@ composer install --no-interaction --prefer-dist --optimize-autoloader
 
 ### HTTPS
 
-1. If HTTPS is not supported, you must set `RewriteCond %{HTTPS} !on` to `!off` in the following lines from the `.htaccess` file.
+If HTTPS is not supported, you must set `RewriteCond %{HTTPS} !on` to `!off` in the following lines from the `.htaccess` file.
 
 ```
 RewriteCond %{HTTPS} !on
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 ```
 
-2. In addition, you must also change the reference to HTTPS in `RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1` to redirect correctly to `http://` if above holds true.
+In addition, you must also change the reference to HTTPS in `RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1` to redirect correctly to `http://` if above holds true.
 
 ## Development
 
-The website is developed using Flight PHP framework, JQuery JavaScript library and SASS CSS post-processing tool.
+The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library and SASS CSS extension language.
 
 For more information on how I developed the website, please visit [my blog](https://blog.peterchrjoergensen.dk).
 
