@@ -2,7 +2,7 @@
 
 ![StyleCI](https://styleci.io/repos/96241363/shield)
 [![Website](https://img.shields.io/website-up-down-green-red/https/peterchrjoergensen.dk.svg?label=Website&style=flat-square)](https://peterchrjoergensen.dk/)
-[![Release](https://img.shields.io/github/release/tehwave/peterchrjoergensen.dk.svg?style=flat-square)](https://github.com/tehwave/peterchrjoergensen.dk)
+[![Release](https://img.shields.io/github/release/tehwave/peterchrjoergensen.dk.svg?label=Release&style=flat-square)](https://github.com/tehwave/peterchrjoergensen.dk)
 
 This is the repository for my personal website. Some elements may have been excluded in interest of privacy and security.
 
