@@ -8,6 +8,24 @@ https://peterchrjoergensen.dk
 
 ## Installation
 
+### Build
+
+The website uses Gulp to process CSS and images. Images should be placed in the `resources/src` folder if they are to be processed.
+
+1. Production
+
+```
+npm run prod
+```
+
+2. Development
+
+The following command will watch for changes.
+
+```
+npm run dev
+```
+
 ### Deployment
 
 ```
