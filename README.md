@@ -1,5 +1,7 @@
 # peterchrjoergensen.dk
 
+![StyleCI](https://styleci.io/repos/96241363/shield)
+
 This is the repository for my personal website. Some elements may have been excluded in interest of privacy and security.
 
 ## Demo
