@@ -17,6 +17,7 @@ class Controller
 {
     public static function home ()
     {
+        Flight::cache('home');
         Flight::render('home', array(), 'content');
 
         return Flight::render('layout', array(
@@ -28,6 +29,7 @@ class Controller
 
     public static function cv ()
     {
+        Flight::cache('cv');
         Flight::render('cv', array(), 'content');
 
         return Flight::render('layout', array(
@@ -39,6 +41,7 @@ class Controller
 
     public static function portfolio ()
     {
+        Flight::cache('portfolio');
         Flight::render('portfolio', array('projects' => array(
             'B2B Kolding' => array(
                 'filters'       => array('website', 'company'),
