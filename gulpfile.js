@@ -13,9 +13,7 @@ gulp.task('stylesheets', function() {
     gulp.src(sassPath)
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-        .pipe(rename({
-            suffix: '.min'
-        }))
+        .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(cssPath));
 });
