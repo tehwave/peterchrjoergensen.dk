@@ -54,7 +54,7 @@
         <meta name="twitter:description" content="<?php echo $description ?>">
 
         <!-- JSON-LD Person -->
-        <script type="application/ld+json" defer>
+        <script type="application/ld+json">
         {
             "@context": "http://schema.org/",
             "@type": "Person",
