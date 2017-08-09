@@ -76,7 +76,7 @@
             <?php foreach ($stylesheets as $stylesheet) : ?>
                 <link rel="stylesheet" type="text/css" href="<?php echo $stylesheet ?>">
             <?php endforeach; ?>
-        <?php endif;  ?>
+        <?php endif; ?>
 
         <!-- Font -->
         <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Raleway:700,600,400,300'>
@@ -168,6 +168,6 @@
             <?php foreach ($scripts as $script) : ?>
                 <script type="text/javascript" src="<?php echo $script ?>"></script>
             <?php endforeach; ?>
-        <?php endif;  ?>
+        <?php endif; ?>
     </body>
 </html>
