@@ -76,7 +76,7 @@
                             <a class="button button-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
                                 <?php echo $project['button_text'] ?>
                             </a>
-                        <?php endif;?>
+                        <?php endif; ?>
                     </section>
                 </article>
             <?php endforeach; ?>
