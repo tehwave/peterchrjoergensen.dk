@@ -84,7 +84,7 @@
     <?php endforeach; ?>
     <div class="container">
         <section class="two columns">
-            See more on my <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">LinkedIn</a> profile.
+            <p>See more on my <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">LinkedIn</a> profile.</p>
         </section>
     </div>
 
@@ -117,7 +117,7 @@
     </div>
     <div class="container">
         <section class="two columns">
-            See more on my <a href="/portfolio">portfolio</a>.
+            <p>See more on my <a href="/portfolio">portfolio</a>.</p>
         </section>
     </div>
 
