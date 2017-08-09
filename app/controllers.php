@@ -35,7 +35,58 @@ class Controller
     public static function cv()
     {
         Flight::cache('cv');
-        Flight::render('cv', [], 'content');
+        Flight::render('cv', [
+            'educations' => [
+                [
+                    'date'   => '2015 - 2017',
+                    'title'  => 'Multimedia Designer',
+                    'school' => 'Lillebaelt Academy',
+                ],
+                [
+                    'date'   => '2010 - 2013',
+                    'title'  => 'Higher Technical Examination',
+                    'school' => 'Hansenberg',
+                ],
+            ],
+            'experiences' => [
+                [
+                    'date' => '2017',
+                    'title'  => 'Student Assistant',
+                    'company' => 'Grundfos',
+                    'summary' => [
+                        'I worked on a web application, that is intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
+                        'Source code can be found on <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a>',
+                    ],
+                ],
+                [
+                    'date' => '2017',
+                    'title'  => 'Intern',
+                    'company' => 'B2B Kolding',
+                    'summary' => [
+                        'I worked on the design and development of the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
+                        'I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget. In addition to that, I examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.',
+                        'Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>',
+                    ],
+                ],
+                [
+                    'date' => '2013 - 2016',
+                    'title'  => 'Community Manager',
+                    'company' => '/r/GameMaker via Reddit',
+                    'summary' => [
+                        'I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.',
+                        'The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.',
+                    ],
+                ],
+                [
+                    'date' => '2009 - 2013',
+                    'title'  => 'IT & Operation Assistant',
+                    'company' => 'Janchart Shipping',
+                    'summary' => [
+                        'I was in charge of daily shipping routines, any computer related jobs, processing of data and management of the company website.',
+                    ],
+                ],
+            ],
+        ], 'content');
 
         return Flight::render('layout', [
             'title'         => 'Peter C. Jørgensen',

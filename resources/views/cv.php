@@ -40,99 +40,51 @@
     <div class="container" style="margin-top: 20px;">
         <section class="twelve columns">
             <h2>Education</h2>
+            <hr>
         </section>
     </div>
-    <div class="container">
-        <section class="two columns">
-            2015 - 2017
-        </section>
-        <section class="eight columns">
-            <strong>Multimedia Designer</strong>
-            <p>Lillebaelt Academy</p>
-        </section>
-    </div>
-    <div class="container">
-        <section class="two columns">
-            2010 - 2013
-        </section>
-        <section class="eight columns">
-            <strong>Higher Technical Examination</strong>
-            <p>Hansenberg</p>
-        </section>
-    </div>
+    <?php foreach ($educations as $education) : ?>
+        <div class="container">
+            <section class="two columns">
+                <?php echo $education['date'] ?>
+            </section>
+            <section class="eight columns">
+                <h3>
+                    <?php echo $education['title'] ?>
+                    <small><?php echo $education['school'] ?></small>
+                </h3>
+            </section>
+        </div>
+    <?php endforeach; ?>
 
     <!-- Experience -->
     <div class="container" style="margin-top: 20px;">
         <section class="twelve columns">
             <h2>Experience</h2>
+            <hr>
         </section>
     </div>
+    <?php foreach ($experiences as $experience) : ?>
     <div class="container">
         <section class="two columns">
-            2017
+            <?php echo $experience['date'] ?>
         </section>
         <section class="eight columns">
-            <strong>Student Assistant</strong>
-            <div>Grundfos</div>
-            <small>
+            <h3>
+                <?php echo $experience['title'] ?>
+                <small><?php echo $experience['company'] ?></small>
+            </h3>
+            <?php foreach ($experience['summary'] as $summary) : ?>
                 <p>
-                    I worked on a web application, that is intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.
+                    <?php echo $summary ?>
                 </p>
-                <p>
-                    Source code can be found on <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a>.
-                </p>
-            </small>
+            <?php endforeach; ?>
         </section>
     </div>
+    <?php endforeach; ?>
     <div class="container">
         <section class="two columns">
-            2017
-        </section>
-        <section class="eight columns">
-            <strong>Intern</strong>
-            <div>B2B Kolding</div>
-            <small>
-                <p>
-                    I worked on the design and development of the company's website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.
-                </p>
-                <p>
-                    I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget. In addition to that, I examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.
-                </p>
-                <p>
-                    Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>
-                </p>
-            </small>
-        </section>
-    </div>
-    <div class="container">
-        <section class="two columns">
-            2013 - 2016
-        </section>
-        <section class="eight columns">
-            <strong>Community Manager</strong>
-            <div>/r/GameMaker via Reddit</div>
-            <small>
-                <p>
-                    I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.
-                </p>
-                <p>
-                    The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.
-                </p>
-            </small>
-        </section>
-    </div>
-    <div class="container">
-        <section class="two columns">
-            2009 - 2013
-        </section>
-        <section class="eight columns">
-            <strong>IT & Operation Assistant</strong>
-            <div>Janchart Shipping A/S</div>
-            <small>
-                <p>
-                    I was in charge of daily shipping routines, any computer related jobs, processing of data and management of the company website.
-                </p>
-            </small>
+            See more on my <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">LinkedIn</a> profile.
         </section>
     </div>
 
@@ -140,6 +92,7 @@
     <div class="container" style="margin-top: 20px;">
         <section class="twelve columns">
             <h2>Projects</h2>
+            <hr>
         </section>
     </div>
     <div class="container">
@@ -163,7 +116,7 @@
         </section>
     </div>
     <div class="container">
-        <section class="offset-by-two eight columns">
+        <section class="two columns">
             See more on my <a href="/portfolio">portfolio</a>.
         </section>
     </div>
@@ -172,6 +125,7 @@
     <div class="container" style="margin-top: 20px;">
         <section class="twelve columns">
             <h2>Profile</h2>
+            <hr>
         </section>
     </div>
     <div class="container">
@@ -187,6 +141,7 @@
     <div class="container" style="margin-top: 20px;">
         <section class="twelve columns">
             <h2>Skills</h2>
+            <hr>
         </section>
     </div>
     <div class="container">
