@@ -25,7 +25,9 @@ gulp.task('images', function() {
 });
 
 gulp.task('watch', function() {
-    gulp.watch(sassPath, ['stylesheets', 'images']);
+    gulp.watch(sassPath, ['stylesheets']);
+    gulp.watch(srcPath, ['images']);
+
 });
 
 gulp.task('default', function() {
