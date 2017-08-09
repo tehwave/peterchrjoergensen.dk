@@ -95,7 +95,7 @@
         <!-- End Google Tag Manager (noscript) -->
 
         <!-- Header -->
-        <header class="container header text-center">
+        <header class="container header">
             <!-- Title -->
             <h1 class="title">
                 <a href="/">Peter Christian Jørgensen</a>
@@ -128,7 +128,7 @@
         <?php echo isset($content) ? $content : '' ?>
 
         <!-- Footer -->
-        <footer class="u-full-width text-center">
+        <footer class="footer">
             <!-- Contact -->
             <section class="parallax contact" data-parallax="scroll" data-speed="0.6" data-image-src="/resources/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
                 <div class="container">

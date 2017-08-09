@@ -31,6 +31,7 @@ Header
 -------------------------------- */
 
 .header {
+	text-align: center;
 	padding-top: 4rem;
 	@media (min-width: 550px) {
 		padding-top: 8rem;
@@ -86,7 +87,11 @@ Footer
 
 -------------------------------- */
 
-footer {
+.footer {
+	text-align: center;
+	width: 100%;
+	box-sizing: border-box;
+
 	section:first-child {
 		color: white;
 		p, h2 { font-weight: 600; }
@@ -104,7 +109,6 @@ footer {
 
 	.copyright {
 		margin: 3rem auto;
-		text-align: center;
 
 		p {
 			margin: 0;
