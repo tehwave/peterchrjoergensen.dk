@@ -196,6 +196,9 @@
                 <span class="skill">Web Development</span>
                 <span class="skill">Bootstrap</span>
                 <span class="skill">Laravel</span>
+                <span class="skill">Flight</span>
+                <span class="skill">Gulp</span>
+                <span class="skill">npm</span>
                 <span class="skill">JavaScript</span>
                 <span class="skill">CSS</span>
                 <span class="skill">SASS</span>
