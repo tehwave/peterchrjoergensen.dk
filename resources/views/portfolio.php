@@ -72,9 +72,11 @@
                         <p>
                             <?php echo $project['paragraph'] ?>
                         </p>
-                        <a class="button button-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
-                            <?php echo $project['button_text'] ?>
-                        </a>
+                        <?php if (isset($project['button_url'])): ?>
+                            <a class="button button-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
+                                <?php echo $project['button_text'] ?>
+                            </a>
+                        <?php endif;?>
                     </section>
                 </article>
             <?php endforeach; ?>
