@@ -71,7 +71,7 @@ class Controller
                 [
                     'date' => '2013 - 2016',
                     'title'  => 'Community Manager',
-                    'company' => '/r/GameMaker via Reddit',
+                    'company' => 'Reddit',
                     'summary' => [
                         'I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.',
                         'The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.',
