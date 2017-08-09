@@ -88,7 +88,7 @@
         <!-- End Google Tag Manager -->
     </head>
     <!-- neck -->
-    <body class="u-full-width home">
+    <body class="u-full-width">
         <!-- Google Tag Manager (noscript) -->
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKNTXKZ"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
