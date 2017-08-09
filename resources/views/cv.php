@@ -5,7 +5,7 @@
  * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
  */
 ?>
-<main class="u-full-width">
+<main class="cv">
     <!-- Introduction -->
     <section class="parallax intro"
         data-parallax="scroll"
