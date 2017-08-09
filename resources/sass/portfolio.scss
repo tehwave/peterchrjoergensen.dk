@@ -10,8 +10,12 @@ Portfolio
 -------------------------------- */
 
 .portfolio {
+	width: 100%;
+	box-sizing: border-box;
 
 	.projects {
+		text-align: center;
+
 		hr {
 			margin-bottom: 5rem;
 		}
@@ -46,6 +50,7 @@ Portfolio
 				max-width: 100%;
 				width: 100%;
 				height: auto;
+  				box-sizing: border-box;
 			}
 		}
 

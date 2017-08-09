@@ -5,7 +5,7 @@
  * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
  */
 ?>
-<main class="u-full-width portfolio">
+<main class="portfolio">
     <!-- Introduction -->
     <section
         class="parallax intro"
@@ -24,7 +24,7 @@
     </section>
 
     <!-- Projects -->
-    <section class="projects text-center">
+    <section class="projects">
         <ul class="controls">
             <li><button type="button" class="button" data-filter="all">All</button></li>
             <li><button type="button" class="button" data-filter=".game">Game</button></li>
@@ -42,13 +42,13 @@
                     <section class="image-wrapper">
                         <noscript>
                             <img
-                                class="u-max-full-width image"
+                                class="image"
                                 src="/resources/img/portfolio/<?php echo $project['image'].'.'.$project['image_format'] ?>"
                                 width="300" height="300" alt="<?php echo $project['title'] ?>"
                             />
                         </noscript>
                         <img
-                            class="u-max-full-width image lazyload lqip"
+                            class="image lazyload lqip"
                             src="/resources/img/portfolio/<?php echo $project['image'] ?>-lowquality.<?php echo $project['image_format'] ?>"
                             data-src="/resources/img/portfolio/<?php echo $project['image'].'.'.$project['image_format'] ?>"
                             width="300" height="300" alt="<?php echo $project['title'] ?>"
