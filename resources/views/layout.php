@@ -125,7 +125,7 @@
         </header>
 
         <!-- Main -->
-        <?php echo $content ?>
+        <?php echo isset($content) ? $content : '' ?>
 
         <!-- Footer -->
         <footer class="u-full-width text-center">
