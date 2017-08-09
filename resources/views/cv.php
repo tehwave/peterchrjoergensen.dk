@@ -207,11 +207,11 @@
             <section class="skills">
                 <span class="skill">Game Development</span>
                 <span class="skill">Unity3D</span>
+                <span class="skill">C#</span>
                 <span class="skill">Unreal Engine 4</span>
                 <span class="skill">Blueprints Visual Scripting</span>
                 <span class="skill">GameMaker: Studio</span>
                 <span class="skill">GameMaker Language</span>
-                <span class="skill">C#</span>
                 <span class="skill">Java</span>
                 <span class="skill">Python</span>
                 <span class="skill">Autodesk Maya</span>
