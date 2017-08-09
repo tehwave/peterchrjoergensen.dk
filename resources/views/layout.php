@@ -72,9 +72,11 @@
         <link rel="stylesheet" type="text/css" href="/resources/css/normalize.min.css">
         <link rel="stylesheet" type="text/css" href="/resources/css/skeleton.min.css">
         <link rel="stylesheet" type="text/css" href="/resources/css/pcj.min.css">
-        <?php if (isset($stylesheets)): foreach ($stylesheets as $stylesheet): ?>
-            <link rel="stylesheet" type="text/css" href="<?php echo $stylesheet ?>">
-        <?php endforeach; endif; ?>
+        <?php if (isset($stylesheets)) : ?>
+            <?php foreach ($stylesheets as $stylesheet) : ?>
+                <link rel="stylesheet" type="text/css" href="<?php echo $stylesheet ?>">
+            <?php endforeach; ?>
+        <?php endif;  ?>
 
         <!-- Font -->
         <link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Raleway:700,600,400,300'>
@@ -162,8 +164,10 @@
         <script src="/resources/js/jquery-1.12.4.min.js"></script>
         <script src="/resources/js/smoothscroll.min.js" defer></script>
         <script src="/resources/js/parallax.min.js" defer></script>
-        <?php if (isset($scripts)): foreach ($scripts as $script): ?>
-            <script type="text/javascript" src="<?php echo $script ?>"></script>
-        <?php endforeach; endif; ?>
+        <?php if (isset($scripts)) : ?>
+            <?php foreach ($scripts as $script) : ?>
+                <script type="text/javascript" src="<?php echo $script ?>"></script>
+            <?php endforeach; ?>
+        <?php endif;  ?>
     </body>
 </html>
