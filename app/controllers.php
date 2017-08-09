@@ -50,8 +50,8 @@ class Controller
             ],
             'experiences' => [
                 [
-                    'date' => '2017',
-                    'title'  => 'Student Assistant',
+                    'date'    => '2017',
+                    'title'   => 'Student Assistant',
                     'company' => 'Grundfos',
                     'summary' => [
                         'I worked on a web application, that is intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
@@ -59,8 +59,8 @@ class Controller
                     ],
                 ],
                 [
-                    'date' => '2017',
-                    'title'  => 'Intern',
+                    'date'    => '2017',
+                    'title'   => 'Intern',
                     'company' => 'B2B Kolding',
                     'summary' => [
                         'I worked on the design and development of the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
@@ -69,8 +69,8 @@ class Controller
                     ],
                 ],
                 [
-                    'date' => '2013 - 2016',
-                    'title'  => 'Community Manager',
+                    'date'    => '2013 - 2016',
+                    'title'   => 'Community Manager',
                     'company' => 'Reddit',
                     'summary' => [
                         'I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.',
@@ -78,8 +78,8 @@ class Controller
                     ],
                 ],
                 [
-                    'date' => '2009 - 2013',
-                    'title'  => 'IT & Operation Assistant',
+                    'date'    => '2009 - 2013',
+                    'title'   => 'IT & Operation Assistant',
                     'company' => 'Janchart Shipping',
                     'summary' => [
                         'I was in charge of daily shipping routines, any computer related jobs, processing of data and management of the company website.',
