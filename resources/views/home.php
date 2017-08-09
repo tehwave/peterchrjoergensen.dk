@@ -5,7 +5,7 @@
  * @author   Peter C. Jørgensen <hello@peterchrjoergensen.dk>
  */
 ?>
-<main class="u-full-width portfolio">
+<main class="u-full-width home">
     <!-- Introduction -->
     <section
         class="parallax intro"
@@ -24,7 +24,7 @@
     </section>
 
     <!-- Projects -->
-    <div class="container projects text-center">
+    <div class="container projects">
         <h3>I'm exceptionally proud of these projects</h3>
         <hr>
         <div class="row">
@@ -45,7 +45,7 @@
             </section>
         </div>
         <div class="row">
-            <section class="portfolio-referral text-center">
+            <section class="referral">
                 You can find more of my projects in my <a href="/portfolio">portfolio.</a>
             </section>
         </div>

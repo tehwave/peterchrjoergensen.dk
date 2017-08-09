@@ -11,21 +11,26 @@ Home
 
 .home {
 	.projects {
+		text-align: center;
+
 		h3 {
 			font-size: 1.8rem;
 			@media (min-width: 550px) { font-size: 2.4rem }
 		}
 
-		.portfolio-referral {
+		.project {
+			.lead {
+			    font-size: 1.25em
+			}
+
+			h2 {
+			    margin-top: 20px
+			}
+		}
+
+		.referral {
 			margin-top: 4rem;
-		}
-
-		.project h2 {
-		    margin-top: 20px
-		}
-
-		.project .lead {
-		    font-size: 1.25em
+			text-align: center;
 		}
 	}
 }
