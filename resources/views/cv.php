@@ -131,9 +131,8 @@
     <div class="container">
         <section class="ten columns">
             <p>I am a resourceful and creative young Danish man with lots of energy and a go-getter attitude.
-            <p>
-                I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.
-            </p>
+            <p>I love to learn new stuff, and I strive to keep myself updated with the latest in the industry.</p>
+            <p>I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
         </section>
     </div>
 
