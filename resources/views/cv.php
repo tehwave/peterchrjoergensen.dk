@@ -187,4 +187,28 @@
             </ul>
         </section>
     </div>
+
+    <!-- Other -->
+    <div class="container" style="margin-top: 20px;">
+        <section class="twelve columns">
+            <h2>Other</h2>
+            <hr>
+        </section>
+    </div>
+    <div class="container">
+        <section class="two columns">
+            <strong>Nationality</strong>
+        </section>
+        <section class="ten columns">
+            <p>Danish</p>
+        </section>
+    </div>
+    <div class="container">
+        <section class="two columns">
+            <strong>Drivers License</strong>
+        </section>
+        <section class="ten columns">
+            <p>Yes. Issued in Denmark. Type B.</p>
+        </section>
+    </div>
 </main>
