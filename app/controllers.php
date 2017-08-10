@@ -54,7 +54,7 @@ class Controller
                     'title'   => 'Student Assistant',
                     'company' => 'Grundfos',
                     'summary' => [
-                        'I worked on a web application, that is intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
+                        'I worked on a web application intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
                         'Source code can be found on <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a>',
                     ],
                 ],
@@ -64,7 +64,7 @@ class Controller
                     'company' => 'B2B Kolding',
                     'summary' => [
                         'I worked on the design and development of the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
-                        'I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget. In addition to that, I examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.',
+                        'I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget, and I also examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.',
                         'Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>',
                     ],
                 ],
