@@ -182,6 +182,8 @@
                 <span class="skill">Virtual Reality</span>
                 <span class="skill">Community Management</span>
                 <span class="skill">Social Marketing</span>
+                <span class="skill">Gamification</span>
+                <span class="skill">YouTube Partnership</span>
                 <span class="skill">SoMe</span>
             </section>
         </section>
