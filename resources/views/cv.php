@@ -145,46 +145,46 @@
     </div>
     <div class="container">
         <section class="ten columns">
-            <section class="skills">
-                <span class="skill">Web Design</span>
-                <span class="skill">Web Development</span>
-                <span class="skill">Bootstrap</span>
-                <span class="skill">Laravel</span>
-                <span class="skill">Flight</span>
-                <span class="skill">Gulp</span>
-                <span class="skill">npm</span>
-                <span class="skill">JavaScript</span>
-                <span class="skill">CSS</span>
-                <span class="skill">SASS</span>
-                <span class="skill">HTML</span>
-                <span class="skill">PHP</span>
-                <span class="skill">SQL</span>
-                <span class="skill">SEO</span>
-            </section>
-            <section class="skills">
-                <span class="skill">Game Development</span>
-                <span class="skill">Unity3D</span>
-                <span class="skill">C#</span>
-                <span class="skill">Unreal Engine 4</span>
-                <span class="skill">Blueprints Visual Scripting</span>
-                <span class="skill">GameMaker: Studio</span>
-                <span class="skill">GameMaker Language</span>
-                <span class="skill">Java</span>
-                <span class="skill">Python</span>
-                <span class="skill">Autodesk Maya</span>
-                <span class="skill">Autodesk Inventor</span>
-            </section>
+            <ul class="skills">
+                <li class="skill">Web Design</li>
+                <li class="skill">Web Development</li>
+                <li class="skill">Bootstrap</li>
+                <li class="skill">Laravel</li>
+                <li class="skill">Flight</li>
+                <li class="skill">Gulp</li>
+                <li class="skill">npm</li>
+                <li class="skill">JavaScript</li>
+                <li class="skill">CSS</li>
+                <li class="skill">SASS</li>
+                <li class="skill">HTML</li>
+                <li class="skill">PHP</li>
+                <li class="skill">SQL</li>
+                <li class="skill">SEO</li>
+            </ul>
+            <ul class="skills">
+                <li class="skill">Game Development</li>
+                <li class="skill">Unity3D</li>
+                <li class="skill">C#</li>
+                <li class="skill">Unreal Engine 4</li>
+                <li class="skill">Blueprints Visual Scripting</li>
+                <li class="skill">GameMaker: Studio</li>
+                <li class="skill">GameMaker Language</li>
+                <li class="skill">Java</li>
+                <li class="skill">Python</li>
+                <li class="skill">Autodesk Maya</li>
+                <li class="skill">Autodesk Inventor</li>
+            </ul>
 
-            <section class="skills">
-                <span class="skill">Microsoft Office</span>
-                <span class="skill">Adobe Creative Suite</span>
-                <span class="skill">Virtual Reality</span>
-                <span class="skill">Community Management</span>
-                <span class="skill">Social Marketing</span>
-                <span class="skill">Gamification</span>
-                <span class="skill">YouTube Partnership</span>
-                <span class="skill">SoMe</span>
-            </section>
+            <ul class="skills">
+                <li class="skill">Microsoft Office</li>
+                <li class="skill">Adobe Creative Suite</li>
+                <li class="skill">Virtual Reality</li>
+                <li class="skill">Community Management</li>
+                <li class="skill">Social Marketing</li>
+                <li class="skill">Gamification</li>
+                <li class="skill">YouTube Partnership</li>
+                <li class="skill">SoMe</li>
+            </ul>
         </section>
     </div>
 </main>
