@@ -11,7 +11,7 @@
         class="parallax intro"
         data-parallax="scroll"
         data-speed="0.6"
-        data-image-src="/resources/img/home.jpg"
+        data-image-src="<?php echo img('home.jpg') ?>"
         data-natural-width="1920"
         data-natural-height="1080"
         data-z-index="0"
@@ -43,14 +43,14 @@
                     <noscript>
                         <img
                             class="card-img-top"
-                            src="/resources/img/firkant.png"
+                            src="<?php echo img('firkant.png') ?>"
                             alt="FIRKANT"
                         />
                     </noscript>
                     <img
                         class="card-img-top lazyload lqip"
-                        src="/resources/img/firkant-lowquality.png"
-                        data-src="/resources/img/firkant.png"
+                        src="<?php echo img('firkant-lowquality.png') ?>"
+                        data-src="<?php echo img('firkant.png') ?>"
                         alt="FIRKANT"
                     />
                     <div class="card-body">
@@ -65,14 +65,14 @@
                     <noscript>
                         <img
                             class="card-img-top"
-                            src="/resources/img/b2bkolding.png"
+                            src="<?php echo img('b2bkolding.png') ?>"
                             alt="B2B Kolding"
                         />
                     </noscript>
                     <img
                         class="card-img-top lazyload lqip"
-                        src="/resources/img/b2bkolding-lowquality.png"
-                        data-src="/resources/img/b2bkolding.png"
+                        src="<?php echo img('b2bkolding-lowquality.png') ?>"
+                        data-src="<?php echo img('b2bkolding.png') ?>"
                         alt="B2B Kolding"
                     />
                     <div class="card-body">
@@ -85,12 +85,12 @@
             <section class="col-12 col-md-8 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mr-xl-auto mb-4">
                 <div class="card">
                     <noscript>
-                        <img class="card-img-top" src="/resources/img/gm48.png" alt="GM48"/>
+                        <img class="card-img-top" src="<?php echo img('gm48.png') ?>" alt="GM48"/>
                     </noscript>
                     <img
                         class="card-img-top lazyload lqip"
-                        src="/resources/img/gm48-lowquality.png"
-                        data-src="/resources/img/gm48.png"
+                        src="<?php echo img('gm48-lowquality.png') ?>"
+                        data-src="<?php echo img('gm48.png') ?>"
                         alt="GM48"
                     />
                     <div class="card-body">
