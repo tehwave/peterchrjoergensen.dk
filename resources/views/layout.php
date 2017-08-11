@@ -69,7 +69,7 @@
         </script>
 
         <!-- CSS -->
-        <link rel="stylesheet" type="text/css" href="/resources/css/pcj.min.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo css('pcj.min.css') ?>">
         <?php if (isset($stylesheets)) : ?>
             <?php foreach ($stylesheets as $stylesheet) : ?>
                 <link rel="stylesheet" type="text/css" href="<?php echo $stylesheet ?>">
@@ -135,7 +135,7 @@
         <!-- Footer -->
         <footer class="footer">
             <!-- Contact -->
-            <section class="parallax outro" data-parallax="scroll" data-speed="0.6" data-image-src="/resources/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
+            <section class="parallax outro" data-parallax="scroll" data-speed="0.6" data-image-src="<?php echo img('footer.jpg') ?>" data-natural-width="1920" data-natural-height="725" data-z-index="0">
                 <div class="container contact">
                     <div class="row">
                         <section class="col">
