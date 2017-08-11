@@ -28,7 +28,7 @@
     </section>
 
     <!-- Controls -->
-    <div class="container">
+    <div class="container controls">
         <div class="row">
             <section class="col">
                 <div class="btn-group mb-2 mb-sm-0" role="group" aria-label="Show All">
