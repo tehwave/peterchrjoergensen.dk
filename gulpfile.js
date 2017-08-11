@@ -56,11 +56,6 @@ gulp.task('images', function() {
 
 
 // Scripts
-gulp.task('watch', function() {
-    gulp.watch(sassPath, ['stylesheets']);
-    gulp.watch(srcPath, ['images']);
-});
-
 gulp.task('default', function() {
     gulp.start('stylesheets:clean', 'stylesheets:copy', 'stylesheets:process', 'stylesheets:revision', 'images');
 });
