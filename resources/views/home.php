@@ -104,8 +104,8 @@
     </div>
     <div class="container">
         <div class="row">
-            <section class="col mt-5">
-                <a  href="/portfolio" class="btn btn-outline-link btn-lg btn-block">Browse my portfolio for more projects</a>
+            <section class="col mt-5 text-center">
+                <a href="/portfolio" class="btn btn-outline-link btn-lg">Browse my portfolio for more projects</a>
             </section>
         </div>
     </div>
