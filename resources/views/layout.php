@@ -139,7 +139,7 @@
                 <div class="container contact">
                     <div class="row">
                         <section class="col">
-                            <h2>Get in touch</h2>
+                            <h2 class="h1">Get in touch</h2>
                         </section>
                         <section class="col">
                             <a href="mailto:hello@peterchrjoergensen.dk?subject=Hello" target="_top" title="Send Peter an email">
