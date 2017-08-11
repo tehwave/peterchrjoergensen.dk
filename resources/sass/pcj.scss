@@ -23,7 +23,6 @@ PCJ
 
 -------------------------------- */
 
-@import 'partials/bourbon/bourbon';
 @import 'partials/variables';
 
 
@@ -40,7 +39,9 @@ body {
 
 hr {
     margin-bottom: 2rem;
-    border-color: #E77E2D
+    border-width: 1px;
+    border-style: solid;
+    border-color: $orange;
 }
 
 a {
@@ -56,11 +57,8 @@ Header
 
 .header {
 	text-align: center;
-	padding-top: 4rem;
-	@media (min-width: 550px) {
-		padding-top: 8rem;
-	}
-	padding-bottom: 1rem;
+	margin-top: 4rem;
+	margin-bottom: 1rem;
 
 	nav a {
 	    color: $black;
@@ -70,6 +68,7 @@ Header
 	    letter-spacing: .2rem;
 	    text-decoration: none;
 	    text-transform: uppercase;
+	    text-align: center;
 
 	    &.active {
 	    	color: $teal;
@@ -85,23 +84,45 @@ Header
 	}
 
 	.icon {
-		margin: 0.5em;
+		padding-right: 0.5em;
+
+		&:last-child {
+			padding-right: 0;
+		}
 	}
 
-	.title a {
-		color: black;
-		text-decoration: none;
+	.title {
+	    font-size: 3.5rem;
+	    font-weight: 300;
+	    line-height: 1.1;
+
+	    hr {
+	    	margin-bottom: 0;
+	    }
+
+		a {
+			color: black;
+			text-decoration: none;
+
+		    &:hover {
+		    	color: $blue;
+	    	}
+		}
 	}
 }
 
-.intro {
+.introduction, .contact {
 	color: white;
-	line-height: 3rem;
 	margin-bottom: 5rem;
-	h2 { font-size: 4.0rem }
-	p, h2 { font-weight: 600 }
-	p { font-size: 2em; font-weight: 400 }
-	@media (min-width: 550px) { h2 { font-size: 5.0rem } }
+	font-size: 200%;
+
+	a {
+		text-decoration: none;
+
+		&:hover {
+			opacity: 0.5;
+		}
+	}
 }
 
 
@@ -113,31 +134,15 @@ Footer
 
 .footer {
 	text-align: center;
-	width: 100%;
-	box-sizing: border-box;
 
-	section:first-child {
-		color: white;
-		p, h2 { font-weight: 600; }
-		p { font-size: 2em; font-weight: 400; }
-
-		a {
-			margin: 1em;
-			text-decoration: none;
-
-			&:hover {
-				opacity: 0.5;
-			}
+	.contact a {
+		margin-right: 1rem;
+		&:last-child {
+			margin-right: 0;
 		}
 	}
 
 	.copyright {
-		margin: 3rem auto;
-
-		p {
-			margin: 0;
-		}
-
 		a {
 			color: $black;
 			font-weight: 600;
@@ -151,7 +156,6 @@ Footer
 	}
 
 	.nucleo {
-
 		img {
 			max-height: 16px;
 			vertical-align: middle;
@@ -162,7 +166,7 @@ Footer
 		}
 	}
 
-	margin-top: 10rem !important;
+	margin-top: 5rem !important;
 }
 
 
@@ -181,12 +185,12 @@ Other
 // Lazy Load
 .lqip {
 	will-change: filter;
-	@include filter(blur(2px));
+	filter: blur(2px);
 }
 
 .lqip.lazyloaded {
-	@include filter(blur(0px));
-	@include transition(filter 0.5s ease-in-out);
+	filter: blur(0px);
+	transition: filter 0.5s ease-in-out;
 }
 
 .twitter-search {
@@ -202,7 +206,7 @@ Other
 .parallax-mirror {
 	opacity: 1;
 	will-change: transform;
-	@include animation(parallax 0.5s ease-in-out);
+	animation: parallax 0.5s ease-in-out;
 }
 
 .parallax {
@@ -216,7 +220,7 @@ Other
 		}
 	}
 
-	@include keyframes(parallax) {
+	keyframes(parallax) {
 		from {
 			opacity: 0;
 		}
