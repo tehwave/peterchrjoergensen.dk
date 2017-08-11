@@ -237,28 +237,4 @@ Footer
 			}
 		}
 	}
-
-	.copyright {
-		a {
-			color: $black;
-			font-weight: 600;
-			text-decoration: none;
-
-			&:hover {
-				color: $black;
-				text-decoration: underline;
-			}
-		}
-	}
-
-	.nucleo {
-		img {
-			max-height: 16px;
-			vertical-align: middle;
-
-			&:hover {
-				opacity: 0.5;
-			}
-		}
-	}
 }
