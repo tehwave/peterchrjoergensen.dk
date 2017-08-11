@@ -37,6 +37,79 @@ Bootstrap
 
 /* --------------------------------
 
+Other
+
+-------------------------------- */
+
+.no-js {
+	.controls, img.lazyload {
+		display: none;
+	}
+}
+
+// Lazy Load
+.lqip {
+	will-change: filter;
+	filter: blur(2px);
+}
+
+.lqip.lazyloaded {
+	filter: blur(0px);
+	transition: filter 0.5s ease-in-out;
+}
+
+.twitter-search {
+	font-weight: bold;
+	text-decoration: none;
+	color: $white !important;
+
+	&:hover {
+		opacity: 0.5;
+	}
+}
+
+.parallax-mirror {
+	opacity: 1;
+	will-change: transform;
+	animation: parallax 0.5s ease-in-out;
+}
+
+.parallax {
+	background: $bluegray;
+
+	.container {
+		padding: 10rem 20px;
+
+		@media (min-width: 400px) {
+			padding: 10rem 0;
+		}
+	}
+}
+
+@keyframes parallax {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+button.mixitup-control-active {
+	color: #FFF;
+	background-color: #33C3F0;
+	border-color: #33C3F0;
+
+	&:hover, &:active, &:focus {
+		background-color: #1EAEDB;
+		border-color: #1EAEDB;
+		color: #FFF;
+	}
+}
+
+
+/* --------------------------------
+
 Primary
 
 -------------------------------- */
@@ -153,8 +226,8 @@ Footer
 	text-align: center;
 
 	.contact {
-		padding-top: 5rem;
-		padding-bottom: 5rem;
+		padding-top: 8rem;
+		padding-bottom: 8rem;
 
 		a {
 			margin-right: 1rem;
@@ -187,78 +260,5 @@ Footer
 				opacity: 0.5;
 			}
 		}
-	}
-}
-
-
-/* --------------------------------
-
-Other
-
--------------------------------- */
-
-.no-js {
-	.controls, img.lazyload {
-		display: none;
-	}
-}
-
-// Lazy Load
-.lqip {
-	will-change: filter;
-	filter: blur(2px);
-}
-
-.lqip.lazyloaded {
-	filter: blur(0px);
-	transition: filter 0.5s ease-in-out;
-}
-
-.twitter-search {
-	font-weight: bold;
-	text-decoration: none;
-	color: $white !important;
-
-	&:hover {
-		opacity: 0.5;
-	}
-}
-
-.parallax-mirror {
-	opacity: 1;
-	will-change: transform;
-	animation: parallax 0.5s ease-in-out;
-}
-
-.parallax {
-	background: $bluegray;
-
-	.container {
-		padding: 10rem 20px;
-
-		@media (min-width: 400px) {
-			padding: 10rem 0;
-		}
-	}
-}
-
-@keyframes parallax {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-button.mixitup-control-active {
-	color: #FFF;
-	background-color: #33C3F0;
-	border-color: #33C3F0;
-
-	&:hover, &:active, &:focus {
-		background-color: #1EAEDB;
-		border-color: #1EAEDB;
-		color: #FFF;
 	}
 }
