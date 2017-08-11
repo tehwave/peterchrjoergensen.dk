@@ -14,7 +14,7 @@ Flight::set('flight.views.path', 'resources/views');
  */
 function asset_path($filename)
 {
-    $manifest_path = 'assets/rev-manifest.json';
+    $manifest_path = 'resources/rev-manifest.json';
 
     if (file_exists($manifest_path)) {
         $manifest = json_decode(file_get_contents($manifest_path), true);
