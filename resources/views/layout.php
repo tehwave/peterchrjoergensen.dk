@@ -69,8 +69,6 @@
         </script>
 
         <!-- CSS -->
-        <link rel="stylesheet" type="text/css" href="/resources/css/normalize.min.css">
-        <link rel="stylesheet" type="text/css" href="/resources/css/skeleton.min.css">
         <link rel="stylesheet" type="text/css" href="/resources/css/pcj.min.css">
         <?php if (isset($stylesheets)) : ?>
             <?php foreach ($stylesheets as $stylesheet) : ?>
