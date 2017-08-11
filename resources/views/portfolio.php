@@ -31,20 +31,23 @@
     <div class="container controls">
         <div class="row">
             <section class="col">
-                <div class="btn-group mb-2 mb-sm-0" role="group" aria-label="Show All">
-                    <button type="button" class="btn btn-outline-primary" data-filter="all">All</button>
+                <div class="d-md-flex justify-content-md-center">
+                    <div class="btn-group mb-2 mb-sm-0 mr-sm-4" role="group" aria-label="Show All">
+                        <button type="button" class="btn btn-outline-primary" data-filter="all">All</button>
+                    </div>
+                    <div class="btn-group mb-2 mb-sm-0 mr-sm-4" role="group" aria-label="Filters for Type">
+                        <button type="button" class="btn btn-outline-primary" data-filter=".game">Game</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter=".video">Video</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter=".website">Website</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter=".other">Other</button>
+                    </div>
+                    <div class="btn-group mb-2 mb-sm-0" role="group" aria-label="Additional Filters">
+                        <button type="button" class="btn btn-outline-primary" data-filter=".solo">Solo</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter=".team">Team</button>
+                        <button type="button" class="btn btn-outline-primary" data-filter=".company">Company</button>
+                    </div>
                 </div>
-                <div class="btn-group mb-2 mb-sm-0" role="group" aria-label="Filters for Type">
-                    <button type="button" class="btn btn-outline-primary" data-filter=".game">Game</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter=".video">Video</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter=".website">Website</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter=".other">Other</button>
-                </div>
-                <div class="btn-group mb-2 mb-sm-0" role="group" aria-label="Additional Filters">
-                    <button type="button" class="btn btn-outline-primary" data-filter=".solo">Solo</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter=".team">Team</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter=".company">Company</button>
-                </div>
+
             </section>
         </div>
         <div class="row">
@@ -58,7 +61,7 @@
     <div class="container" id="mixitup">
         <div class="row">
             <?php foreach ($projects as $project) : ?>
-                 <section class="w-50 project <?php echo implode(' ', $project['filters']) ?>">
+                 <section class="col-12 col-md-6 project <?php echo implode(' ', $project['filters']) ?>">
                     <article class="card m-4">
                         <noscript>
                             <img
@@ -75,11 +78,13 @@
                         />
                         <div class="card-body">
                             <h1 class="card-title"><?php echo $project['title'] ?></h1>
+                            <p class="card-text">
                             <?php
                             foreach ($project['tags'] as $tag) {
                                 echo '<span class="badge badge-light">'.$tag."</span>\r\n";
                             }
                             ?>
+                            </p>
                             <p class="card-text"><?php echo $project['lead'] ?></p>
                             <p class="card-text"><?php echo $project['paragraph'] ?></p>
                             <?php if (isset($project['button_url'])) : ?>
