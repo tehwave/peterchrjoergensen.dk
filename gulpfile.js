@@ -1,3 +1,4 @@
+// Gulp
 const gulp         = require('gulp'),
       rev          = require('gulp-rev'),
       sass         = require('gulp-sass'),
@@ -7,11 +8,15 @@ const gulp         = require('gulp'),
       imagemin     = require('gulp-imagemin'),
       sourcemaps   = require('gulp-sourcemaps');
 
+
+// Variables
 const srcPath     = 'resources/src',
       imgPath     = 'resources/img',
       cssPath     = 'resources/css',
       sassPath    = 'resources/sass/*.scss';
 
+
+// Tasks
 gulp.task('stylesheets', function() {
     gulp.src(sassPath)
         .pipe(sourcemaps.init())
@@ -22,38 +27,31 @@ gulp.task('stylesheets', function() {
         .pipe(postcss([autoprefixer()]))
         .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(cssPath))
         .pipe(gulp.dest(srcPath + '/css/'));
 });
 
-gulp.task('revision-stylesheets', function () {
-  gulp.src(srcPath + '/css/**/*')
+gulp.task('images', function() {
+    gulp.src(srcPath + '/img/**/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest(imgPath));
+});
+
+gulp.task('revision', function () {
+  gulp.src(srcPath + '/css/**/*.css')
       .pipe(rev())
       .pipe(gulp.dest(cssPath))
       .pipe(rev.manifest())
       .pipe(gulp.dest('resources'));
 });
 
-gulp.task('images', function() {
-    gulp.src(srcPath + '/**/*')
-        .pipe(imagemin())
-        .pipe(gulp.dest(srcPath))
-});
 
-gulp.task('revision-images', function () {
-  gulp.src(srcPath + '/img/**/*')
-      .pipe(rev())
-      .pipe(gulp.dest(imgPath))
-      .pipe(rev.manifest())
-      .pipe(gulp.dest('resources'));
-});
-
-/// Scripts
-
+// Scripts
 gulp.task('watch', function() {
     gulp.watch(sassPath, ['stylesheets']);
     gulp.watch(srcPath, ['images']);
 });
 
 gulp.task('default', function() {
-    gulp.start('stylesheets', 'images', 'revision-stylesheets', 'revision-images');
+    gulp.start('stylesheets', 'images', 'revision');
 });
