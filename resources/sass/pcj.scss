@@ -2,25 +2,6 @@
 
 /* --------------------------------
 
-Bootstrap
-
--------------------------------- */
-
-@import 'functions';
-@import 'variables';
-@import 'mixins';
-@import 'reboot';
-@import 'utilities';
-
-// Components
-@import 'grid';
-@import 'card';
-@import 'images';
-@import 'buttons';
-
-
-/* --------------------------------
-
 Variables
 
 -------------------------------- */
@@ -32,6 +13,26 @@ $blue: 		#0fa0ce;
 $black: 	#222222;
 $orange: 	#E77E2D;
 $bluegray:  #298cab;
+
+
+/* --------------------------------
+
+Bootstrap
+
+-------------------------------- */
+
+@import 'functions';
+@import 'variables';
+@import 'mixins';
+@import 'reboot';
+@import 'utilities';
+
+// Components
+@import 'type';
+@import 'grid';
+@import 'card';
+@import 'images';
+@import 'buttons';
 
 
 /* --------------------------------
@@ -153,6 +154,7 @@ Footer
 
 	.contact a {
 		margin-right: 1rem;
+
 		&:last-child {
 			margin-right: 0;
 		}
@@ -234,7 +236,7 @@ Other
 		}
 	}
 
-	keyframes(parallax) {
+	keyframes parallax {
 		from {
 			opacity: 0;
 		}
