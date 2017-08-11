@@ -8,6 +8,7 @@ const gulp         = require('gulp'),
       imagemin     = require('gulp-imagemin'),
       sourcemaps   = require('gulp-sourcemaps');
 
+      var del = require('del');
 
 // Variables
 const srcPath     = 'resources/src',
@@ -17,7 +18,11 @@ const srcPath     = 'resources/src',
 
 
 // Tasks
-gulp.task('stylesheets', function() {
+gulp.task('stylesheets:clean', function() {
+  return del([cssPath + '/**/*']);
+});
+
+gulp.task('stylesheets:process', function() {
     gulp.src(sassPath)
         .pipe(sourcemaps.init())
         .pipe(sass({
@@ -27,22 +32,26 @@ gulp.task('stylesheets', function() {
         .pipe(postcss([autoprefixer()]))
         .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(cssPath))
-        .pipe(gulp.dest(srcPath + '/css/'));
+        .pipe(gulp.dest(srcPath + '/sass/'));
+});
+
+gulp.task('stylesheets:copy', function() {
+    gulp.src(srcPath + '/css/**/*')
+        .pipe(gulp.dest(cssPath));
+});
+
+gulp.task('stylesheets:revision', function () {
+  gulp.src(srcPath + '/sass/*.css')
+      .pipe(rev())
+      .pipe(gulp.dest(cssPath))
+      .pipe(rev.manifest())
+      .pipe(gulp.dest('resources'));
 });
 
 gulp.task('images', function() {
     gulp.src(srcPath + '/img/**/*')
         .pipe(imagemin())
         .pipe(gulp.dest(imgPath));
-});
-
-gulp.task('revision', function () {
-  gulp.src(srcPath + '/css/**/*.css')
-      .pipe(rev())
-      .pipe(gulp.dest(cssPath))
-      .pipe(rev.manifest())
-      .pipe(gulp.dest('resources'));
 });
 
 
@@ -53,5 +62,5 @@ gulp.task('watch', function() {
 });
 
 gulp.task('default', function() {
-    gulp.start('stylesheets', 'images', 'revision');
+    gulp.start('stylesheets:clean', 'stylesheets:copy', 'stylesheets:process', 'stylesheets:revision', 'images');
 });
