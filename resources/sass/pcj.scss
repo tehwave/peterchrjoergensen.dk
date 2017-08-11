@@ -98,14 +98,10 @@ Other
 }
 
 button.mixitup-control-active {
-	color: #FFF;
-	background-color: #33C3F0;
-	border-color: #33C3F0;
-
-	&:hover, &:active, &:focus {
-		background-color: #1EAEDB;
-		border-color: #1EAEDB;
-		color: #FFF;
+	&, &:hover, &:active, &:focus {
+		background-color: $blue;
+    	border-color: $blue;
+		color: $white;
 	}
 }
 
