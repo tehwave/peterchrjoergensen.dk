@@ -27,7 +27,6 @@ gulp.task('stylesheets', function() {
 
 gulp.task('revision-stylesheets', function () {
   gulp.src(srcPath + '/css/**/*')
-      .pipe(gulp.dest(cssPath))
       .pipe(rev())
       .pipe(gulp.dest(cssPath))
       .pipe(rev.manifest())
