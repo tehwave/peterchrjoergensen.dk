@@ -31,7 +31,7 @@
     <div class="container">
         <div class="row">
             <section class="col">
-                <h3>I'm exceptionally proud of these projects</h3>
+                <h3>I'm proud of these exceptional projects</h3>
                 <hr>
             </section>
         </div>
