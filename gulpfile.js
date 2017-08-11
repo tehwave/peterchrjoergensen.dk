@@ -26,7 +26,7 @@ gulp.task('stylesheets', function() {
 });
 
 gulp.task('revision-stylesheets', function () {
-  gulp.src(srcPath + '/css/*')
+  gulp.src(srcPath + '/css/**/*')
       .pipe(gulp.dest(cssPath))
       .pipe(rev())
       .pipe(gulp.dest(cssPath))
@@ -41,8 +41,7 @@ gulp.task('images', function() {
 });
 
 gulp.task('revision-images', function () {
-  gulp.src(srcPath + '/img/*')
-      .pipe(gulp.dest(imgPath))
+  gulp.src(srcPath + '/img/**/*')
       .pipe(rev())
       .pipe(gulp.dest(imgPath))
       .pipe(rev.manifest())
