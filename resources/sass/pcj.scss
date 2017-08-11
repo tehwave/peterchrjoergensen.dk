@@ -15,6 +15,7 @@ Bootstrap
 // Components
 @import 'grid';
 @import 'card';
+@import 'images';
 @import 'buttons';
 
 
@@ -65,7 +66,6 @@ Header
 .header {
 	text-align: center;
 	margin-top: 4rem;
-	margin-bottom: 1rem;
 
 	nav a {
 	    color: $black;
@@ -118,9 +118,9 @@ Header
 	}
 }
 
-.introduction, .contact {
+.intro, .outro {
 	color: white;
-	margin-bottom: 5rem;
+	margin: 5rem auto;
 	font-size: 200%;
 
 	a {
@@ -130,6 +130,10 @@ Header
 			opacity: 0.5;
 		}
 	}
+}
+
+.intro {
+	margin-top: 0;
 }
 
 
@@ -172,8 +176,6 @@ Footer
 			}
 		}
 	}
-
-	margin-top: 5rem !important;
 }
 
 
