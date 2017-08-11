@@ -135,8 +135,8 @@
         <!-- Footer -->
         <footer class="footer">
             <!-- Contact -->
-            <section class="parallax contact" data-parallax="scroll" data-speed="0.6" data-image-src="/resources/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
-                <div class="container">
+            <section class="parallax outro" data-parallax="scroll" data-speed="0.6" data-image-src="/resources/img/footer.jpg" data-natural-width="1920" data-natural-height="725" data-z-index="0">
+                <div class="container contact">
                     <div class="row">
                         <section class="col">
                             <h2>Get in touch</h2>
