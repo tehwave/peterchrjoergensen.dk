@@ -1,5 +1,6 @@
 // Gulp
 const gulp         = require('gulp'),
+      del          = require('del'),
       rev          = require('gulp-rev'),
       sass         = require('gulp-sass'),
       rename       = require('gulp-rename'),
@@ -8,7 +9,6 @@ const gulp         = require('gulp'),
       imagemin     = require('gulp-imagemin'),
       sourcemaps   = require('gulp-sourcemaps');
 
-      var del = require('del');
 
 // Variables
 const srcPath     = 'resources/src',
