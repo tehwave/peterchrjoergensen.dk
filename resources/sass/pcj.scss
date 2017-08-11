@@ -152,11 +152,16 @@ Footer
 .footer {
 	text-align: center;
 
-	.contact a {
-		margin-right: 1rem;
+	.contact {
+		padding-top: 5rem;
+		padding-bottom: 5rem;
 
-		&:last-child {
-			margin-right: 0;
+		a {
+			margin-right: 1rem;
+
+			&:last-child {
+				margin-right: 0;
+			}
 		}
 	}
 
@@ -235,14 +240,14 @@ Other
 			padding: 10rem 0;
 		}
 	}
+}
 
-	keyframes parallax {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+@keyframes parallax {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
 	}
 }
 
