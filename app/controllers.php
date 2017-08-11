@@ -15,14 +15,8 @@
  */
 class Controller
 {
-    public function __construct()
-    {
-        Flight::cache('layout');
-    }
-
     public static function home()
     {
-        Flight::cache('home');
         Flight::render('home', [], 'content');
 
         return Flight::render('layout', [
@@ -34,7 +28,6 @@ class Controller
 
     public static function cv()
     {
-        Flight::cache('cv');
         Flight::render('cv', [
             'educations' => [
                 [
@@ -97,7 +90,6 @@ class Controller
 
     public static function portfolio()
     {
-        Flight::cache('portfolio');
         Flight::render('portfolio', ['projects' => [
             'B2B Kolding' => [
                 'filters'       => ['website', 'company'],
