@@ -16,9 +16,7 @@ gulp.task('stylesheets', function() {
         .pipe(sourcemaps.init())
         .pipe(sass({
           outputStyle: 'compressed',
-          includePaths: [
-            'vendor/twbs/bootstrap/scss'
-          ]
+          includePaths: ['vendor/twbs/bootstrap/scss']
          }).on('error', sass.logError))
         .pipe(postcss([autoprefixer()]))
         .pipe(rename({suffix: '.min'}))
