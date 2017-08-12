@@ -221,7 +221,7 @@
                 </ul>
             </section>
         </div>
-        <div class="row mt-4">
+        <div class="row mt-2">
             <section class="col text-center">
                 <a href="https://github.com/tehwave" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">Find my skills at work on my GitHub profile</a>
             </section>
