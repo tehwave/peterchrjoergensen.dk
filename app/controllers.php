@@ -15,26 +15,19 @@
  */
 class Controller
 {
-    public function __construct()
-    {
-        Flight::cache('layout');
-    }
-
     public static function home()
     {
-        Flight::cache('home');
         Flight::render('home', [], 'content');
 
         return Flight::render('layout', [
             'title'         => 'Peter C. Jørgensen',
             'description'   => 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.',
-            'stylesheets'   => ['/resources/css/home.min.css'],
+            'scripts'       => ['/resources/js/lazysizes.min.js'],
         ]);
     }
 
     public static function cv()
     {
-        Flight::cache('cv');
         Flight::render('cv', [
             'educations' => [
                 [
@@ -91,13 +84,12 @@ class Controller
         return Flight::render('layout', [
             'title'         => 'Peter C. Jørgensen',
             'description'   => 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.',
-            'stylesheets'   => ['/resources/css/cv.min.css'],
+            'scripts'       => ['/resources/js/lazysizes.min.js'],
         ]);
     }
 
     public static function portfolio()
     {
-        Flight::cache('portfolio');
         Flight::render('portfolio', ['projects' => [
             'B2B Kolding' => [
                 'filters'       => ['website', 'company'],
@@ -166,11 +158,11 @@ class Controller
                 'button_url'    => 'https://www.youtube.com/watch?v=S0bQYYnhtGk',
             ],
             'Western World' => [
-                'filters'       => ['application', 'team'],
+                'filters'       => ['other', 'team'],
                 'image'         => 'western',
                 'image_format'  => 'jpg',
                 'title'         => 'Western World',
-                'tags'          => ['Application', 'Unity3D', 'Team'],
+                'tags'          => ['Other', 'Unity3D', 'Team'],
                 'lead'          => 'A small, atmospheric town, that was inspired by the good, old Western films, to explore around in.',
                 'paragraph'     => 'Made in Unity3D as a school project, it was meant to teach us the asset pipeline between Maya and Unity.',
                 'button_text'   => 'Watch the trailer',
@@ -199,11 +191,11 @@ class Controller
                 'button_url'    => 'https://www.youtube.com/watch?v=0U42shiUG2w',
             ],
             'Odense Golfklub' => [
-                'filters'       => ['application', 'team'],
+                'filters'       => ['other', 'team'],
                 'image'         => 'odensegolfklub',
                 'image_format'  => 'png',
                 'title'         => 'Odense Golfklub',
-                'tags'          => ['Application', 'Unity3D', 'Team'],
+                'tags'          => ['Other', 'Unity3D', 'Team'],
                 'lead'          => 'A mobile application for the members of Odense Golfklub with 360° imagery and 3D models of golf courses.',
                 'paragraph'     => 'Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.',
             ],
@@ -212,7 +204,6 @@ class Controller
         return Flight::render('layout', [
             'title'         => 'Peter C. Jørgensen',
             'description'   => 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.',
-            'stylesheets'   => ['/resources/css/portfolio.min.css'],
             'scripts'       => ['/resources/js/lazysizes.min.js', '/resources/js/mixitup.min.js', '/resources/js/portfolio.js'],
         ]);
     }

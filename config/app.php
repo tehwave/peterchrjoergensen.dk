@@ -8,14 +8,44 @@
 
 Flight::set('flight.views.path', 'resources/views');
 
-/*
-* Handles view caching.
-*
-* @param  string $view Name of view to cache
-*/
-// TODO: Move this somewhere else more appropriate.
-Flight::map('cache', function ($view) {
-    header('Cache-Control: public, max-age=31536000');
+/**
+ * @param string $filename
+ *
+ * @return string
+ */
+function asset_path($filename, $path = 'resources/')
+{
+    $manifest_path = 'resources/rev-manifest.json';
 
-    return Flight::lastModified(filemtime(sprintf('./%s/%s%s', Flight::get('flight.views.path'), $view, Flight::get('flight.views.extension'))));
-});
+    if (file_exists($manifest_path)) {
+        $manifest = json_decode(file_get_contents($manifest_path), true);
+    } else {
+        $manifest = [];
+    }
+
+    if (array_key_exists($filename, $manifest)) {
+        return $path.$manifest[$filename];
+    }
+
+    return $path.$filename;
+}
+
+/**
+ * @param string $filename
+ *
+ * @return string
+ */
+function css($filename)
+{
+    return asset_path($filename, '/resources/css/');
+}
+
+/**
+ * @param string $filename
+ *
+ * @return string
+ */
+function img($filename)
+{
+    return asset_path($filename, '/resources/img/');
+}

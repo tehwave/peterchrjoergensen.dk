@@ -14,21 +14,19 @@ https://peterchrjoergensen.dk
 
 ### Build
 
-The website uses Gulp to process CSS and images. Images should be placed in the `resources/src` folder if they are to be processed.
-
-1. Production
+Install the dependencies.
 
 ```
-npm run prod
+npm install
 ```
 
-2. Development
-
-The following command will watch for changes.
+Process and build assets.
 
 ```
-npm run dev
+npm run build
 ```
+
+Images and stylesheets should be placed in their respective folders in the `resources/src` directory if they are to be processed.
 
 ### Deployment
 
@@ -53,7 +51,7 @@ In addition, you must also change the reference to HTTPS in `RedirectMatch 301 ^
 
 ## Development
 
-The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library and SASS CSS extension language.
+The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library, Bootstrap front-end component library and SASS CSS extension language.
 
 For more information on how I developed the website, please visit [my blog](https://blog.peterchrjoergensen.dk).
 
