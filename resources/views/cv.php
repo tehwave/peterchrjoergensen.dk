@@ -264,7 +264,7 @@
                 <strong>Drivers License</strong>
             </section>
             <section class="col-10">
-                <p>Yes. Danish Type B.</p>
+                <p>Yes. Type B.</p>
             </section>
         </div>
     </div>
