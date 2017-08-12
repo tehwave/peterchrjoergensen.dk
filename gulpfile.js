@@ -19,43 +19,44 @@ const srcPath     = 'resources/src',
 
 // Tasks
 gulp.task('stylesheets:clean', function() {
-  return del([cssPath + '/**/*']);
+  del([cssPath + '/**/*']);
 });
 
 gulp.task('stylesheets:process', function() {
-    gulp.src(sassPath)
-        .pipe(sourcemaps.init())
-        .pipe(sass({
-          outputStyle: 'compressed',
-          includePaths: ['vendor/twbs/bootstrap/scss']
-         }).on('error', sass.logError))
-        .pipe(postcss([autoprefixer()]))
-        .pipe(rename({suffix: '.min'}))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(srcPath + '/sass/'));
+  return gulp.src(sassPath)
+    .pipe(sourcemaps.init())
+    .pipe(sass({
+      outputStyle: 'compressed',
+      includePaths: ['vendor/twbs/bootstrap/scss']
+    }).on('error', sass.logError))
+    .pipe(postcss([autoprefixer()]))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(srcPath + '/sass/'))
+    .pipe(gulp.dest(srcPath + '/css/'));
 });
 
 gulp.task('stylesheets:copy', function() {
-    gulp.src(srcPath + '/css/**/*')
-        .pipe(gulp.dest(cssPath));
+  return gulp.src(srcPath + '/css/**/*')
+    .pipe(gulp.dest(cssPath));
 });
 
 gulp.task('stylesheets:revision', function () {
-  gulp.src(srcPath + '/sass/*.css')
-      .pipe(rev())
-      .pipe(gulp.dest(cssPath))
-      .pipe(rev.manifest())
-      .pipe(gulp.dest('resources'));
+  return gulp.src(srcPath + '/sass/*.css')
+    .pipe(rev())
+    .pipe(gulp.dest(cssPath))
+    .pipe(rev.manifest())
+    .pipe(gulp.dest('resources'));
 });
 
 gulp.task('images', function() {
-    gulp.src(srcPath + '/img/**/*')
-        .pipe(imagemin())
-        .pipe(gulp.dest(imgPath));
+  return gulp.src(srcPath + '/img/**/*')
+    .pipe(imagemin())
+    .pipe(gulp.dest(imgPath));
 });
 
 
 // Scripts
 gulp.task('default', function() {
-    gulp.start('stylesheets:clean', 'stylesheets:copy', 'stylesheets:process', 'stylesheets:revision', 'images');
+    gulp.start('stylesheets:clean', ['stylesheets:copy', 'stylesheets:process', 'stylesheets:revision', 'images']);
 });
