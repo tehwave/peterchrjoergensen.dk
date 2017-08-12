@@ -8,10 +8,10 @@
 
 Flight::set('flight.views.path', 'resources/views');
 
-
 /**
  * @param  string  $filename
  * @return string
+ *
  */
 function asset_path($filename, $path = 'resources/')
 {
@@ -24,15 +24,16 @@ function asset_path($filename, $path = 'resources/')
     }
 
     if (array_key_exists($filename, $manifest)) {
-        return $path . $manifest[$filename];
+        return $path.$manifest[$filename];
     }
 
-    return $path . $filename;
+    return $path.$filename;
 }
 
 /**
  * @param  string  $filename
  * @return string
+ *
  */
 function css($filename)
 {
@@ -42,6 +43,7 @@ function css($filename)
 /**
  * @param  string  $filename
  * @return string
+ *
  */
 function img($filename)
 {
