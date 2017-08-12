@@ -14,13 +14,19 @@ https://peterchrjoergensen.dk
 
 ### Build
 
-The website uses Gulp to proces and build assets.
+Install the dependencies.
+
+```
+npm install
+```
+
+Process and build assets.
 
 ```
 npm run prod
 ```
 
-Images and CSS should be placed in their respective folders in the `resources/src` directory if they are to be processed.
+Images and stylesheets should be placed in their respective folders in the `resources/src` directory if they are to be processed.
 
 ### Deployment
 
