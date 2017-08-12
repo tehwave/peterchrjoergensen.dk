@@ -51,7 +51,7 @@ In addition, you must also change the reference to HTTPS in `RedirectMatch 301 ^
 
 ## Development
 
-The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library and SASS CSS extension language.
+The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library, Bootstrap front-end component library and SASS CSS extension language.
 
 For more information on how I developed the website, please visit [my blog](https://blog.peterchrjoergensen.dk).
 
