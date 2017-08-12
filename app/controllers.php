@@ -84,7 +84,7 @@ class Controller
         return Flight::render('layout', [
             'title'         => 'Peter C. Jørgensen',
             'description'   => 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.',
-            'stylesheets'   => ['/resources/css/cv.min.css'],
+            'scripts'       => ['/resources/js/lazysizes.min.js'],
         ]);
     }
 
