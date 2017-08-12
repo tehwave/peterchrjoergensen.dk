@@ -9,9 +9,9 @@
 Flight::set('flight.views.path', 'resources/views');
 
 /**
-  * @param string $filename
-  *
-  * @return string
+ * @param string $filename
+ *
+ * @return string
  */
 function asset_path($filename, $path = 'resources/')
 {
@@ -31,9 +31,9 @@ function asset_path($filename, $path = 'resources/')
 }
 
 /**
-  * @param string $filename
-  *
-  * @return string
+ * @param string $filename
+ *
+ * @return string
  */
 function css($filename)
 {
@@ -41,9 +41,9 @@ function css($filename)
 }
 
 /**
-  * @param string $filename
-  *
-  * @return string
+ * @param string $filename
+ *
+ * @return string
  */
 function img($filename)
 {
