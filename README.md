@@ -14,7 +14,7 @@ https://peterchrjoergensen.dk
 
 ### Build
 
-The website uses Gulp to process CSS and images.
+The website uses Gulp to proces and build assets.
 
 ```
 npm run prod
