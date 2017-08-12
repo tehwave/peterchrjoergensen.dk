@@ -4,7 +4,7 @@
   "description": "The personal website of Peter C. Jørgensen.",
   "main": "index.php",
   "scripts": {
-    "prod": "gulp --production",
+    "build": "gulp --production",
     "clean": "gulp stylesheets:clean"
   },
   "repository": {

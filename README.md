@@ -23,7 +23,7 @@ npm install
 Process and build assets.
 
 ```
-npm run prod
+npm run build
 ```
 
 Images and stylesheets should be placed in their respective folders in the `resources/src` directory if they are to be processed.
