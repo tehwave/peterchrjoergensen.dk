@@ -24,10 +24,10 @@
             <div class="row">
                 <section class="col">
                     <a href="/resources/files/CV-Peter-Christian-Jørgensen-English.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                        Download &nbsp; (English <img src="/resources/img/english.png" width="16"> )
+                        Download &nbsp; (English <img src="/resources/img/english.png" width="20" class="align-baseline"> )
                     </a>
                     <a href="/resources/files/CV-Peter-Christian-Jørgensen-Dansk.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                        Download &nbsp; (Dansk <img src="/resources/img/dansk.png" width="16"> )
+                        Download &nbsp; (Dansk <img src="/resources/img/dansk.png" width="20" class="align-baseline"> )
                     </a>
                 </section>
             </div>
@@ -261,7 +261,7 @@
         </div>
         <div class="row">
             <section class="col-2">
-                <strong>Drivers License</strong>
+                <strong>Driver's License</strong>
             </section>
             <section class="col-10">
                 <p>Yes. Type B.</p>
