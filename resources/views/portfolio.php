@@ -13,7 +13,7 @@
         data-speed="0.6"
         data-image-src="<?php echo img('portfolio.jpg') ?>"
         data-natural-width="1920"
-        data-natural-height="1080"
+        data-natural-height="1282"
         data-z-index="0"
     >
         <div class="container">
