@@ -10,9 +10,9 @@
     <section class="parallax intro"
         data-parallax="scroll"
         data-speed="0.6"
-        data-image-src="/resources/img/home.jpg"
+        data-image-src="/resources/img/cv.jpg"
         data-natural-width="1920"
-        data-natural-height="1080"
+        data-natural-height="1277"
         data-z-index="0"
     >
         <div class="container">
