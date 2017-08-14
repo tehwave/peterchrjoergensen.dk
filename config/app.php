@@ -10,6 +10,7 @@ Flight::set('flight.views.path', 'resources/views');
 
 /**
  * @param string $filename
+ * @param string $path
  *
  * @return string
  */
