@@ -1,3 +1,6 @@
+# FIXME: Bug where http:// links are routed to peterchrjoergensen.dk/index.php
+# Reproduce by localhost'ing the blog, and seting nav links to http://
+
 RewriteEngine On
 
 # -- Redirect blog urls
