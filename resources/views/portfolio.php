@@ -20,7 +20,7 @@
             <div class="row">
                 <section class="col">
                     <h2 class="h1">Portfolio</h2>
-                    <p>Throughout the years, I have accumulated various <b>ambitious</b> <b>and creative</b> projects, including <b>applications</b>, <b>games</b> and <b>websites.</b></p>
+                    <p>Throughout the years, I have accumulated various <b>ambitious</b> and <b>creative</b> projects, including <b>applications</b>, <b>games</b> and <b>websites.</b></p>
                     <p>I have worked on <b>full-fledged projects</b>, in <b>collaborative teams</b>, and with <b>reputable companies.</b></p>
                 </section>
             </div>
