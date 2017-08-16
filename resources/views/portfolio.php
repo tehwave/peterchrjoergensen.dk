@@ -81,7 +81,7 @@
                             <p class="card-text">
                             <?php
                             foreach ($project['tags'] as $tag) {
-                                echo '<span class="badge badge-light">'.$tag."</span>\r\n";
+                                echo '<span class="badge badge-pcj">'.$tag."</span>\r\n";
                             }
                             ?>
                             </p>
