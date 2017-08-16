@@ -78,7 +78,7 @@
                     <div class="card-body">
                         <h2 class="card-title">B2B Kolding</h2>
                         <p class="card-text">A custom Wordpress website for a local trade fair</p>
-                        <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Take a look</a>
+                        <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Check it out</a>
                     </div>
                 </div>
             </section>
@@ -96,7 +96,7 @@
                     <div class="card-body">
                         <h2 class="card-title">GM48</h2>
                         <p class="card-text">A quarterly 48 hours GameMaker game jam</p>
-                        <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Visit the website</a>
+                        <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Check it out</a>
                     </div>
                 </div>
             </section>
