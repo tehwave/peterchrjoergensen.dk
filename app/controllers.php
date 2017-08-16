@@ -47,8 +47,8 @@ class Controller
                     'title'   => 'Student Assistant',
                     'company' => 'Grundfos',
                     'summary' => [
-                        'I worked on a web application intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
-                        'Source code can be found on <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a>',
+                        'I designed and developed a web application intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
+                        'Source code located on my <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a> page.',
                     ],
                 ],
                 [
@@ -56,8 +56,9 @@ class Controller
                     'title'   => 'Intern',
                     'company' => 'B2B Kolding',
                     'summary' => [
-                        'I worked on the design and development of the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
-                        'I was responsible for marketing the trade fair by, for example, making the marketing plan, as well as via research, finding out what worked best in relation to our target group and budget, and I also examined the competitors. In addition, I shot several short video commercials for distribution on SoMe.',
+                        'I designed and developed the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
+                        'I was responsible for marketing the trade fair by drafting the marketing plan as well as finding out via research what worked best in relation to the target group and limited budget.',
+                        'In addition, I shot several short video commercials for distribution on SoMe.',
                         'Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>',
                     ],
                 ],
@@ -66,7 +67,8 @@ class Controller
                     'title'   => 'Community Manager',
                     'company' => 'Reddit',
                     'summary' => [
-                        'I volunteered to help maintain the day-to-day of the subreddit <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas. In addition, I composed plans to increase growth, and approached interesting and relevant people to host Ask-Me-Anything (AMAs) on the subreddit.',
+                        'I volunteered to help maintain the day-to-day of the forum <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas.',
+                        'In addition, I composed plans to increase growth, and approached interesting & relevant people to host Ask-Me-Anything (AMAs) on the forum.',
                         'The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.',
                     ],
                 ],
