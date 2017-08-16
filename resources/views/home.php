@@ -95,7 +95,7 @@
                     />
                     <div class="card-body">
                         <h2 class="card-title">GM48</h2>
-                        <p class="card-text">A quarterly 48 hours GameMaker game jam</p>
+                        <p class="card-text">A website for a games development competition</p>
                         <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Check it out</a>
                     </div>
                 </div>
