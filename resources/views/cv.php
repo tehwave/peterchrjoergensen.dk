@@ -241,8 +241,9 @@
                     <img src="/resources/img/peter.jpg" class="img-fluid rounded-circle">
             </section>
             <section class="col-8">
-                <p class="lead">I am a resourceful and creative young Danish man with lots of energy and a go-getter attitude.
-                <p>I love to learn new stuff, and I strive to keep myself updated with the latest in the industry.</p>
+                <p class="lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
+                <p>I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
+                <p>I love to learn new things, and I strive to keep myself up to date with the industry.</p>
                 <p>I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
             </section>
         </div>
