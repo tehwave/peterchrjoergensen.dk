@@ -185,7 +185,7 @@
                     <li class="badge badge-pcj badge-lg">Web Development</li>
                     <li class="badge badge-pcj badge-lg">Bootstrap</li>
                     <li class="badge badge-pcj badge-lg">Laravel</li>
-                    <li class="badge badge-pcj badge-lg">Fpcj</li>
+                    <li class="badge badge-pcj badge-lg">Flight</li>
                     <li class="badge badge-pcj badge-lg">Gulp</li>
                     <li class="badge badge-pcj badge-lg">npm</li>
                     <li class="badge badge-pcj badge-lg">JavaScript</li>
