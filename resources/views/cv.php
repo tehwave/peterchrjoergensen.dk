@@ -186,15 +186,22 @@
                     <li class="badge badge-pcj badge-lg">Bootstrap</li>
                     <li class="badge badge-pcj badge-lg">Laravel</li>
                     <li class="badge badge-pcj badge-lg">Flight</li>
+                    <li class="badge badge-pcj badge-lg">MVC</li>
+                    <li class="badge badge-pcj badge-lg">Nginx</li>
+                    <li class="badge badge-pcj badge-lg">Apache</li>
+                    <li class="badge badge-pcj badge-lg">MySQL</li>
+                    <li class="badge badge-pcj badge-lg">PHP</li>
+                    <li class="badge badge-pcj badge-lg">JQuery</li>
+                    <li class="badge badge-pcj badge-lg">AJAX</li>
                     <li class="badge badge-pcj badge-lg">Gulp</li>
                     <li class="badge badge-pcj badge-lg">npm</li>
                     <li class="badge badge-pcj badge-lg">JavaScript</li>
                     <li class="badge badge-pcj badge-lg">CSS</li>
                     <li class="badge badge-pcj badge-lg">SASS</li>
                     <li class="badge badge-pcj badge-lg">HTML</li>
-                    <li class="badge badge-pcj badge-lg">PHP</li>
                     <li class="badge badge-pcj badge-lg">SQL</li>
                     <li class="badge badge-pcj badge-lg">SEO</li>
+                    <li class="badge badge-pcj badge-lg">REST</li>
                 </ul>
                 <ul class="pl-0">
                     <li class="badge badge-pcj badge-lg">Game Development</li>
@@ -218,6 +225,10 @@
                     <li class="badge badge-pcj badge-lg">Gamification</li>
                     <li class="badge badge-pcj badge-lg">YouTube Partnership</li>
                     <li class="badge badge-pcj badge-lg">SoMe</li>
+                    <li class="badge badge-pcj badge-lg">GitHub</li>
+                    <li class="badge badge-pcj badge-lg">Git</li>
+                    <li class="badge badge-pcj badge-lg">JSON</li>
+                    <li class="badge badge-pcj badge-lg">XML</li>
                 </ul>
             </section>
         </div>
