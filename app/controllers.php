@@ -148,6 +148,17 @@ class Controller
                 'button_text'   => 'Check it out',
                 'button_url'    => '/FIRKANT',
             ],
+            'Lennarth Hansen' => [
+                'filters'       => ['other', 'solo'],
+                'image'         => 'lennarthhansen',
+                'image_format'  => 'png',
+                'title'         => 'Lennarth Hansen',
+                'tags'          => ['Other', 'Adobe Creative Suite', 'Solo'],
+                'lead'          => 'Lennarth Hansen is a local politician in Kolding.',
+                'paragraph'     => 'I have been contracted to create graphic designs, e.g. stickers and posters, for his campaign as well as help manage his Facebook-page.',
+                'button_text'   => 'Check it out',
+                'button_url'    => 'https://www.facebook.com/stemlennarth/',
+            ],
             'The Author' => [
                 'filters'       => ['video', 'team'],
                 'image'         => 'author',
