@@ -108,5 +108,23 @@
                 <a href="/portfolio" class="btn btn-outline-link btn-lg">Browse my portfolio for more projects</a>
             </section>
         </div>
+        <div class="row mt-5">
+            <section class="col">
+                <h3>Latest posts from my blog</h3>
+                <hr>
+            </section>
+        </div>
+        <div class="row" id="wp-posts">
+            <section class="col-12  mb-3 text-center" id="wp-posts-loading">
+                <img src="/resources/img/loading.svg">
+            </section>
+        </div>
+        <div class="row">
+            <section class="col text-center">
+                <a href="/blog" class="btn btn-outline-link btn-lg">Visit my blog for more posts</a>
+            </section>
+        </div>
     </div>
 </main>
+
+
