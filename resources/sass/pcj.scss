@@ -98,6 +98,21 @@ Other
 	}
 }
 
+#wp-posts-loading img {
+    transform: rotate(90deg);
+    animation: spinner 2s linear infinite;
+    will-change: transform;
+}
+
+@keyframes spinner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
 button.mixitup-control-active {
 	&, &:hover, &:active, &:focus {
 		background-color: $blue;
