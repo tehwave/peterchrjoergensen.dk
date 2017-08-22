@@ -15,5 +15,6 @@ jQuery(document).ready(function($) {
                 '</article>'
             );
         });
+        jQuery(window).trigger('resize').trigger('scroll');
     });
 });
