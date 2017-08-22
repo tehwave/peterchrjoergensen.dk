@@ -13,6 +13,3 @@
 Flight::route('/', ['Controller', 'home']);
 Flight::route('/cv', ['Controller', 'cv']);
 Flight::route('/portfolio', ['Controller', 'portfolio']);
-Flight::route('/index.php', function () {
-    Flight::redirect('/');
-});

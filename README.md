@@ -38,17 +38,6 @@ git pull origin master
 
 Composer is not currently available on my hosting service, so I include the `vendor` directory.
 
-### HTTPS
-
-If HTTPS is not supported, you must set `RewriteCond %{HTTPS} !on` to `!off` in the following lines from the `.htaccess` file.
-
-```
-RewriteCond %{HTTPS} !on
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-```
-
-In addition, you must also change the reference to HTTPS in `RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1` to redirect correctly to `http://` if above holds true.
-
 ## Development
 
 The website is developed using Flight PHP framework, Composer PHP dependency manager, Gulp building toolkit, JQuery JavaScript library, Bootstrap front-end component library and SASS CSS extension language.

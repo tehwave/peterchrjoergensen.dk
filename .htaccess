@@ -1,23 +1,16 @@
-# FIXME: Bug where http:// links are routed to peterchrjoergensen.dk/index.php
-# Reproduce by localhost'ing the blog, and seting nav links to http://
+
 
 RewriteEngine On
 
 # -- Redirect blog urls
 
-RewriteBase /
-RedirectMatch 301 ^/blog/(.*)$ https://blog.peterchrjoergensen.dk/$1
+RewriteCond %{HTTP_HOST} !^blog\.peterchrjoergensen\.dk$ [NC]
+RewriteRule ^blog/$ %{REQUEST_SCHEME}://blog.peterchrjoergensen.dk/$1 [L,NC,R=301]
+
+
 
 # -- Rewrite to index.php
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
-
-# -- Rewrite to non-www and HTTPS
-
-RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
-
-RewriteCond %{HTTPS} !on
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
