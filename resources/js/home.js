@@ -1,8 +1,8 @@
 jQuery(document).ready(function($) {
     $.get("https://blog.peterchrjoergensen.dk/wp-json/wp/v2/posts?per_page=3", function( data ) {
-        $('#wp-posts-loadinga').remove();
+        $('#wp-posts-loading').remove();
         $.each(data, function(i, post) {
-            $( "#wp-postsa").append(
+            $( "#wp-posts").append(
                 '<article class="col-4">' +
                     '<h1 class="h4">' +
                         '<a href="' + post.link + '">' +
