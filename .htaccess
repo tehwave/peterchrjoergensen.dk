@@ -1,5 +1,10 @@
 RewriteEngine On
 
+# -- Redirect blog urls
+
+RewriteBase /
+RedirectMatch 301 ^/blog/(.*)$ http://blog.peterchrjoergensen.dk/$1
+
 # -- Rewrite to index.php
 
 RewriteCond %{REQUEST_FILENAME} !-f
