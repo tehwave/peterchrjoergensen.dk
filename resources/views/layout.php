@@ -110,7 +110,7 @@
             <nav class="row">
                 <section class="col-12 col-sm-3"><a href="/cv" title="Peter's Curriculum Vitae">C.V.</a></section>
                 <section class="col-12 col-sm-3"><a href="/portfolio" title="Peter's Portfolio">Portfolio</a></section>
-                <section class="col-12 col-sm-3"><a href="/blog/" title="Peter's Blog">Blog</a></section>
+                <section class="col-12 col-sm-3"><a href="//blog.peterchrjoergensen.dk" title="Peter's Blog">Blog</a></section>
                 <!-- Social -->
                 <section class="col-12 col-sm-3">
                     <a href="mailto:hello@peterchrjoergensen.dk?subject=Hello" target="_top" class="icon" title="Send Peter an email">

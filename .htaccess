@@ -1,13 +1,4 @@
-
-
 RewriteEngine On
-
-# -- Redirect blog urls
-
-RewriteCond %{HTTP_HOST} !^blog\.peterchrjoergensen\.dk$ [NC]
-RewriteRule ^blog/$ %{REQUEST_SCHEME}://blog.peterchrjoergensen.dk/$1 [L,NC,R=301]
-
-
 
 # -- Rewrite to index.php
 
