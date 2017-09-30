@@ -38,7 +38,7 @@
     </div>
     <div class="container-fluid">
         <div class="row">
-            <section class="col-12 col-md-8 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 ml-xl-auto mb-4">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 ml-xl-auto mb-4">
                 <div class="card">
                     <noscript>
                         <img
@@ -60,7 +60,7 @@
                     </div>
                 </div>
             </section>
-            <section class="col-12 col-md-8 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mb-4">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mb-4">
                 <div class="card">
                     <noscript>
                         <img
@@ -82,7 +82,7 @@
                     </div>
                 </div>
             </section>
-            <section class="col-12 col-md-8 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mr-xl-auto mb-4">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mr-xl-auto mb-4">
                 <div class="card">
                     <noscript>
                         <img class="card-img-top" src="<?php echo img('gm48.png') ?>" alt="GM48"/>
