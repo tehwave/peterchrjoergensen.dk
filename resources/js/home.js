@@ -3,7 +3,7 @@ jQuery(document).ready(function($) {
         $('#wp-posts-loading').remove();
         $.each(data, function(i, post) {
             $( "#wp-posts").append(
-                '<article class="col-4">' +
+                '<article class="col-12 col-md-6 col-lg-4">' +
                     '<h1 class="h4">' +
                         '<a href="' + post.link + '">' +
                             post.title.rendered +
