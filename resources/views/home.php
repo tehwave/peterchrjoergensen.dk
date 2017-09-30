@@ -105,7 +105,7 @@
     <div class="container">
         <div class="row">
             <section class="col mt-5 text-center">
-                <a href="/portfolio" class="btn btn-outline-link btn-lg">Browse my portfolio for more projects</a>
+                <a href="/portfolio" class="btn btn-outline-link btn-lg">Browse my portfolio</a>
             </section>
         </div>
         <div class="row mt-5">
@@ -121,7 +121,7 @@
         </div>
         <div class="row">
             <section class="col text-center">
-                <a href="/blog" class="btn btn-outline-link btn-lg">Visit my blog for more posts</a>
+                <a href="/blog" class="btn btn-outline-link btn-lg">Visit my blog</a>
             </section>
         </div>
     </div>
