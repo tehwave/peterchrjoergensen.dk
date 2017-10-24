@@ -17,5 +17,5 @@
 *.RTF	 diff=astextplain
 
 # Ignore Vendor Directory
-/vendor/ export-ignore
-/vendor/* linguist-vendored
+vendor/ export-ignore
+vendor/* linguist-vendored
