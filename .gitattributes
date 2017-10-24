@@ -18,3 +18,4 @@
 
 # Ignore Vendor Directory
 /vendor/ export-ignore
+/vendor/* linguist-vendored
