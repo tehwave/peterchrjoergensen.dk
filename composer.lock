@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9013fc509375b9298f6e182ae54f7172",
-    "content-hash": "339ffed83040aa6984d6c9119f53ed83",
+    "content-hash": "42277b8aa3d62d9c6c866f3af40cd0f7",
     "packages": [
         {
             "name": "mikecao/flight",
@@ -48,20 +47,20 @@
             ],
             "description": "Flight is a fast, simple, extensible framework for PHP. Flight enables you to quickly and easily build RESTful web applications.",
             "homepage": "http://flightphp.com",
-            "time": "2017-07-19 18:44:21"
+            "time": "2017-07-19T18:44:21+00:00"
         },
         {
             "name": "twbs/bootstrap",
-            "version": "v4.0.0-beta",
+            "version": "v4.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twbs/bootstrap.git",
-                "reference": "35f80bb12e4e71fd777ee60ffa43711d8f84b1a6"
+                "reference": "fc94de5b8b5b329a298eeeb76174b146ff17af2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twbs/bootstrap/zipball/35f80bb12e4e71fd777ee60ffa43711d8f84b1a6",
-                "reference": "35f80bb12e4e71fd777ee60ffa43711d8f84b1a6",
+                "url": "https://api.github.com/repos/twbs/bootstrap/zipball/fc94de5b8b5b329a298eeeb76174b146ff17af2d",
+                "reference": "fc94de5b8b5b329a298eeeb76174b146ff17af2d",
                 "shasum": ""
             },
             "replace": {
@@ -99,7 +98,7 @@
                 "sass",
                 "web"
             ],
-            "time": "2017-08-11 03:56:35"
+            "time": "2017-10-19T19:23:29+00:00"
         }
     ],
     "packages-dev": [],
