@@ -138,10 +138,10 @@
             <section class="parallax outro" data-parallax="scroll" data-speed="0.6" data-image-src="<?php echo img('footer.jpg') ?>" data-natural-width="1920" data-natural-height="725" data-z-index="0">
                 <div class="container contact">
                     <div class="row">
-                        <section class="col">
+                        <section class="col-12 mb-4 col-lg mb-lg-0">
                             <h2 class="h1">Get in touch</h2>
                         </section>
-                        <section class="col">
+                        <section class="col-12 col-lg">
                             <a href="mailto:hello@peterchrjoergensen.dk?subject=Hello" target="_top" title="Send Peter an email">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="#fff"><path data-color="color-2" d="M45 5H3c-1.1 0-2 .9-2 2v6c0 .37.2.7.52.88l22 12c.15.08.32.12.48.12s.33-.04.48-.12l22-12c.32-.18.52-.5.52-.88V7c0-1.1-.9-2-2-2z"/><path d="M25.44 27.63c-.45.24-.94.37-1.44.37s-1-.13-1.43-.36L1.02 15.88 1 15.9V41c0 1.1.9 2 2 2h42c1.1 0 2-.9 2-2V15.9l-.02-.02-21.54 11.75z"/></g></svg>
                             </a>
