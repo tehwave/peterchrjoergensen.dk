@@ -138,7 +138,7 @@
             <section class="parallax outro" data-parallax="scroll" data-speed="0.6" data-image-src="<?php echo img('footer.jpg') ?>" data-natural-width="1920" data-natural-height="725" data-z-index="0">
                 <div class="container contact">
                     <div class="row">
-                        <section class="col-12 mb-4 col-lg mb-lg-0">
+                        <section class="col-12 mb-4  col-lg mb-lg-0">
                             <h2 class="h1">Get in touch</h2>
                         </section>
                         <section class="col-12 col-lg">
@@ -159,7 +159,7 @@
             <div class="container copyright">
                 <div class="row">
                     <p class="col">
-                        Designed and developed by Peter 'tehwave' Jørgensen via <a href="https://github.com/tehwave/peterchrjoergensen.dk" target="_blank" rel="noopener">GitHub</a>.
+                        Designed and developed by Peter 'tehwave' Jørgensen on <a href="https://github.com/tehwave/peterchrjoergensen.dk" target="_blank" rel="noopener">GitHub</a>
                     </p>
                 </div>
             </div>
