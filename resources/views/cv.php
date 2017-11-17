@@ -283,7 +283,7 @@
                 <strong>Driver's License</strong>
             </section>
             <section class="col-12 col-lg-8">
-                <p>Yes. Type B.</p>
+                <p>Type B</p>
             </section>
         </div>
     </div>
