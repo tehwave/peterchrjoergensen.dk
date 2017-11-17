@@ -108,11 +108,11 @@
 
             <!-- Navigation -->
             <nav class="row">
-                <section class="col-12 col-sm-3"><a href="/cv" title="Peter's Curriculum Vitae">C.V.</a></section>
-                <section class="col-12 col-sm-3"><a href="/portfolio" title="Peter's Portfolio">Portfolio</a></section>
-                <section class="col-12 col-sm-3"><a href="//blog.peterchrjoergensen.dk" title="Peter's Blog">Blog</a></section>
+                <section class="col-12 col-sm-6 col-md"><a href="/cv" title="Peter's Curriculum Vitae">C.V.</a></section>
+                <section class="col-12 col-sm-6 col-md"><a href="/portfolio" title="Peter's Portfolio">Portfolio</a></section>
+                <section class="col-12 col-sm-6 col-md"><a href="//blog.peterchrjoergensen.dk" title="Peter's Blog">Blog</a></section>
                 <!-- Social -->
-                <section class="col-12 col-sm-3">
+                <section class="col-12 col-sm-6 col-md">
                     <a href="mailto:hello@peterchrjoergensen.dk?subject=Hello" target="_top" class="icon" title="Send Peter an email">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path data-color="color-2" d="M15 1H1c-.6 0-1 .4-1 1v1.4l8 4.5 8-4.4V2c0-.6-.4-1-1-1z"/><path d="M7.5 9.9L0 5.7V14c0 .6.4 1 1 1h14c.6 0 1-.4 1-1V5.7L8.5 9.9c-.28.14-.72.14-1 0z"/></svg>
                     </a>
