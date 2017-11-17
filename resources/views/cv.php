@@ -43,14 +43,14 @@
             </section>
         </div>
         <?php foreach ($educations as $education) : ?>
-            <div class="row">
-                <section class="col-2">
+            <div class="row mb-4">
+                <section class="col-12 col-lg-2">
                     <?php echo $education['date'] ?>
                 </section>
-                <section class="col-8">
+                <section class="col-12 col-lg-8">
                     <h3>
                         <?php echo $education['title'] ?>
-                        <small><?php echo $education['school'] ?></small>
+                        <small class="d-block d-lg-inline-block"><?php echo $education['school'] ?></small>
                     </h3>
                 </section>
             </div>
@@ -66,14 +66,14 @@
             </section>
         </div>
         <?php foreach ($experiences as $experience) : ?>
-            <div class="row">
-                <section class="col-2">
+            <div class="row mb-4">
+                <section class="col-12 col-lg-2">
                     <?php echo $experience['date'] ?>
                 </section>
-                <section class="col-8">
+                <section class="col-12 col-lg-8">
                     <h3>
                         <?php echo $experience['title'] ?>
-                        <small><?php echo $experience['company'] ?></small>
+                        <small class="d-block d-lg-inline-block"><?php echo $experience['company'] ?></small>
                     </h3>
                     <?php foreach ($experience['summary'] as $summary) : ?>
                         <p>
@@ -250,10 +250,10 @@
             </section>
         </div>
         <div class="row">
-            <section class="col-2">
+            <section class="d-none d-lg-block col-lg-2">
                     <img src="/resources/img/peter.jpg" class="img-fluid rounded-circle">
             </section>
-            <section class="col-8">
+            <section class="col-12 col-lg-8">
                 <p class="lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
                 <p>I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
                 <p>I love to learn new things, and I strive to keep myself up to date with the industry.</p>
@@ -271,18 +271,18 @@
             </section>
         </div>
         <div class="row">
-            <section class="col-2">
+            <section class="col-12 col-lg-2">
                 <strong>Nationality</strong>
             </section>
-            <section class="col-10">
+            <section class="col-12 col-lg-8">
                 <p>Danish</p>
             </section>
         </div>
         <div class="row">
-            <section class="col-2">
+            <section class="col-12 col-lg-2">
                 <strong>Driver's License</strong>
             </section>
-            <section class="col-10">
+            <section class="col-12 col-lg-8">
                 <p>Yes. Type B.</p>
             </section>
         </div>
