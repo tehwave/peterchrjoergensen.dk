@@ -92,15 +92,17 @@
 
 
     <!-- Projects -->
-    <div class="container mb-5">
+    <div class="container">
         <div class="row">
             <section class="col">
                 <h3 class="h2">Projects</h3>
                 <hr>
             </section>
         </div>
-        <div class="row">
-            <section class="col-12 col-sm-4">
+    </div>
+    <div class="container-fluid mb-5">
+       <div class="row">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 ml-xl-auto mb-4">
                 <div class="card">
                     <noscript>
                         <img
@@ -122,7 +124,7 @@
                     </div>
                 </div>
             </section>
-            <section class="col-12 col-sm-4">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mb-4">
                 <div class="card">
                     <noscript>
                         <img
@@ -140,11 +142,11 @@
                     <div class="card-body">
                         <h2 class="card-title">B2B Kolding</h2>
                         <p class="card-text">A custom Wordpress website for a local trade fair</p>
-                        <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Take a look</a>
+                        <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Check it out</a>
                     </div>
                 </div>
             </section>
-            <section class="col-12 col-sm-4">
+            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mr-xl-auto mb-4">
                 <div class="card">
                     <noscript>
                         <img class="card-img-top" src="<?php echo img('gm48.png') ?>" alt="GM48"/>
@@ -157,8 +159,8 @@
                     />
                     <div class="card-body">
                         <h2 class="card-title">GM48</h2>
-                        <p class="card-text">A quarterly 48 hours GameMaker game jam</p>
-                        <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Visit the website</a>
+                        <p class="card-text">A games development competition</p>
+                        <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Check it out</a>
                     </div>
                 </div>
             </section>
