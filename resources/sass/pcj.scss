@@ -81,11 +81,7 @@ Other
 	background: $bluegray;
 
 	.container {
-		padding: 8rem 20px;
-
-		@media (min-width: 400px) {
-			padding: 8rem 0;
-		}
+		padding: 8rem 15px;
 	}
 }
 
