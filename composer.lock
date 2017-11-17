@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "mikecao/flight",
-            "version": "v1.3.3",
+            "version": "v1.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mikecao/flight.git",
-                "reference": "1c8d06cc42dcb04355984d561ce9fbbcf0bb9ef7"
+                "reference": "e146b8c0ddbc6384c5a66f23dea71743fc282289"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mikecao/flight/zipball/1c8d06cc42dcb04355984d561ce9fbbcf0bb9ef7",
-                "reference": "1c8d06cc42dcb04355984d561ce9fbbcf0bb9ef7",
+                "url": "https://api.github.com/repos/mikecao/flight/zipball/e146b8c0ddbc6384c5a66f23dea71743fc282289",
+                "reference": "e146b8c0ddbc6384c5a66f23dea71743fc282289",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
             ],
             "description": "Flight is a fast, simple, extensible framework for PHP. Flight enables you to quickly and easily build RESTful web applications.",
             "homepage": "http://flightphp.com",
-            "time": "2017-07-19T18:44:21+00:00"
+            "time": "2017-10-20T01:46:56+00:00"
         },
         {
             "name": "twbs/bootstrap",
