@@ -83,9 +83,9 @@
                 </section>
             </div>
         <?php endforeach; ?>
-        <div class="row mt-4">
+        <div class="row mt-3">
             <section class="col text-center">
-                <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">See more on my LinkedIn profile</a>
+                <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">Learn more</a>
             </section>
         </div>
     </div>
@@ -165,9 +165,9 @@
                 </div>
             </section>
         </div>
-        <div class="row mt-4">
+        <div class="row mt-3">
             <section class="col text-center">
-                <a href="/portfolio" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">Browse my portfolio for more projects</a>
+                <a href="/portfolio" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">Browse my portfolio</a>
             </section>
         </div>
     </div>
@@ -232,11 +232,6 @@
                     <li class="badge badge-pcj badge-lg">JSON</li>
                     <li class="badge badge-pcj badge-lg">XML</li>
                 </ul>
-            </section>
-        </div>
-        <div class="row mt-2">
-            <section class="col text-center">
-                <a href="https://github.com/tehwave" target="_blank" rel="noopener" class="btn btn-outline-link btn-lg">Find my skills at work on my GitHub profile</a>
             </section>
         </div>
     </div>
