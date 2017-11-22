@@ -76,7 +76,7 @@
                             data-src="<?php echo img($project['image'].'.'.$project['image_format']) ?>"
                             alt="<?php echo $project['title'] ?>"
                         />
-                        <div class="card-body">
+                        <section class="card-body">
                             <h1 class="card-title"><?php echo $project['title'] ?></h1>
                             <p class="card-text">
                             <?php
@@ -87,12 +87,14 @@
                             </p>
                             <p class="card-text"><?php echo $project['lead'] ?></p>
                             <p class="card-text"><?php echo $project['paragraph'] ?></p>
-                            <?php if (isset($project['button_url'])) : ?>
-                                <a class="btn btn-primary" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
+                        </section>
+                        <?php if (isset($project['button_url'])) : ?>
+                            <footer class="card-footer">
+                                <a class="card-link" href="<?php echo $project['button_url'] ?>" target="_blank" rel="noopener">
                                     <?php echo $project['button_text'] ?>
                                 </a>
-                            <?php endif; ?>
-                        </div>
+                            </footer>
+                        <?php endif; ?>
                     </article>
                 </section>
             <?php endforeach; ?>

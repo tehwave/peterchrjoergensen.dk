@@ -102,67 +102,71 @@
     </div>
     <div class="container-fluid mb-5">
        <div class="row">
-            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 ml-xl-auto mb-4">
-                <div class="card">
-                    <noscript>
+            <section class="col-12 mx-auto col-lg-12 col-xl-10">
+                <div class="card-deck">
+                    <article class="card mb-4">
+                        <noscript>
+                            <img
+                                class="card-img-top"
+                                src="<?php echo img('firkant.png') ?>"
+                                alt="FIRKANT"
+                            />
+                        </noscript>
                         <img
-                            class="card-img-top"
-                            src="<?php echo img('firkant.png') ?>"
+                            class="card-img-top lazyload lqip"
+                            src="<?php echo img('firkant-lowquality.png') ?>"
+                            data-src="<?php echo img('firkant.png') ?>"
                             alt="FIRKANT"
                         />
-                    </noscript>
-                    <img
-                        class="card-img-top lazyload lqip"
-                        src="<?php echo img('firkant-lowquality.png') ?>"
-                        data-src="<?php echo img('firkant.png') ?>"
-                        alt="FIRKANT"
-                    />
-                    <div class="card-body">
-                        <h2 class="card-title">FIRKANT</h2>
-                        <p class="card-text">A fast-paced, procedural platforming video game</p>
-                        <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Check it out</a>
-                    </div>
-                </div>
-            </section>
-            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mb-4">
-                <div class="card">
-                    <noscript>
+                        <section class="card-body">
+                            <h2 class="card-title">FIRKANT</h2>
+                            <p class="card-text">A fast-paced, procedural platforming video game</p>
+                        </section>
+                        <footer class="card-footer">
+                            <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
+                        </footer>
+                    </article>
+                    <article class="card mb-4">
+                        <noscript>
+                            <img
+                                class="card-img-top"
+                                src="<?php echo img('b2bkolding.png') ?>"
+                                alt="B2B Kolding"
+                            />
+                        </noscript>
                         <img
-                            class="card-img-top"
-                            src="<?php echo img('b2bkolding.png') ?>"
+                            class="card-img-top lazyload lqip"
+                            src="<?php echo img('b2bkolding-lowquality.png') ?>"
+                            data-src="<?php echo img('b2bkolding.png') ?>"
                             alt="B2B Kolding"
                         />
-                    </noscript>
-                    <img
-                        class="card-img-top lazyload lqip"
-                        src="<?php echo img('b2bkolding-lowquality.png') ?>"
-                        data-src="<?php echo img('b2bkolding.png') ?>"
-                        alt="B2B Kolding"
-                    />
-                    <div class="card-body">
-                        <h2 class="card-title">B2B Kolding</h2>
-                        <p class="card-text">A custom Wordpress website for a local trade fair</p>
-                        <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Check it out</a>
-                    </div>
-                </div>
-            </section>
-            <section class="col-12 mx-auto col-sm-10 col-md-8 mx-md-0 ml-md-auto mr-md-auto col-lg-4 m-lg-0 col-xl-3 mr-xl-auto mb-4">
-                <div class="card">
-                    <noscript>
-                        <img class="card-img-top" src="<?php echo img('gm48.png') ?>" alt="GM48"/>
-                    </noscript>
-                    <img
-                        class="card-img-top lazyload lqip"
-                        src="<?php echo img('gm48-lowquality.png') ?>"
-                        data-src="<?php echo img('gm48.png') ?>"
-                        alt="GM48"
-                    />
-                    <div class="card-body">
-                        <h2 class="card-title">GM48</h2>
-                        <p class="card-text">A games development competition</p>
-                        <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Check it out</a>
-                    </div>
-                </div>
+                        <section class="card-body">
+                            <h2 class="card-title">B2B Kolding</h2>
+                            <p class="card-text">A custom Wordpress website for a local trade fair</p>
+                        </section>
+                        <footer class="card-footer">
+                            <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Website</a>
+                        </footer>
+                    </article>
+                    <article class="card mb-4">
+                        <noscript>
+                            <img class="card-img-top" src="<?php echo img('gm48.png') ?>" alt="GM48"/>
+                        </noscript>
+                        <img
+                            class="card-img-top lazyload lqip"
+                            src="<?php echo img('gm48-lowquality.png') ?>"
+                            data-src="<?php echo img('gm48.png') ?>"
+                            alt="GM48"
+                        />
+                        <section class="card-body">
+                            <h2 class="card-title">GM48</h2>
+                            <p class="card-text">A games development competition</p>
+                        </section>
+                        <footer class="card-footer">
+                            <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Website</a>
+                            <a href="https://blog.peterchrjoergensen.dk/category/gm48/" target="_blank" rel="noopener" class="card-link">Blog</a>
+                        </footer>
+                    </article>
             </section>
         </div>
         <div class="row mt-3">

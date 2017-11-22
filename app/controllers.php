@@ -101,7 +101,7 @@ class Controller
                 'tags'          => ['Website', 'Wordpress', 'Company'],
                 'lead'          => 'B2B Kolding aims to strengthen the partnership between local businesses in Kolding, Denmark.',
                 'paragraph'     => 'Using Wordpress as CMS, I developed a custom-built theme for the website, and optimized it with cache, SEO and analytics plugins.',
-                'button_text'   => 'Check it out',
+                'button_text'   => 'Website',
                 'button_url'    => 'https://www.b2bkolding.dk',
             ],
             'GM48' => [
@@ -112,7 +112,7 @@ class Controller
                 'tags'          => ['Website', 'PHP', 'Solo'],
                 'lead'          => 'The gm(48) is a quarterly 48 hours GameMaker game jam from the community of /r/GameMaker.',
                 'paragraph'     => 'I wrote the website in PHP, HTML, SASS and JS using the Laravel, Bootstrap and VueJS frameworks.',
-                'button_text'   => 'Check it out',
+                'button_text'   => 'Website',
                 'button_url'    => 'https://gm48.net',
             ],
             'Grundfos Safety'   => [
@@ -123,7 +123,7 @@ class Controller
                 'tags'          => ['Website', 'JavaScript', 'Company'],
                 'lead'          => 'A safety instructions and quiz web application for visitors to the Grundfos facilities.',
                 'paragraph'     => 'The web application was written in VueJS, and has editable files, translations and support for browsers from IE9 and up.',
-                'button_text'   => 'Check it out',
+                'button_text'   => 'GitHub Repository',
                 'button_url'    => 'https://tehwave.github.io/grundfos-quiz/',
             ],
             'My Website' => [
@@ -134,7 +134,7 @@ class Controller
                 'tags'          => ['Website', 'PHP', 'Solo'],
                 'lead'          => 'My personal website complete with landing page, portfolio, curriculum vitae and blog.',
                 'paragraph'     => 'I wrote the website to be fast using the Flight PHP micro-framework via Composer. I use MixItUp 3 for display & filtering of projects.',
-                'button_text'   => 'Browse code',
+                'button_text'   => 'GitHub Repository',
                 'button_url'    => 'https://github.com/tehwave/peterchrjoergensen.dk',
             ],
             'FIRKANT' => [
@@ -145,7 +145,7 @@ class Controller
                 'tags'          => ['Game', 'GameMaker: Studio', 'Solo'],
                 'lead'          => 'FIRKANT is a a fast-paced, procedural platformer inspired by Cloudberry Kingdom and Super Meat Boy.',
                 'paragraph'     => 'Made in GameMaker: Studio, it\'s planned for release on mobile platforms in late 2017. For more information, please visit the website.',
-                'button_text'   => 'Check it out',
+                'button_text'   => 'Website',
                 'button_url'    => '/FIRKANT',
             ],
             'Lennarth Hansen' => [
@@ -156,7 +156,7 @@ class Controller
                 'tags'          => ['Other', 'Adobe Creative Suite', 'Solo'],
                 'lead'          => 'Lennarth Hansen is a local politician in Kolding.',
                 'paragraph'     => 'I have been contracted to create graphic designs, e.g. stickers and posters, for his campaign as well as help manage his Facebook-page.',
-                'button_text'   => 'Check it out',
+                'button_text'   => 'Facebook',
                 'button_url'    => 'https://www.facebook.com/stemlennarth/',
             ],
             'The Author' => [
@@ -167,7 +167,7 @@ class Controller
                 'tags'          => ['Video', 'Premiere Pro', 'Team'],
                 'lead'          => 'An author with writer\'s block goes to an abandoned house for inspiration, but find things getting too real.',
                 'paragraph'     => 'I starred in the short film as the main character. It was colorgraded and edited in Adobe Premiere Pro by me as well.',
-                'button_text'   => 'Watch it',
+                'button_text'   => 'YouTube',
                 'button_url'    => 'https://www.youtube.com/watch?v=S0bQYYnhtGk',
             ],
             'Western World' => [
@@ -178,7 +178,7 @@ class Controller
                 'tags'          => ['Other', 'Unity3D', 'Team'],
                 'lead'          => 'A small, atmospheric town, that was inspired by the good, old Western films, to explore around in.',
                 'paragraph'     => 'Made in Unity3D as a school project, it was meant to teach us the asset pipeline between Maya and Unity.',
-                'button_text'   => 'Watch the trailer',
+                'button_text'   => 'Trailer',
                 'button_url'    => 'https://www.youtube.com/watch?v=0SeTUIsS5sQ',
             ],
             'Showreel - 2015' => [
@@ -189,7 +189,7 @@ class Controller
                 'tags'          => ['Video', 'Premiere Pro', 'Solo'],
                 'lead'          => 'A showreel for various school projects that I completed during my first two semesters in 2015.',
                 'paragraph'     => 'Edited in Premiere Pro, it was important for me that the music matched the editing, so that it was exciting to watch.',
-                'button_text'   => 'Watch it',
+                'button_text'   => 'YouTube',
                 'button_url'    => 'https://www.youtube.com/watch?v=cYLeWeJryOQ',
             ],
             'Mord Ombord' => [
@@ -200,7 +200,7 @@ class Controller
                 'tags'          => ['Game', 'Unity3D', 'Team'],
                 'lead'          => 'Solve mysteries and puzzles using learning material in Virtual Reality as part of your school education.',
                 'paragraph'     => 'Developed in Unity3D for use with Google Cardboard, I had to heavily optimize the game to run on old devices.',
-                'button_text'   => 'Watch trailer',
+                'button_text'   => 'Trailer',
                 'button_url'    => 'https://www.youtube.com/watch?v=0U42shiUG2w',
             ],
             'Odense Golfklub' => [
