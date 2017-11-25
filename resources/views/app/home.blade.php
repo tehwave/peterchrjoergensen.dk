@@ -107,11 +107,16 @@
         </div>
     </div>
     <div class="container">
-        <div class="row">
+        <div class="row mb-5">
             <section class="col mt-3 text-center">
                 <a href="{{ route('portfolio') }}" class="btn btn-outline-pcj">Browse my portfolio</a>
             </section>
         </div>
+    </div>
+
+    {{-- Blog --}}
+    {{--
+    <div class="container">
         <div class="row mt-5">
             <section class="col">
                 <h3>Latest posts from my blog</h3>
@@ -129,4 +134,5 @@
             </section>
         </div>
     </div>
+     --}}
 @endsection
