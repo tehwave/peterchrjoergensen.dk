@@ -8454,14 +8454,25 @@ Navigation
 
 .pcj-navigation {
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .pcj-navigation {
+    margin-top: 4rem;
+  }
 }
 
 .pcj-navigation-title {
-  font-size: 3.5rem;
   font-weight: 300;
   line-height: 1.1;
   margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .pcj-navigation-title {
+    font-size: 3.5rem;
+  }
 }
 
 .pcj-navigation-title hr {
@@ -8481,11 +8492,11 @@ Navigation
   color: #222222;
   font-size: 18px;
   font-weight: 600;
-  line-height: 6.5rem;
   letter-spacing: .2rem;
   text-decoration: none;
   text-transform: uppercase;
   text-align: center;
+  display: inline-block;
 }
 
 .pcj-navigation nav a.active {
@@ -8498,6 +8509,18 @@ Navigation
 
 .pcj-navigation nav a:hover svg path {
   fill: #0fa0ce !important;
+}
+
+.pcj-navigation-link {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .pcj-navigation-link {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 }
 
 .pcj-navigation-social {
