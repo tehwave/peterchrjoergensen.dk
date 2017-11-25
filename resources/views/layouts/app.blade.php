@@ -116,7 +116,7 @@
 
                 <!-- Links -->
                 <section class="col-12 col-sm-6 col-md">
-                    <a href="/cv" title="Peter's Curriculum Vitae" class="pcj-navigation-link">C.V.</a>
+                    <a href="{{ route('curriculum-vitae') }}" title="Peter's Curriculum Vitae" class="pcj-navigation-link">C.V.</a>
                 </section>
                 <section class="col-12 col-sm-6 col-md">
                     <a href="{{ route('portfolio') }}" title="Peter's Portfolio" class="pcj-navigation-link">Portfolio</a>

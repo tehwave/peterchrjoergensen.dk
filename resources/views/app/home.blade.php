@@ -102,6 +102,7 @@
                             <a href="https://blog.peterchrjoergensen.dk/category/gm48/" target="_blank" rel="noopener" class="card-link">Blog</a>
                         </footer>
                     </article>
+                </div>
             </section>
         </div>
     </div>
