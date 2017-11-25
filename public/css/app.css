@@ -8596,6 +8596,7 @@ Home
 }
 
 .pcj-home-header a:hover {
+  color: white;
   opacity: 0.5;
 }
 
@@ -8624,7 +8625,7 @@ a {
 }
 
 a:hover {
-  color: #064457;
+  color: #0c7b9e;
 }
 
 button,
