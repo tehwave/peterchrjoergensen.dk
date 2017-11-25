@@ -108,7 +108,7 @@
     <div class="container">
         <div class="row">
             <section class="col mt-3 text-center">
-                <a href="/portfolio" class="btn btn-outline-link btn-lg">Browse my portfolio</a>
+                <a href="{{ route('portfolio') }}" class="btn btn-outline-link btn-lg">Browse my portfolio</a>
             </section>
         </div>
         <div class="row mt-5">

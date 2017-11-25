@@ -119,7 +119,7 @@
                     <a href="/cv" title="Peter's Curriculum Vitae" class="pcj-navigation-link">C.V.</a>
                 </section>
                 <section class="col-12 col-sm-6 col-md">
-                    <a href="/portfolio" title="Peter's Portfolio" class="pcj-navigation-link">Portfolio</a>
+                    <a href="{{ route('portfolio') }}" title="Peter's Portfolio" class="pcj-navigation-link">Portfolio</a>
                 </section>
                 <section class="col-12 col-sm-6 col-md">
                     <a href="//blog.peterchrjoergensen.dk" title="Peter's Blog" class="pcj-navigation-link">Blog</a>
