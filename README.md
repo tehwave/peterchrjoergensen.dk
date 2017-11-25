@@ -49,7 +49,6 @@ Deploy Script for Laravel Forge
     if [ -f artisan ]
     then
         php artisan migrate --force
-        php artisan storage:link
 
         php artisan cache:clear
         php artisan view:clear
