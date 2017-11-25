@@ -44,8 +44,14 @@ hr {
 a {
     text-decoration-skip: ink;
     cursor: pointer;
+    color: $blue;
+
+    &:hover {
+        color: darken($blue, 25%);
+    }
 }
 
+// Buttons
 button, .btn {
     transition: box-shadow 0.15s ease-in-out,
                 transform 0.15s;
@@ -61,5 +67,28 @@ button, .btn {
 
     &.disabled, &[disabled] {
         cursor: not-allowed;
+    }
+
+    &.mixitup-control-active {
+        &, &:hover, &:active, &:focus {
+            background-color: $blue;
+            border-color: $blue;
+            color: $white;
+        }
+    }
+}
+
+.btn-outline-pcj {
+    color: $blue;
+    border-color: $blue;
+    background-color: $white;
+
+    &:hover {
+        background-color: $blue;
+        color: $white;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($blue, 0.25);
     }
 }

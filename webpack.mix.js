@@ -28,7 +28,7 @@ mix
         'bootstrap',
         'popper.js',
         'lazysizes',
-        // 'mixitup',
+        'mixitup',
         'jquery',
         'lodash',
         'axios'

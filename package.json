@@ -20,6 +20,7 @@
     "jquery": "^3.2.1",
     "jquery-parallax.js": "^1.5.0",
     "lazysizes": "^4.0.1",
+    "mixitup": "^3.2.2",
     "popper.js": "^1.12.9"
   }
 }
