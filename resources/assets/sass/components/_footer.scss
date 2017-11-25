@@ -1,0 +1,30 @@
+/* --------------------------------
+
+Footer
+
+-------------------------------- */
+
+.pcj-footer {
+    &-contact {
+        color: white;
+        font-size: 200%;
+
+        .row {
+            padding: 6rem 0px;
+        }
+
+        h2 {
+            font-weight: 700;
+        }
+
+        a {
+            font-weight: bold;
+            text-decoration: none;
+            color: $white;
+
+            &:hover {
+                opacity: 0.5;
+            }
+        }
+    }
+}

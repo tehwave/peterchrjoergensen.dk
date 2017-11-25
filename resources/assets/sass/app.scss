@@ -4,9 +4,63 @@ peterchrjoergensen.dk
 
 -------------------------------- */
 
-// Partials
+// Variables & Mixins
 @import "partials/variables";
 @import "partials/mixins";
 
 // Bootstrap
 @import "~bootstrap/dist/css/bootstrap.css";
+
+// Font
+@import url("https://fonts.googleapis.com/css?family=Raleway:700,600,400,300");
+
+// Components
+@import "components/lazysizes";
+@import "components/parallax";
+@import "components/navigation";
+@import "components/header";
+@import "components/footer";
+
+// Views
+@import "views/home";
+
+/* --------------------------------
+
+Primary
+
+-------------------------------- */
+
+body {
+    font-family: 'Raleway', Helvetica, Arial, sans-serif;
+    background-image: url('/img/overlay.png');
+    background: $white;
+    color: $black;
+}
+
+hr {
+    margin-bottom: 2rem;
+    border: 1px solid $orange;
+}
+
+a {
+    text-decoration-skip: ink;
+    cursor: pointer;
+}
+
+button, .btn {
+    transition: box-shadow 0.15s ease-in-out,
+                transform 0.15s;
+    cursor: pointer;
+
+    &:active, &.active {
+        transform: scale(0.95);
+    }
+
+    &.active:active {
+        transform: scale(0.90);
+    }
+
+    &.disabled, &[disabled] {
+        cursor: not-allowed;
+    }
+}

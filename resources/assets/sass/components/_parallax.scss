@@ -1,0 +1,24 @@
+/* --------------------------------
+
+Parallax
+
+-------------------------------- */
+
+.parallax-mirror {
+    opacity: 1;
+    will-change: transform;
+    animation: parallax 1s ease-in-out;
+}
+
+.pcj-parallax {
+    background: $bluegray;
+}
+
+@keyframes parallax {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

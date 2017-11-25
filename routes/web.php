@@ -12,5 +12,5 @@
 */
 
 // Home
-Route::view('/', 'app.home');
+Route::view('/', 'app.home')->name('home');
 Route::redirect('/home', '/', 301);
