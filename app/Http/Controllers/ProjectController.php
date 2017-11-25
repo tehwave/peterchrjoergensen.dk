@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class ProjectController extends Controller
 {
     /**
-     * Shows listing of projects
+     * Shows listing of projects.
      *
      * @return \Illuminate\Http\Response
      */
@@ -132,7 +130,7 @@ class ProjectController extends Controller
                 'tags'          => ['Other', 'Unity3D', 'Team'],
                 'lead'          => 'A mobile application for the members of Odense Golfklub with 360° imagery and 3D models of golf courses.',
                 'paragraph'     => 'Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.',
-            ]
+            ],
         ];
 
         return view('app.portfolio', compact('projects'));
