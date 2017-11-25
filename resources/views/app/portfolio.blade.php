@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Portfolio – Peter C. Jørgensen')
 
 @section('app')
     <!-- Introduction -->
