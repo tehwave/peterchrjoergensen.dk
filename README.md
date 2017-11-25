@@ -14,11 +14,58 @@ https://peterchrjoergensen.dk
 
 ### Build
 
-TODO
+Install the dependencies.
+
+```
+npm install
+```
+
+Process and build assets.
+
+```
+npm run prod
+```
+
+Develop in a local environment.
+
+```
+npm run watch
+```
 
 ### Deployment
 
-TODO
+Deploy Script for Laravel Forge
+
+    cd /home/forge/peterchrjoergensen.dk
+
+    if [ -f artisan ]
+    then
+        php artisan down
+    fi
+
+    git pull origin master
+    composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    if [ -f artisan ]
+    then
+        php artisan migrate --force
+        php artisan storage:link
+
+        php artisan cache:clear
+        php artisan view:clear
+
+        php artisan config:cache
+        php artisan route:cache
+
+        php artisan queue:restart
+    fi
+
+    echo "" | sudo -S service php7.1-fpm reload
+
+    if [ -f artisan ]
+    then
+        php artisan up
+    fi
 
 ## Development
 
