@@ -24,8 +24,10 @@ mix
 
     // JS Vendors
     .extract([
+        'jquery-parallax.js',
         'bootstrap',
         'popper.js',
+        'lazysizes',
         // 'mixitup',
         'jquery',
         'lodash',
