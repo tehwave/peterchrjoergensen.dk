@@ -21,15 +21,15 @@
         <!-- Website -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#0fa0ce">
-        <link rel="mask-icon" href="#TODO" color="#5bbad5">
-        <link rel="apple-touch-icon" sizes="144x144" href="#TODO">
-        <link rel="icon" type="image/png" href="#TODO" sizes="32x32">
-        <link rel="icon" type="image/png" href="#TODO" sizes="16x16">
+        <link rel="mask-icon" href="{{ asset('img/safari-pinned-tab.svg') }}" color="#5bbad5">
+        <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('img/apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('img/favicon-32x32.png') }}" sizes="32x32">
+        <link rel="icon" type="image/png" href="{{ asset('img/favicon-16x16.png') }}" sizes="16x16">
 
         <!-- SEO -->
         @section('head')
             <meta name="title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="author" content="@yield('description', 'TODO')">
+            <meta name="author" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
             <meta name="description" content="#TODO">
         @show
 
@@ -40,8 +40,8 @@
             <meta property="profile:last_name" content="Jørgensen">
             <meta property="og:url" content="{{ url()->full() }}">
             <meta property="og:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta property="og:description" content="@yield('description', 'TODO')"">
-            <meta property="og:image" content="#TODO">
+            <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')"">
+            <meta property="og:image" content="{{ asset('img/open-graph-image.png') }}">
         @show
 
         <!-- Twitter -->
@@ -49,8 +49,8 @@
             <meta name="twitter:card" content="summary">
             <meta name="twitter:site" content="@tehwave">
             <meta name="twitter:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="twitter:description" content="@yield('description', 'TODO')"">
-            <meta name="twitter:image" content="#TODO">
+            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')"">
+            <meta name="twitter:image" content="{{ asset('twitter-image.png') }}">
         @show
 
         <!-- JSON-LD Person -->
