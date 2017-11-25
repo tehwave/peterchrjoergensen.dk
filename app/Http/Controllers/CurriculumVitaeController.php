@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class CurriculumVitaeController extends Controller
 {
     /**
-     * Shows listing of projects
+     * Shows curriculum vitae.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $educations = [
             [
                 'date'   => '2015 - 2017',
