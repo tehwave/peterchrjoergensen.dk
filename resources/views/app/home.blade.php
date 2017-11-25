@@ -109,7 +109,7 @@
     <div class="container">
         <div class="row">
             <section class="col mt-3 text-center">
-                <a href="{{ route('portfolio') }}" class="btn btn-outline-pcj btn-lg">Browse my portfolio</a>
+                <a href="{{ route('portfolio') }}" class="btn btn-outline-pcj">Browse my portfolio</a>
             </section>
         </div>
         <div class="row mt-5">
@@ -125,7 +125,7 @@
         </div>
         <div class="row mb-5">
             <section class="col text-center">
-                <a href="/blog" class="btn btn-outline-pcj btn-lg">Visit my blog</a>
+                <a href="/blog" class="btn btn-outline-pcj">Visit my blog</a>
             </section>
         </div>
     </div>
