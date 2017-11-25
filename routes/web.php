@@ -11,6 +11,6 @@
 |
 */
 
-Route::get('/', function () {
-    return view('app.home');
-});
+// Home
+Route::view('/', 'app.home');
+Route::redirect('/home', '/', 301);
