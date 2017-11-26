@@ -11,6 +11,9 @@
 |
 */
 
+// Auth
+Auth::routes();
+
 // Home
 Route::view('/', 'app.home')->name('home');
 Route::redirect('/home', '/', 301);
