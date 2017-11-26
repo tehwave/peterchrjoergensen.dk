@@ -14,6 +14,20 @@
                         <section class="card-body">
                                 {{ csrf_field() }}
 
+                                @unless ($errors->isEmpty())
+                                    <div class="form-row">
+                                        <div class="form-group col">
+                                            <div class="alert alert-danger" role="alert">
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach ($errors->all() as $error)
+                                                        <li>{{ $error }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endunless
+
                                 <div class="form-row">
                                     <div class="form-group col">
                                         <label for="name">Name</label>
