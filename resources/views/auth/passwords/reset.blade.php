@@ -1,9 +1,11 @@
 @extends('layouts.app')
+@section('navigation', false)
+@section('footer', false)
 
 @section('app')
-    <div class="container">
-        <div class="row my-4">
-            <div class="col-lg-8 mx-lg-auto">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="my-auto col-lg-8 mx-lg-auto">
                 <form method="POST" action="{{ route('password.request') }}">
                     <article class="card">
                         <header class="card-header bg-pcj text-white">
