@@ -15,7 +15,7 @@ class ValidRegisterPin implements Rule
      */
     public function passes($attribute, $value)
     {
-        $value === config('app.register_pin');
+        return $value === config('app.register_pin');
     }
 
     /**
