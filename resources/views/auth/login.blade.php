@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('html', 'class=h-100')
 @section('navigation', false)
 @section('footer', false)
 
