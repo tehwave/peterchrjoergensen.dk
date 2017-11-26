@@ -1,47 +1,42 @@
 @extends('layouts.app')
 
 @section('app')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Reset Password</div>
+    <div class="container">
+        <div class="row my-4">
+            <div class="col-lg-8 mx-lg-auto">
+                <form method="POST" action="{{ route('password.email') }}">
+                    <article class="card">
+                        <header class="card-header bg-pcj text-white">
+                            <h1 class="h6 mb-0">Send password reset</h1>
+                        </header>
+                        <section class="card-body">
+                                {{ csrf_field() }}
 
-                <div class="panel-body">
-                    @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    <form class="form-horizontal" method="POST" action="{{ route('password.email') }}">
-                        {{ csrf_field() }}
-
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
-
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
+                                @if (session('status'))
+                                    <div class="form-row">
+                                        <div class="form-group col">
+                                            <div class="alert alert-success">
+                                                {{ session('status') }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
-                            </div>
-                        </div>
 
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Send Password Reset Link
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                                <div class="form-row">
+                                    <div class="form-group col">
+                                        <label for="email">Email</label>
+                                        <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                                    </div>
+                                </div>
+                        </section>
+                        <footer class="card-footer text-right">
+                            <button type="submit" class="btn btn-pcj">
+                                Send
+                            </button>
+                        </footer>
+                    </article>
+                </form>
             </div>
         </div>
     </div>
-</div>
 @endsection
