@@ -66,6 +66,10 @@ Deploy Script for Laravel Forge
         php artisan up
     fi
 
+### Environment
+
+```.env.example``` represents the environment variables for production. Sensitive information has been redacted, and must be replaced with their correct values.
+
 ## Development
 
 The website is developed using Laravel PHP framework, Composer PHP dependency manager, JQuery JavaScript library, Bootstrap front-end component library and SASS CSS extension language.
