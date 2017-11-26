@@ -23,3 +23,7 @@ Route::redirect('projects', 'portfolio', 301);
 // Curriculum Vitae
 Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curriculum-vitae');
 Route::redirect('cv', 'curriculum-vitae', 301)->name('cv');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
