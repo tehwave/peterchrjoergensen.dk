@@ -1,0 +1,22 @@
+/* --------------------------------
+
+Home
+
+-------------------------------- */
+
+.pcj-home {
+    &-header {
+        margin-bottom: 5rem;
+
+        a {
+            font-weight: bold;
+            text-decoration: none;
+            color: $white;
+
+            &:hover {
+                color: $white;
+                opacity: 0.5;
+            }
+        }
+    }
+}

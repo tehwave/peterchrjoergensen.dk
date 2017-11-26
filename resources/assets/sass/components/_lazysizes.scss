@@ -1,0 +1,16 @@
+/* --------------------------------
+
+Lazysizes
+
+-------------------------------- */
+
+// Lazy Load
+.lqip {
+    will-change: filter;
+    filter: blur(2px);
+}
+
+.lqip.lazyloaded {
+    filter: blur(0px);
+    transition: filter 1s ease-in-out;
+}

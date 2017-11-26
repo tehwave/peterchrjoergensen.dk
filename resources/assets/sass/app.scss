@@ -1,0 +1,129 @@
+/* --------------------------------
+
+peterchrjoergensen.dk
+
+-------------------------------- */
+
+// Variables & Mixins
+@import "partials/variables";
+@import "partials/mixins";
+
+// Bootstrap
+@import "~bootstrap/dist/css/bootstrap.css";
+
+// Font
+@import url("https://fonts.googleapis.com/css?family=Raleway:700,600,400,300");
+
+// Components
+@import "components/lazysizes";
+@import "components/parallax";
+@import "components/navigation";
+@import "components/header";
+@import "components/footer";
+
+// Views
+@import "views/home";
+
+/* --------------------------------
+
+Primary
+
+-------------------------------- */
+
+body {
+    font-family: 'Raleway', Helvetica, Arial, sans-serif;
+    background-image: url('/img/overlay.png');
+    color: $black;
+}
+
+hr {
+    margin-bottom: 2rem;
+    border: 1px solid $orange;
+}
+
+a {
+    text-decoration-skip: ink;
+    cursor: pointer;
+    color: $blue;
+
+    &:hover {
+        color: darken($blue, 10%);
+    }
+}
+
+// Buttons
+button, .btn {
+    transition: box-shadow 0.15s ease-in-out,
+                transform 0.15s;
+    cursor: pointer;
+
+    &:active, &.active {
+        transform: scale(0.95);
+    }
+
+    &.active:active {
+        transform: scale(0.90);
+    }
+
+    &.disabled, &[disabled] {
+        cursor: not-allowed;
+    }
+
+    &.mixitup-control-active {
+        &, &:hover, &:active, &:focus {
+            background-color: $blue;
+            border-color: $blue;
+            color: $white;
+        }
+    }
+}
+
+/* --------------------------------
+
+Bootstrap variants
+
+-------------------------------- */
+
+.btn-outline-pcj {
+    color: $blue;
+    border-color: $blue;
+    background-color: $white;
+
+    &:hover {
+        background-color: $blue;
+        color: $white;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($blue, 0.25);
+    }
+}
+
+.btn-pcj {
+    color: $white;
+    background-color: $blue;
+    border-color: $blue;
+
+    &:hover {
+        background-color: lighten($blue, 10%);
+        border-color: lighten($blue, 10%);
+        color: $white;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($blue, 0.25);
+    }
+}
+
+.badge-pcj {
+    background-color: $blue;
+    border-color: $blue;
+    color: $white;
+}
+
+.badge-lg {
+    padding: .25rem .5rem;
+    margin-bottom: .4em;
+    font-size: 100%;
+    line-height: 1.5;
+}
