@@ -123,7 +123,7 @@
                         <a href="{{ route('portfolio') }}" title="Peter's Portfolio" class="pcj-navigation-link">Portfolio</a>
                     </section>
                     <section class="col-12 col-sm-6 col-md">
-                        <a href="//blog.peterchrjoergensen.dk" title="Peter's Blog" class="pcj-navigation-link">Blog</a>
+                        <a href="{{ route('post.index') }}" title="Peter's Blog" class="pcj-navigation-link">Blog</a>
                     </section>
 
                     <!-- Social -->
