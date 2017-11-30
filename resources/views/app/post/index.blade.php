@@ -71,7 +71,7 @@
                             </h2>
                             <ul class="list-unstyled">
                                 @foreach ($posts->take(3) as $post)
-                                    <li> <a href="{{ $post->slug }}">{{ $post->title }}</a></li>
+                                    <li> <a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></li>
                                 @endforeach
                             </ul>
                         @endif
