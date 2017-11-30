@@ -32,7 +32,7 @@
                     <article class="card mb-4">
                         <section class="card-body">
                             <h1 class="card-title">
-                                <a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a>
+                                <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
                             </h1>
                             <h2 class="card-subtitle mb-2 text-muted h6">
                                 {{ $post->published_at->format('l, F jS, Y') }}
