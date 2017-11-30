@@ -29,22 +29,37 @@
                     <section class="card-body">
                         <div class="row">
                             <section class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1">
-                                @if ($previous_post)
+                                @isset ($previous_post)
                                     <small>Previous</small>
                                     <div><a href="{{ route('post.show', $previous_post->slug) }}">{{ $previous_post->title }}</a></div>
-                                @endif
+                                @endisset
                             </section>
                             <section class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto">
-                                <div>{{ $post->published_at->format('F jS, Y') }}</div>
+                                <div>
+                                    @isset($post->published_at)
+                                        {{ $post->published_at->format('F jS, Y') }}
+                                    @else
+                                        Draft
+                                    @endisset
+                                </div>
                             </section>
                             <section class="col-12 col-sm-6 order-3 col-md-3 order-md-3">
-                                @if ($next_post)
+                                @isset ($next_post)
                                     <small>Next</small>
                                     <div><a href="{{ route('post.show', $next_post->slug) }}">{{ $next_post->title }}</a></div>
-                                @endif
+                                @endisset
                             </section>
                         </div>
                     </section>
+                    @auth
+                        <footer class="card-footer">
+                            <div class="row">
+                                <section class="col-lg-4 mx-lg-auto">
+                                    <a href="{{ route('post.edit', $post->slug) }}" class="btn btn-block btn-pcj">Edit</a>
+                                </section>
+                            </div>
+                        </footer>
+                    @endauth
                 </div>
             </section>
         </div>

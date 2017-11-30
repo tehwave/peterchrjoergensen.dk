@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Post extends Model
 {
     /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
      * The attributes that should be mutated to dates.
      *
      * @var array

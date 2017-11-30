@@ -29,6 +29,14 @@ Route::redirect('cv', 'curriculum-vitae', 301)->name('cv');
 
 // Blog
 Route::prefix('blog')->group(function () {
+    Route::middleware('auth')->group(function () {
+        Route::get('new', 'PostController@create')->name('post.create');
+        Route::post('/', 'PostController@store')->name('post.store');
+        Route::get('{slug}/edit', 'PostController@edit')->name('post.edit');
+        Route::put('{slug}', 'PostController@update')->name('post.update');
+        Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
+    });
+
     Route::get('/', 'PostController@index')->name('post.index');
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });

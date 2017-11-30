@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Validator;
 use App\Post;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        // TODO
+        return view('app.post.create');
     }
 
     /**
@@ -35,9 +36,32 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store()
     {
-        // TODO
+        $validator = Validator::make(request()->all(), [
+            'title'     => 'required|string',
+            'excerpt'   => 'nullable|string',
+            'body'      => 'nullable|string',
+            'publish'   => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput()
+                ->withErrors($validator);
+        }
+
+        $post = new Post([
+            'title'         => request()->title,
+            'slug'          => str_slug(request()->title),
+            'excerpt'       => request()->excerpt,
+            'body'          => request()->body,
+            'published_at'  => request()->publish ? now() : null,
+        ]);
+
+        $post->save();
+
+        return redirect()->route('post.show', $post->slug);
     }
 
     /**
@@ -51,17 +75,20 @@ class PostController extends Controller
         $post = Post::where('slug', $slug)->first();
 
         abort_if($post === null, 404);
-        abort_if($post->published_at === null, 403);
+        abort_if($post->published_at === null && auth()->guest(), 403);
 
-        $previous_post = Post::published()
-            ->where('published_at', '<', $post->published_at)
-            ->orderBy('published_at', 'desc')
-            ->first();
+        if ($post->published_at !== null)
+        {
+            $previous_post = Post::published()
+                ->where('published_at', '<', $post->published_at)
+                ->orderBy('published_at', 'desc')
+                ->first();
 
-        $next_post = Post::published()
-            ->where('published_at', '>', $post->published_at)
-            ->orderBy('published_at', 'asc')
-            ->first();
+            $next_post = Post::published()
+                ->where('published_at', '>', $post->published_at)
+                ->orderBy('published_at', 'asc')
+                ->first();
+        }
 
         return view('app.post.show', compact('post', 'previous_post', 'next_post'));
     }
@@ -72,9 +99,11 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post)
+    public function edit($slug)
     {
-        // TODO
+        $post = Post::where('slug', $slug)->first();
+
+        return view('app.post.edit', compact('post'));
     }
 
     /**
@@ -84,9 +113,32 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+    public function update($slug)
     {
-        // TODO
+        $validator = Validator::make(request()->all(), [
+            'title'     => 'required|string',
+            'excerpt'   => 'nullable|string',
+            'body'      => 'nullable|string',
+            'publish'   => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput()
+                ->withErrors($validator, 'update');
+        }
+
+        $post = Post::where('slug', $slug)->first();
+
+        $post->title        = request()->title;
+        $post->slug         = str_slug(request()->title);
+        $post->excerpt      = request()->excerpt;
+        $post->body         = request()->body;
+        $post->published_at = request()->published_at;
+
+        $post->save();
+
+        return redirect()->route('post.show', $post->slug);
     }
 
     /**
@@ -95,8 +147,21 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy($slug)
     {
-        // TODO
+        $validator = Validator::make(request()->all(), [
+            'delete' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput()
+                ->withErrors($validator, 'destroy');
+        }
+
+        $post = Post::where('slug', $slug)->first();
+        $post->delete();
+
+        return redirect()->route('post.index');
     }
 }
