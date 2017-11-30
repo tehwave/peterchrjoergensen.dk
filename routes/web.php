@@ -28,7 +28,8 @@ Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curricu
 Route::redirect('cv', 'curriculum-vitae', 301)->name('cv');
 
 // Blog
-Route::group(['prefix' => 'blog'], function () {
+Route::prefix('blog')->group(function () {
     Route::get('/', 'PostController@index')->name('post.index');
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });
+
