@@ -53,8 +53,15 @@ class PostController extends Controller
         abort_if($post === null, 404);
         abort_if($post->published_at === null, 403);
 
-        $previous_post = Post::published()->where('id', '<', $post->id)->first();
-        $next_post = Post::published()->where('id', '>', $post->id)->first();
+        $previous_post = Post::published()
+            ->where('published_at', '<', $post->published_at)
+            ->orderBy('published_at', 'desc')
+            ->first();
+
+        $next_post = Post::published()
+            ->where('published_at', '>', $post->published_at)
+            ->orderBy('published_at', 'asc')
+            ->first();
 
         return view('app.post.show', compact('post', 'previous_post', 'next_post'));
     }
