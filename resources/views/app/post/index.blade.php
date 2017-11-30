@@ -35,7 +35,7 @@
                                 <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
                             </h1>
                             <h2 class="card-subtitle mb-2 text-muted h6">
-                                {{ $post->published_at->format('l, F jS, Y') }}
+                                {{ $post->published_at->format('F jS, Y') }}
                             </h2>
                             <p class="card-text">
                                 {{ $post->excerpt }}
