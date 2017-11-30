@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
 use App\Post;
+use Validator;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -77,8 +77,7 @@ class PostController extends Controller
         abort_if($post === null, 404);
         abort_if($post->published_at === null && auth()->guest(), 403);
 
-        if ($post->published_at !== null)
-        {
+        if ($post->published_at !== null) {
             $previous_post = Post::published()
                 ->where('published_at', '<', $post->published_at)
                 ->orderBy('published_at', 'desc')
@@ -130,10 +129,10 @@ class PostController extends Controller
 
         $post = Post::where('slug', $slug)->first();
 
-        $post->title        = request()->title;
-        $post->slug         = str_slug(request()->title);
-        $post->excerpt      = request()->excerpt;
-        $post->body         = request()->body;
+        $post->title = request()->title;
+        $post->slug = str_slug(request()->title);
+        $post->excerpt = request()->excerpt;
+        $post->body = request()->body;
         $post->published_at = request()->published_at;
 
         $post->save();

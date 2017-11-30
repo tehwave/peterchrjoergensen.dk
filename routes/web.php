@@ -40,4 +40,3 @@ Route::prefix('blog')->group(function () {
     Route::get('/', 'PostController@index')->name('post.index');
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });
-
