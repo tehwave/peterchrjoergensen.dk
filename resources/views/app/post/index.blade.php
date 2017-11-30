@@ -63,10 +63,20 @@
                 <!-- Overview -->
                 <div class="card">
                     <section class="card-body">
-                        Sidebar
+
+                        {{-- Recent Posts --}}
+                        @if (request()->input('page') > 1)
+                            <h2 class="card-title h6">
+                                Recent
+                            </h2>
+                            <ul class="list-unstyled">
+                                @foreach ($posts->take(3) as $post)
+                                    <li> <a href="{{ $post->slug }}">{{ $post->title }}</a></li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </section>
                 </div>
-
             </section>
         </div>
     </div>
