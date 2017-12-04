@@ -2,8 +2,8 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Parsedown;
+use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
@@ -38,6 +38,13 @@ class Post extends Model
         return $query->whereNotNull('published_at');
     }
 
+
+    /**
+     * Scope a query to only include published posts.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function body()
     {
         return (new Parsedown())->text($this->body);
