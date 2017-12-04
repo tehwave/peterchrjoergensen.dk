@@ -68,7 +68,7 @@
         <div class="row mb-4">
             <section class="col">
                 <article class="pcj-post-body">
-                    {{ $post->body }}
+                    {!! $post->body() !!}
                 </article>
             </section>
         </div>
