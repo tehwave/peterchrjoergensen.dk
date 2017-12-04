@@ -38,12 +38,10 @@ class Post extends Model
         return $query->whereNotNull('published_at');
     }
 
-
     /**
-     * Scope a query to only include published posts.
+     * Parse the Markdown content of the body attribute.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return HTML
      */
     public function body()
     {
