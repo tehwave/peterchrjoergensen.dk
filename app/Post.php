@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Parsedown;
 
 class Post extends Model
 {
@@ -35,5 +36,10 @@ class Post extends Model
     public function scopePublished($query)
     {
         return $query->whereNotNull('published_at');
+    }
+
+    public function body()
+    {
+        return (new Parsedown())->text($this->body);
     }
 }
