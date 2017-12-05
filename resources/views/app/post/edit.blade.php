@@ -59,10 +59,6 @@
                                     <div class="form-group col-lg-8 mx-lg-auto">
                                         <label for="body">Body</label>
                                         <textarea id="body" type="text" class="form-control" rows="10" name="body">{{ old('body', $post->body) }}</textarea>
-                                        <ul class="list-inline form-text text-muted mb-0">
-                                            <li class="list-inline-item">Markdown</li>
-                                            <li class="list-inline-item">HTML</li>
-                                        </ul>
                                     </div>
                                 </div>
 
