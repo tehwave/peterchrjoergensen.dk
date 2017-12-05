@@ -38,7 +38,7 @@
                                 {{ $post->published_at->format('F jS, Y') }}
                             </h2>
                             <p class="card-text">
-                                {{ $post->excerpt }}
+                                {!! $post->excerpt() !!}
                             </p>
                         </section>
                     </article>

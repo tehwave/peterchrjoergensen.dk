@@ -39,6 +39,17 @@ class Post extends Model
     }
 
     /**
+     * Parse the Markdown content of the excerpt attribute.
+     *
+     * @return HTML
+     */
+    public function excerpt()
+    {
+        return (new Parsedown())
+            ->text($this->excerpt);
+    }
+
+    /**
      * Parse the Markdown content of the body attribute.
      *
      * @return HTML
