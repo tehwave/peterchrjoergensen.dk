@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Post;
 use Carbon\Carbon;
 
@@ -26,7 +25,7 @@ class ArchiveController extends Controller
                 ->whereDay('published_at', $day)
                 ->paginate(5);
 
-            $date = Carbon::parse($year .'-'. $month .'-'. $day)->toFormattedDateString();
+            $date = Carbon::parse($year.'-'.$month.'-'.$day)->toFormattedDateString();
         } else if (isset($year) && isset($month)) {
             $posts = Post::published()
                 ->orderBy('published_at', 'desc')
@@ -34,7 +33,7 @@ class ArchiveController extends Controller
                 ->whereMonth('published_at', $month)
                 ->paginate(5);
 
-            $date = Carbon::parse($year .'-'. $month)->format('M, Y');
+            $date = Carbon::parse($year.'-'.$month)->format('M, Y');
         } else {
             $posts = Post::published()
                 ->orderBy('published_at', 'desc')
