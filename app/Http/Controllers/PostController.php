@@ -17,7 +17,7 @@ class PostController extends Controller
     {
         $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
 
-        $archive = Post::published()->get()->sortByDesc('published_at')->groupBy( function($post) {
+        $archive = Post::published()->get()->sortByDesc('published_at')->groupBy(function($post) {
             return $post->published_at->format('Y/m');
         });
 

@@ -26,7 +26,7 @@ class ArchiveController extends Controller
                 ->paginate(5);
 
             $date = Carbon::parse($year.'-'.$month.'-'.$day)->toFormattedDateString();
-        } else if (isset($year) && isset($month)) {
+        } elseif (isset($year) && isset($month)) {
             $posts = Post::published()
                 ->orderBy('published_at', 'desc')
                 ->whereYear('published_at', $year)
