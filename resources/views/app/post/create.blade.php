@@ -52,6 +52,7 @@
                                         <textarea id="body" type="text" class="form-control" rows="10" name="body" value="{{ old('body') }}"></textarea>
                                         <ul class="list-inline form-text text-muted mb-0">
                                             <li class="list-inline-item">Markdown</li>
+                                            <li class="list-inline-item">HTML</li>
                                         </ul>
                                     </div>
                                 </div>
