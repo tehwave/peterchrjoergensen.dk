@@ -56,8 +56,9 @@ class Post extends Model
      */
     public function body()
     {
-        return (new Parsedown())
-            ->setMarkupEscaped(false)
-            ->text($this->body);
+        $body = (new Parsedown())->text($this->body);
+
+        // Stop <p> from wrapping <img>
+        return preg_replace('/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s', '\1', $body);
     }
 }
