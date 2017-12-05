@@ -45,6 +45,8 @@ class Post extends Model
      */
     public function body()
     {
-        return (new Parsedown())->text($this->body);
+        return (new Parsedown())
+            ->setMarkupEscaped(false)
+            ->text($this->body);
     }
 }
