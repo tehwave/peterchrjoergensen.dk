@@ -85,7 +85,11 @@
                 <form method="POST" action="{{ route('post.destroy', $post->slug) }}">
                     <article class="card mb-4">
                         <header class="card-header bg-danger text-white">
-                            <h1 class="h6 mb-0">Delete</h1>
+                            <div class="row">
+                                <section class="col-lg-8 mx-lg-auto">
+                                    <h1 class="h6 mb-0">Delete</h1>
+                                </section>
+                            </div>
                         </header>
                         <section class="card-body">
                                 {{ csrf_field() }}
@@ -93,7 +97,7 @@
 
                                 @unless ($errors->destroy->isEmpty())
                                     <div class="form-row">
-                                        <div class="form-group col">
+                                        <div class="form-group col-lg-8 mx-lg-auto">
                                             <div class="alert alert-danger" role="alert">
                                                 <ul class="list-unstyled mb-0">
                                                     @foreach ($errors->destroy->all() as $error)
