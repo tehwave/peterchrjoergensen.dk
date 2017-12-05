@@ -71,10 +71,20 @@
                             </h2>
                             <ul class="list-unstyled">
                                 @foreach ($posts->take(3) as $post)
-                                    <li> <a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></li>
+                                    <li><a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></li>
                                 @endforeach
                             </ul>
                         @endif
+
+                        <!-- Archive -->
+                        <h2 class="card-title h6">
+                            Archive
+                            <ul class="list-unstyled">
+                                @foreach ($archive as $date => $posts)
+                                    <li><a href="{!! route('archive.show', $date) !!}">{{ $date }}</a></li>
+                                @endforeach
+                            </ul>
+                        </h2>
                     </section>
                 </div>
             </section>

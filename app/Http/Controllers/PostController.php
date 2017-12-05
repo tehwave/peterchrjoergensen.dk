@@ -17,7 +17,11 @@ class PostController extends Controller
     {
         $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
 
-        return view('app.post.index', compact('posts'));
+        $archive = Post::published()->get()->sortByDesc('published_at')->groupBy( function($post) {
+            return $post->published_at->format('Y/m');
+        });
+
+        return view('app.post.index', compact('posts', 'archive'));
     }
 
     /**
