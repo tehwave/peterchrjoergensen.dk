@@ -43,7 +43,6 @@ class ArchiveController extends Controller
             $date = Carbon::create($year)->year;
         }
 
-
         return view('app.archive.show', compact('posts', 'date'));
     }
 }
