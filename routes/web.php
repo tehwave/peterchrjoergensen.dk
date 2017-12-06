@@ -29,6 +29,8 @@ Route::redirect('cv', 'curriculum-vitae', 301)->name('cv');
 
 // Blog
 Route::prefix('blog')->group(function () {
+    Route::get('/', 'PostController@index')->name('post.index');
+
     Route::middleware('auth')->group(function () {
         Route::get('new', 'PostController@create')->name('post.create');
         Route::post('/', 'PostController@store')->name('post.store');
@@ -37,7 +39,6 @@ Route::prefix('blog')->group(function () {
         Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
     });
 
-    Route::get('/', 'PostController@index')->name('post.index');
     Route::get('{year}/{month?}/{day?}', 'ArchiveController@show')->name('archive.show')->where(['year' => '[0-9]+', 'month' => '[0-9]+', 'day' => '[0-9]+']);
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });
