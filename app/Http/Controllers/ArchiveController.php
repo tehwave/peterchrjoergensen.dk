@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use Validator;
 use Carbon\Carbon;
 
 class ArchiveController extends Controller
@@ -14,7 +15,6 @@ class ArchiveController extends Controller
      */
     public function show($year, $month = null, $day = null)
     {
-
         // Dirty, but not sure how to otherwise do it.
         // Let me know if there's an elegant solution to it.
         if (isset($year) && isset($month) && isset($day)) {
@@ -44,5 +44,26 @@ class ArchiveController extends Controller
         }
 
         return view('app.archive.show', compact('posts', 'date'));
+    }
+
+    /**
+     * Browse the archive
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function browse()
+    {
+        $validator = Validator::make(request()->all(), [
+            'year' => 'required_with:month,day',
+            'month' => 'required_with:day',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput()
+                ->withErrors($validator);
+        }
+
+        return redirect()->route('archive.show', [request()->year, request()->month, request()->day]);
     }
 }

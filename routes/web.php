@@ -40,5 +40,7 @@ Route::prefix('blog')->group(function () {
     });
 
     Route::get('{year}/{month?}/{day?}', 'ArchiveController@show')->name('archive.show')->where(['year' => '[0-9]+', 'month' => '[0-9]+', 'day' => '[0-9]+']);
+    Route::post('/', 'ArchiveController@browse')->name('archive.browse');
+
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });
