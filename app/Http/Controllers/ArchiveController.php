@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class ArchiveController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the specified resource.
      *
      * @return \Illuminate\Http\Response
      */
@@ -47,7 +47,7 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Browse the archive
+     * Browse the archive.
      *
      * @return \Illuminate\Http\Response
      */
