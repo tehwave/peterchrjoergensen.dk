@@ -37,7 +37,7 @@
                     @foreach ($posts as $post)
                         <article class="card mb-4">
                             <section class="card-body">
-                                <h1 class="card-title">
+                                <h1 class="card-title h2">
                                     <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
                                 </h1>
                                 <h2 class="card-subtitle mb-2 text-muted h6">
