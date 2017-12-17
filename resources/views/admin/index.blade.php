@@ -12,6 +12,7 @@
                 <tr>
                     <th>#</th>
                     <th>Title</th>
+                    <th></th>
                     <th class="text-right">Published</th>
                     <th class="text-right">Created</th>
                     <th class="text-right">Updated</th>
@@ -20,11 +21,12 @@
             <tbody>
                 @foreach ($posts as $post)
                     <tr>
-                        <td>{{ $post->id }}</td>
-                        <td><a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></td>
-                        <td class="text-right">{{ $post->published_at }}</td>
-                        <td class="text-right">{{ $post->created_at }}</td>
-                        <td class="text-right">{{ $post->updated_at }}</td>
+                        <td class="align-middle">{{ $post->id }}</td>
+                        <td class="align-middle"><a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></td>
+                        <td class="align-middle"><a href="{{ route('post.edit', $post->slug) }}" class="btn btn-pcj btn-sm">Edit</a></td>
+                        <td class="align-middle text-right">{{ $post->published_at }}</td>
+                        <td class="align-middle text-right">{{ $post->created_at }}</td>
+                        <td class="align-middle text-right">{{ $post->updated_at }}</td>
                     </tr>
                 @endforeach
             </tbody>
