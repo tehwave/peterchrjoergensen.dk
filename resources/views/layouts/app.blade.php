@@ -29,8 +29,8 @@
         <!-- SEO -->
         @section('head')
             <meta name="title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="author" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
-            <meta name="description" content="#TODO">
+            <meta name="author" content="@yield('author', 'Peter C. Jørgensen')">
+            <meta name="description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
         @show
 
         <!-- Open Graph -->
