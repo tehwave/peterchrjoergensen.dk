@@ -63,7 +63,7 @@ class PostController extends Controller
             'slug'          => str_slug(request()->title),
             'excerpt'       => request()->excerpt,
             'body'          => request()->body,
-            'published_at'  => request()->publish ? now() : null,
+            'published_at'  => request()->published_at ? now() : null,
         ]);
 
         $post->save();
