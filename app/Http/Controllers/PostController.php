@@ -15,7 +15,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
+        if (request()->has('q')) {
+            $posts = Post::search(request()->input('q'))->paginate(5);
+        } else {
+            $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
+        }
 
         $archive = Post::published()->get()->sortByDesc('published_at')->groupBy(function ($post) {
             return $post->published_at->format('Y/m');
