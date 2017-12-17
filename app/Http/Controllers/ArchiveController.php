@@ -11,6 +11,9 @@ class ArchiveController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param  int  $year
+     * @param  int  $month
+     * @param  int  $day
      * @return \Illuminate\Http\Response
      */
     public function show($year, $month = null, $day = null)
