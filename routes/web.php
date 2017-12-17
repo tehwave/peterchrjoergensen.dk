@@ -44,7 +44,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::prefix('post')->group(function () {
         Route::get('/', 'PostController@create')->name('post.create');
         Route::post('/', 'PostController@store')->name('post.store');
-        Route::get('{slug}/edit', 'PostController@edit')->name('post.edit');
+        Route::get('{slug}', 'PostController@edit')->name('post.edit');
         Route::put('{slug}', 'PostController@update')->name('post.update');
         Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
     });
