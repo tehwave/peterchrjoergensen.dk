@@ -60,6 +60,8 @@ button, .btn {
     transition: box-shadow 0.15s ease-in-out,
                 transform 0.15s;
     cursor: pointer;
+    font-size: 0.8rem;
+    text-transform: uppercase;
 
     &:active, &.active {
         transform: scale(0.95);
