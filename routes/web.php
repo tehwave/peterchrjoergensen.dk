@@ -33,7 +33,7 @@ Route::prefix('blog')->group(function () {
 
     Route::middleware('auth')->group(function () {
         Route::get('new', 'PostController@create')->name('post.create');
-        Route::post('/', 'PostController@store')->name('post.store');
+        Route::post('new', 'PostController@store')->name('post.store');
         Route::get('{slug}/edit', 'PostController@edit')->name('post.edit');
         Route::put('{slug}', 'PostController@update')->name('post.update');
         Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
