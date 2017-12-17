@@ -99,7 +99,10 @@
                     @auth
                         <footer class="card-footer">
                             <div class="row">
-                                <section class="col-lg-4 mx-lg-auto">
+                                <section class="col-lg-4">
+                                    <a href="{{ route('admin.index') }}" class="btn btn-block btn-outline-pcj mb-2 mb-lg-0">Admin</a>
+                                </section>
+                                <section class="col-lg-4 mr-lg-auto">
                                     <a href="{{ route('post.edit', $post->slug) }}" class="btn btn-block btn-pcj">Edit</a>
                                 </section>
                             </div>
