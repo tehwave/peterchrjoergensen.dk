@@ -1,4 +1,49 @@
 @extends('layouts.app')
+@section('title', $post->title)
+@section('description', $post->excerpt)
+
+@section('open-graph')
+    <meta property="og:site_name" content="Peter C. Jørgensen">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $post->title }}">
+    <meta property="og:updated_time" content="{{ $post->updated_at }}">
+    <meta property="og:description" content="{{ $post->excerpt }}">
+
+    <!-- JSON-LD BlogPosting -->
+    <script type="application/ld+json">
+        {
+            "@context": "http://schema.org",
+            "@type": "BlogPosting",
+            "headline": "{{ $post->title }}",
+            "alternativeHeadline": "{{ $post->excerpt }}",
+            "wordcount": "{{ str_word_count($post->body) }}",
+            "url": "{{ url()->current() }}",
+            "datePublished": "{{ $post->published_at }}",
+            "dateCreated": "{{ $post->created_at }}",
+            "dateModified": "{{ $post->updated_at }}",
+            "description": "{{ $post->excerpt }}",
+            "articleBody": "{{ $post->body }}",
+            "author": {
+                "@type": "Person",
+                "name": "Peter Christian Jørgensen",
+                "jobTitle": "Multimedia Designer",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Kolding",
+                    "addressRegion": "Jutland"
+                }
+            }
+        }
+    </script>
+@endsection
+
+@section('twitter')
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@tehwave">
+    <meta name="twitter:creator" content="@tehwave">
+    <meta name="twitter:title" content="{{ $post->title }}">
+    <meta name="twitter:description" content="{{ $post->excerpt }}">
+@endsection
 
 @section('app')
     <header
