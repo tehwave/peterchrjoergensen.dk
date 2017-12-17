@@ -3,10 +3,13 @@
 namespace App;
 
 use Parsedown;
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    use Searchable;
+
     /**
      * The attributes that aren't mass assignable.
      *
@@ -26,6 +29,20 @@ class Post extends Model
     protected $dates = [
         'published_at',
     ];
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'excerpt' => $this->excerpt,
+            'published_at' => $this->published_at,
+        ];
+    }
 
     /**
      * Scope a query to only include published posts.
