@@ -29,7 +29,7 @@
 
                     <div class="form-row">
                         <div class="form-group  col-lg-8 mx-lg-auto">
-                            <label for="name">Title</label>
+                            <label for="title">Title</label>
                             <input id="title" type="text" class="form-control" name="title" value="{{ old('title') }}" required>
                         </div>
                     </div>
