@@ -1,0 +1,20 @@
+/* --------------------------------
+
+Blog
+
+-------------------------------- */
+
+.pcj-blog {
+    &-header {
+        a {
+            font-weight: bold;
+            text-decoration: none;
+            color: $white;
+
+            &:hover {
+                color: $white;
+                opacity: 0.5;
+            }
+        }
+    }
+}

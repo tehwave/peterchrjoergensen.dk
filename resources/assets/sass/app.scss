@@ -18,11 +18,15 @@ peterchrjoergensen.dk
 @import "components/lazysizes";
 @import "components/parallax";
 @import "components/navigation";
+@import "components/pagination";
 @import "components/header";
 @import "components/footer";
+@import "components/post";
+@import "components/form";
 
 // Views
 @import "views/home";
+@import "views/blog";
 
 /* --------------------------------
 

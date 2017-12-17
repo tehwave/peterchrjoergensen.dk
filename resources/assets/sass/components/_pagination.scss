@@ -1,0 +1,17 @@
+/* --------------------------------
+
+Pagination
+
+-------------------------------- */
+
+.pcj-pagination {
+    .page-item.active .page-link {
+        color: $white;
+        background-color: $blue;
+        border-color: $blue;
+    }
+
+    .page-link {
+        color: $blue;
+    }
+}

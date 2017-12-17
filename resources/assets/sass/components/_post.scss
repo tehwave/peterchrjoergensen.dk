@@ -1,0 +1,48 @@
+/* --------------------------------
+
+Post
+
+-------------------------------- */
+
+.pcj-post-body {
+    @media (min-width: 992px) {
+        p, h1, h2, h3, h4, h5, h6, ul, ol {
+            width: 75%;
+            text-align: justify;
+            text-align-last: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        p, h1, h2, h3, h4, h5, h6, ul, ol {
+            width: 60%;
+            text-align: justify;
+            text-align-last: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    // Horizontal ruler after headings
+    h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+        content: ' ';
+        display: block;
+        height: 2px;
+        background: #e77e2d;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        width: 15%;
+        border-radius: 4px;
+    }
+
+    // Images
+    img {
+        border-radius: 0.25rem;
+
+        // Responsive
+        max-width: 100%;
+        height: auto;
+    }
+}
