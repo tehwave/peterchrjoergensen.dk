@@ -49,3 +49,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
     });
 });
+
+// Redirects
+Route::redirect('firkant', 'https://firkant.website');
+Route::redirect('FIRKANT', 'https://firkant.website');
