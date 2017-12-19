@@ -7,7 +7,7 @@
             <header class="card-header bg-pcj text-white">
                 <div class="row">
                     <section class="col-lg-8 mx-lg-auto">
-                        <h1 class="h6 mb-0">Edit</h1>
+                        <h1 class="h6 mb-0 text-uppercase">Edit</h1>
                         <h2 class="mb-0">{{ $post->title }}</h2>
                     </section>
                 </div>

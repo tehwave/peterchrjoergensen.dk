@@ -6,7 +6,7 @@
             <header class="card-header bg-pcj text-white">
                 <div class="row">
                     <section class="col-lg-8 mx-lg-auto">
-                        <h1 class="h6 mb-0">New</h1>
+                        <h1 class="h6 mb-0 text-uppercase">New</h1>
                     </section>
                 </div>
             </header>
