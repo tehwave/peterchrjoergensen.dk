@@ -87,6 +87,13 @@
                                         Draft
                                     @endisset
                                 </div>
+                                @if ($post->tags->count())
+                                    <div>
+                                        @foreach ($post->tags as $tag)
+                                            <span class="badge badge-pill badge-pcj">{{ $tag->name }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </section>
                             <section class="col-12 col-sm-6 order-3 col-md-3 order-md-3">
                                 @isset ($next_post)
