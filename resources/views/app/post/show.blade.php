@@ -16,6 +16,9 @@
             "@type": "BlogPosting",
             "headline": "{{ $post->title }}",
             "alternativeHeadline": "{{ $post->excerpt }}",
+            @if ($post->tags->count())
+                "keywords": "{{ $post->tags->implode('name', ' ') }}",
+            @endif
             "wordcount": "{{ str_word_count($post->body) }}",
             "url": "{{ url()->current() }}",
             "datePublished": "{{ $post->published_at }}",
