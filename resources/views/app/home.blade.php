@@ -151,7 +151,7 @@
         </div>
         <div class="row mb-5">
             <section class="col text-center">
-                <a href="/blog" class="btn btn-outline-pcj">Read my blog</a>
+                <a href="{{ route('post.index') }}" class="btn btn-outline-pcj">Read my blog</a>
             </section>
         </div>
     </div>
