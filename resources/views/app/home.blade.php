@@ -115,7 +115,7 @@
     </div>
 
     {{-- Blog --}}
-    {{--
+
     <div class="container">
         <div class="row mt-5">
             <section class="col">
@@ -123,16 +123,37 @@
                 <hr>
             </section>
         </div>
-        <div class="row" id="wp-posts">
-            <section class="col-12  mb-3 text-center" id="wp-posts-loading">
-                <img src="/resources/img/loading.svg">
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <section class="col-12 mx-auto col-lg-12 col-xl-10">
+                <div class="card-deck">
+                    @foreach (App\Post::published()->orderBy('published_at')->get()->take(4) as $post)
+                        <article class="card mb-4">
+                            <section class="card-body">
+                                <h1 class="card-title h2">
+                                    <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
+                                </h1>
+                                <h2 class="card-subtitle mb-2 text-muted h6">
+                                    {{ $post->published_at->format('F jS, Y') }}
+                                </h2>
+                                @foreach ($post->tags as $tag)
+                                    <span class="badge badge-pill badge-pcj">{{ $tag->name }}</span>
+                                @endforeach
+                                <p class="card-text">
+                                    {!! $post->excerpt() !!}
+                                </p>
+                            </section>
+                        </article>
+                    @endforeach
+                </div>
             </section>
         </div>
         <div class="row mb-5">
             <section class="col text-center">
-                <a href="/blog" class="btn btn-outline-pcj">Visit my blog</a>
+                <a href="/blog" class="btn btn-outline-pcj">Read my blog</a>
             </section>
         </div>
     </div>
-     --}}
+
 @endsection
