@@ -128,7 +128,7 @@
         <div class="row">
             <section class="col-12 mx-auto col-lg-12 col-xl-10">
                 <div class="card-deck">
-                    @foreach (App\Post::published()->orderBy('published_at')->get()->take(4) as $post)
+                    @foreach (App\Post::published()->orderByDesc('published_at')->get()->take(4) as $post)
                         <article class="card mb-4">
                             <section class="card-body">
                                 <h1 class="card-title h2">
