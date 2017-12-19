@@ -87,4 +87,4 @@ I would be happy to answer any questions, that you might have regarding the webs
 
 ## License
 
-2017 © Peter Christian Jørgensen. All Rights Reserved.
+© Peter Christian Jørgensen. All Rights Reserved.
