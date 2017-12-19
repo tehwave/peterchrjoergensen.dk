@@ -3,13 +3,13 @@
 namespace App;
 
 use Parsedown;
+use Spatie\Tags\HasTags;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    use Searchable;
-
+    use Searchable, HasTags;
     /**
      * The attributes that aren't mass assignable.
      *
