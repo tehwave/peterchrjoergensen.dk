@@ -37,7 +37,15 @@
                         </div>
                     </div>
 
-
+                    <div class="form-row">
+                        <div class="form-group col-lg-8 mx-lg-auto">
+                            <label for="tags">Tags</label>
+                            <input id="tags" type="text" class="form-control" name="tags" value="{{ old('tags', $post->tags->implode('name', ',')) }}">
+                            <ul class="list-inline form-text text-muted mb-0">
+                                <li class="list-inline-item">Seperate tags with commas</li>
+                            </ul>
+                        </div>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group col-lg-8 mx-lg-auto">

@@ -43,6 +43,9 @@
                                 <h2 class="card-subtitle mb-2 text-muted h6">
                                     {{ $post->published_at->format('F jS, Y') }}
                                 </h2>
+                                @foreach ($post->tags as $tag)
+                                    <span class="badge badge-pill badge-pcj">{{ $tag->name }}</span>
+                                @endforeach
                                 <p class="card-text">
                                     {!! $post->excerpt() !!}
                                 </p>

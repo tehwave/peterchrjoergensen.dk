@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Post;
 use Validator;
+use Spatie\Tags\Tag;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -61,6 +62,7 @@ class PostController extends Controller
         $post = new Post([
             'title'         => request()->title,
             'slug'          => str_slug(request()->title),
+            'tags'          => Tag::findOrCreate(explode(',', request()->tags), 'Post'),
             'excerpt'       => request()->excerpt,
             'body'          => request()->body,
             'published_at'  => request()->published_at ? now() : null,
@@ -122,6 +124,7 @@ class PostController extends Controller
     {
         $validator = Validator::make(request()->all(), [
             'title'     => 'required|string',
+            'tags'      => 'nullable|string',
             'excerpt'   => 'nullable|string',
             'body'      => 'nullable|string',
             'publish'   => 'nullable|date',
@@ -134,6 +137,8 @@ class PostController extends Controller
         }
 
         $post = Post::where('slug', $slug)->first();
+        $tags = Tag::findOrCreate(explode(',', request()->tags), 'Post');
+        $post->attachTags($tags);
 
         $post->title = request()->title;
         $post->slug = str_slug(request()->title);
