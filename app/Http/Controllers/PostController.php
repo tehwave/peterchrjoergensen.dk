@@ -26,7 +26,11 @@ class PostController extends Controller
             return $post->published_at->format('Y/m');
         });
 
-        return view('app.post.index', compact('posts', 'archive'));
+        $feeds = collect(config('feed.feeds'))->mapWithKeys(function ($feed, $name) {
+            return [$name => $feed['title']];
+        });
+
+        return view('app.post.index', compact('posts', 'archive', 'feeds'));
     }
 
     /**

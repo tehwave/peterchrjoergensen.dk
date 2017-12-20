@@ -101,6 +101,16 @@
                                 @endforeach
                             </ul>
                         </h2>
+
+                        <!-- Feeds -->
+                        <h2 class="card-title h6">
+                            RSS Feed
+                            <ul class="list-unstyled mb-0">
+                                @foreach($feeds as $name => $title)
+                                    <li><a rel="alternate" type="application/rss+xml" href="{{ route("feeds.{$name}") }}" title="{{ $title }}">{{ $title }}</a></li>
+                                @endforeach
+                            </ul>
+                        </h2>
                     </section>
                 </div>
             </section>
