@@ -64,7 +64,7 @@
                                 </section>
                                 <section class="col-12 col-sm-4 text-sm-right">
                                     <!-- Submit -->
-                                    <button type="submit" class="btn btn-pcj">
+                                    <button type="submit" class="btn btn-lg btn-pcj">
                                         Browse
                                     </button>
                                 </section>
