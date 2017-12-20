@@ -3,7 +3,7 @@
 return [
 
     'feeds' => [
-        'main' => [
+        [
             /*
              * Here you can specify which class and method will return
              * the items that should appear in the feed. For example:
@@ -12,14 +12,14 @@ return [
              * You can also pass an argument to that method:
              * ['App\Model@getAllFeedItems', 'argument']
              */
-            'items' => '',
+            'items' => 'App\Post@getFeedItems',
 
             /*
              * The feed will be available on this url.
              */
-            'url' => '',
+            'url' => 'blog',
 
-            'title' => 'My feed',
+            'title' => 'peterchrjoergensen.dk',
         ],
     ],
 
