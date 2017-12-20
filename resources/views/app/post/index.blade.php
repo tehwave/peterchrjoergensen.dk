@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('head')
+    @include('feed::links')
+@endpush
+
 @section('app')
     <!-- Welcome -->
     <header
