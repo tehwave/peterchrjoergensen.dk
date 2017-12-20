@@ -37,6 +37,9 @@ Route::prefix('blog')->group(function () {
     Route::get('{slug}', 'PostController@show')->name('post.show');
 });
 
+// Feeds
+Route::feeds('feed');
+
 // Admin
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', 'AdminController@index')->name('admin.index');
