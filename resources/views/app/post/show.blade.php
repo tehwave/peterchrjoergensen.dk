@@ -61,7 +61,10 @@
         <div class="container">
             <div class="row">
                 <section class="col">
-                    <h2 class="h1">{{ $post->title }}</h2>
+                    <h2 class="h1">
+                        <span style="color: #E77E2D">|</span>
+                        {{ $post->title }}
+                    </h2>
                     <p>{!! $post->excerpt() !!}</p>
                 </section>
             </div>
