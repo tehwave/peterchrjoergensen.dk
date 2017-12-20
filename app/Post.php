@@ -4,12 +4,15 @@ namespace App;
 
 use Parsedown;
 use Spatie\Tags\HasTags;
+use Spatie\Feed\Feedable;
+use Spatie\Feed\FeedItem;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
+class Post extends Model implements Feedable
 {
     use Searchable, HasTags;
+
     /**
      * The attributes that aren't mass assignable.
      *
@@ -43,6 +46,35 @@ class Post extends Model
             'excerpt' => $this->excerpt,
             'published_at' => $this->published_at,
         ];
+    }
+
+    /**
+     * Get the indexable feed item for the model.
+     *
+     * @return \Spatie\Feed\FeedItem
+     */
+    public function toFeedItem()
+    {
+        return FeedItem::create()
+            ->id($this->id)
+            ->title($this->title)
+            ->summary($this->excerpt)
+            ->updated($this->updated_at)
+            ->link(route('post.show', $this->slug))
+            ->author('Peter Christian Jørgensen');
+    }
+
+    /**
+     * Get collection of models for the model feed.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getFeedItems()
+    {
+        return Post::published()
+            ->orderBy('published_at', 'desc')
+            ->limit(100)
+            ->get();
     }
 
     /**
