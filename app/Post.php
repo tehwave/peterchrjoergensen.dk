@@ -40,12 +40,16 @@ class Post extends Model implements Feedable
      */
     public function toSearchableArray()
     {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'excerpt' => $this->excerpt,
-            'published_at' => $this->published_at,
-        ];
+        if ($this->published_at) {
+            return [
+                'id' => $this->id,
+                'title' => $this->title,
+                'excerpt' => $this->excerpt,
+                'published_at' => $this->published_at,
+            ];
+        }
+
+        return [];
     }
 
     /**
