@@ -71,7 +71,7 @@ class Post extends Model implements Feedable
      */
     public static function getFeedItems()
     {
-        return Post::published()
+        return self::published()
             ->orderBy('published_at', 'desc')
             ->limit(100)
             ->get();
