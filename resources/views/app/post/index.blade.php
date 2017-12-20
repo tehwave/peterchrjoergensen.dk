@@ -82,35 +82,41 @@
 
                         {{-- Recent Posts --}}
                         @if (request()->input('page') > 1)
-                            <h2 class="card-title h6">
+                            <h2 class="h6 mb-0">
                                 Recent
                             </h2>
+                            <img src="{{ asset('img/orange-line.svg') }}">
                             <ul class="list-unstyled">
                                 @foreach ($posts->take(3) as $post)
-                                    <li><a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></li>
+                                    <li>
+                                        <a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a>
+                                        <span class="text-muted">{{ $post->published_at->diffForHumans() }}</span>
+                                    </li>
                                 @endforeach
                             </ul>
                         @endif
 
                         <!-- Archive -->
-                        <h2 class="card-title h6">
+                        <h2 class="h6 @if (request()->input('page') > 1) mt-5 @endif mb-0">
                             Archive
-                            <ul class="list-unstyled">
-                                @foreach ($archive as $date => $posts)
-                                    <li><a href="{!! route('archive.show', $date) !!}">{{ $date }}</a></li>
-                                @endforeach
-                            </ul>
                         </h2>
+                        <img src="{{ asset('img/orange-line.svg') }}">
+                        <ul class="list-unstyled">
+                            @foreach ($archive as $date => $posts)
+                                <li><a href="{!! route('archive.show', $date) !!}">{{ $date }}</a></li>
+                            @endforeach
+                        </ul>
 
                         <!-- Feeds -->
-                        <h2 class="card-title h6">
+                        <h2 class="h6 mt-5 mb-0">
                             RSS Feed
-                            <ul class="list-unstyled mb-0">
-                                @foreach($feeds as $name => $title)
-                                    <li><a rel="alternate" type="application/rss+xml" href="{{ route("feeds.{$name}") }}" title="{{ $title }}">{{ $title }}</a></li>
-                                @endforeach
-                            </ul>
                         </h2>
+                        <img src="{{ asset('img/orange-line.svg') }}">
+                        <ul class="list-unstyled mb-0">
+                            @foreach($feeds as $name => $title)
+                                <li><a rel="alternate" type="application/rss+xml" href="{{ route("feeds.{$name}") }}" title="{{ $title }}">{{ $title }}</a></li>
+                            @endforeach
+                        </ul>
                     </section>
                 </div>
             </section>
