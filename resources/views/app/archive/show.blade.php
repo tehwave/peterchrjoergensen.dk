@@ -24,7 +24,7 @@
     <!-- Posts -->
     <div class="container">
         <div class="row my-4">
-            <section class="col-lg-8 mr-lg-auto">
+            <section class="col">
                 <form action="{{ route('archive.browse') }}" method="POST">
                     {{ csrf_field() }}
                     <div class="card">
@@ -32,14 +32,16 @@
                             <div class="row">
                                 <section class="col-12 col-sm">
                                     <!-- Year -->
-                                    <select name="year" class="custom-select mb-2 mb-sm-0 @if ($errors->has('year')) is-invalid @endif">
+                                    <select name="year" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('year')) is-invalid @endif">
                                         <option @unless (old('year')) selected @endunless value="">Year</option>
                                         @for ($i = 0; $i < (Carbon\Carbon::now()->year - 2016); $i++)
                                             <option value="{{ Carbon\Carbon::now()->subYears($i)->year }}" @if (old('year') == Carbon\Carbon::now()->subYears($i)->year) selected @endif>{{ Carbon\Carbon::now()->subYears($i)->year }}</option>
                                         @endfor
                                     </select>
+                                </section>
+                                <section class="col-12 col-sm">
                                     <!-- Month -->
-                                    <select name="month" class="custom-select mb-2 mb-sm-0 @if ($errors->has('month')) is-invalid @endif">
+                                    <select name="month" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('month')) is-invalid @endif">
                                         <option @unless (old('month')) selected @endunless value="">Month</option>
                                         <option value="1" @if (old('month') == 1) selected @endif>January</option>
                                         <option value="2" @if (old('month') == 2) selected @endif>February</option>
@@ -54,15 +56,17 @@
                                         <option value="11" @if (old('month') == 11) selected @endif>November</option>
                                         <option value="12" @if (old('month') == 12) selected @endif>December</option>
                                     </select>
+                                </section>
+                                <section class="col-12 col-sm">
                                     <!-- Day -->
-                                    <select name="day" class="custom-select mb-2 mb-sm-0 @if ($errors->has('day')) is-invalid @endif">
+                                    <select name="day" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('day')) is-invalid @endif">
                                         <option @unless (old('day')) selected @endunless value="">Day</option>
                                         @for ($i = 1; $i < 32; $i++)
                                             <option value="{{ $i }}" @if (old('day') == $i) selected @endif>{{ $i }}</option>
                                         @endfor
                                     </select>
                                 </section>
-                                <section class="col-12 col-sm-4 text-sm-right">
+                                <section class="col-12 col-sm text-sm-right">
                                     <!-- Submit -->
                                     <button type="submit" class="btn btn-lg btn-pcj">
                                         Browse

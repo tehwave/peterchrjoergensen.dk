@@ -70,8 +70,8 @@
                 <form role="search" method="GET" action="{{ url()->current() }}">
                     <div class="input-group mb-4">
                         <input type="search" class="form-control" name="q" placeholder="..." value="{{ request()->input('q') }}">
-                        <span class="input-group-btn">
-                            <input type="submit" class="btn btn-pcj" value="Search">
+                        <span class="input-group-append">
+                            <button type="submit" class="btn btn-pcj">Search</button>
                         </span>
                     </div>
                 </form>

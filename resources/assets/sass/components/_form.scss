@@ -15,3 +15,10 @@ label {
     font-size: 0.8rem;
     text-transform: uppercase;
 }
+
+// Normalize btn size when append/prepend
+.input-group-append, .input-group-prepend {
+    .btn {
+        padding: .575rem .75rem;
+    }
+}
