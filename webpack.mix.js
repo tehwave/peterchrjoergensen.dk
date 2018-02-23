@@ -36,7 +36,9 @@ mix
     ])
 
     // Clean up
-    .purgeCss()
+    .purgeCss({
+        whitelist: ['lazyloaded']
+    })
 
     // Cache Busting
     .version();
