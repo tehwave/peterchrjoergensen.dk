@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+require('laravel-mix-purgecss');
 
 /*
  |--------------------------------------------------------------------------
@@ -33,6 +34,9 @@ mix
         'lodash',
         'axios'
     ])
+
+    // Clean up
+    .purgeCss()
 
     // Cache Busting
     .version();
