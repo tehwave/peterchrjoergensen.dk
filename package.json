@@ -19,6 +19,7 @@
     "bootstrap": "^4.0.0",
     "jquery": "^3.3.1",
     "jquery-parallax.js": "^1.5.0",
+    "laravel-mix-purgecss": "^1.0.5",
     "lazysizes": "^4.0.1",
     "mixitup": "^3.2.2",
     "popper.js": "^1.12.9"
