@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+require('laravel-mix-purgecss');
 
 /*
  |--------------------------------------------------------------------------
@@ -33,6 +34,11 @@ mix
         'lodash',
         'axios'
     ])
+
+    // Clean up
+    .purgeCss({
+        whitelist: ['lazyloaded']
+    })
 
     // Cache Busting
     .version();
