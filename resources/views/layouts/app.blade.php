@@ -25,6 +25,7 @@
         <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('img/apple-touch-icon.png') }}">
         <link rel="icon" type="image/png" href="{{ asset('img/favicon-32x32.png') }}" sizes="32x32">
         <link rel="icon" type="image/png" href="{{ asset('img/favicon-16x16.png') }}" sizes="16x16">
+        <meta name="norton-safeweb-site-verification" content="ruupo17w25hgxl64ko9xi-tzk8g8oagauekw54k758cs9l7z127rrzoumh0s3y9anjokm96h5kwbwnyyf8meknh89wngtt4zcgudogijwy2i5gug35196p4ykx4va7sh">
 
         <!-- SEO -->
         @section('head')
