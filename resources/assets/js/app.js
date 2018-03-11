@@ -24,3 +24,6 @@ if (document.querySelector('#mixitup')) {
         }
     });
 }
+
+// Tooltip
+$('[data-toggle="tooltip"]').tooltip();
