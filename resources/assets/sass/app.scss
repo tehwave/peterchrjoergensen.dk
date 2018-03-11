@@ -86,6 +86,15 @@ button, .btn {
             border-color: $blue;
             color: $white;
         }
+
+        &:hover {
+            background-color: lighten($blue, 10%);
+            border-color: lighten($blue, 10%);
+        }
+
+        &:focus {
+            box-shadow: 0 0 0 0.2rem rgba($blue, 0.25);
+        }
     }
 }
 
