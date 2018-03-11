@@ -39,6 +39,7 @@ mix
     .purgeCss({
         whitelist: [
             'lazyloaded',
+            'tooltip-inner',
             'parallax-mirror',
             'mixitup-control-active'
         ]
