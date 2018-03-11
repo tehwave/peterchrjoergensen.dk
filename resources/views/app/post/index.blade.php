@@ -12,7 +12,7 @@
             <section class="col">
                 <article class="pcj-header-content mb-0">
                     @empty (request()->input('q'))
-                        <h2 class="h1">Welcome,</h2>
+                        <h2 class="h1">Welcome</h2>
                         <p>You have found my personal blog, where I talk about the <b>ideas</b>, the <b>insights</b> and the <b>techniques</b> behind my projects.</p>
                         <p>In addition, I post about <b>news</b>, <b>events</b> and <b>resources</b> relevant to the <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23webdev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#webdev</a> and <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23gamedev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#gamedev</a> communities.</p>
                     @else
