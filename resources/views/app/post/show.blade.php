@@ -48,31 +48,24 @@
     <meta name="twitter:description" content="{{ $post->excerpt }}">
 @endsection
 
-@section('app')
-    <header
-        class="pcj-parallax pcj-header pcj-blog-header"
-        data-image-src="{{ asset('img/blog.jpg') }}"
-        data-natural-height="1277"
-        data-natural-width="1920"
-        data-parallax="scroll"
-        data-speed="0.6"
-        data-z-index="0"
-    >
-        <div class="container">
-            <div class="row">
-                <section class="col">
+@section('header')
+    <div class="container">
+        <div class="row">
+            <section class="col">
+                <article class="pcj-header-content">
                     <h2 class="h1">
                         <span style="color: #E77E2D">|</span>
                         {{ $post->title }}
                     </h2>
                     <p>{!! $post->excerpt() !!}</p>
-                </section>
-            </div>
-       </div>
-    </header>
+                </article>
+            </section>
+        </div>
+   </div>
+@endsection
 
+@section('app')
     <div class="container">
-
         <!-- Meta -->
         <div class="row my-4 text-center">
             <section class="col">
@@ -96,7 +89,7 @@
                                 @if ($post->tags->count())
                                     <div>
                                         @foreach ($post->tags as $tag)
-                                            <span class="badge badge-pill badge-pcj">{{ $tag->name }}</span>
+                                            <span class="badge badge-pcj-orange">{{ $tag->name }}</span>
                                         @endforeach
                                     </div>
                                 @endif

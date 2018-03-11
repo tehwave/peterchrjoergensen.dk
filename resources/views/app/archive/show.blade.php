@@ -1,26 +1,20 @@
 @extends('layouts.app')
+@section('title', 'Archive – Peter C. Jørgensen')
 
-@section('app')
-    <!-- Welcome -->
-    <header
-        class="pcj-parallax pcj-header pcj-blog-header"
-        data-image-src="{{ asset('img/blog.jpg') }}"
-        data-natural-height="1277"
-        data-natural-width="1920"
-        data-parallax="scroll"
-        data-speed="0.6"
-        data-z-index="0"
-    >
-        <div class="container">
-            <div class="row">
-                <section class="col">
+@section('header')
+    <div class="container">
+        <div class="row">
+            <section class="col">
+                <article class="pcj-header-content">
                     <h2 class="h1">Archive</h2>
                     <p>{{ $date }}</p>
-                </section>
-            </div>
-       </div>
-    </header>
+                </article>
+            </section>
+        </div>
+   </div>
+@endsection
 
+@section('app')
     <!-- Posts -->
     <div class="container">
         <div class="row my-4">

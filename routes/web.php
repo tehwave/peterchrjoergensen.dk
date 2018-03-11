@@ -15,7 +15,7 @@
 Auth::routes();
 
 // Home
-Route::view('/', 'app.home')->name('home');
+Route::get('/', 'AppController@home')->name('home');
 Route::redirect('/home', '/', 301);
 
 // Portfolio

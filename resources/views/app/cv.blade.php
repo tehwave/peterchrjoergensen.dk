@@ -1,19 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Curriculum Vitae – Peter C. Jørgensen')
+@section('banner', asset('img/cv.jpg'))
 
-@section('app')
-    <!-- Introduction -->
-    <section class="pcj-parallax pcj-header mb-5"
-        data-parallax="scroll"
-        data-speed="0.6"
-        data-image-src="{{ asset('img/cv.jpg') }}"
-        data-natural-width="1920"
-        data-natural-height="1277"
-        data-z-index="0"
-    >
-        <div class="container">
-            <div class="row">
-                <section class="col">
+@section('header')
+    <div class="container">
+        <div class="row">
+            <section class="col">
+                <article class="pcj-header-content">
                     <h2 class="h1">Curriculum Vitae</h2>
                     <a href="{{ asset('files/CV-Peter-Christian-Jørgensen-English.pdf') }}" target="_blank" rel="noopener noreferrer" class="btn btn-pcj">
                         Download &nbsp; (English <img src="{{ asset('img/english.png') }}" width="20" class="align-baseline"> )
@@ -21,11 +14,13 @@
                     <a href="{{ asset('files/CV-Peter-Christian-Jørgensen-Dansk.pdf') }}" target="_blank" rel="noopener noreferrer" class="btn btn-pcj">
                         Download &nbsp; (Dansk <img src="{{ asset('img/dansk.png') }}" width="20" class="align-baseline"> )
                     </a>
-                </section>
-            </div>
+                </article>
+            </section>
         </div>
-    </section>
+    </div>
+@endsection
 
+@section('app')
     <!-- Education -->
     <div class="container mb-5">
         <div class="row mt-4">

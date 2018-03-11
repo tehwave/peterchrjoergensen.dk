@@ -37,7 +37,11 @@ mix
 
     // Clean up
     .purgeCss({
-        whitelist: ['lazyloaded']
+        whitelist: [
+            'lazyloaded',
+            'parallax-mirror',
+            'mixitup-control-active'
+        ]
     })
 
     // Cache Busting

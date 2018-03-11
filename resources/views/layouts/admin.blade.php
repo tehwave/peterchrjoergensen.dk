@@ -25,36 +25,42 @@
         @stack('head')
     </head>
     <body class="h-100">
+
         <!-- Application -->
-        <div class="container-fluid" id="app">
+        <div class="container-fluid h-100" id="app">
             <div class="row">
                 <!-- Navigation -->
-                <aside class="col-sm-3 col-lg-2 col-xl-2 py-4">
-                    <article class="card card-pcj mb-4">
-                        <header class="card-header text-center bg-pcj">
-                           <h2 class="card-title">
-                                Administration
-                            </h2>
-                        </header>
-                        <ul class="list-group list-group-flush">
-                            <a href="{{ route('admin.index') }}"><li class="list-group-item">Overview</li></a>
-                            <a href="{{ route('post.create') }}"><li class="list-group-item">New Post</li></a>
-                        </ul>
-                        <footer class="card-footer">
-                            <!-- Log out -->
-                            <form action="{{ route('logout') }}" method="POST" class="text-right">
-                                {{ csrf_field() }}
+                <section class="my-auto col-lg-8 mx-lg-auto py-4">
+                    <nav class="navbar navbar-expand-sm navbar-light bg-white border rounded">
+                        <a class="navbar-brand" href="{{ route('admin.index') }}">🌊</a>
+                        @auth
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminNavbar">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
 
-                                <button type="submit" role="button" class="btn btn-pcj">
-                                    Log out
-                                </button>
-                            </form>
-                        </footer>
-                    </article>
-                </aside>
+                            <div class="collapse navbar-collapse" id="adminNavbar">
 
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('post.create') }}">New Post</a>
+                                    </li>
+                                </ul>
+                                <!-- Log out -->
+                                <form class="form-inline my-2 my-lg-0" action="{{ route('logout') }}" method="POST">
+                                    {{ csrf_field() }}
+
+                                    <button type="submit" role="button" class="btn btn-outline-pcj my-2 my-sm-0">
+                                        Log out
+                                    </button>
+                                </form>
+                            </div>
+                        @endauth
+                    </nav>
+                </section>
+            </div>
+            <div class="row">
                 <!-- Main -->
-                <main class="col-sm-9 col-lg-10 col-xl-8 mr-xl-auto py-4" id="admin">
+                <main class="my-auto col-lg-8 mx-lg-auto py-4" id="admin">
                     @yield('admin')
                 </main>
             </div>
