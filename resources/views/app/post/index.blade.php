@@ -1,60 +1,47 @@
 @extends('layouts.app')
+@section('title', 'Blog – Peter C. Jørgensen')
+@section('banner', asset('img/blog.jpg'))
 
 @push('head')
     @include('feed::links')
 @endpush
 
-@section('app')
-    <!-- Welcome -->
-    <header
-        class="pcj-parallax pcj-header pcj-blog-header"
-        data-image-src="{{ asset('img/blog.jpg') }}"
-        data-natural-height="1277"
-        data-natural-width="1920"
-        data-parallax="scroll"
-        data-speed="0.6"
-        data-z-index="0"
-    >
-        <div class="container">
-            <div class="row">
-                <section class="col">
+@section('header')
+    <div class="container">
+        <div class="row">
+            <section class="col">
+                <article class="pcj-header-content mb-0">
                     @empty (request()->input('q'))
                         <h2 class="h1">Welcome,</h2>
                         <p>You have found my personal blog, where I talk about the <b>ideas</b>, the <b>insights</b> and the <b>techniques</b> behind my projects.</p>
-                        <p>In addition, I post about <b>news</b>, <b>events</b> and <b>resources</b> relevant to the <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23webdev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#webdev</a> & <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23gamedev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#gamedev</a> communities.</p>
+                        <p>In addition, I post about <b>news</b>, <b>events</b> and <b>resources</b> relevant to the <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23webdev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#webdev</a> and <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23gamedev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#gamedev</a> communities.</p>
                     @else
                         <h2 class="h1">Search</h2>
                         <p>{{ $posts->count() }} {{ str_plural('result', $posts->count()) }} for <b> {{ request()->input('q') }}</b></p>
                     @endempty
-                </section>
-            </div>
-       </div>
-    </header>
+                </article>
+            </section>
+        </div>
+   </div>
+@endsection
 
+@section('app')
     <!-- Posts -->
     <div class="container">
         <div class="row my-4">
             <section class="col-lg-8">
 
+                <!-- Search -->
+                <div class="mb-4 d-block d-lg-none">
+                    @include('components.search')
+                </div>
+
                 <!-- List -->
                 @if ($posts->count())
                     @foreach ($posts as $post)
-                        <article class="card mb-4">
-                            <section class="card-body">
-                                <h1 class="card-title h2">
-                                    <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
-                                </h1>
-                                <h2 class="card-subtitle mb-2 text-muted h6">
-                                    {{ $post->published_at->format('F jS, Y') }}
-                                </h2>
-                                @foreach ($post->tags as $tag)
-                                    <span class="badge badge-pill badge-pcj">{{ $tag->name }}</span>
-                                @endforeach
-                                <p class="card-text">
-                                    {!! $post->excerpt() !!}
-                                </p>
-                            </section>
-                        </article>
+                        <div class="mb-4">
+                            @include('components.post')
+                        </div>
                     @endforeach
                 @else
                     <p class="text-danger my-1">There doesn't seem to be anything here.</p>
@@ -67,14 +54,9 @@
             <section class="col-lg-4">
 
                 <!-- Search -->
-                <form role="search" method="GET" action="{{ url()->current() }}">
-                    <div class="input-group mb-4">
-                        <input type="search" class="form-control" name="q" placeholder="..." value="{{ request()->input('q') }}">
-                        <span class="input-group-append">
-                            <button type="submit" class="btn btn-pcj">Search</button>
-                        </span>
-                    </div>
-                </form>
+                <div class="mb-4 d-none d-lg-block">
+                    @include('components.search')
+                </div>
 
                 <!-- Overview -->
                 <div class="card">
