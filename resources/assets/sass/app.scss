@@ -178,6 +178,22 @@ Bootstrap variants
     }
 }
 
+.btn-pcj-orange {
+    color: $white;
+    background-color: $orange;
+    border-color: $orange;
+
+    &:hover {
+        background-color: lighten($orange, 10%);
+        border-color: lighten($orange, 10%);
+        color: $white;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($orange, 0.25);
+    }
+}
+
 .bg-pcj {
     background-color: $blue;
     color: $white;
