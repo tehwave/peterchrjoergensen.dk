@@ -3,8 +3,8 @@
         <h1 class="card-title h2">
             <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
         </h1>
-        <p class="card-subtitle text-muted" title="{{ $post->published_at->diffForHumans() }}">
-            {{ $post->published_at->format('F jS, Y') }}
+        <p class="card-subtitle text-muted">
+            <span class="pr-1" data-toggle="tooltip" data-placement="right" title="{{ $post->published_at->diffForHumans() }}">{{ $post->published_at->format('F jS, Y') }}</span>
         </p>
         <p class="card-text">
             {!! $post->excerpt() !!}
