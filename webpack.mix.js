@@ -38,6 +38,7 @@ mix
     // Clean up
     .purgeCss({
         whitelist: [
+            'arrow',
             'lazyloaded',
             'tooltip-inner',
             'parallax-mirror',
