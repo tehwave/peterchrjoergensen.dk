@@ -105,7 +105,7 @@
                 <div class="card-deck mb-sm-4">
                     @include('components.post', ['post' => $posts[0]])
                     <article class="card text-white">
-                        <img class="card-img" src="{{ asset('img/home.jpg') }}">
+                        <img class="card-img" src="{{ asset('img/blog.jpg') }}">
                         <div class="card-img-overlay">
                             <h1 class="card-title h2">
                                 Don't miss out
