@@ -85,7 +85,6 @@
                         </section>
                         <footer class="card-footer bg-white border-top-0">
                             <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Website</a>
-                            <a href="https://blog.peterchrjoergensen.dk/category/gm48/" target="_blank" rel="noopener" class="card-link">Blog</a>
                         </footer>
                     </article>
                 </div>
