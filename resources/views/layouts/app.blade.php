@@ -85,7 +85,13 @@
         <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}" media="none" onload="if (media!=='all') media='all'">
         <noscript>
             <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
+            <style>
+                .lqip {
+                    display: none;
+                }
+            </style>
         </noscript>
+
         @stack('styles')
 
         @stack('head')
