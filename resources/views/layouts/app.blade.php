@@ -81,7 +81,11 @@
         <!-- Fonts -->
 
         <!-- Styles -->
-        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}" media="none" onload="if (media!=='all') media='all'">
+        <noscript>
+            <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
+        </noscript>
         @stack('styles')
 
         @stack('head')

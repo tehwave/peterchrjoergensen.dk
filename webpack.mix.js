@@ -14,6 +14,7 @@ require('laravel-mix-purgecss');
 
 mix
     // CSS
+    .sass('resources/assets/sass/bootstrap.scss', 'public/css')
     .sass('resources/assets/sass/app.scss', 'public/css')
 
     // JS
@@ -29,10 +30,10 @@ mix
         'bootstrap',
         'popper.js',
         'lazysizes',
-        'mixitup',
+        'mixitup', // Move this out of vendors and into specific file for portfolio page only?
         'jquery',
         'lodash',
-        'axios'
+        'axios' // Maybe we can remove this?
     ])
 
     // Clean up
