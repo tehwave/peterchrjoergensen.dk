@@ -3,6 +3,7 @@
     data-parallax="scroll"
     data-speed="0.6"
     data-z-index="0"
+    style="padding: 6rem 0;"
 >
     @include('components.navbar')
 
