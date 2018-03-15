@@ -82,9 +82,8 @@
 
         <!-- Styles -->
         <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
-        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}" media="none" onload="if (media!=='all') media='all'">
+        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
         <noscript>
-            <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
             <style>
                 .lqip {
                     display: none;
