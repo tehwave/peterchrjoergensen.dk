@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use Cache;
 
 class AppController extends Controller
 {
@@ -11,8 +12,12 @@ class AppController extends Controller
      */
     public function home()
     {
-        // TODO: Cache this
-        $posts = Post::published()->orderByDesc('published_at')->get()->take(3);
+        $posts = Cache::remember('app.home.posts', 60 * 24, function () {
+            return Post::published()
+                ->orderByDesc('published_at')
+                ->get()
+                ->take(3);
+        });
 
         return view('app.home', compact('posts'));
     }
