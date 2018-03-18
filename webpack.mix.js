@@ -23,6 +23,7 @@ mix
         'popper.js/dist/umd/popper.js': ['Popper']
     })
     .js('resources/assets/js/app.js', 'public/js')
+    .js('resources/assets/js/mixitup.js', 'public/js')
 
     // JS Vendors
     .extract([
@@ -30,7 +31,6 @@ mix
         'bootstrap',
         'popper.js',
         'lazysizes',
-        'mixitup', // Move this out of vendors and into specific file for portfolio page only?
         'jquery',
         'lodash',
     ])

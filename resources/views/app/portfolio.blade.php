@@ -48,3 +48,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ mix('js/mixitup.js') }}"></script>
+@endpush
