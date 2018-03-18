@@ -1,0 +1,18 @@
+/* --------------------------------
+
+Cards
+
+-------------------------------- */
+
+.card {
+    .card-text {
+        .card-link + .card-link {
+            margin-left: 0;
+        }
+    }
+
+    &.text-white {
+        .card-link { color: $white; font-weight: 700; text-decoration: none; }
+        .card-link:hover { opacity: 0.75; }
+    }
+}
