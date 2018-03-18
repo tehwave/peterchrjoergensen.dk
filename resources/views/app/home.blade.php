@@ -47,22 +47,23 @@
                         <noscript>
                             <img
                                 class="card-img-top"
-                                src="{{ asset('img/b2bkolding.png') }}"
-                                alt="B2B Kolding"
+                                src="{{ asset('img/grundfos.png') }}"
+                                alt="Grundfos"
                             />
                         </noscript>
                         <img
                             class="card-img-top lazyload lqip"
-                            src="{{ asset('img/b2bkolding-lowquality.png') }}"
-                            data-src="{{ asset('img/b2bkolding.png') }}"
-                            alt="B2B Kolding"
+                            src="{{ asset('img/grundfos-lowquality.png') }}"
+                            data-src="{{ asset('img/grundfos.png') }}"
+                            alt="Grundfos"
                         />
                         <section class="card-body">
-                            <h2 class="card-title">B2B Kolding</h2>
-                            <p class="card-text">A custom Wordpress website for a local trade fair</p>
+                            <h2 class="card-title">Grundfos Safety</h2>
+                            <p class="card-text">A safety instructions and quiz web application for visitors to the Grundfos facilities</p>
                         </section>
                         <footer class="card-footer bg-white border-top-0">
-                            <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Website</a>
+                            <a href="https://tehwave.github.io/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">Example</a>
+                            <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
                     </article>
                     <article class="card">
