@@ -12,7 +12,7 @@
     </section>
     <footer class="card-footer bg-white border-top-0">
         @foreach ($post->tags as $tag)
-            <span class="badge badge-pcj-orange">
+            <span class="pcj-tag">
                 {{ $tag->name }}
             </span>
         @endforeach

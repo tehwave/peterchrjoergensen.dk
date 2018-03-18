@@ -89,7 +89,7 @@
                                 @if ($post->tags->count())
                                     <div>
                                         @foreach ($post->tags as $tag)
-                                            <span class="badge badge-pcj-orange">{{ $tag->name }}</span>
+                                            <span class="pcj-tag">{{ $tag->name }}</span>
                                         @endforeach
                                     </div>
                                 @endif
