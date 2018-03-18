@@ -33,7 +33,6 @@ mix
         'mixitup', // Move this out of vendors and into specific file for portfolio page only?
         'jquery',
         'lodash',
-        'axios' // Maybe we can remove this?
     ])
 
     // Clean up
