@@ -81,7 +81,9 @@
                             <section class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto">
                                 <div>
                                     @isset($post->published_at)
-                                        {{ $post->published_at->format('F jS, Y') }}
+                                        <span data-toggle="tooltip" data-placement="top" title="{{ $post->published_at->diffForHumans() }}">
+                                            {{ $post->published_at->format('F jS, Y') }}
+                                        </span>
                                     @else
                                         Draft
                                     @endisset
