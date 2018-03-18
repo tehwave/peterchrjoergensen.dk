@@ -40,9 +40,15 @@ mix
     .purgeCss({
         whitelist: [
             'arrow',
+            'collapsing',
             'lazyloaded',
             'tooltip-inner',
+            'bs-tooltip-top',
+            'bs-tooltip-auto',
+            'bs-tooltip-left',
             'parallax-mirror',
+            'bs-tooltip-right',
+            'bs-tooltip-bottom',
             'mixitup-control-active'
         ]
     })
