@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Post;
 use Cache;
+use App\Post;
 
 class AppController extends Controller
 {
