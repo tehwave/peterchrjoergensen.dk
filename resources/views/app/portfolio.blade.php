@@ -14,7 +14,7 @@
            </section>
         </div>
         <!-- Controls -->
-        <div class="row">
+        <div class="row mb-4 mb-md-0">
             <section class="col">
                 <div class="d-md-flex justify-content-md-center">
                     <div class="btn-group mb-2 mr-sm-4" role="group" aria-label="Show All">
