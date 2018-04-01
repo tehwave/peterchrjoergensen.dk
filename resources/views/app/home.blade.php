@@ -105,8 +105,8 @@
             <section class="col-12">
                 <div class="card-deck mb-sm-4">
                     @include('components.post', ['post' => $posts[0]])
-                    <article class="card text-white">
-                        <section class="card-body bg-pcj" style="background-image: url('{{ asset('img/blog.jpg') }}'); background-size: cover; background-position: center;">
+                    <article class="card text-white bg-pcj" style="background-image: url('{{ asset('img/blog.jpg') }}'); background-size: cover; background-position: center;">
+                        <section class="card-body">
                             <h1 class="card-title h2">
                                 Don't miss out
                             </h1>
