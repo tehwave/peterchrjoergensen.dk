@@ -69,6 +69,20 @@
         }
         </script>
 
+        <!-- Fonts -->
+
+        <!-- Styles -->
+        <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
+        <noscript>
+            <style>
+                .lqip {
+                    display: none;
+                }
+            </style>
+        </noscript>
+        @stack('styles')
+
         <!-- Google Tag Manager -->
         <script>
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -86,21 +100,6 @@
             enable_page_level_ads: true
           });
         </script>
-
-        <!-- Fonts -->
-
-        <!-- Styles -->
-        <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
-        <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
-        <noscript>
-            <style>
-                .lqip {
-                    display: none;
-                }
-            </style>
-        </noscript>
-
-        @stack('styles')
 
         @stack('head')
     </head>
