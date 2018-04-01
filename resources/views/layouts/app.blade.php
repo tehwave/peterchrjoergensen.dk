@@ -69,8 +69,6 @@
         }
         </script>
 
-        <!-- Fonts -->
-
         <!-- Styles -->
         <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
