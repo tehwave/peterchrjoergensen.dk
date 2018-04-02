@@ -46,6 +46,18 @@
                 @else
                     <p class="text-danger my-1">There doesn't seem to be anything here.</p>
                 @endif
+                <div class="mb-4">
+                    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-format="fluid"
+                         data-ad-layout-key="-5i+e7+5o-6q-71"
+                         data-ad-client="ca-pub-4880846761046037"
+                         data-ad-slot="4955556552"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
 
                 <!-- Pagination -->
                 {{ $posts->links() }}
