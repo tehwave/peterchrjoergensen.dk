@@ -7,7 +7,7 @@
         <div class="row">
             <section class="col">
                 <article class="pcj-header-content">
-                    <h2 class="h1">Curriculum Vitae</h2>
+                    <h1>Curriculum Vitae</h1>
                     <a href="{{ asset('files/CV-Peter-Christian-Jørgensen-English.pdf') }}" target="_blank" rel="noopener noreferrer" class="btn btn-pcj">
                         Download &nbsp; (English <img src="{{ asset('img/english.png') }}" width="20" class="align-baseline"> )
                     </a>
@@ -21,75 +21,82 @@
 @endsection
 
 @section('app')
-    <!-- Education -->
-    <div class="container mb-5">
+    <div class="container mb-4">
+        <!-- Experience -->
         <div class="row mt-4">
-            <section class="col-12">
-                <h3 class="h2">Education</h3>
-                <hr>
+            <section class="col-8">
+                <p class="text-muted">Experience</p>
+            </section>
+            <section class="col-4 text-right">
+                <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">Learn more</a>
             </section>
         </div>
-        @foreach ($educations as $education)
-            <div class="row mb-4">
-                <section class="col-12 col-lg-2">
-                    {{ $education['date'] }}
-                </section>
-                <section class="col-12 col-lg-8">
-                    <h3>
-                        {{ $education['title'] }}
-                        <small class="d-block d-lg-inline-block">{{ $education['school'] }}</small>
-                    </h3>
-                </section>
-            </div>
-        @endforeach
-    </div>
-
-    <!-- Experience -->
-    <div class="container mb-5">
-        <div class="row mt-4">
-            <section class="col-12">
-                <h3 class="h2">Experience</h3>
-                <hr>
-            </section>
-        </div>
-        @foreach ($experiences as $experience)
-            <div class="row mb-4">
-                <section class="col-12 col-lg-2">
-                    {{ $experience['date'] }}
-                </section>
-                <section class="col-12 col-lg-8">
-                    <h3>
-                        {{ $experience['title'] }}
-                        <small class="d-block d-lg-inline-block">{{ $experience['company'] }}</small>
-                    </h3>
-                    @foreach ($experience['summary'] as $summary)
-                        <p>{!! $summary !!}</p>
-                    @endforeach
-                </section>
-            </div>
-        @endforeach
-        <div class="row mt-3">
-            <section class="col text-center">
-                <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener" class="btn btn-outline-pcj">Learn more</a>
-            </section>
-        </div>
-    </div>
-
-
-    <!-- Projects -->
-    <div class="container">
         <div class="row">
             <section class="col">
-                <h3 class="h2">Projects</h3>
-                <hr>
+                <div class="card-group">
+                    @foreach ($experiences as $experience)
+                        <article class="card">
+                            <header class="card-header @if ($loop->first) bg-pcj @endif">
+                                {{ $experience['date'] }}
+                            </header>
+                            <section class="card-body">
+                                <h3 class="card-title">
+                                    {{ $experience['title'] }}
+                                    <small class="text-muted">{{ $experience['company'] }}</small>
+                                </h3>
+                                <p class="card-subtitle text-muted">
+                                </p>
+                                @foreach ($experience['summary'] as $summary)
+                                    <p class="card-text">{!! $summary !!}</p>
+                                @endforeach
+                            </section>
+                        </article>
+                    @endforeach
+                </div>
             </section>
         </div>
-    </div>
-    <div class="container-fluid mb-5">
-       <div class="row">
-            <section class="col-12 mx-auto col-lg-12 col-xl-10">
-                <div class="card-deck">
-                    <article class="card mb-4">
+
+        <!-- Education -->
+        <div class="row mt-4">
+            <section class="col">
+                <p class="text-muted">Education</p>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col">
+                <div class="card-group">
+                    @foreach ($educations as $education)
+                        <article class="card">
+                            <header class="card-header @if ($loop->first) bg-pcj @endif">
+                                {{ $education['date'] }}
+                            </header>
+                            <section class="card-body">
+                                <h3 class="card-title">
+                                    {{ $education['title'] }}
+                                </h3>
+                                <p class="card-text">
+                                    {{ $education['school'] }}
+                                </p>
+                            </section>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        </div>
+
+        <!-- Projects -->
+        <div class="row mt-4">
+            <section class="col-8">
+                <p class="text-muted">Projects</p>
+            </section>
+            <section class="col-4 my-auto text-right">
+                <a href="{{ route('portfolio') }}">See all</a>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col">
+                <div class="card-deck mb-4">
+                    <article class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -107,33 +114,34 @@
                             <h2 class="card-title">FIRKANT</h2>
                             <p class="card-text">A fast-paced, procedural platforming video game</p>
                         </section>
-                        <footer class="card-footer">
+                        <footer class="card-footer bg-white border-top-0">
                             <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
                     </article>
-                    <article class="card mb-4">
+                    <article class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
-                                src="{{ asset('img/b2bkolding.png') }}"
-                                alt="B2B Kolding"
+                                src="{{ asset('img/grundfos.png') }}"
+                                alt="Grundfos"
                             />
                         </noscript>
                         <img
                             class="card-img-top lazyload lqip"
-                            src="{{ asset('img/b2bkolding-lowquality.png') }}"
-                            data-src="{{ asset('img/b2bkolding.png') }}"
-                            alt="B2B Kolding"
+                            src="{{ asset('img/grundfos-lowquality.png') }}"
+                            data-src="{{ asset('img/grundfos.png') }}"
+                            alt="Grundfos"
                         />
                         <section class="card-body">
-                            <h2 class="card-title">B2B Kolding</h2>
-                            <p class="card-text">A custom Wordpress website for a local trade fair</p>
+                            <h2 class="card-title">Grundfos Safety</h2>
+                            <p class="card-text">A safety instructions and quiz web application for visitors to the Grundfos facilities</p>
                         </section>
-                        <footer class="card-footer">
-                            <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener" class="card-link">Website</a>
+                        <footer class="card-footer bg-white border-top-0">
+                            <a href="https://tehwave.github.io/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">Example</a>
+                            <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
                     </article>
-                    <article class="card mb-4">
+                    <article class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -151,27 +159,18 @@
                             <h2 class="card-title">GM48</h2>
                             <p class="card-text">A games development competition</p>
                         </section>
-                        <footer class="card-footer">
+                        <footer class="card-footer bg-white border-top-0">
                             <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Website</a>
-                            <a href="https://blog.peterchrjoergensen.dk/category/gm48/" target="_blank" rel="noopener" class="card-link">Blog</a>
                         </footer>
                     </article>
                 </div>
             </section>
         </div>
-        <div class="row mt-3">
-            <section class="col text-center">
-                <a href="{{ route('portfolio') }}" target="_blank" rel="noopener" class="btn btn-outline-pcj">Browse my portfolio</a>
-            </section>
-        </div>
-    </div>
 
-    <!-- Skills -->
-    <div class="container mb-5">
-        <div class="row">
+        <!-- Skills -->
+        <div class="row mt-4">
             <section class="col">
-                <h3 class="h2">Skills</h3>
-                <hr>
+                <p class="text-muted">Skills</p>
             </section>
         </div>
         <div class="row">
@@ -228,51 +227,49 @@
                 </ul>
             </section>
         </div>
-    </div>
 
-    <!-- Profile -->
-    <div class="container mb-5">
+        <!-- Profile -->
+        <div class="row mt-4">
+            <section class="col">
+                <p class="text-muted">Profile</p>
+            </section>
+        </div>
         <div class="row">
             <section class="col">
-                <h3 class="h2">Profile</h3>
-                <hr>
+                <article class="card">
+                    <header class="card-header text-center">
+                        <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px">
+                    </header>
+                    <section class="card-body">
+                        <section class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
+                            <p class="card-text lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
+                            <p class="card-text">I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
+                            <p class="card-text">I love to learn new things, and I strive to keep myself up to date with the industry.</p>
+                            <p class="card-text">I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
+                        </section>
+                    </section>
+                </article>
             </section>
         </div>
-        <div class="row">
-            <section class="d-none d-lg-block col-lg-2">
-                    <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle">
-            </section>
-            <section class="col-12 col-lg-8">
-                <p class="lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
-                <p>I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
-                <p>I love to learn new things, and I strive to keep myself up to date with the industry.</p>
-                <p>I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
-            </section>
-        </div>
-    </div>
 
-    <!-- Other -->
-    <div class="container mb-5">
+        <!-- Other -->
+        <div class="row mt-4">
+            <section class="col">
+                <p class="text-muted">Misc</p>
+            </section>
+        </div>
         <div class="row">
             <section class="col">
-                <h3 class="h2">Other</h3>
-                <hr>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-12 col-lg-2">
-                <strong>Nationality</strong>
-            </section>
-            <section class="col-12 col-lg-8">
-                <p>Danish</p>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-12 col-lg-2">
-                <strong>Driver's License</strong>
-            </section>
-            <section class="col-12 col-lg-8">
-                <p>Type B</p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Nationality</strong>
+                        <div>Danish</div>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Driver's License</strong>
+                        <div>Type B</div>
+                    </li>
+                </ul>
             </section>
         </div>
     </div>
