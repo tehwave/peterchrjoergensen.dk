@@ -50,7 +50,6 @@ class CurriculumVitaeController extends Controller
                     'I designed and developed the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
                     'I was responsible for marketing the trade fair by drafting the marketing plan as well as finding out via research what worked best in relation to the target group and limited budget.',
                     'In addition, I shot several short video commercials for distribution on SoMe.',
-                    'Visit the <a href="https://www.b2bkolding.dk" target="_blank" rel="noopener noreferrer">website.</a>',
                 ],
             ],
         ];
