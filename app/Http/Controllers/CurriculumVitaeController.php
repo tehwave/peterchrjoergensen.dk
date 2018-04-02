@@ -26,6 +26,14 @@ class CurriculumVitaeController extends Controller
 
         $experiences = [
             [
+                'date'    => '2017 -',
+                'title'   => 'Customer Support Agent',
+                'company' => 'YouSee',
+                'summary' => [
+                    'I work over-the-phone by supporting, selling and advising customers on YouSee products, ensuring that any problems are remedied, solutions are found, and that the customer has felt well treated.',
+                ],
+            ],
+            [
                 'date'    => '2017',
                 'title'   => 'Student Assistant',
                 'company' => 'Grundfos',
@@ -53,14 +61,6 @@ class CurriculumVitaeController extends Controller
                     'I volunteered to help maintain the day-to-day of the forum <a href="https://www.reddit.com/r/GameMaker" target="_blank" rel="noreferrer noopener">/r/GameMaker</a>, remove any unwanted posts or comments made by users with ill-intent, organize events, and brainstorm ideas.',
                     'In addition, I composed plans to increase growth, and approached interesting & relevant people to host Ask-Me-Anything (AMAs) on the forum.',
                     'The forum consisted of over 15,000 members and received over 200,000 visitors each month at the time of my departure.',
-                ],
-            ],
-            [
-                'date'    => '2009 - 2013',
-                'title'   => 'IT & Operation Assistant',
-                'company' => 'Janchart Shipping',
-                'summary' => [
-                    'I was in charge of daily shipping routines, any computer related jobs, processing of data and management of the company website.',
                 ],
             ],
         ];
