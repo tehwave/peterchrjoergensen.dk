@@ -89,7 +89,7 @@
             <section class="col-8">
                 <p class="text-muted">Projects</p>
             </section>
-            <section class="col-4 my-auto text-right">
+            <section class="col-4 text-right">
                 <a href="{{ route('portfolio') }}">See all</a>
             </section>
         </div>
