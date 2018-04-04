@@ -69,14 +69,14 @@
                 <!-- Overview -->
                 <ul class="list-group">
                     {{-- Recent Posts --}}
-                    @if (request()->input('page') > 1)
+                    @if (request()->input('page') > 1 && empty(request()->input('query')))
                         <li class="list-group-item">
                             <div>Recent</div>
                             <ul class="list-unstyled">
-                                @foreach ($posts->take(3) as $post)
+                                @foreach (App\Post::published()->orderBy('published_at', 'desc')->take(3)->get() as $post)
                                     <li>
                                         <a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a>
-                                        <span class="text-muted">{{ $post->published_at->diffForHumans() }}</span>
+                                        <small class="text-muted">{{ $post->published_at->diffForHumans() }}</small>
                                     </li>
                                 @endforeach
                             </ul>
