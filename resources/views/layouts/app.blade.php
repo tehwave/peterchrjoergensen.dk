@@ -41,7 +41,7 @@
             <meta property="profile:last_name" content="Jørgensen">
             <meta property="og:url" content="{{ url()->full() }}">
             <meta property="og:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')"">
+            <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
             <meta property="og:image" content="{{ asset('img/open-graph-image.png') }}">
         @show
 
@@ -50,7 +50,7 @@
             <meta name="twitter:card" content="summary">
             <meta name="twitter:site" content="@tehwave">
             <meta name="twitter:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')"">
+            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
             <meta name="twitter:image" content="{{ asset('twitter-image.png') }}">
         @show
 
