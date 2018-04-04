@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $post->title)
+@section('title', "$post->title by Peter C. Jørgensen")
 @section('description', $post->excerpt)
 
 @section('open-graph')
