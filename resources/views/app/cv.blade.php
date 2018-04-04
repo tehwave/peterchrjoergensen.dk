@@ -44,8 +44,6 @@
                                     {{ $experience['title'] }}
                                     <small class="text-muted">{{ $experience['company'] }}</small>
                                 </h3>
-                                <p class="card-subtitle text-muted">
-                                </p>
                                 @foreach ($experience['summary'] as $summary)
                                     <p class="card-text">{!! $summary !!}</p>
                                 @endforeach
