@@ -53,10 +53,21 @@
         <div class="row">
             <section class="col">
                 <article class="pcj-header-content">
-                    <h2 class="h1">
-                        <span style="color: #E77E2D">|</span>
+                    <ul class="list-inline mb-0" style="font-size: 1rem">
+                        @isset($post->published_at)
+                            <li class="list-inline-item" data-toggle="tooltip" data-placement="top" title="{{ $post->published_at->diffForHumans() }}">
+                                {{ $post->published_at->format('F jS, Y') }}
+                            </li>
+                        @else
+                            <li class="list-inline-item">Draft</li>
+                        @endisset
+                        @foreach ($post->tags as $tag)
+                                <li class="list-inline-item pcj-tag">{{ $tag->name }}</li>
+                        @endforeach
+                    </ul>
+                    <h1>
                         {{ $post->title }}
-                    </h2>
+                    </h1>
                     <p>{!! $post->excerpt() !!}</p>
                 </article>
             </section>
@@ -66,68 +77,54 @@
 
 @section('app')
     <div class="container">
+
+        <!-- Body -->
+        <div class="row my-4">
+            <div class="col">
+                <article class="pcj-post-body">
+                    {!! $post->body() !!}
+                </article>
+            </div>
+        </div>
+
         <!-- Meta -->
-        <div class="row my-4 text-center">
-            <section class="col">
+        <div class="row mb-4 text-center">
+            <div class="col">
                 <div class="card">
-                    <section class="card-body">
+                    <div class="card-body">
                         <div class="row">
-                            <section class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1">
+                            <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1">
                                 @isset ($previous_post)
                                     <small>Previous</small>
                                     <div><a href="{{ route('post.show', $previous_post->slug) }}">{{ $previous_post->title }}</a></div>
                                 @endisset
-                            </section>
-                            <section class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto">
-                                <div>
-                                    @isset($post->published_at)
-                                        <span data-toggle="tooltip" data-placement="top" title="{{ $post->published_at->diffForHumans() }}">
-                                            {{ $post->published_at->format('F jS, Y') }}
-                                        </span>
-                                    @else
-                                        Draft
-                                    @endisset
-                                </div>
-                                @if ($post->tags->count())
-                                    <div>
-                                        @foreach ($post->tags as $tag)
-                                            <span class="pcj-tag">{{ $tag->name }}</span>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </section>
-                            <section class="col-12 col-sm-6 order-3 col-md-3 order-md-3">
+                            </div>
+                            <div class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto text-center">
+                                <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px" data-toggle="tooltip" data-placement="top" title="Peter C. Jørgensen">
+
+                            </div>
+                            <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3">
                                 @isset ($next_post)
                                     <small>Next</small>
                                     <div><a href="{{ route('post.show', $next_post->slug) }}">{{ $next_post->title }}</a></div>
                                 @endisset
-                            </section>
+                            </div>
                         </div>
-                    </section>
+                    </div>
                     @auth
                         <footer class="card-footer">
                             <div class="row">
-                                <section class="col-lg-4">
+                                <div class="col-lg-4">
                                     <a href="{{ route('admin.index') }}" class="btn btn-block btn-outline-pcj mb-2 mb-lg-0">Admin</a>
-                                </section>
-                                <section class="col-lg-4 mr-lg-auto">
+                                </div>
+                                <div class="col-lg-4 mr-lg-auto">
                                     <a href="{{ route('post.edit', $post->slug) }}" class="btn btn-block btn-pcj">Edit</a>
-                                </section>
+                                </div>
                             </div>
                         </footer>
                     @endauth
                 </div>
-            </section>
+            </div>
         </div>
-
-        <!-- Body -->
-        <div class="row mb-4">
-            <section class="col">
-                <article class="pcj-post-body">
-                    {!! $post->body() !!}
-                </article>
-            </section>
-        </div>
-
     </div>
 @endsection
