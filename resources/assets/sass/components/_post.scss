@@ -4,7 +4,21 @@ Post
 
 -------------------------------- */
 
+.pcj-post-footer {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.pcj-post-avatar {
+    margin: 0;
+
+    @media (min-width: 1200px) {
+        margin: -64px 0;
+    }
+}
+
 .pcj-post-body {
+    margin-top: 1.5rem;
     margin-bottom: 4rem;
 
     @media (min-width: 992px) {

@@ -88,22 +88,36 @@
         </div>
 
         <!-- Meta -->
-        <div class="row mb-4 text-center">
+        <div class="row text-center">
             <div class="col">
-                <div class="card">
+                <div class="card pcj-post-footer">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1">
+                            <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1 my-md-auto">
                                 @isset ($previous_post)
                                     <small>Previous</small>
                                     <div><a href="{{ route('post.show', $previous_post->slug) }}">{{ $previous_post->title }}</a></div>
                                 @endisset
                             </div>
                             <div class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto text-center">
-                                <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px" data-toggle="tooltip" data-placement="top" title="Peter C. Jørgensen">
-
+                                <noscript>
+                                    <img
+                                        class="img-fluid rounded-circle pcj-post-avatar"
+                                        src="{{ asset('img/peter.jpg') }}"
+                                        width="128"
+                                    />
+                                </noscript>
+                                <img
+                                    class="lazyload lqip img-fluid rounded-circle pcj-post-avatar"
+                                    src="{{ asset('img/peter-lowquality.jpg') }}"
+                                    data-src="{{ asset('img/peter.jpg') }}"
+                                    data-toggle="tooltip"
+                                    data-placement="top"
+                                    title="Peter C. Jørgensen"
+                                    width="128"
+                                />
                             </div>
-                            <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3">
+                            <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3 my-md-auto">
                                 @isset ($next_post)
                                     <small>Next</small>
                                     <div><a href="{{ route('post.show', $next_post->slug) }}">{{ $next_post->title }}</a></div>
