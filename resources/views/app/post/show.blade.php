@@ -128,10 +128,10 @@
                     @auth
                         <footer class="card-footer">
                             <div class="row">
-                                <div class="col-lg-4">
+                                <div class="col col-lg-4 mx-lg-auto">
                                     <a href="{{ route('admin.index') }}" class="btn btn-block btn-outline-pcj mb-2 mb-lg-0">Admin</a>
                                 </div>
-                                <div class="col-lg-4 mr-lg-auto">
+                                <div class="col col-lg-4 mx-lg-auto">
                                     <a href="{{ route('post.edit', $post->slug) }}" class="btn btn-block btn-pcj">Edit</a>
                                 </div>
                             </div>
