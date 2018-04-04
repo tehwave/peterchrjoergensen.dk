@@ -93,9 +93,9 @@
         </div>
 
         {{-- Blog --}}
-        <div class="row my-2">
+        <div class="row mt-2">
             <section class="col-8 text-muted">
-                Latest posts from my blog
+                <p class="text-muted">Latest posts from my blog</p>
             </section>
             <section class="col-4 text-right">
                 <a href="{{ route('post.index') }}">See all</a>
