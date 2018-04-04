@@ -16,8 +16,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        if (request()->has('q')) {
-            $posts = Post::search(request()->input('q'))->paginate(5);
+        if (request()->has('query')) {
+            $posts = Post::search(request()->input('query'))->paginate(5);
         } else {
             $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
         }
