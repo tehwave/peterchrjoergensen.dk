@@ -62,7 +62,7 @@
                             <li class="list-inline-item">Draft</li>
                         @endisset
                         @foreach ($post->tags as $tag)
-                                <li class="list-inline-item pcj-tag">{{ $tag->name }}</li>
+                            <li class="list-inline-item pcj-tag">{{ $tag->name }}</li>
                         @endforeach
                     </ul>
                     <h1>
