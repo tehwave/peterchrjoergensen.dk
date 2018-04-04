@@ -5,7 +5,7 @@
 @section('header')
     <div class="container">
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <article class="pcj-header-content">
                     <h1>Curriculum Vitae</h1>
                     <a href="{{ asset('files/CV-Peter-Christian-Jørgensen-English.pdf') }}" target="_blank" rel="noopener noreferrer" class="btn btn-pcj">
@@ -15,7 +15,7 @@
                         Download &nbsp; (Dansk <img src="{{ asset('img/dansk.png') }}" width="20" class="align-baseline"> )
                     </a>
                 </article>
-            </section>
+            </div>
         </div>
     </div>
 @endsection
@@ -24,18 +24,18 @@
     <div class="container mb-4">
         <!-- Experience -->
         <div class="row mt-4">
-            <section class="col-8">
+            <div class="col-8">
                 <p class="text-muted">Experience</p>
-            </section>
-            <section class="col-4 text-right">
+            </div>
+            <div class="col-4 text-right">
                 <a href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">Learn more</a>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <div class="card-group">
                     @foreach ($experiences as $experience)
-                        <article class="card">
+                        <div class="card">
                             <header class="card-header @if ($loop->first) bg-pcj @endif">
                                 {{ $experience['date'] }}
                             </header>
@@ -48,23 +48,23 @@
                                     <p class="card-text">{!! $summary !!}</p>
                                 @endforeach
                             </section>
-                        </article>
+                        </div>
                     @endforeach
                 </div>
-            </section>
+            </div>
         </div>
 
         <!-- Education -->
         <div class="row mt-4">
-            <section class="col">
+            <div class="col">
                 <p class="text-muted">Education</p>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <div class="card-group">
                     @foreach ($educations as $education)
-                        <article class="card">
+                        <div class="card">
                             <header class="card-header @if ($loop->first) bg-pcj @endif">
                                 {{ $education['date'] }}
                             </header>
@@ -76,25 +76,25 @@
                                     {{ $education['school'] }}
                                 </p>
                             </section>
-                        </article>
+                        </div>
                     @endforeach
                 </div>
-            </section>
+            </div>
         </div>
 
         <!-- Projects -->
         <div class="row mt-4">
-            <section class="col-8">
+            <div class="col-8">
                 <p class="text-muted">Projects</p>
-            </section>
-            <section class="col-4 text-right">
+            </div>
+            <div class="col-4 text-right">
                 <a href="{{ route('portfolio') }}">See all</a>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <div class="card-deck mb-4">
-                    <article class="card">
+                    <div class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -115,8 +115,8 @@
                         <footer class="card-footer bg-white border-top-0">
                             <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
-                    </article>
-                    <article class="card">
+                    </div>
+                    <div class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -138,8 +138,8 @@
                             <a href="https://tehwave.github.io/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">Example</a>
                             <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
-                    </article>
-                    <article class="card">
+                    </div>
+                    <div class="card">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -160,19 +160,19 @@
                         <footer class="card-footer bg-white border-top-0">
                             <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
-                    </article>
+                    </div>
                 </div>
-            </section>
+            </div>
         </div>
 
         <!-- Skills -->
         <div class="row mt-4">
-            <section class="col">
+            <div class="col">
                 <p class="text-muted">Skills</p>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <ul class="pl-0">
                     <li class="badge badge-pcj badge-lg">Web Design</li>
                     <li class="badge badge-pcj badge-lg">Web Development</li>
@@ -223,41 +223,41 @@
                     <li class="badge badge-pcj badge-lg">JSON</li>
                     <li class="badge badge-pcj badge-lg">XML</li>
                 </ul>
-            </section>
+            </div>
         </div>
 
         <!-- Profile -->
         <div class="row mt-4">
-            <section class="col">
+            <div class="col">
                 <p class="text-muted">Profile</p>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
-                <article class="card">
+            <div class="col">
+                <div class="card">
                     <header class="card-header text-center">
                         <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px">
                     </header>
-                    <section class="card-body">
-                        <section class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
+                    <div class="card-body">
+                        <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
                             <p class="card-text lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
                             <p class="card-text">I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
                             <p class="card-text">I love to learn new things, and I strive to keep myself up to date with the industry.</p>
                             <p class="card-text">I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
-                        </section>
-                    </section>
-                </article>
-            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Other -->
         <div class="row mt-4">
-            <section class="col">
+            <div class="col">
                 <p class="text-muted">Misc</p>
-            </section>
+            </div>
         </div>
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <ul class="list-group">
                     <li class="list-group-item">
                         <strong>Nationality</strong>
@@ -268,7 +268,7 @@
                         <div>Type B</div>
                     </li>
                 </ul>
-            </section>
+            </div>
         </div>
     </div>
 @endsection

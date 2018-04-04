@@ -4,27 +4,26 @@
 @section('header')
     <div class="container">
         <div class="row">
-            <section class="col">
+            <div class="col">
                 <article class="pcj-header-content">
-                    <h2 class="h1">Archive</h2>
+                    <h1>Archive</h1>
                     <p>{{ $date }}</p>
                 </article>
-            </section>
+            </div>
         </div>
    </div>
 @endsection
 
 @section('app')
-    <!-- Posts -->
     <div class="container">
         <div class="row my-4">
-            <section class="col">
+            <div class="col">
                 <form action="{{ route('archive.browse') }}" method="POST">
                     {{ csrf_field() }}
                     <div class="card">
-                        <section class="card-body">
+                        <div class="card-body">
                             <div class="row">
-                                <section class="col-12 col-sm">
+                                <div class="col-12 col-sm">
                                     <!-- Year -->
                                     <select name="year" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('year')) is-invalid @endif">
                                         <option @unless (old('year')) selected @endunless value="">Year</option>
@@ -32,8 +31,8 @@
                                             <option value="{{ Carbon\Carbon::now()->subYears($i)->year }}" @if (old('year') == Carbon\Carbon::now()->subYears($i)->year) selected @endif>{{ Carbon\Carbon::now()->subYears($i)->year }}</option>
                                         @endfor
                                     </select>
-                                </section>
-                                <section class="col-12 col-sm">
+                                </div>
+                                <div class="col-12 col-sm">
                                     <!-- Month -->
                                     <select name="month" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('month')) is-invalid @endif">
                                         <option @unless (old('month')) selected @endunless value="">Month</option>
@@ -50,8 +49,8 @@
                                         <option value="11" @if (old('month') == 11) selected @endif>November</option>
                                         <option value="12" @if (old('month') == 12) selected @endif>December</option>
                                     </select>
-                                </section>
-                                <section class="col-12 col-sm">
+                                </div>
+                                <div class="col-12 col-sm">
                                     <!-- Day -->
                                     <select name="day" class="custom-select d-inline-block mb-2 mb-sm-0 @if ($errors->has('day')) is-invalid @endif">
                                         <option @unless (old('day')) selected @endunless value="">Day</option>
@@ -59,38 +58,27 @@
                                             <option value="{{ $i }}" @if (old('day') == $i) selected @endif>{{ $i }}</option>
                                         @endfor
                                     </select>
-                                </section>
-                                <section class="col-12 col-sm text-sm-right">
+                                </div>
+                                <div class="col-12 col-sm text-sm-right">
                                     <!-- Submit -->
                                     <button type="submit" class="btn btn-lg btn-pcj">
                                         Browse
                                     </button>
-                                </section>
+                                </div>
                             </div>
-                        </section>
+                        </div>
                     </div>
                 </form>
-            </section>
+            </div>
         </div>
         <div class="row mb-4">
-            <section class="col-lg-8 mr-lg-auto">
-
-                @if($posts->count())
+            <div class="col-lg-8 mr-lg-auto">
+                @if ($posts->count())
                     <!-- List -->
                     @foreach ($posts as $post)
-                        <article class="card mb-4">
-                            <section class="card-body">
-                                <h1 class="card-title">
-                                    <a href="{{ route('post.show', $post->slug) }}" class="card-link">{{ $post->title }}</a>
-                                </h1>
-                                <h2 class="card-subtitle mb-2 text-muted h6">
-                                    {{ $post->published_at->format('F jS, Y') }}
-                                </h2>
-                                <p class="card-text">
-                                    {!! $post->excerpt() !!}
-                                </p>
-                            </section>
-                        </article>
+                        <div class="mb-4">
+                            @include('components.post')
+                        </div>
                     @endforeach
 
                     <!-- Pagination -->
@@ -98,8 +86,7 @@
                 @else
                     <p class="text-danger my-4">There doesn't seem to be anything here.</p>
                 @endif
-
-            </section>
+            </div>
         </div>
     </div>
 @endsection

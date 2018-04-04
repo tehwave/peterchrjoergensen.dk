@@ -1,4 +1,4 @@
-<article class="card">
+<div class="card">
     <noscript>
         <img
             class="card-img-top"
@@ -22,4 +22,4 @@
             <a href="{{ $project['link'] }}" target="_blank" rel="noopener" class="card-link">{{ $project['link_text'] }}</a>
         </footer>
     @endisset
-</article>
+</div>
