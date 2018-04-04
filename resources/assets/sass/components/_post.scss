@@ -5,6 +5,8 @@ Post
 -------------------------------- */
 
 .pcj-post-body {
+    margin-bottom: 4rem;
+
     @media (min-width: 992px) {
         p, h1, h2, h3, h4, h5, h6, ul, ol {
             width: 75%;
