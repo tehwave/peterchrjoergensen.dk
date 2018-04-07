@@ -52,6 +52,7 @@ class PostController extends Controller
     {
         $validator = Validator::make(request()->all(), [
             'title'     => 'required|string',
+            'tags'      => 'nullable|string',
             'excerpt'   => 'nullable|string',
             'body'      => 'nullable|string',
             'publish'   => 'nullable|date',
