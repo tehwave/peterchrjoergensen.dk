@@ -53,7 +53,24 @@
         <div class="row">
             <section class="col">
                 <article class="pcj-header-content">
+                    <h1>
+                        {{ $post->title }}
+                    </h1>
+                    <p>{!! $post->excerpt() !!}</p>
                     <ul class="list-inline mb-0" style="font-size: 1rem">
+                        @isset($previous_page)
+                            <li class="list-inline-item">
+                                <a href="{{ route('post.index', ['page' => $previous_page]) }}" class="align-middle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" width="16" height="16"><g class="nc-icon-wrapper" fill="#ffffff"><path fill="#ffffff" d="M8,5c5.2,0,8,3.8,8,10c-1.5-2.4-2.7-4-8-4v4L0,8l8-7V5z"></path></g></svg>
+                                </a>
+                            </li>
+                        @else
+                            <li class="list-inline-item">
+                                <a href="{{ route('post.index') }}" class="align-middle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" width="16" height="16"><g class="nc-icon-wrapper" fill="#ffffff"><path fill="#ffffff" d="M8,5c5.2,0,8,3.8,8,10c-1.5-2.4-2.7-4-8-4v4L0,8l8-7V5z"></path></g></svg>
+                                </a>
+                            </li>
+                        @endisset
                         @isset($post->published_at)
                             <li class="list-inline-item" data-toggle="tooltip" data-placement="top" title="{{ $post->published_at->diffForHumans() }}">
                                 {{ $post->published_at->format('F jS, Y') }}
@@ -62,13 +79,9 @@
                             <li class="list-inline-item">Draft</li>
                         @endisset
                         @foreach ($post->tags as $tag)
-                            <li class="list-inline-item pcj-tag">{{ $tag->name }}</li>
+                            <li class="list-inline-item">#{{ $tag->name }}</li>
                         @endforeach
                     </ul>
-                    <h1>
-                        {{ $post->title }}
-                    </h1>
-                    <p>{!! $post->excerpt() !!}</p>
                 </article>
             </section>
         </div>

@@ -88,6 +88,10 @@ class PostController extends Controller
     {
         $post = Post::where('slug', $slug)->first();
 
+        // Get page incase from paginated post index
+        parse_str(parse_url(url()->previous(), PHP_URL_QUERY), $params);
+        $previous_page = $params['page'] ?? null;
+
         abort_if($post === null, 404);
         abort_if($post->published_at === null && auth()->guest(), 403);
 
@@ -103,7 +107,7 @@ class PostController extends Controller
                 ->first();
         }
 
-        return view('app.post.show', compact('post', 'previous_post', 'next_post'));
+        return view('app.post.show', compact('post', 'previous_post', 'next_post', 'previous_page'));
     }
 
     /**
