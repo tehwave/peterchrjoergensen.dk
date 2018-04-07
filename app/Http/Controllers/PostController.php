@@ -146,8 +146,8 @@ class PostController extends Controller
         }
 
         $post = Post::where('slug', $slug)->first();
-        $post->attachTags($tags);
         $tags = Tag::findOrCreate(array_filter(explode(',', request()->tags)), 'Post');
+        $post->syncTags($tags);
 
         $post->title = request()->title;
         $post->slug = str_slug(request()->title);
