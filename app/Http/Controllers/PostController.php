@@ -67,7 +67,7 @@ class PostController extends Controller
         $post = new Post([
             'title'         => request()->title,
             'slug'          => str_slug(request()->title),
-            'tags'          => Tag::findOrCreate(explode(',', request()->tags), 'Post'),
+            'tags'          => Tag::findOrCreate(array_filter(explode(',', request()->tags)), 'Post'),
             'excerpt'       => request()->excerpt,
             'body'          => request()->body,
             'published_at'  => request()->published_at ? now() : null,
@@ -146,8 +146,8 @@ class PostController extends Controller
         }
 
         $post = Post::where('slug', $slug)->first();
-        $tags = Tag::findOrCreate(explode(',', request()->tags), 'Post');
         $post->attachTags($tags);
+        $tags = Tag::findOrCreate(array_filter(explode(',', request()->tags)), 'Post');
 
         $post->title = request()->title;
         $post->slug = str_slug(request()->title);
