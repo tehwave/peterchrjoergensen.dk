@@ -103,7 +103,9 @@
         <!-- Meta -->
         <div class="row text-center">
             <div class="col">
-                <div class="card pcj-post-footer">
+                <small>Written by</small>
+                <h4>Peter C. Jørgensen</h4>
+                <div class="card pcj-post-footer mt-5">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1 my-md-auto col-lg-4">
@@ -124,9 +126,6 @@
                                     class="lazyload lqip img-fluid rounded-circle pcj-post-avatar"
                                     src="{{ asset('img/peter-lowquality.jpg') }}"
                                     data-src="{{ asset('img/peter.jpg') }}"
-                                    data-toggle="tooltip"
-                                    data-placement="top"
-                                    title="Peter C. Jørgensen"
                                     width="128"
                                 />
                             </div>
