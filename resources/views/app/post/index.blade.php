@@ -93,10 +93,13 @@
                     </li>
                     <!-- Feeds -->
                     <li class="list-group-item">
-                        <div>RSS Feed</div>
+                        <div>Subscribe</div>
                         <ul class="list-unstyled">
                             @foreach($feeds as $name => $title)
-                                <li><a rel="alternate" type="application/rss+xml" href="{{ route("feeds.{$name}") }}" title="{{ $title }}">{{ $title }}</a></li>
+                                <li>
+                                    <svg class="align-middle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" width="16" height="16"><g class="nc-icon-wrapper" fill="#e77e2d"><circle fill="#e77e2d" cx="3" cy="13" r="2"></circle> <path fill="#e77e2d" d="M15,15h-2.7C12.3,8.8,7.2,3.7,1,3.7V1C8.7,1,15,7.3,15,15z"></path> <path data-color="color-2" fill="#e77e2d" d="M10.3,15H7.7c0-3.7-3-6.7-6.7-6.7V5.7C6.1,5.7,10.3,9.9,10.3,15z"></path></g></svg>
+                                    <a rel="alternate" type="application/rss+xml" href="{{ route("feeds.{$name}") }}" title="{{ $title }}">{{ $title }}</a>
+                                </li>
                             @endforeach
                         </ul>
                     </li>
