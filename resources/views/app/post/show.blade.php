@@ -109,7 +109,7 @@
                             <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1 my-md-auto col-lg-4">
                                 @isset ($previous_post)
                                     <small>Previous</small>
-                                    <div><a href="{{ route('post.show', $previous_post->slug) }}">{{ $previous_post->title }}</a></div>
+                                    <a class="d-block" href="{{ route('post.show', $previous_post->slug) }}">{{ $previous_post->title }}</a>
                                 @endisset
                             </div>
                             <div class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto col-lg-4 text-center">
@@ -133,7 +133,7 @@
                             <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3 my-md-auto col-lg-4">
                                 @isset ($next_post)
                                     <small>Next</small>
-                                    <div><a href="{{ route('post.show', $next_post->slug) }}">{{ $next_post->title }}</a></div>
+                                    <a class="d-block" href="{{ route('post.show', $next_post->slug) }}">{{ $next_post->title }}</a>
                                 @endisset
                             </div>
                         </div>
