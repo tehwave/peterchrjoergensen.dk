@@ -264,6 +264,10 @@
                         <div>Danish</div>
                     </li>
                     <li class="list-group-item">
+                        <strong>Age</strong>
+                        <div>{{ now()->year - 1993 }}</div>
+                    </li>
+                    <li class="list-group-item">
                         <strong>Driver's License</strong>
                         <div>Type B</div>
                     </li>
