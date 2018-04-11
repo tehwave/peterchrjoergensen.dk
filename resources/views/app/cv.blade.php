@@ -6,7 +6,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <article class="pcj-header-content">
+                <article class="pcj-header-content mb-0">
                     <h1>Curriculum Vitae</h1>
                     <a href="{{ asset('files/CV-Peter-Christian-Jørgensen-English.pdf') }}" target="_blank" rel="noopener noreferrer" class="btn btn-pcj">
                         Download &nbsp; (English <img src="{{ asset('img/english.png') }}" width="20" class="align-baseline"> )

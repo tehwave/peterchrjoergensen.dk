@@ -52,7 +52,7 @@
     <div class="container">
         <div class="row">
             <section class="col">
-                <article class="pcj-header-content">
+                <article class="pcj-header-content mb-0">
                     <h1>
                         {{ $post->title }}
                     </h1>
