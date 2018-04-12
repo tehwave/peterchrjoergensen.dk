@@ -17,6 +17,12 @@ label {
     text-transform: uppercase;
 }
 
+.form-check-label {
+    letter-spacing: normal;
+    text-transform: none;
+    font-size: 1rem;
+}
+
 // Normalize btn size when append/prepend
 .input-group-append, .input-group-prepend {
     .btn {
