@@ -32,7 +32,6 @@ mix
         'popper.js',
         'lazysizes',
         'jquery',
-        'lodash',
     ])
 
     // Clean up
