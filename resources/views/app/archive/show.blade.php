@@ -5,7 +5,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <article class="pcj-header-content">
+                <article class="pcj-header-content mb-0">
                     <h1>Archive</h1>
                     <p>{{ $date }}</p>
                 </article>
