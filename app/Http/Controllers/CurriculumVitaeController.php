@@ -26,7 +26,14 @@ class CurriculumVitaeController extends Controller
 
         $experiences = [
             [
-                'date'    => '2017 -',
+                'date'    => '2018 - ',
+                'title'   => 'Web Developer',
+                'company' => 'Webstarters.dk',
+                'summary' => [
+                ],
+            ],
+            [
+                'date'    => '2017 - 2018',
                 'title'   => 'Customer Support Agent',
                 'company' => 'YouSee',
                 'summary' => [
@@ -41,17 +48,7 @@ class CurriculumVitaeController extends Controller
                     'I designed and developed a web application intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
                     'Source code located on my <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a> page.',
                 ],
-            ],
-            [
-                'date'    => '2017',
-                'title'   => 'Intern',
-                'company' => 'B2B Kolding',
-                'summary' => [
-                    'I designed and developed the company\'s website in Wordpress. For that purpose, I made a custom-built theme as well as implemented a new system to handle registrations from visitors and exhibitors.',
-                    'I was responsible for marketing the trade fair by drafting the marketing plan as well as finding out via research what worked best in relation to the target group and limited budget.',
-                    'In addition, I shot several short video commercials for distribution on SoMe.',
-                ],
-            ],
+            ]
         ];
 
         return view('app.cv', compact('educations', 'experiences'));
