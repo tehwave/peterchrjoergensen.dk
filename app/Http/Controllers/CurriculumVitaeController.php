@@ -48,7 +48,7 @@ class CurriculumVitaeController extends Controller
                     'I designed and developed a web application intended to guide visitors through a safety course before they go on tours throughout the Grundfos facilities.',
                     'Source code located on my <a href="https://github.com/tehwave/grundfos-quiz" target="_blank" rel="noopener noreferrer">GitHub</a> page.',
                 ],
-            ]
+            ],
         ];
 
         return view('app.cv', compact('educations', 'experiences'));
