@@ -110,6 +110,8 @@
                                 alt="Teamwork Projects"
                                 border="0"
                                 src="https://s3.amazonaws.com/tw-referrals/large.png"
+                                srcset="https://s3.amazonaws.com/tw-referrals/large.png 1x, https://s3.amazonaws.com/tw-referrals/large@2x.png 2x"
+                                width="300" height="250"
                             />
                         </a>
                         <small class="d-block text-muted text-right">Referral</small>
