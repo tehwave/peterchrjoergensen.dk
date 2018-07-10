@@ -131,6 +131,15 @@ class ProjectController extends Controller
                 'lead'          => 'A mobile application for the members of Odense Golfklub with 360° imagery and 3D models of golf courses.',
                 'paragraph'     => 'Developed in Unity3D for its ease with 3D, I had to write custom functionality to handle the display of 360° imagery.',
             ],
+            'Janchart' => [
+                'filters'       => ['other', 'solo'],
+                'image'         => 'janchart',
+                'image_format'  => 'png',
+                'title'         => 'Janchart',
+                'tags'          => ['Other', 'Adobe Creative Suite', 'Solo'],
+                'lead'          => 'Janchart Shipping are brokers in Dry Cargo Chartering worldwide.',
+                'paragraph'     => 'I was contracted to create graphic designs, e.g. a sigil for imprinting stamps.',
+            ],
         ];
 
         return view('app.portfolio', compact('projects'));
