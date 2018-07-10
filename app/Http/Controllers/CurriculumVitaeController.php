@@ -37,7 +37,7 @@ class CurriculumVitaeController extends Controller
                 'title'   => 'Customer Support Agent',
                 'company' => 'YouSee',
                 'summary' => [
-                    'I work over-the-phone by supporting, selling and advising customers on YouSee products, ensuring that any problems are remedied, solutions are found, and that the customer has felt well treated.',
+                    'I worked over-the-phone supporting, selling and advising customers on YouSee products, ensuring that any problems are remedied, solutions are found, and that the customer has felt well treated.',
                 ],
             ],
             [
