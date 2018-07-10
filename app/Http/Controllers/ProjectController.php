@@ -74,7 +74,7 @@ class ProjectController extends Controller
                 'title'         => 'Lennarth Hansen',
                 'tags'          => ['Other', 'Adobe Creative Suite', 'Solo'],
                 'lead'          => 'Lennarth Hansen is a local politician in Kolding.',
-                'paragraph'     => 'I have been contracted to create graphic designs, e.g. stickers and posters, for his campaign as well as help manage his Facebook-page.',
+                'paragraph'     => 'I wascontracted to create graphic designs, e.g. stickers and posters, for his campaign as well as help manage his Facebook-page.',
                 'link_text'   => 'Facebook',
                 'link'    => 'https://www.facebook.com/stemlennarth/',
             ],
