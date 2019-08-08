@@ -40,19 +40,6 @@ Route::prefix('blog')->group(function () {
 // Feeds
 Route::feeds('feed');
 
-// Admin
-Route::prefix('admin')->middleware('auth')->group(function () {
-    Route::get('/', 'AdminController@index')->name('admin.index');
-
-    Route::prefix('post')->group(function () {
-        Route::get('/', 'PostController@create')->name('post.create');
-        Route::post('/', 'PostController@store')->name('post.store');
-        Route::get('{slug}', 'PostController@edit')->name('post.edit');
-        Route::put('{slug}', 'PostController@update')->name('post.update');
-        Route::delete('{slug}', 'PostController@destroy')->name('post.destroy');
-    });
-});
-
 // Redirects
 Route::redirect('firkant', 'https://firkant.website');
 Route::redirect('FIRKANT', 'https://firkant.website');
