@@ -52,7 +52,7 @@ class Post extends Model implements Feedable
     public static function getFeedItems()
     {
         return self::published()
-            ->orderBy('published_at', 'desc')
+            ->orderByDesc('published_at')
             ->limit(100)
             ->get();
     }
@@ -73,7 +73,7 @@ class Post extends Model implements Feedable
      *
      * @return HTML
      */
-    public function excerpt()
+    public function getExcerptHtmlAttribute()
     {
         return (new Parsedown())
             ->text($this->excerpt);
@@ -84,11 +84,12 @@ class Post extends Model implements Feedable
      *
      * @return HTML
      */
-    public function body()
+    public function getBodyHtmlAttribute()
     {
-        $body = (new Parsedown())->text($this->body);
+        $body = (new Parsedown())
+            ->text($this->body);
 
-        // Stop <p> from wrapping <img>
+        // Stop <p> from wrapping <img>.
         return preg_replace('/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s', '\1', $body);
     }
 }
