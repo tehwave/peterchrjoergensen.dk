@@ -14,9 +14,9 @@
              |_|   \___|\__\___|_|     \____(_)  \___/ \//__/|_|  \__, |\___|_| |_|___/\___|_| |_|
                                                                   |___/
                                         Designed and developed by
-                            Peter C. Jørgensen | peterchrjoergensen.dk | @tehwave
+                            Peter 🌊 Jørgensen | peterchrjoergensen.dk | @tehwave
          -->
-        <title>@yield('title', 'Peter C. Jørgensen')</title>
+        <title>@yield('title', 'Peter 🌊 Jørgensen')</title>
 
         <!-- Website -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -29,9 +29,9 @@
 
         <!-- SEO -->
         @section('head')
-            <meta name="title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="author" content="@yield('author', 'Peter C. Jørgensen')">
-            <meta name="description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta name="title" content="@yield('title', 'Peter 🌊 Jørgensen')">
+            <meta name="author" content="@yield('author', 'Peter 🌊 Jørgensen')">
+            <meta name="description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
         @show
 
         <!-- Open Graph -->
@@ -40,8 +40,8 @@
             <meta property="profile:first_name" content="Peter">
             <meta property="profile:last_name" content="Jørgensen">
             <meta property="og:url" content="{{ url()->full() }}">
-            <meta property="og:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta property="og:title" content="@yield('title', 'Peter 🌊 Jørgensen')">
+            <meta property="og:description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
             <meta property="og:image" content="{{ asset('img/open-graph-image.png') }}">
         @show
 
@@ -49,8 +49,8 @@
         @section('twitter')
             <meta name="twitter:card" content="summary">
             <meta name="twitter:site" content="@tehwave">
-            <meta name="twitter:title" content="@yield('title', 'Peter C. Jørgensen')">
-            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta name="twitter:title" content="@yield('title', 'Peter 🌊 Jørgensen')">
+            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
             <meta name="twitter:image" content="{{ asset('twitter-image.png') }}">
         @show
 
@@ -59,8 +59,8 @@
         {
             "@context": "http://schema.org/",
             "@type": "Person",
-            "name": "Peter C. Jørgensen",
-            "jobTitle": "Multimedia Designer",
+            "name": "Peter 🌊 Jørgensen",
+            "jobTitle": "Web Developer",
             "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Kolding",
@@ -72,13 +72,6 @@
         <!-- Styles -->
         <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
-        <noscript>
-            <style>
-                .lqip {
-                    display: none;
-                }
-            </style>
-        </noscript>
         @stack('styles')
 
         <!-- Google Tag Manager -->
@@ -89,16 +82,6 @@
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-TKNTXKZ');
         </script>
-
-        <!-- Google AdSense -->
-        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <script>
-          (adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-pub-4880846761046037",
-            enable_page_level_ads: true
-          });
-        </script>
-
         @stack('head')
     </head>
     <body class="h-100">

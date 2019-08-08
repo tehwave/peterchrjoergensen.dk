@@ -19,7 +19,7 @@
                     <a class="nav-link" href="{{ route('portfolio') }}" title="Peter's Portfolio">Portfolio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('post.index') }}" title="Peter's Blog">Blog</a>
+                    <a class="nav-link" href="{{ route('blog') }}" title="Peter's Blog">Blog</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">

@@ -14,12 +14,9 @@
     "laravel-mix": "^2.1.11"
   },
   "dependencies": {
-    "bootstrap": "^4.1.1",
-    "jquery": "^3.3.1",
-    "jquery-parallax.js": "^1.5.0",
-    "laravel-mix-purgecss": "^1.0.5",
-    "lazysizes": "^4.0.2",
-    "mixitup": "^3.2.2",
-    "popper.js": "^1.14.3"
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.4.1",
+    "mixitup": "^3.3.1",
+    "popper.js": "^1.15.0"
   }
 }

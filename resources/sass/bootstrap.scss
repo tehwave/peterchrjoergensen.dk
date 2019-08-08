@@ -4,4 +4,6 @@ Bootstrap
 
 -------------------------------- */
 
-@import "~bootstrap/dist/css/bootstrap.css";
+@import "variables";
+
+@import '~bootstrap/scss/bootstrap';
