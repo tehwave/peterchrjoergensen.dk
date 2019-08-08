@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use App\Post;
 use Validator;
 use Spatie\Tags\Tag;
@@ -66,7 +67,7 @@ class PostController extends Controller
 
         $post = new Post([
             'title'         => request()->title,
-            'slug'          => str_slug(request()->title),
+            'slug'          => Str::slug(request()->title),
             'tags'          => Tag::findOrCreate(array_filter(explode(',', request()->tags)), 'Post'),
             'excerpt'       => request()->excerpt,
             'body'          => request()->body,
@@ -150,7 +151,7 @@ class PostController extends Controller
         $post->syncTags($tags);
 
         $post->title = request()->title;
-        $post->slug = str_slug(request()->title);
+        $post->slug = Str::slug(request()->title);
         $post->excerpt = request()->excerpt;
         $post->body = request()->body;
         $post->published_at = request()->published_at;
