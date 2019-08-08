@@ -22,7 +22,7 @@ Route::permanentRedirect('projects', 'portfolio');
 
 // Curriculum Vitae
 Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curriculum-vitae');
-Route::get('cv', 'CurriculumVitaeController@redirect')->name('cv');
+Route::permanentRedirect('cv', '/curriculum-vitae');
 
 // Feeds
 Route::feeds('feed');

@@ -52,14 +52,4 @@ class CurriculumVitaeController extends Controller
 
         return view('app.cv', compact('educations', 'experiences'));
     }
-
-    /**
-     * Redirect to main route.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function redirect()
-    {
-        return redirect()->route('curriculum-vitae');
-    }
 }
