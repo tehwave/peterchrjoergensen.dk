@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Cache;
 use App\Post;
 
-class AppController extends Controller
+class HomeController extends Controller
 {
     /**
+     * Retrieve posts and stay home.
+     *
      * @return \Illuminate\Http\Response
      */
-    public function home()
+    public function __invoke()
     {
         $posts = Cache::remember('app.home.posts', 60 * 24, function () {
             return Post::published()

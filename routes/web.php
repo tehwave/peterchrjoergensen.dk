@@ -11,12 +11,9 @@
 |
 */
 
-// Auth
-Auth::routes();
-
 // Home
-Route::get('/', 'AppController@home')->name('home');
-Route::permanentRedirect('/home', '/');
+Route::get('/', 'HomeController')->name('home');
+Route::permanentRedirect('home', '/');
 
 // Portfolio
 Route::get('portfolio', 'ProjectController@index')->name('portfolio');
@@ -27,19 +24,13 @@ Route::permanentRedirect('projects', 'portfolio');
 Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curriculum-vitae');
 Route::get('cv', 'CurriculumVitaeController@redirect')->name('cv');
 
-// Blog
-Route::prefix('blog')->group(function () {
-    Route::get('/', 'PostController@index')->name('post.index');
-
-    Route::get('{year}/{month?}/{day?}', 'ArchiveController@show')->name('archive.show')->where(['year' => '[0-9]+', 'month' => '[0-9]+', 'day' => '[0-9]+']);
-    Route::post('/', 'ArchiveController@browse')->name('archive.browse');
-
-    Route::get('{slug}', 'PostController@show')->name('post.show');
-});
-
 // Feeds
 Route::feeds('feed');
 
 // Redirects
 Route::permanentRedirect('firkant', 'https://firkant.website');
 Route::permanentRedirect('FIRKANT', 'https://firkant.website');
+
+// Blog
+Route::get('blog', 'PostController@index')->name('post.index');
+Route::get('{slug}', 'PostController@show')->name('post.show');
