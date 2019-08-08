@@ -16,12 +16,12 @@ Auth::routes();
 
 // Home
 Route::get('/', 'AppController@home')->name('home');
-Route::redirect('/home', '/', 301);
+Route::permanentRedirect('/home', '/', 301);
 
 // Portfolio
 Route::get('portfolio', 'ProjectController@index')->name('portfolio');
-Route::redirect('project', 'portfolio', 301)->name('project.index');
-Route::redirect('projects', 'portfolio', 301);
+Route::permanentRedirect('project', 'portfolio', 301)->name('project.index');
+Route::permanentRedirect('projects', 'portfolio', 301);
 
 // Curriculum Vitae
 Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curriculum-vitae');
@@ -41,5 +41,5 @@ Route::prefix('blog')->group(function () {
 Route::feeds('feed');
 
 // Redirects
-Route::redirect('firkant', 'https://firkant.website');
-Route::redirect('FIRKANT', 'https://firkant.website');
+Route::permanentRedirect('firkant', 'https://firkant.website');
+Route::permanentRedirect('FIRKANT', 'https://firkant.website');

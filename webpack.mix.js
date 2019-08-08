@@ -14,16 +14,16 @@ require('laravel-mix-purgecss');
 
 mix
     // CSS
-    .sass('resources/assets/sass/bootstrap.scss', 'public/css')
-    .sass('resources/assets/sass/app.scss', 'public/css')
+    .sass('resources/sass/bootstrap.scss', 'public/css')
+    .sass('resources/sass/app.scss', 'public/css')
 
     // JS
     .autoload({
         jquery: ['$', 'window.jQuery', 'jQuery'],
         'popper.js/dist/umd/popper.js': ['Popper']
     })
-    .js('resources/assets/js/app.js', 'public/js')
-    .js('resources/assets/js/mixitup.js', 'public/js')
+    .js('resources/js/app.js', 'public/js')
+    .js('resources/js/mixitup.js', 'public/js')
 
     // JS Vendors
     .extract([
