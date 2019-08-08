@@ -6,7 +6,6 @@ use Parsedown;
 use Spatie\Tags\HasTags;
 use Spatie\Feed\Feedable;
 use Spatie\Feed\FeedItem;
-use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model implements Feedable
@@ -32,25 +31,6 @@ class Post extends Model implements Feedable
     protected $dates = [
         'published_at',
     ];
-
-    /**
-     * Get the indexable data array for the model.
-     *
-     * @return array
-     */
-    public function toSearchableArray()
-    {
-        if ($this->published_at) {
-            return [
-                'id' => $this->id,
-                'title' => $this->title,
-                'excerpt' => $this->excerpt,
-                'published_at' => $this->published_at,
-            ];
-        }
-
-        return [];
-    }
 
     /**
      * Get the indexable feed item for the model.
