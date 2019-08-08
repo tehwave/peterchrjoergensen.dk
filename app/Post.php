@@ -10,18 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model implements Feedable
 {
-    use Searchable, HasTags;
+    use HasTags;
 
     /**
      * The attributes that aren't mass assignable.
      *
      * @var array
      */
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be mutated to dates.
