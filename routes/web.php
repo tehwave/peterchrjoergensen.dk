@@ -16,12 +16,12 @@ Auth::routes();
 
 // Home
 Route::get('/', 'AppController@home')->name('home');
-Route::permanentRedirect('/home', '/', 301);
+Route::permanentRedirect('/home', '/');
 
 // Portfolio
 Route::get('portfolio', 'ProjectController@index')->name('portfolio');
-Route::permanentRedirect('project', 'portfolio', 301)->name('project.index');
-Route::permanentRedirect('projects', 'portfolio', 301);
+Route::permanentRedirect('project', 'portfolio')->name('project.index');
+Route::permanentRedirect('projects', 'portfolio');
 
 // Curriculum Vitae
 Route::get('curriculum-vitae', 'CurriculumVitaeController@index')->name('curriculum-vitae');
