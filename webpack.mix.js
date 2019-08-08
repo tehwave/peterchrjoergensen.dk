@@ -1,5 +1,4 @@
-let mix = require('laravel-mix');
-require('laravel-mix-purgecss');
+const mix = require('laravel-mix');
 
 /*
  |--------------------------------------------------------------------------
@@ -13,43 +12,21 @@ require('laravel-mix-purgecss');
  */
 
 mix
-    // CSS
+    // CSS.
     .sass('resources/sass/bootstrap.scss', 'public/css')
     .sass('resources/sass/app.scss', 'public/css')
 
-    // JS
+    // JS.
     .autoload({
         jquery: ['$', 'window.jQuery', 'jQuery'],
         'popper.js/dist/umd/popper.js': ['Popper']
     })
-    .js('resources/js/app.js', 'public/js')
+    .js('resources/js/bootstrap.js', 'public/js')
     .js('resources/js/mixitup.js', 'public/js')
+    .js('resources/js/app.js', 'public/js')
 
-    // JS Vendors
-    .extract([
-        'jquery-parallax.js',
-        'bootstrap',
-        'popper.js',
-        'lazysizes',
-        'jquery',
-    ])
+    // JS Vendors.
+    .extract()
 
-    // Clean up
-    .purgeCss({
-        whitelist: [
-            'arrow',
-            'collapsing',
-            'lazyloaded',
-            'tooltip-inner',
-            'bs-tooltip-top',
-            'bs-tooltip-auto',
-            'bs-tooltip-left',
-            'parallax-mirror',
-            'bs-tooltip-right',
-            'bs-tooltip-bottom',
-            'mixitup-control-active'
-        ]
-    })
-
-    // Cache Busting
+    // Cache Busting.
     .version();

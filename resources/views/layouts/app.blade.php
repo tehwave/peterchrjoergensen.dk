@@ -84,7 +84,7 @@
         </script>
         @stack('head')
     </head>
-    <body class="h-100">
+    <body class="h-100" data-no-js>
         <!-- Google Tag Manager (noscript) -->
         <noscript>
             <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKNTXKZ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
@@ -97,10 +97,8 @@
             </div>
         </noscript>
 
-        <!-- Header w/ Navigation -->
-        @component('components.header')
-            @yield('header')
-        @endcomponent
+        <!-- Navigation -->
+        @include('partials.navbar')
 
         <!-- Application -->
         <main class="h-100" id="app">
@@ -108,14 +106,14 @@
         </main>
 
         <!-- Footer -->
-        @component('components.footer')
-            @yield('footer')
-        @endcomponent
+        @include('partials.footer')
 
         <!-- Scripts -->
         <script src="{{ mix('js/manifest.js') }}"></script>
+        <script src="{{ mix('js/bootstrap.js') }}"></script>
         <script src="{{ mix('js/vendor.js') }}"></script>
         <script src="{{ mix('js/app.js') }}"></script>
+        <script>$('body').removeAttr('data-no-js');</script>
         @stack('scripts')
     </body>
 </html>

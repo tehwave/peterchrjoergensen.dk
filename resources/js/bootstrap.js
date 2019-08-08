@@ -13,6 +13,8 @@ try {
 
     require('bootstrap');
 
+    require('jquery-lazy');
+
 } catch (e) {
 
 }

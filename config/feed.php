@@ -1,5 +1,7 @@
 <?php
 
+use App\Post;
+
 return [
 
     'feeds' => [
@@ -12,7 +14,7 @@ return [
              * You can also pass an argument to that method:
              * ['App\Model@getAllFeedItems', 'argument']
              */
-            'items' => 'App\Post@getFeedItems',
+            'items' => Post::getFeedItems(),
 
             /*
              * The feed will be available on this url.

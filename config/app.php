@@ -213,14 +213,4 @@ return [
 
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Register PIN
-    |--------------------------------------------------------------------------
-    |
-    | This PIN is required for registering an account.
-    |
-    */
-
-    'register_pin' => env('APP_REGISTER_PIN', 1234),
 ];
