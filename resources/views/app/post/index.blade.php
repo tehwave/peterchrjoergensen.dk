@@ -17,7 +17,7 @@
                         <p>In addition, I post about <b>news</b>, <b>events</b> and <b>resources</b> relevant to the <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23webdev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#webdev</a> and <a href="https://twitter.com/search?f=tweets&vertical=default&q=%23gamedev%20AND%20from%3A%40tehwave" target="_blank" rel="noopener">#gamedev</a> communities.</p>
                     @else
                         <h1>Search</h1>
-                        <p>{{ $posts->count() }} {{ str_plural('result', $posts->count()) }} for <b> {{ request()->input('query') }}</b></p>
+                        <p>{{ $posts->count() }} {{ Str::plural('result', $posts->count()) }} for <b> {{ request()->input('query') }}</b></p>
                     @endempty
                 </article>
             </section>
