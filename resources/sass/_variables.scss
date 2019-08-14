@@ -4,11 +4,99 @@ Variables
 
 -------------------------------- */
 
-// Colors
-$white:     white;
-$black:     #222222;
-$gray:      #f5f5f5;
+$enable-shadows:            true;
+$enable-print-styles:       false;
+
+/* --------------------------------
+
+Fonts
+
+-------------------------------- */
+
+$font-family-primary: 'Montserrat', sans-serif;
+
+/* --------------------------------
+
+Colors
+
+-------------------------------- */
+
+$white: white;
+$gray-100: #F5F7FA;
+$gray-200: #E4E7EB;
+$gray-300: #CBD2D9;
+$gray-400: #9AA5B1;
+$gray-500: #7B8794;
+$gray-600: #616E7C;
+$gray-700: #52606D;
+$gray-800: #3E4C59;
+$gray-900: #323F4B;
+$black: #1F2933;
+
+
 $teal:      #33c3f0;
 $blue:      #0fa0ce;
 $orange:    #E77E2D;
 $bluegray:  #298cab;
+
+
+
+/* --------------------------------
+
+Body
+
+-------------------------------- */
+
+$body-bg:                   $white;
+$body-color:                $black;
+
+/* --------------------------------
+
+Grid
+
+-------------------------------- */
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1400px
+);
+
+$container-max-widths: (
+  sm: 540px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px
+);
+
+/* --------------------------------
+
+Spacers
+
+-------------------------------- */
+
+$spacer: 1rem;
+
+$spacers: (
+    0: 0,
+    1: ($spacer * .25),
+    2: ($spacer * .5),
+    3: $spacer,
+    4: ($spacer * 1.5),
+    5: ($spacer * 3),
+    6: ($spacer * 4),
+    7: ($spacer * 6),
+    8: ($spacer * 8),
+);
+
+/* --------------------------------
+
+Components
+
+-------------------------------- */
+
+$box-shadow-sm:               0 .125rem .25rem rgba($black, .175);
+$box-shadow:                  0 .5rem 1rem rgba($black, .25);
+$box-shadow-lg:               0 1rem 1.5rem rgba($black, .375);
