@@ -113,7 +113,7 @@
         @include('partials.navbar')
 
         <!-- Application -->
-        <main class="h-100" id="app">
+        <main id="main">
             @yield('app')
         </main>
 

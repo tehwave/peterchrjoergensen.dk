@@ -2,11 +2,11 @@
 
 @section('app')
     <!-- Projects -->
-    <div class="container" style="margin-top: -3rem;">
+    <div class="container">
         <div class="row">
             <div class="col">
                 <div class="card-deck mb-4">
-                    <div class="card">
+                    <div class="card  shadow-md">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -28,7 +28,7 @@
                             <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
                     </div>
-                    <div class="card">
+                    <div class="card  shadow-md">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -51,7 +51,7 @@
                             <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
                     </div>
-                    <div class="card">
+                    <div class="card  shadow-md">
                         <noscript>
                             <img
                                 class="card-img-top"
@@ -69,7 +69,7 @@
                             <h2 class="card-title">GM48</h2>
                             <p class="card-text">A games development competition</p>
                         </section>
-                        <footer class="card-footer bg-white border-top-0">
+                        <footer class="card-footer bg-white">
                             <a href="http://www.gm48.net/" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
                     </div>
@@ -78,19 +78,19 @@
         </div>
 
         {{-- Blog --}}
-        <div class="row mt-2">
+        <div class="row mt-4 mt-xl-6 px-3 mb-2">
             <div class="col-8">
-                <p class="text-muted">Latest posts from my blog</p>
+                <span class="text-muted">Latest posts from my blog</span>
             </div>
             <div class="col-4 text-right">
-                <a href="{{ route('post.index') }}">See all</a>
+                <a href="{{ route('blog') }}">See all</a>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="card-deck mb-sm-4">
-                    <div class="card text-white bg-pcj" style="background-image: url('{{ asset('img/blog.jpg') }}'); background-size: cover; background-position: center;">
-                        <section class="card-body">
+                <div class="card-deck mb-4 mb-xl-6">
+                    <div class="card bg-wavy shadow-md">
+                        <div class="card-body">
                             <h2 class="card-title">
                                 Don't miss out
                             </h2>
@@ -110,10 +110,8 @@
                             <a class="card-link" href="https://www.github.com/tehwave" target="_blank" rel="noopener" title="Find Peter on GitHub">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" width="24" height="24"><g class="nc-icon-wrapper" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" d="M12,0.3c-6.6,0-12,5.4-12,12c0,5.3,3.4,9.8,8.2,11.4 C8.8,23.8,9,23.4,9,23.1c0-0.3,0-1,0-2c-3.3,0.7-4-1.6-4-1.6c-0.5-1.4-1.3-1.8-1.3-1.8C2.5,17,3.7,17,3.7,17 c1.2,0.1,1.8,1.2,1.8,1.2c1.1,1.8,2.8,1.3,3.5,1c0.1-0.8,0.4-1.3,0.8-1.6c-2.7-0.3-5.5-1.3-5.5-5.9c0-1.3,0.5-2.4,1.2-3.2 C5.5,8.1,5,6.9,5.7,5.3c0,0,1-0.3,3.3,1.2c1-0.3,2-0.4,3-0.4c1,0,2,0.1,3,0.4c2.3-1.6,3.3-1.2,3.3-1.2c0.7,1.7,0.2,2.9,0.1,3.2 c0.8,0.8,1.2,1.9,1.2,3.2c0,4.6-2.8,5.6-5.5,5.9c0.4,0.4,0.8,1.1,0.8,2.2c0,1.6,0,2.9,0,3.3c0,0.3,0.2,0.7,0.8,0.6 c4.8-1.6,8.2-6.1,8.2-11.4C24,5.7,18.6,0.3,12,0.3z"></path></g></svg>
                             </a>
-                        </section>
+                        </div>
                     </div>
-                </div>
-                <div class="card-deck mb-4">
                 </div>
             </div>
         </div>
