@@ -54,6 +54,12 @@ Cards
 
 -------------------------------- */
 
+/* --------------------------------
+
+Navbar
+
+-------------------------------- */
+
 /*!
  * Bootstrap v4.3.1 (https://getbootstrap.com/)
  * Copyright 2011-2019 The Bootstrap Authors
@@ -4404,7 +4410,7 @@ input[type=button].btn-block {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
+  padding: 1rem 0px;
 }
 
 .navbar > .container,
@@ -4419,7 +4425,7 @@ input[type=button].btn-block {
   display: inline-block;
   padding-top: 0.3125rem;
   padding-bottom: 0.3125rem;
-  margin-right: 1rem;
+  margin-right: 0px;
   font-size: 1.25rem;
   line-height: inherit;
   white-space: nowrap;
@@ -4507,8 +4513,8 @@ input[type=button].btn-block {
   }
 
   .navbar-expand-sm .navbar-nav .nav-link {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .navbar-expand-sm > .container,
@@ -4549,8 +4555,8 @@ input[type=button].btn-block {
   }
 
   .navbar-expand-md .navbar-nav .nav-link {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .navbar-expand-md > .container,
@@ -4591,8 +4597,8 @@ input[type=button].btn-block {
   }
 
   .navbar-expand-lg .navbar-nav .nav-link {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .navbar-expand-lg > .container,
@@ -4633,8 +4639,8 @@ input[type=button].btn-block {
   }
 
   .navbar-expand-xl .navbar-nav .nav-link {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .navbar-expand-xl > .container,
@@ -4672,8 +4678,8 @@ input[type=button].btn-block {
 }
 
 .navbar-expand .navbar-nav .nav-link {
-  padding-right: 0.5rem;
-  padding-left: 0.5rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
 }
 
 .navbar-expand > .container,
@@ -5164,7 +5170,7 @@ input[type=button].btn-block {
   display: inline-block;
   padding: 0.25em 0.4em;
   font-size: 75%;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   text-align: center;
   white-space: nowrap;

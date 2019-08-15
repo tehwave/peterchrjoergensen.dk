@@ -16,9 +16,8 @@ $(document).ready(function () {
   // Tooltip.
   $('[data-tooltip]').tooltip(); // Lazy loading.
 
-  $('[data-lazy]').lazy({
-    effect: "fadeIn",
-    effectTime: 500
+  $('[data-lazy]').lazy({// enableThrottle: true,
+    // throttle: 250
   });
 });
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js")))

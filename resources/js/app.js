@@ -10,7 +10,7 @@ $(document).ready(function() {
 
     // Lazy loading.
     $('[data-lazy]').lazy({
-        effect: "fadeIn",
-        effectTime: 500
+        // enableThrottle: true,
+        // throttle: 250
     });
 });

@@ -226,6 +226,9 @@ $font-weight-normal:          400;
 $font-weight-bold:            700;
 $font-weight-bolder:          800;
 
+// Badges.
+$badge-font-weight:           600;
+
 /* --------------------------------
 
 Cards
@@ -233,3 +236,14 @@ Cards
 -------------------------------- */
 
 $card-border-radius:          1rem;
+
+/* --------------------------------
+
+Navbar
+
+-------------------------------- */
+
+$navbar-padding-y:                  $spacer;
+$navbar-padding-x:                  0px;
+
+$navbar-nav-link-padding-x:         $spacer;
