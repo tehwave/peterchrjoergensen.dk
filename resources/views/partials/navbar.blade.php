@@ -13,7 +13,7 @@
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('curriculum-vitae') }}" title="Peter's Curriculum Vitae">C.V.</a>
+                    <a class="nav-link" href="{{ route('resume') }}" title="Peter's Resume">Résumé</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('portfolio') }}" title="Peter's Portfolio">Portfolio</a>

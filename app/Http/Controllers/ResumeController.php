@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-class CurriculumVitaeController extends Controller
+class ResumeController extends Controller
 {
     /**
-     * Shows curriculum vitae.
+     * Show Peter's resume.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function __invoke()
     {
         $educations = [
             [
