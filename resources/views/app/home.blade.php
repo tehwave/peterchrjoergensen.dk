@@ -2,7 +2,6 @@
 
 @section('app')
 
-    <div class="bg-navbar"></div>
     <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6">

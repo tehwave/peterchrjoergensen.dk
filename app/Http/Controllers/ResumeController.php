@@ -50,6 +50,8 @@ class ResumeController extends Controller
             ],
         ];
 
-        return view('app.cv', compact('educations', 'experiences'));
+        return view('app.resume')
+            ->withEducations($educations)
+            ->withExperiences($experiences);
     }
 }

@@ -21,14 +21,4 @@ class AppServiceProvider extends ServiceProvider
             return app()->environment($environment);
         });
     }
-
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
 }

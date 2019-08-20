@@ -37,13 +37,11 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  string  $slug
+     * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show(Post $post)
     {
-        $post = Post::where('slug', $slug)->first();
-
         // Get page incase from paginated post index
         parse_str(parse_url(url()->previous(), PHP_URL_QUERY), $params);
         $previous_page = $params['page'] ?? null;

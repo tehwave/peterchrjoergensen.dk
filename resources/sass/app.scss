@@ -58,7 +58,8 @@ Utilities
 .font-black { font-weight: 900; }
 
 // Backgrounds.
-.bg-navbar {
+.navbar-background:after {
+    content: '';
     height: 75px;
     position: absolute;
     top: 0;

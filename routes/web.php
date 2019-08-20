@@ -17,8 +17,8 @@ Route::permanentRedirect('home', '/');
 
 // Portfolio.
 Route::get('portfolio', 'ProjectController@index')->name('portfolio');
-Route::permanentRedirect('project', 'portfolio')->name('project.index');
-Route::permanentRedirect('projects', 'portfolio');
+Route::permanentRedirect('project', '/portfolio')->name('project.index');
+Route::permanentRedirect('projects', '/portfolio');
 
 // Resume.
 Route::get('resume', 'ResumeController')->name('resume');
@@ -37,4 +37,4 @@ Route::permanentRedirect('FIRKANT', 'https://firkant.website');
 // Blog.
 Route::get('blog', 'PostController@index')->name('blog');
 Route::permanentRedirect('posts', '/blog')->name('post.index');
-Route::get('{slug}', 'PostController@show')->name('post.show');
+Route::get('{post}', 'PostController@show')->name('post.show');
