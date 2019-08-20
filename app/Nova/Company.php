@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Company extends Resource
@@ -20,7 +21,7 @@ class Company extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -28,7 +29,7 @@ class Company extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'id', 'name',
     ];
 
     /**
@@ -41,6 +42,8 @@ class Company extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            Text::make('Name')->sortable(),
         ];
     }
 

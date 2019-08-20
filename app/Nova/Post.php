@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Post extends Resource
@@ -20,7 +21,7 @@ class Post extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'title';
 
     /**
      * The columns that should be searched.
@@ -28,7 +29,7 @@ class Post extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'id', 'title', 'slug',
     ];
 
     /**
@@ -40,7 +41,11 @@ class Post extends Resource
     public function fields(Request $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make()
+                ->sortable(),
+
+            Text::make('Title')
+                ->sortable(),
         ];
     }
 

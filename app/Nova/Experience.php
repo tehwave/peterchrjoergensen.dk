@@ -6,6 +6,7 @@ use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Experience extends Resource
@@ -44,7 +45,6 @@ class Experience extends Resource
     public function fields(Request $request)
     {
         return [
-
             ID::make()
                 ->sortable(),
 
@@ -59,6 +59,12 @@ class Experience extends Resource
             Textarea::make('Summary')
                 ->nullable(),
 
+            DateTime::make('Started At')
+                ->firstDayOfWeek(1),
+
+            DateTime::make('Stopped At')
+                ->firstDayOfWeek(1)
+                ->nullable(),
         ];
     }
 

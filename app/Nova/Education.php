@@ -6,6 +6,7 @@ use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Education extends Resource
@@ -44,9 +45,11 @@ class Education extends Resource
     public function fields(Request $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make()
+                ->sortable(),
 
-            Text::make('Title')->sortable(),
+            Text::make('Title')
+                ->sortable(),
 
             Text::make('Subtitle')
                 ->nullable()
@@ -54,6 +57,17 @@ class Education extends Resource
                 ->hideFromIndex(),
 
             Textarea::make('Summary')
+                ->nullable(),
+
+            BelongsTo::make('Institution')
+                ->nullable()
+                ->searchable(),
+
+            DateTime::make('Started At')
+                ->firstDayOfWeek(1),
+
+            DateTime::make('Finished At')
+                ->firstDayOfWeek(1)
                 ->nullable(),
         ];
     }
