@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Education extends Resource
@@ -48,6 +49,9 @@ class Education extends Resource
             ID::make()
                 ->sortable(),
 
+            BelongsTo::make('Institution')
+                ->nullable(),
+
             Text::make('Title')
                 ->sortable(),
 
@@ -58,10 +62,6 @@ class Education extends Resource
 
             Textarea::make('Summary')
                 ->nullable(),
-
-            BelongsTo::make('Institution')
-                ->nullable()
-                ->searchable(),
 
             DateTime::make('Started At')
                 ->firstDayOfWeek(1),

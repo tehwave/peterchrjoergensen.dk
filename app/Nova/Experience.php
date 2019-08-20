@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Experience extends Resource
@@ -47,6 +48,9 @@ class Experience extends Resource
         return [
             ID::make()
                 ->sortable(),
+
+            BelongsTo::make('Company')
+                ->nullable(),
 
             Text::make('Title')
                 ->sortable(),

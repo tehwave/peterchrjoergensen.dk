@@ -5,6 +5,7 @@ namespace App\Nova;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class SkillGroup extends Resource
@@ -44,6 +45,8 @@ class SkillGroup extends Resource
             ID::make()->sortable(),
 
             Text::make('Name')->sortable(),
+
+            HasMany::make('Skills'),
         ];
     }
 }

@@ -5,8 +5,11 @@
 use App\Education;
 use App\Institution;
 use Faker\Generator as Faker;
+use Bezhanov\Faker\ProviderCollectionHelper;
 
 $factory->define(Education::class, function (Faker $faker) {
+    ProviderCollectionHelper::addAllProvidersTo($faker);
+
     return [
         'institution_id' => function () {
             return factory(Institution::class)->create()->id;

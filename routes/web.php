@@ -37,4 +37,6 @@ Route::permanentRedirect('FIRKANT', 'https://firkant.website');
 // Blog.
 Route::get('blog', 'PostController@index')->name('blog');
 Route::permanentRedirect('posts', '/blog')->name('post.index');
-Route::get('{post}', 'PostController@show')->name('post.show');
+Route::get('{post}', 'PostController@show')
+    ->where('post', '^(?!nova).*$')
+    ->name('post.show');
