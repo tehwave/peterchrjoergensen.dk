@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <div class="container mt-n4 mt-xl-n6">
+    <div class="container mt-4 mt-md-n6">
         <!-- Experience -->
         <div class="row px-3 mb-2">
             <div class="col-8">
@@ -57,7 +57,7 @@
         </div>
         <div class="row mb-4 mb-xl-6">
             <div class="col">
-                <div class="card-deck mb-4">
+                <div class="card-deck">
                     <div class="card shadow-md overflow-hidden">
                         <img
                             class="card-img-top"
@@ -143,7 +143,7 @@
                 <h2 class="text-muted h6">Skills</h2>
             </div>
         </div>
-        <div class="row mb-4 mb-xl-6">
+        <div class="row mb-2 mb-xl-5">
             <div class="col col-xl-8">
                 @foreach ($skills as $skillsByGroup)
                     <ul class="pl-0">
