@@ -7,6 +7,6 @@ use Faker\Generator as Faker;
 
 $factory->define(Institution::class, function (Faker $faker) {
     return [
-        'title' => $faker->secondarySchool,
+        'name' => $faker->secondarySchool,
     ];
 });

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSkillsTable extends Migration
+class CreateSkillGroupsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,8 @@ class CreateSkillsTable extends Migration
      */
     public function up()
     {
-        Schema::create('skills', function (Blueprint $table) {
+        Schema::create('skill_groups', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('skill_group_id')->nullable()->index();
-            $table->foreign('skill_group_id')->references('id')->on('skill_groups')->onDelete('set null');
             $table->string('name');
         });
     }
@@ -28,6 +26,6 @@ class CreateSkillsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('skills');
+        Schema::dropIfExists('skill_groups');
     }
 }
