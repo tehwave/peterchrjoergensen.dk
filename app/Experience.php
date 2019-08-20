@@ -32,4 +32,18 @@ class Experience extends Model
     {
         return $this->belongsTo('App\Company');
     }
+
+    /**
+     * Get the human readable date of the started_at and stopped_at dates.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function getDateAttribute()
+    {
+        if (is_null($this->stopped_at)) {
+            return "{$this->started_at->format('Y')} –";
+        }
+
+        return "{$this->started_at->format('Y')} – {$this->stopped_at->format('Y')}";
+    }
 }

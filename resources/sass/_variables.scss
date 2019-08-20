@@ -136,10 +136,11 @@ $dark:          $gray-800;
 $theme-colors: (
   "primary":    $primary,
   "secondary":  $secondary,
-  "success":    $success,
-  "info":       $info,
-  "warning":    $warning,
-  "danger":     $danger,
+  "accent":     $orange-500,
+  // "success":    $success,
+  // "info":       $info,
+  // "warning":    $warning,
+  // "danger":     $danger,
   "light":      $light,
   "dark":       $dark,
 );
@@ -156,6 +157,10 @@ $body-color:    $blue;
 Typography
 
 -------------------------------- */
+
+$font-size-base:              1rem; // Assumes the browser default, typically `16px`.
+$font-size-lg:                $font-size-base * 1.25;
+$font-size-sm:                $font-size-base * .875;
 
 $font-family-primary:         'Montserrat', sans-serif;
 $headings-font-family:        $font-family-primary;
@@ -209,7 +214,7 @@ Components
 
 // Borders.
 $border-radius:               .25rem;
-$border-radius-lg:            .5rem;
+$border-radius-lg:            1rem;
 $border-radius-sm:            .125rem;
 $border-radius-pill:          9999px;
 
@@ -230,13 +235,16 @@ $font-weight-bolder:          800;
 // Badges.
 $badge-font-weight:           600;
 
+// List Groups.
+$list-group-border-radius:    $border-radius-lg;
+
 /* --------------------------------
 
 Cards
 
 -------------------------------- */
 
-$card-border-radius:          1rem;
+$card-border-radius:          $border-radius-lg;
 
 /* --------------------------------
 

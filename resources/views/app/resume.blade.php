@@ -15,9 +15,47 @@
         </div>
     </div>
 
-    <!-- Projects -->
     <div class="container mt-n4 mt-xl-n6">
-        <div class="row">
+        <!-- Experience -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Experience</h2>
+            </div>
+            <div class="col-4 text-right">
+                <a class="text-muted card-link" href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">Learn more</a>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
+            <div class="col">
+                <div class="card-deck">
+                    @foreach ($experiences as $experience)
+                        <div class="card shadow-md">
+                            <div class="card-header @if ($loop->first) bg-accent text-white @else bg-light @endif">
+                                {{ $experience->date }}
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">
+                                    {{ $experience->title }}
+                                    <small class="text-muted">{{ $experience->company->name }}</small>
+                                </h3>
+                                <p class="card-text">{!! $experience->summary !!}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Portfolio</h2>
+            </div>
+            <div class="col-4 text-right">
+                <a class="text-muted card-link" href="{{ route('portfolio') }}" target="_blank" rel="noopener">View all</a>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
             <div class="col">
                 <div class="card-deck mb-4">
                     <div class="card shadow-md overflow-hidden">
@@ -70,6 +108,99 @@
                         </footer>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Education -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Education</h2>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
+            <div class="col">
+                <div class="card-deck">
+                    @foreach ($educations as $education)
+                        <div class="card shadow-md">
+                            <div class="card-header bg-light">
+                                {{ $education->date }}
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">
+                                    {{ $education->title }}
+                                    <small class="text-muted">{{ $education->institution->name }}</small>
+                                </h3>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Skill -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Skills</h2>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
+            <div class="col col-xl-8">
+                @foreach ($skills as $skillsByGroup)
+                    <ul class="pl-0">
+                        @foreach ($skillsByGroup as $skill)
+                            <li class="badge badge-secondary badge-md shadow-md rounded-lg mb-2 px-4">{{ $skill->name }}</li>
+                        @endforeach
+                    </ul>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Profile</h2>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
+            <div class="col">
+                <div class="card shadow-md">
+                    <header class="card-header bg-light text-center">
+                        <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px">
+                    </header>
+                    <div class="card-body">
+                        <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
+                            <p class="card-text lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
+                            <p class="card-text">I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
+                            <p class="card-text">I love to learn new things, and I strive to keep myself up to date with the industry.</p>
+                            <p class="card-text">I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Misc -->
+        <div class="row px-3 mb-2">
+            <div class="col-8">
+                <h2 class="text-muted h6">Misc.</h2>
+            </div>
+        </div>
+        <div class="row mb-4 mb-xl-6">
+            <div class="col">
+                <ul class="list-group shadow-md rounded-lg">
+                    <li class="list-group-item">
+                        <strong>Nationality</strong>
+                        <div>Danish</div>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Age</strong>
+                        <div>{{ now()->year - 1993 }}</div>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Driver's License</strong>
+                        <div>Type B</div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

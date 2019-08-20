@@ -39,4 +39,18 @@ class Education extends Model
     {
         return $this->belongsTo('App\Institution');
     }
+
+    /**
+     * Get the human readable date of the started_at and finished_at dates.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function getDateAttribute()
+    {
+        if (is_null($this->finished_at)) {
+            return "{$this->started_at->format('Y')} –";
+        }
+
+        return "{$this->started_at->format('Y')} – {$this->finished_at->format('Y')}";
+    }
 }
