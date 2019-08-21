@@ -9,7 +9,7 @@
                     <h1>Résumé</h1>
                 </div>
                 <div class="col-12 col-md mt-md-2">
-                    <p class="h3">I am a <b>Web Developer</b> from <b>Denmark</b> with a speciality in <b>PHP</b>.
+                    <p class="h3">I see <b>my future</b> as someone, who is <b>respected</b> by my co-workers for my <b>knowledge</b>, <b>skill</b> and <b>sharp senses</b> as well as <b>cheerfulness</b>.
                 </div>
             </div>
         </div>
@@ -165,14 +165,14 @@
             <div class="col">
                 <div class="card shadow-md">
                     <header class="card-header bg-light text-center">
-                        <img src="{{ asset('img/peter.jpg') }}" class="img-fluid rounded-circle" width="128" style="margin-top: -64px">
+                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" class="img-fluid rounded-circle shadow-lg" width="128" style="margin-top: -64px">
                     </header>
                     <div class="card-body">
                         <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
                             <p class="card-text lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
                             <p class="card-text">I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
                             <p class="card-text">I love to learn new things, and I strive to keep myself up to date with the industry.</p>
-                            <p class="card-text">I see my future as an employee, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
+                            <p class="card-text">I see my future as someone, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
                         </div>
                     </div>
                 </div>
