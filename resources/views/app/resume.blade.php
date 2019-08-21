@@ -165,7 +165,7 @@
             <div class="col">
                 <div class="card shadow-md">
                     <header class="card-header bg-light text-center">
-                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" class="img-fluid rounded-circle shadow-lg" width="128" style="margin-top: -64px">
+                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" alt="Photo of Peter" class="img-fluid rounded-circle shadow-lg" width="128" style="margin-top: -64px">
                     </header>
                     <div class="card-body">
                         <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
