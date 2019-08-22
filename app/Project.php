@@ -51,4 +51,48 @@ class Project extends Model
     {
         return $this->belongsTo('App\Company');
     }
+
+    /**
+     * Does this project have links?
+     *
+     * @return string
+     */
+    public function hasLinks()
+    {
+        if (empty($this->links)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolve the filters.
+     *
+     * @return string
+     */
+    public function getFiltersAttribute()
+    {
+        return '';
+    }
+
+    /**
+     * Retrieve logo. Hardcoding this to asset for now.
+     *
+     * @return string
+     */
+    public function getLogoAttribute($logo)
+    {
+        return $logo;
+    }
+
+    /**
+     * Retrieve logo thumbnail. Hardcoding this to normal logo for now.
+     *
+     * @return string
+     */
+    public function getLogoThumbnailAttribute()
+    {
+        return $this->logo;
+    }
 }

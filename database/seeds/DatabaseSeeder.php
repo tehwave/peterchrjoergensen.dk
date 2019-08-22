@@ -3,6 +3,7 @@
 use App\User;
 use App\Post;
 use App\Skill;
+use App\Project;
 use App\Education;
 use App\Experience;
 use App\SkillGroup;
@@ -38,5 +39,8 @@ class DatabaseSeeder extends Seeder
 
                 $skillGroup->skills()->saveMany($skills);
             });
+
+        factory(Project::class, 20)
+            ->create();
     }
 }

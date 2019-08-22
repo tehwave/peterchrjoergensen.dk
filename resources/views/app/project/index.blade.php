@@ -38,10 +38,8 @@
     <div class="container mt-4 mt-md-n6">
         <div class="row mb-4 mb-xl-6">
             @foreach ($projects as $project)
-                <div class="col-12 mx-auto mb-4 col-md-6 col-lg-4 mix {{ implode(' ', $project['filters']) }}">
-                    @component('components.project')
-
-                    @endcomponent
+                <div class="col-12 mx-auto mb-4 col-md-6 col-lg-4 mix {{ $project->filters }}">
+                    @component('components.project', ['project' => $project]) @endcomponent
                 </div>
             @endforeach
         </div>

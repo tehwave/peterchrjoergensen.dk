@@ -6,9 +6,13 @@ use App\Company;
 use App\Project;
 use App\Institution;
 use Faker\Generator as Faker;
+use Bezhanov\Faker\ProviderCollectionHelper;
+use Illuminate\Support\Arr;
 
 $factory->define(Project::class, function (Faker $faker) {
+    ProviderCollectionHelper::addAllProvidersTo($faker);
 
+    // Random number of elements from assoc. array with keys intact.
     $links = [
         'Website' => '#',
         'Download' => '#',
@@ -16,6 +20,20 @@ $factory->define(Project::class, function (Faker $faker) {
         'Video' => '#',
         'Trailer' => '#',
     ];
+
+    $count = $faker->numberBetween(0, 3);
+
+    $results = [];
+
+    if ($count > 0) {
+        $keys = array_rand($links, $count);
+
+        foreach ((array) $keys as $key) {
+            $results[$key] = $links[$key];
+        }
+    }
+
+    $links = $results;
 
     return [
         'company_id' => optional($faker->optional(), function () {
@@ -26,7 +44,8 @@ $factory->define(Project::class, function (Faker $faker) {
         }),
         'title' => $faker->catchPhrase,
         'summary' => $faker->optional()->paragraph,
-        'links' => $faker->optional()->randomElements($links, $faker->numberBetween(1, count($links)))
+        'links' => $links,
+        'logo' => $faker->placeholder(),
         'started_at' => $faker->optional()->dateTime(),
         'finished_at' => $faker->optional()->dateTime(),
     ];
