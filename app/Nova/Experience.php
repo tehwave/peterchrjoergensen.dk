@@ -55,18 +55,15 @@ class Experience extends Resource
             Text::make('Title')
                 ->sortable(),
 
-            Text::make('Subtitle')
-                ->nullable()
-                ->sortable()
-                ->hideFromIndex(),
-
             Textarea::make('Summary')
                 ->nullable(),
 
             DateTime::make('Started At')
+                ->format('YYYY-MM-DD HH:mm')
                 ->firstDayOfWeek(1),
 
             DateTime::make('Stopped At')
+                ->format('YYYY-MM-DD HH:mm')
                 ->firstDayOfWeek(1)
                 ->nullable(),
         ];

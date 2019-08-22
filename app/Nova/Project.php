@@ -7,17 +7,18 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Education extends Resource
+class Project extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Education';
+    public static $model = 'App\Project';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -32,9 +33,7 @@ class Education extends Resource
      * @var array
      */
     public static $search = [
-        'id',
-        'title',
-        'subtitle',
+        'id', 'title',
     ];
 
     /**
@@ -49,8 +48,13 @@ class Education extends Resource
             ID::make()
                 ->sortable(),
 
+            BelongsTo::make('Company')
+                ->nullable()
+                ->hideFromIndex(),
+
             BelongsTo::make('Institution')
-                ->nullable(),
+                ->nullable()
+                ->hideFromIndex(),
 
             Text::make('Title')
                 ->sortable(),
@@ -58,14 +62,23 @@ class Education extends Resource
             Textarea::make('Summary')
                 ->nullable(),
 
+            KeyValue::make('Links')
+                ->keyLabel('Text')
+                ->valueLabel('URL')
+                ->actionText('Add Link')
+                ->nullable(),
+
             DateTime::make('Started At')
                 ->format('YYYY-MM-DD HH:mm')
-                ->firstDayOfWeek(1),
+                ->firstDayOfWeek(1)
+                ->nullable()
+                ->hideFromIndex(),
 
             DateTime::make('Finished At')
                 ->format('YYYY-MM-DD HH:mm')
                 ->firstDayOfWeek(1)
-                ->nullable(),
+                ->nullable()
+                ->hideFromIndex(),
         ];
     }
 }

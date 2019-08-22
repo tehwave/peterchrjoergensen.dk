@@ -23,7 +23,7 @@ $factory->define(Project::class, function (Faker $faker) {
 
     $count = $faker->numberBetween(0, 3);
 
-    $results = [];
+    $results = null;
 
     if ($count > 0) {
         $keys = array_rand($links, $count);
