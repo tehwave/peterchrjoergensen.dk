@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Project;
+
 class ProjectController extends Controller
 {
     /**
@@ -142,6 +144,7 @@ class ProjectController extends Controller
             ],
         ];
 
-        return view('app.portfolio', compact('projects'));
+        return view('app.project.index')
+            ->withProjects($projects);
     }
 }

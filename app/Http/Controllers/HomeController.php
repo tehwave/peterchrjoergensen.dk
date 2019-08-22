@@ -14,12 +14,16 @@ class HomeController extends Controller
      */
     public function __invoke()
     {
-        // $posts = Cache::remember('home.posts', 60 * 24, function () {
+        $posts = Cache::remember('home.posts', now()->addHour(), function () {
             $posts = Post::published()
                 ->latest('published_at')
                 ->take(4)
                 ->get();
-        // });
-        return view('app.home', compact('posts'));
+
+            return $posts;
+        });
+
+        return view('app.home')
+            ->withPosts($posts);
     }
 }
