@@ -14,13 +14,12 @@ class HomeController extends Controller
      */
     public function __invoke()
     {
-        $posts = Cache::remember('app.home.posts', 60 * 24, function () {
-            return Post::published()
-                ->orderByDesc('published_at')
-                ->get()
-                ->take(3);
-        });
-
+        // $posts = Cache::remember('home.posts', 60 * 24, function () {
+            $posts = Post::published()
+                ->latest('published_at')
+                ->take(4)
+                ->get();
+        // });
         return view('app.home', compact('posts'));
     }
 }
