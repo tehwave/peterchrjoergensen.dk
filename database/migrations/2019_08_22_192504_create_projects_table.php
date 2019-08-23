@@ -34,6 +34,9 @@ class CreateProjectsTable extends Migration
                 ->on('institutions')
                 ->onDelete('set null');
 
+            $table->string('type')
+                ->index();
+
             $table->string('title');
 
             $table->text('summary')

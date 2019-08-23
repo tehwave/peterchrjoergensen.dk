@@ -1,14 +1,16 @@
 // MixItUp
-import mixitup from 'mixitup';
+window.mixitup = require('mixitup');
 
-mixitup('#mixitup', {
+var mixer = mixitup(document.querySelector('#mixitup'), {
     selectors: {
         target: '.mix'
     },
     animation: {
         duration: 400,
-        nudge: true,
-        // animateResizeContainer: false,
+        animateResizeContainer: false,
         effects: "fade translateZ(-100px)"
+    },
+    load: {
+        sort: 'random'
     }
 });

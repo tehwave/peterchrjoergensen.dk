@@ -2,10 +2,20 @@
 
 namespace App;
 
+use App\Enums\ProjectType;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'type' => ProjectType::OTHER,
+    ];
+
     /**
      * Indicates if the model should be timestamped.
      *
@@ -73,7 +83,19 @@ class Project extends Model
      */
     public function getFiltersAttribute()
     {
-        return '';
+        $filters = collect([
+            $this->type,
+        ]);
+
+        if (! empty($this->institution_id)) {
+            $filters->push('institution');
+        } elseif (! empty($this->company_id)) {
+            $filters->push('company');
+        } else {
+            $filters->push('solo');
+        }
+
+        return $filters->implode(' ');
     }
 
     /**

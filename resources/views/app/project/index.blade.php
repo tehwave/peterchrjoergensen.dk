@@ -27,7 +27,7 @@
                     </div>
                     <div class="btn-group mb-2" role="group" aria-label="Additional Filters">
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".solo">Solo</button>
-                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".team">Team</button>
+                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".institution">Team</button>
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".company">Company</button>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="container mt-4 mt-md-n6">
+    <div class="container mt-4 mt-md-n6" id="mixitup">
         <div class="row mb-4 mb-xl-6">
             @foreach ($projects as $project)
                 <div class="col-12 mx-auto mb-4 col-md-6 col-lg-4 mix {{ $project->filters }}">
@@ -45,3 +45,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ mix('js/mixitup.js') }}"></script>
+@endpush

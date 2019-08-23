@@ -5,6 +5,7 @@
 use App\Company;
 use App\Project;
 use App\Institution;
+use App\Enums\ProjectType;
 use Faker\Generator as Faker;
 use Bezhanov\Faker\ProviderCollectionHelper;
 use Illuminate\Support\Arr;
@@ -36,12 +37,13 @@ $factory->define(Project::class, function (Faker $faker) {
     $links = $results;
 
     return [
-        'company_id' => optional($faker->optional(), function () {
+        'company_id' => optional($faker->optional(0.5, null)->randomDigit, function () {
             return factory(Company::class)->create()->id;
         }),
-        'institution_id' => optional($faker->optional(), function () {
+        'institution_id' => optional($faker->optional(0.5, null)->randomDigit, function () {
             return factory(Institution::class)->create()->id;
         }),
+        'type' => ProjectType::getRandomValue(),
         'title' => $faker->catchPhrase,
         'summary' => $faker->optional()->paragraph,
         'links' => $links,
