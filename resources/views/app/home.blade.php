@@ -7,8 +7,8 @@
             <div class="row my-4 my-xl-6">
                 <div class="col">
                     <div class="h1">Hello</div>
-                    <p class="h3">My name is <b>Peter.</b> It's nice to meet you.</p>
-                    <p class="h3">I am a <b>Web Developer</b> from <b>Denmark</b> with a speciality in <b>PHP</b>.
+                    <p class="h3 my-xl-4">My name is <b>Peter.</b> It's nice to meet you.</p>
+                    <p class="h3 my-xl-4">I am a <b>Web Developer</b> from <b>Denmark</b> with a speciality in <b>PHP</b>.
                 </div>
             </div>
         </div>
