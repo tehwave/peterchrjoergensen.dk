@@ -66,39 +66,26 @@
                         <div class="post-body">
                             {!! $post->body_html !!}
                         </div>
-                        <div class="post-author">
-                            <small>Written by</small>
-                            <div class="h4">Peter C. Jørgensen</div>
-                        </div>
+
                     </div>
                     <div class="card-footer">
-                        <div class="row">
-                            <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 order-md-1 my-md-auto col-lg-4">
+                        <div class="row my-2">
+                            <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 mb-md-0 order-md-1 col-lg-4">
                                 @isset ($previousPost)
-                                    <small>Previous</small>
-                                    <a class="d-block" href="{{ route('post.show', $previousPost->slug) }}">{{ $previousPost->title }}</a>
+                                    <small class="text-muted font-medium">Previous post</small>
+                                    <a class="card-link d-block" href="{{ route('post.show', $previousPost->slug) }}">{{ $previousPost->title }}</a>
                                 @endisset
                             </div>
-                            <div class="col-12 order-1 mb-4 col-md-6 order-md-2 my-md-auto col-lg-4 text-center">
-                                <noscript>
-                                    <img
-                                        class="img-fluid rounded-circle shadow-lg"
-                                        src="{{ asset('img/Peter.png') }}"
-                                        width="128"
-                                    />
-                                </noscript>
-                                <img
-                                    class="img-fluid rounded-circle shadow-lg"
-                                    data-lazy
-                                    src="{{ asset('img/Peter_thumbnail.png') }}"
-                                    data-src="{{ asset('img/Peter.png') }}"
-                                    width="128"
-                                />
+                            <div class="col-12 order-1 mb-4 col-md-6 order-md-2 mb-md-0 col-lg-4 text-center">
+                                <div class="post-author">
+                                    <small class="text-muted font-medium">Written by</small>
+                                    <div class="h4 my-0">Peter C. Jørgensen</div>
+                                </div>
                             </div>
-                            <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3 my-md-auto col-lg-4">
+                            <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3 col-lg-4 text-right">
                                 @isset ($nextPost)
-                                    <small>Next</small>
-                                    <a class="d-block" href="{{ route('post.show', $nextPost->slug) }}">{{ $nextPost->title }}</a>
+                                    <small class="text-muted font-medium">Next post</small>
+                                    <a class="card-link d-block" href="{{ route('post.show', $nextPost->slug) }}">{{ $nextPost->title }}</a>
                                 @endisset
                             </div>
                         </div>

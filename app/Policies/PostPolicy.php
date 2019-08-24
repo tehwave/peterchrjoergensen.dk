@@ -17,8 +17,16 @@ class PostPolicy
      * @param  \App\Post  $post
      * @return mixed
      */
-    public function view(User $user, Post $post)
+    public function view(?User $user, Post $post)
     {
-        //
+        if ($post->isPublished() === false) {
+            if ($user) {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

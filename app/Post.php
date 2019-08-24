@@ -78,7 +78,7 @@ class Post extends Model implements Feedable
      */
     public function isPublished()
     {
-        return is_null($post->published_at) === false;
+        return is_null($this->published_at) === false;
     }
 
     /**

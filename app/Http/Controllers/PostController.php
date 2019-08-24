@@ -35,7 +35,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        abort_if($post->published_at === null && auth()->guest(), 403);
+        $this->authorize('view', $post);
 
         if ($post->isPublished()) {
             $previousPost = Post::published()
@@ -49,14 +49,9 @@ class PostController extends Controller
                 ->first();
         }
 
-        // Get page incase from paginated post index
-        parse_str(parse_url(url()->previous(), PHP_URL_QUERY), $params);
-        $previousPage = $params['page'] ?? null;
-
         return view('app.post.show')
             ->withPost($post)
             ->withNextPost($nextPost)
-            ->withPreviousPost($previousPost)
-            ->withPreviousPage($previousPage);
+            ->withPreviousPost($previousPost);
     }
 }
