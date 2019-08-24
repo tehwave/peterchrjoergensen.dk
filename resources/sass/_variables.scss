@@ -125,6 +125,7 @@ $yellow:        #8D2B0B;
 
 $primary:       $blue;
 $secondary:     $blue-800;
+$accent:        $orange-500;
 
 $success:       $blue-200;
 $info:          $cyan-900;
@@ -136,7 +137,7 @@ $dark:          $gray-800;
 $theme-colors: (
   "primary":    $primary,
   "secondary":  $secondary,
-  "accent":     $orange-500,
+  "accent":     $accent,
   // "success":    $success,
   // "info":       $info,
   // "warning":    $warning,

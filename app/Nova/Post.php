@@ -5,7 +5,12 @@ namespace App\Nova;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Markdown;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\DateTime;
+use Benjaminhirsch\NovaSlugField\Slug;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Benjaminhirsch\NovaSlugField\TextWithSlug;
 
 class Post extends Resource
 {
@@ -54,52 +59,42 @@ class Post extends Resource
             ID::make()
                 ->sortable(),
 
-            Text::make('Title')
-                ->sortable(),
+            TextWithSlug::make('Title')
+                ->slug('slug')
+                ->onlyOnForms(),
+
+            Slug::make('Slug')
+                ->onlyOnForms(),
+
+            Text::make('Title', function () {
+                    return '<a href="'. $this->url .'">'. $this->title .'</a>';
+                })
+                ->asHtml()
+                ->readonly()
+                ->exceptOnForms(),
+
+            Textarea::make('Excerpt')
+                ->nullable(),
+
+            Markdown::make('Body')
+                ->nullable(),
+
+            DateTime::make('Created At')
+                ->format('YYYY-MM-DD HH:mm')
+                ->firstDayOfWeek(1)
+                ->readonly()
+                ->hideFromIndex(),
+
+            DateTime::make('Updated At')
+                ->format('YYYY-MM-DD HH:mm')
+                ->firstDayOfWeek(1)
+                ->readonly()
+                ->hideFromIndex(),
+
+            DateTime::make('Published At')
+                ->format('YYYY-MM-DD HH:mm')
+                ->firstDayOfWeek(1)
+                ->nullable(),
         ];
-    }
-
-    /**
-     * Get the cards available for the request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function cards(Request $request)
-    {
-        return [];
-    }
-
-    /**
-     * Get the filters available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function filters(Request $request)
-    {
-        return [];
-    }
-
-    /**
-     * Get the lenses available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function lenses(Request $request)
-    {
-        return [];
-    }
-
-    /**
-     * Get the actions available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function actions(Request $request)
-    {
-        return [];
     }
 }

@@ -50,7 +50,7 @@
 @section('app')
 
     <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
-
+        {{-- // --}}
     </div>
 
     <div class="container mt-4 mt-md-n6">
@@ -58,18 +58,17 @@
             <div class="col">
                 <div class="card shadow-md">
                     <div class="card-header text-center bg-transparent">
-                        <h1 class="card-title my-4 my-xl-6">
+                        <h1 class="card-title my-4 mt-xl-6">
                             {{ $post->title }}
                         </h1>
                     </div>
                     <div class="card-body">
-                        <div class="post-body">
+                        <div class="post-body mb-4 mb-xl-6">
                             {!! $post->body_html !!}
                         </div>
-
                     </div>
-                    <div class="card-footer">
-                        <div class="row my-2">
+                    <div class="card-footer bg-transparent">
+                        <div class="row my-2 my-xl-4">
                             <div class="col-12 mb-3 col-sm-6 mb-sm-0 order-2 col-md-3 mb-md-0 order-md-1 col-lg-4">
                                 @isset ($previousPost)
                                     <small class="text-muted font-medium">Previous post</small>

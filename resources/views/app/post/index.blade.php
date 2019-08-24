@@ -10,7 +10,7 @@
                 </div>
                 <div class="col-12 col-md mt-md-2">
                     <p class="h3">
-                        I post about <b>insights</b>, <b>events</b> and <b>resources</b> relevant to the <b>web- and game development</b> communities.
+                        I write about <b>insights</b>, <b>events</b> and <b>resources</b> relevant to the <b>web-</b> and <b>game development</b> communities.
                     </p>
                 </div>
             </div>
@@ -25,6 +25,9 @@
                             @component('components.post', ['post' => $post]) @endcomponent
                         </div>
                     @endforeach
+                    <div>
+                        {{ $posts->links() }}
+                    </div>
                 </div>
                 <div class="col-12 mb-4 col-md-6 col-lg-4 ml-lg-auto mb-4">
                     <div class="card shadow-md">
@@ -52,10 +55,5 @@
                     </div>
                 </div>
             </div>
-        <div class="row">
-            <div class="col">
-                {{ $posts->links() }}
-            </div>
-        </div>
     </div>
 @endsection

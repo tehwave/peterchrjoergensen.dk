@@ -7,7 +7,7 @@
      |_|   \___|\__\___|_|     \____(_)  \___/ \//__/|_|  \__, |\___|_| |_|___/\___|_| |_|
                                                           |___/
                                 Designed and developed by
-                    Peter 🌊 Jørgensen | peterchrjoergensen.dk | @tehwave
+                    Peter C. Jørgensen | peterchrjoergensen.dk | @tehwave
  -->
 <html class="h-100" lang="{{ app()->getLocale() }}" @yield('html')>
     <head>
@@ -26,7 +26,7 @@
         <link rel="dns-prefetch" href="https://fonts.googleapis.com">
         <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-        <title>@yield('title', 'Peter 🌊 Jørgensen')</title>
+        <title>@yield('title', 'Peter C. Jørgensen')</title>
 
         <!-- Website -->
         <meta name="theme-color" content="#0fa0ce">
@@ -41,9 +41,9 @@
 
         <!-- SEO -->
         @section('head')
-            <meta name="title" content="@yield('title', 'Peter 🌊 Jørgensen')">
-            <meta name="author" content="@yield('author', 'Peter 🌊 Jørgensen')">
-            <meta name="description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta name="title" content="@yield('title', 'Peter C. Jørgensen')">
+            <meta name="author" content="@yield('author', 'Peter C. Jørgensen')">
+            <meta name="description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
         @show
 
         <!-- Open Graph -->
@@ -52,16 +52,16 @@
             <meta property="profile:first_name" content="Peter">
             <meta property="profile:last_name" content="Jørgensen">
             <meta property="og:url" content="{{ url()->full() }}">
-            <meta property="og:title" content="@yield('title', 'Peter 🌊 Jørgensen')">
-            <meta property="og:description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta property="og:title" content="@yield('title', 'Peter C. Jørgensen')">
+            <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
         @show
 
         <!-- Twitter -->
         @section('twitter')
             <meta name="twitter:card" content="summary">
             <meta name="twitter:site" content="@tehwave">
-            <meta name="twitter:title" content="@yield('title', 'Peter 🌊 Jørgensen')">
-            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter 🌊 Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
+            <meta name="twitter:title" content="@yield('title', 'Peter C. Jørgensen')">
+            <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
         @show
 
         <!-- JSON-LD Person -->
@@ -69,7 +69,7 @@
         {
             "@context": "http://schema.org/",
             "@type": "Person",
-            "name": "Peter 🌊 Jørgensen",
+            "name": "Peter C. Jørgensen",
             "jobTitle": "Web Developer",
             "address": {
                 "@type": "PostalAddress",
