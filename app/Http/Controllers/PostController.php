@@ -3,10 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Post;
-use Validator;
-use Spatie\Tags\Tag;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -17,21 +13,18 @@ class PostController extends Controller
      */
     public function index()
     {
-        if (request()->has('query')) {
-            $posts = Post::search(request()->input('query'))->paginate(5);
-        } else {
-            $posts = Post::published()->orderBy('published_at', 'desc')->paginate(5);
-        }
+        $posts = Post::published()
+            ->latest('published_at')
+            ->paginate(5);
 
-        $archive = Post::published()->get()->sortByDesc('published_at')->groupBy(function ($post) {
-            return $post->published_at->format('Y/m');
-        });
+        $feeds = collect(config('feed.feeds'))
+            ->mapWithKeys(function ($feed, $name) {
+                return [$name => $feed['title']];
+            });
 
-        $feeds = collect(config('feed.feeds'))->mapWithKeys(function ($feed, $name) {
-            return [$name => $feed['title']];
-        });
-
-        return view('app.post.index', compact('posts', 'archive', 'feeds'));
+        return view('app.post.index')
+            ->withPosts($posts)
+            ->withFeeds($feeds);
     }
 
     /**
@@ -42,25 +35,28 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // Get page incase from paginated post index
-        parse_str(parse_url(url()->previous(), PHP_URL_QUERY), $params);
-        $previous_page = $params['page'] ?? null;
-
-        abort_if($post === null, 404);
         abort_if($post->published_at === null && auth()->guest(), 403);
 
-        if ($post->published_at !== null) {
-            $previous_post = Post::published()
+        if ($post->isPublished()) {
+            $previousPost = Post::published()
                 ->where('published_at', '<', $post->published_at)
-                ->orderBy('published_at', 'desc')
+                ->latest('published_at')
                 ->first();
 
-            $next_post = Post::published()
+            $nextPost = Post::published()
                 ->where('published_at', '>', $post->published_at)
-                ->orderBy('published_at', 'asc')
+                ->oldest('published_at')
                 ->first();
         }
 
-        return view('app.post.show', compact('post', 'previous_post', 'next_post', 'previous_page'));
+        // Get page incase from paginated post index
+        parse_str(parse_url(url()->previous(), PHP_URL_QUERY), $params);
+        $previousPage = $params['page'] ?? null;
+
+        return view('app.post.show')
+            ->withPost($post)
+            ->withNextPost($nextPost)
+            ->withPreviousPost($previousPost)
+            ->withPreviousPage($previousPage);
     }
 }

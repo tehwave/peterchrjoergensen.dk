@@ -22,6 +22,16 @@ class Post extends Model implements Feedable
     ];
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /**
      * Get the indexable feed item for the model.
      *
      * @return \Spatie\Feed\FeedItem
@@ -31,9 +41,9 @@ class Post extends Model implements Feedable
         return FeedItem::create()
             ->id($this->id)
             ->title($this->title)
-            ->summary($this->excerpt)
+            ->summary($this->excerpt ?? '')
             ->updated($this->updated_at)
-            ->link(route('post.show', $this->slug))
+            ->link($this->url)
             ->author('Peter Christian Jørgensen');
     }
 
@@ -62,6 +72,16 @@ class Post extends Model implements Feedable
     }
 
     /**
+     * Is this post published?
+     *
+     * @return bool
+     */
+    public function isPublished()
+    {
+        return is_null($post->published_at) === false;
+    }
+
+    /**
      * Parse the Markdown content of the excerpt attribute.
      *
      * @return HTML
@@ -84,5 +104,15 @@ class Post extends Model implements Feedable
 
         // Stop <p> from wrapping <img>.
         return preg_replace('/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s', '\1', $body);
+    }
+
+    /**
+     * Get the route for this specific post.
+     *
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        return route('post.show', $this->slug);
     }
 }
