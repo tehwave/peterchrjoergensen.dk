@@ -47,7 +47,6 @@ $factory->define(Project::class, function (Faker $faker) {
         'title' => $faker->catchPhrase,
         'summary' => $faker->optional()->paragraph,
         'links' => $links,
-        'logo' => $faker->placeholder(),
         'started_at' => $faker->optional()->dateTime(),
         'finished_at' => $faker->optional()->dateTime(),
     ];

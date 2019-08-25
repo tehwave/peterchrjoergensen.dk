@@ -3,10 +3,16 @@
 namespace App;
 
 use App\Enums\ProjectType;
+use Spatie\Image\Manipulations;
+use Spatie\MediaLibrary\Models\Media;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia\HasMedia;
+use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 
-class Project extends Model
+class Project extends Model implements HasMedia
 {
+    use HasMediaTrait;
+
     /**
      * The model's default values for attributes.
      *
@@ -41,6 +47,28 @@ class Project extends Model
     protected $casts = [
         'links' => 'array',
     ];
+
+    /**
+     * Register the media conversions.
+     *
+     * @return void
+     */
+    public function registerMediaConversions(Media $media = null)
+    {
+        $this->addMediaConversion('thumbnail')
+            ->fit(Manipulations::FIT_CONTAIN, 64, 64)
+            ->blur(10);
+    }
+
+    /**
+     * Register the media collections.
+     *
+     * @return void
+     */
+    public function registerMediaCollections()
+    {
+        $this->addMediaCollection('logo')->singleFile();
+    }
 
     /**
      * Get the institution attached to the project.
@@ -99,22 +127,22 @@ class Project extends Model
     }
 
     /**
-     * Retrieve logo. Hardcoding this to asset for now.
+     * Retrieve logo.
      *
      * @return string
      */
-    public function getLogoAttribute($logo)
+    public function getLogoAttribute()
     {
-        return $logo;
+        return $this->getFirstMediaUrl('logo');
     }
 
     /**
-     * Retrieve logo thumbnail. Hardcoding this to normal logo for now.
+     * Retrieve logo thumbnail.
      *
      * @return string
      */
     public function getLogoThumbnailAttribute()
     {
-        return $this->logo;
+        return $this->getFirstMediaUrl('logo', 'thumbnail');
     }
 }

@@ -4,7 +4,7 @@
         data-lazy
         src="{{ $project->logo_thumbnail }}"
         data-src="{{ $project->logo }}"
-        alt="FIRKANT"
+        alt="{{ $project->title }}"
     />
     <div class="card-body">
         <h4 class="card-title">{{ $project->title }}</h4>

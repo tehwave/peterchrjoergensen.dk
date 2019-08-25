@@ -41,6 +41,12 @@ Install the packages.
 composer install
 ```
 
+Link storage to public.
+
+```bash
+php artisan storage:link
+```
+
 ### Build
 
 Install the dependencies.

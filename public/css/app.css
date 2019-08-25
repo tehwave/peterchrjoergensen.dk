@@ -3,83 +3,63 @@
 peterchrjoergensen.dk
 
 -------------------------------- */
-
 /* --------------------------------
 
 Variables
 
 -------------------------------- */
-
 /* --------------------------------
 
 Fonts
 
 -------------------------------- */
-
 /* --------------------------------
 
 Colors
 
 -------------------------------- */
-
 /* --------------------------------
 
 Typography
 
 -------------------------------- */
-
 /* --------------------------------
 
 Grid
 
 -------------------------------- */
-
 /* --------------------------------
 
 Spacers
 
 -------------------------------- */
-
 /* --------------------------------
 
 Components
 
 -------------------------------- */
-
 /* --------------------------------
 
 Cards
 
 -------------------------------- */
-
 /* --------------------------------
 
 Navbar
 
 -------------------------------- */
-
 /* --------------------------------
 
 Mixins
 
 -------------------------------- */
-
 /* --------------------------------
 
 Post
 
 -------------------------------- */
-
 @media (min-width: 992px) {
-  .post-body p,
-  .post-body h1,
-  .post-body h2,
-  .post-body h3,
-  .post-body h4,
-  .post-body h5,
-  .post-body h6,
-  .post-body ul,
-  .post-body ol {
+  .post-body p, .post-body h1, .post-body h2, .post-body h3, .post-body h4, .post-body h5, .post-body h6, .post-body ul, .post-body ol {
     width: 75%;
     text-align: justify;
     -moz-text-align-last: left;
@@ -88,17 +68,8 @@ Post
     margin-right: auto;
   }
 }
-
 @media (min-width: 1200px) {
-  .post-body p,
-  .post-body h1,
-  .post-body h2,
-  .post-body h3,
-  .post-body h4,
-  .post-body h5,
-  .post-body h6,
-  .post-body ul,
-  .post-body ol {
+  .post-body p, .post-body h1, .post-body h2, .post-body h3, .post-body h4, .post-body h5, .post-body h6, .post-body ul, .post-body ol {
     width: 60%;
     text-align: justify;
     -moz-text-align-last: left;
@@ -107,13 +78,7 @@ Post
     margin-right: auto;
   }
 }
-
-.post-body h1:after,
-.post-body h2:after,
-.post-body h3:after,
-.post-body h4:after,
-.post-body h5:after,
-.post-body h6:after {
+.post-body h1:after, .post-body h2:after, .post-body h3:after, .post-body h4:after, .post-body h5:after, .post-body h6:after {
   content: " ";
   display: block;
   width: 96px;
@@ -123,7 +88,6 @@ Post
   border-radius: 51rem;
   background: #F9703E;
 }
-
 .post-body img {
   border-radius: 1rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
@@ -131,12 +95,10 @@ Post
   max-width: 100%;
   height: auto;
 }
-
 .post-body blockquote {
   border-left: 0.25rem solid #F9703E;
   font-size: 1.25rem;
 }
-
 @media (min-width: 992px) {
   .post-body blockquote {
     width: 80%;
@@ -144,7 +106,6 @@ Post
     margin-right: auto;
   }
 }
-
 @media (min-width: 1200px) {
   .post-body blockquote {
     width: 70%;
@@ -152,7 +113,6 @@ Post
     margin-right: auto;
   }
 }
-
 .post-body blockquote p {
   margin-left: 1rem;
   width: 100% !important;
@@ -163,7 +123,6 @@ Post
 Primary
 
 -------------------------------- */
-
 body {
   background-image: url("/img/overlay.png");
 }
@@ -173,26 +132,11 @@ body {
 Lazy Loading
 
 -------------------------------- */
-
-[data-lazy][data-src] {
-  -webkit-filter: blur(2px);
-          filter: blur(2px);
-}
-
-[data-lazy]:not([data-src]) {
-  -webkit-filter: blur(0px);
-          filter: blur(0px);
-  transition: -webkit-filter 0.4s;
-  transition: filter 0.4s;
-  transition: filter 0.4s, -webkit-filter 0.4s;
-}
-
 /* --------------------------------
 
 Utilities
 
 -------------------------------- */
-
 .shadow {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
 }
@@ -266,7 +210,6 @@ Utilities
     Patterns
 
 -------------------------------- */
-
 .pattern-wavy {
   background-size: cover;
   background-position: center;
@@ -282,7 +225,6 @@ Utilities
 Cards
 
 -------------------------------- */
-
 .card-title {
   color: #0A558C;
 }
@@ -298,7 +240,6 @@ Cards
 Navbar
 
 -------------------------------- */
-
 .nav-link {
   font-family: "Montserrat", sans-serif;
   border-radius: 1rem;
@@ -310,7 +251,6 @@ Navbar
 Badges
 
 -------------------------------- */
-
 .badge {
   font-family: "Montserrat", sans-serif;
   border-radius: 1rem;
@@ -328,4 +268,3 @@ Badges
 .badge-lg {
   font-size: 1.25rem;
 }
-

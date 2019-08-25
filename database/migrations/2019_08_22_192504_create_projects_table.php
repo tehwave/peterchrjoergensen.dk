@@ -45,8 +45,6 @@ class CreateProjectsTable extends Migration
             $table->json('links')
                 ->nullable();
 
-            $table->string('logo');
-
             $table->timestamp('started_at')
                 ->nullable();
 

@@ -75,12 +75,6 @@
                                     <a class="card-link d-block" href="{{ route('post.show', $previousPost->slug) }}">{{ $previousPost->title }}</a>
                                 @endisset
                             </div>
-                            <div class="col-12 order-1 mb-4 col-md-6 order-md-2 mb-md-0 col-lg-4 text-center">
-                                <div class="post-author">
-                                    <small class="text-muted font-medium">Written by</small>
-                                    <div class="h4 my-0">Peter C. Jørgensen</div>
-                                </div>
-                            </div>
                             <div class="col-12 col-sm-6 order-3 col-md-3 order-md-3 col-lg-4 text-right">
                                 @isset ($nextPost)
                                     <small class="text-muted font-medium">Next post</small>

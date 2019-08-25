@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Ebess\AdvancedNovaMediaLibrary\Fields\Images;
 
 class Project extends Resource
 {
@@ -79,6 +80,10 @@ class Project extends Resource
                 ->firstDayOfWeek(1)
                 ->nullable()
                 ->hideFromIndex(),
+
+            Images::make('Logo')
+                ->croppingConfigs(['ratio' => 1])
+                ->rules('required'),
         ];
     }
 }
