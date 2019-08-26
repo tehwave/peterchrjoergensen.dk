@@ -2,9 +2,11 @@
 
 namespace App\Nova;
 
+use App\Enums\ProjectType;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Textarea;
@@ -58,6 +60,10 @@ class Project extends Resource
 
             Text::make('Title')
                 ->sortable(),
+
+            Select::make('Type')
+                ->options(ProjectType::toSelectArray())
+                ->displayUsingLabels(),
 
             Textarea::make('Summary')
                 ->nullable(),
