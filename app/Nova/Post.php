@@ -65,7 +65,9 @@ class Post extends Resource
             Slug::make('Slug')
                 ->onlyOnForms(),
 
-            Text::make('Title', function () { return $this->link; })
+            Text::make('Title', function () {
+                return $this->link;
+            })
                 ->asHtml()
                 ->readonly()
                 ->exceptOnForms(),
