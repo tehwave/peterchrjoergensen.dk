@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-
 use App\Education;
 use App\Institution;
 use Faker\Generator as Faker;

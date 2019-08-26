@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-
 use App\SkillGroup;
 use Faker\Generator as Faker;
 

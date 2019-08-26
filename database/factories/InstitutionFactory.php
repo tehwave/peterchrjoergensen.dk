@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-
 use App\Institution;
 use Faker\Generator as Faker;
 use Bezhanov\Faker\ProviderCollectionHelper;

@@ -1,7 +1,5 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-
 use App\Company;
 use App\Project;
 use App\Institution;
