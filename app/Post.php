@@ -115,4 +115,18 @@ class Post extends Model implements Feedable
     {
         return route('post.show', $this->slug);
     }
+
+    /**
+     * Get the route as an <a> element.
+     *
+     * @return string
+     */
+    public function getLinkAttribute()
+    {
+        return sprintf(
+            '<a href="%s">%s</a>',
+            $this->url,
+            $this->title
+        );
+    }
 }
