@@ -58,12 +58,12 @@ class Project extends Resource
                 ->nullable()
                 ->hideFromIndex(),
 
-            Text::make('Title')
-                ->sortable(),
-
             Select::make('Type')
                 ->options(ProjectType::toSelectArray())
                 ->displayUsingLabels(),
+
+            Text::make('Title')
+                ->sortable(),
 
             Textarea::make('Summary')
                 ->nullable(),
