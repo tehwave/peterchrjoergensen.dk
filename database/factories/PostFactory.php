@@ -1,13 +1,15 @@
 <?php
 
+use App\Post;
+use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
-$factory->define(App\Post::class, function (Faker $faker) {
+$factory->define(Post::class, function (Faker $faker) {
     return [
         'title' => $faker->sentence,
-        'slug' => str_slug($faker->sentence),
-        'excerpt' => $faker->paragraph,
-        'body' => $faker->text,
-        'published_at' => $faker->dateTime(),
+        'slug' => Str::slug($faker->sentence),
+        'excerpt' => $faker->optional()->paragraph,
+        'body' => $faker->optional()->text,
+        'published_at' => $faker->optional()->dateTime(),
     ];
 });

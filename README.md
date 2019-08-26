@@ -10,7 +10,42 @@ This is the repository for my personal website.
 
 https://peterchrjoergensen.dk
 
+## Requirements
+
+- Redis
+- Composer
+- PHP >= 7.2
+- MySQL >= 5.7
+- Laravel >= 5.8
+
+### Packages
+
+- Laravel Nova >= 2.0
+
+### PHP Extensions
+
+- ext-curl: *
+- ext-json: *
+
 ## Installation
+
+Add Laravel Nova credentials to `auth.json`.
+
+```bash
+composer config http-basic.nova.laravel.com <USERNAME> <PASSWORD>
+```
+
+Install the packages.
+
+```bash
+composer install
+```
+
+Link storage to public.
+
+```bash
+php artisan storage:link
+```
 
 ### Build
 
@@ -38,56 +73,53 @@ Deploy Script for Laravel Forge
 
     cd /home/forge/peterchrjoergensen.dk
 
-    if [ -f artisan ]
-    then
-        php artisan down
-    fi
+    php artisan down
 
     git pull origin master
     composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    if [ -f artisan ]
-    then
-        php artisan migrate --force
+    php artisan migrate --force
 
-        php artisan cache:clear
-        php artisan view:clear
+    php artisan cache:clear
+    php artisan view:clear
 
-        php artisan config:cache
-        php artisan route:cache
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
 
-        php artisan queue:restart
-    fi
+    php artisan queue:restart
 
-    echo "" | sudo -S service php7.1-fpm reload
+    echo "" | sudo -S service php7.2-fpm reload
 
-    if [ -f artisan ]
-    then
-        php artisan up
-    fi
+    php artisan up
+
+Replace ```php7.3-fpm``` with the version of PHP installed on the server.
 
 ### Environment
 
-```.env.example``` represents the environment variables for production. Sensitive information has been redacted, and must be replaced with their correct values.
+```.env.example``` represents the environment variables for production.
 
-### Nginx
+Sensitive values has been redacted. They must be replaced with their correct values.
 
-Configuration for Nginx to cache CSS, JavaScript and various media files.
+### NGINX
+
+Add the following lines to the NGINX configuration to cache assets, media, etc.
 
 ```
-    # Cache Media: images, icons, video, audio, HTC
-    location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc)$ {
-      expires 1M;
-      access_log off;
-      add_header Cache-Control "public";
-    }
+# assets, media
+location ~* \.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$ {
+    expires 1M;
+    access_log off;
+}
+```
 
-    # Cache CSS and JavaScript
-    location ~* \.(?:css|js)$ {
-      expires 1y;
-      access_log off;
-      add_header Cache-Control "public";
-    }
+```
+# svg, fonts
+location ~* \.(?:svgz?|ttf|ttc|otf|eot|woff2?)$ {
+    add_header Access-Control-Allow-Origin "*";
+    expires 1M;
+    access_log off;
+}
 ```
 
 ## About

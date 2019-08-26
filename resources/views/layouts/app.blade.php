@@ -1,31 +1,43 @@
-<!doctype html>
-<html lang="{{ app()->getLocale() }}" @yield('html')>
+<!DOCTYPE html>
+<!--
+      ____      _               ____         _
+     |  _ \ ___| |_ ___ _ __   / ___|       | | ____  _ __ __ _  ___ _ __  ___  ___ _ __
+     | |_) / _ \ __/ _ \ '__| | |        _  | |/ _//\| '__/ _` |/ _ \ '_ \/ __|/ _ \ '_ \
+     |  __/  __/ ||  __/ |    | |___ _  | |_| | (//) | | | (_| |  __/ | | \__ \  __/ | | |
+     |_|   \___|\__\___|_|     \____(_)  \___/ \//__/|_|  \__, |\___|_| |_|___/\___|_| |_|
+                                                          |___/
+                                Designed and developed by
+                    Peter C. Jørgensen | peterchrjoergensen.dk | @tehwave
+ -->
+<html class="h-100" lang="{{ app()->getLocale() }}" @yield('html')>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <!--
-              ____      _               ____         _
-             |  _ \ ___| |_ ___ _ __   / ___|       | | ____  _ __ __ _  ___ _ __  ___  ___ _ __
-             | |_) / _ \ __/ _ \ '__| | |        _  | |/ _//\| '__/ _` |/ _ \ '_ \/ __|/ _ \ '_ \
-             |  __/  __/ ||  __/ |    | |___ _  | |_| | (//) | | | (_| |  __/ | | \__ \  __/ | | |
-             |_|   \___|\__\___|_|     \____(_)  \___/ \//__/|_|  \__, |\___|_| |_|___/\___|_| |_|
-                                                                  |___/
-                                        Designed and developed by
-                            Peter C. Jørgensen | peterchrjoergensen.dk | @tehwave
-         -->
+        {{-- Don't want Google to index in non-production environments. --}}
+        @unless(app()->environment() === 'production')
+            <meta name="robots" content="noindex,nofollow">
+        @endunless
+
+        <!-- Prefetch -->
+        <link rel="dns-prefetch" href="https://www.google-analytics.com">
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
         <title>@yield('title', 'Peter C. Jørgensen')</title>
 
         <!-- Website -->
-        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#0fa0ce">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <link rel="mask-icon" href="{{ asset('img/safari-pinned-tab.svg') }}" color="#5bbad5">
         <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('img/apple-touch-icon.png') }}">
         <link rel="icon" type="image/png" href="{{ asset('img/favicon-32x32.png') }}" sizes="32x32">
         <link rel="icon" type="image/png" href="{{ asset('img/favicon-16x16.png') }}" sizes="16x16">
+
         <meta name="norton-safeweb-site-verification" content="ruupo17w25hgxl64ko9xi-tzk8g8oagauekw54k758cs9l7z127rrzoumh0s3y9anjokm96h5kwbwnyyf8meknh89wngtt4zcgudogijwy2i5gug35196p4ykx4va7sh">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- SEO -->
         @section('head')
@@ -42,7 +54,6 @@
             <meta property="og:url" content="{{ url()->full() }}">
             <meta property="og:title" content="@yield('title', 'Peter C. Jørgensen')">
             <meta property="og:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
-            <meta property="og:image" content="{{ asset('img/open-graph-image.png') }}">
         @show
 
         <!-- Twitter -->
@@ -51,7 +62,6 @@
             <meta name="twitter:site" content="@tehwave">
             <meta name="twitter:title" content="@yield('title', 'Peter C. Jørgensen')">
             <meta name="twitter:description" content="@yield('description', 'The personal website of Peter C. Jørgensen. It includes his portfolio, curriculum vitae, and blog.')">
-            <meta name="twitter:image" content="{{ asset('twitter-image.png') }}">
         @show
 
         <!-- JSON-LD Person -->
@@ -60,7 +70,7 @@
             "@context": "http://schema.org/",
             "@type": "Person",
             "name": "Peter C. Jørgensen",
-            "jobTitle": "Multimedia Designer",
+            "jobTitle": "Web Developer",
             "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Kolding",
@@ -72,13 +82,8 @@
         <!-- Styles -->
         <link rel="stylesheet" type="text/css" href="{{ mix('css/bootstrap.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ mix('css/app.css') }}">
-        <noscript>
-            <style>
-                .lqip {
-                    display: none;
-                }
-            </style>
-        </noscript>
+        <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700,800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700,800&display=swap"></noscript>
         @stack('styles')
 
         <!-- Google Tag Manager -->
@@ -89,19 +94,9 @@
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-TKNTXKZ');
         </script>
-
-        <!-- Google AdSense -->
-        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <script>
-          (adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-pub-4880846761046037",
-            enable_page_level_ads: true
-          });
-        </script>
-
         @stack('head')
     </head>
-    <body class="h-100">
+    <body class="h-100" data-route="{{ Str::slug(str_replace('.', ' ', Route::currentRouteName())) }}" data-no-js>
         <!-- Google Tag Manager (noscript) -->
         <noscript>
             <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKNTXKZ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
@@ -114,25 +109,23 @@
             </div>
         </noscript>
 
-        <!-- Header w/ Navigation -->
-        @component('components.header')
-            @yield('header')
-        @endcomponent
+        <!-- Navigation -->
+        @include('partials.navbar')
 
         <!-- Application -->
-        <main class="h-100" id="app">
+        <main id="main">
             @yield('app')
         </main>
 
         <!-- Footer -->
-        @component('components.footer')
-            @yield('footer')
-        @endcomponent
+        @include('partials.footer')
 
         <!-- Scripts -->
         <script src="{{ mix('js/manifest.js') }}"></script>
+        <script src="{{ mix('js/bootstrap.js') }}"></script>
         <script src="{{ mix('js/vendor.js') }}"></script>
         <script src="{{ mix('js/app.js') }}"></script>
+        <script>$('body').removeAttr('data-no-js');</script>
         @stack('scripts')
     </body>
 </html>

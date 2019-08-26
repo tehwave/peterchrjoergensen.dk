@@ -1,0 +1,72 @@
+/* --------------------------------
+
+Post
+
+-------------------------------- */
+
+.post-body {
+    @media (min-width: 992px) {
+        p, h1, h2, h3, h4, h5, h6, ul, ol {
+            width: 75%;
+            text-align: justify;
+            text-align-last: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        p, h1, h2, h3, h4, h5, h6, ul, ol {
+            width: 60%;
+            text-align: justify;
+            text-align-last: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    // Horizontal ruler after headings
+    h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+        content: ' ';
+        display: block;
+        width: 96px;
+        height: 4px;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+        border-radius: 51rem;
+        background: $accent;
+    }
+
+    // Images
+    img {
+        border-radius: $border-radius-lg;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        margin-bottom: 1rem;
+
+        // Responsive
+        max-width: 100%;
+        height: auto;
+    }
+
+    blockquote {
+        border-left: 0.25rem solid $accent;
+        font-size: 1.25rem;
+
+        @media (min-width: 992px) {
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 1200px) {
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
+            margin-left: 1rem;
+            width: 100% !important;
+        }
+    }
+}

@@ -6,23 +6,11 @@ use Parsedown;
 use Spatie\Tags\HasTags;
 use Spatie\Feed\Feedable;
 use Spatie\Feed\FeedItem;
-use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model implements Feedable
 {
-    use Searchable, HasTags;
-
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
-    ];
+    use HasTags;
 
     /**
      * The attributes that should be mutated to dates.
@@ -34,22 +22,13 @@ class Post extends Model implements Feedable
     ];
 
     /**
-     * Get the indexable data array for the model.
+     * Get the route key for the model.
      *
-     * @return array
+     * @return string
      */
-    public function toSearchableArray()
+    public function getRouteKeyName()
     {
-        if ($this->published_at) {
-            return [
-                'id' => $this->id,
-                'title' => $this->title,
-                'excerpt' => $this->excerpt,
-                'published_at' => $this->published_at,
-            ];
-        }
-
-        return [];
+        return 'slug';
     }
 
     /**
@@ -62,9 +41,9 @@ class Post extends Model implements Feedable
         return FeedItem::create()
             ->id($this->id)
             ->title($this->title)
-            ->summary($this->excerpt)
+            ->summary($this->excerpt ?? '')
             ->updated($this->updated_at)
-            ->link(route('post.show', $this->slug))
+            ->link($this->url)
             ->author('Peter Christian Jørgensen');
     }
 
@@ -76,7 +55,7 @@ class Post extends Model implements Feedable
     public static function getFeedItems()
     {
         return self::published()
-            ->orderBy('published_at', 'desc')
+            ->orderByDesc('published_at')
             ->limit(100)
             ->get();
     }
@@ -93,11 +72,21 @@ class Post extends Model implements Feedable
     }
 
     /**
+     * Is this post published?
+     *
+     * @return bool
+     */
+    public function isPublished()
+    {
+        return is_null($this->published_at) === false;
+    }
+
+    /**
      * Parse the Markdown content of the excerpt attribute.
      *
      * @return HTML
      */
-    public function excerpt()
+    public function getExcerptHtmlAttribute()
     {
         return (new Parsedown())
             ->text($this->excerpt);
@@ -108,11 +97,36 @@ class Post extends Model implements Feedable
      *
      * @return HTML
      */
-    public function body()
+    public function getBodyHtmlAttribute()
     {
-        $body = (new Parsedown())->text($this->body);
+        $body = (new Parsedown())
+            ->text($this->body);
 
-        // Stop <p> from wrapping <img>
+        // Stop <p> from wrapping <img>.
         return preg_replace('/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s', '\1', $body);
+    }
+
+    /**
+     * Get the route for this specific post.
+     *
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        return route('post.show', $this->slug);
+    }
+
+    /**
+     * Get the route as an <a> element.
+     *
+     * @return string
+     */
+    public function getLinkAttribute()
+    {
+        return sprintf(
+            '<a href="%s">%s</a>',
+            $this->url,
+            $this->title
+        );
     }
 }
