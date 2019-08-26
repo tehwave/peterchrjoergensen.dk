@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', 'Résumé | Peter C. Jørgensen')
+@section('description', 'I see my future as someone, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.')
 
 @section('app')
 
