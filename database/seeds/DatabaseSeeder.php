@@ -1,7 +1,7 @@
 <?php
 
-use App\User;
 use App\Post;
+use App\User;
 use App\Skill;
 use App\Project;
 use App\Education;

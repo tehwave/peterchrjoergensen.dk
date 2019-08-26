@@ -8,7 +8,6 @@ use App\Institution;
 use App\Enums\ProjectType;
 use Faker\Generator as Faker;
 use Bezhanov\Faker\ProviderCollectionHelper;
-use Illuminate\Support\Arr;
 
 $factory->define(Project::class, function (Faker $faker) {
     ProviderCollectionHelper::addAllProvidersTo($faker);

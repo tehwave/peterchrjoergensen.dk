@@ -5,11 +5,10 @@ namespace App\Nova;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Textarea;
-use Laravel\Nova\Fields\DateTime;
 use Benjaminhirsch\NovaSlugField\Slug;
-use Laravel\Nova\Http\Requests\NovaRequest;
 use Benjaminhirsch\NovaSlugField\TextWithSlug;
 
 class Post extends Resource
@@ -67,7 +66,7 @@ class Post extends Resource
                 ->onlyOnForms(),
 
             Text::make('Title', function () {
-                    return '<a href="'. $this->url .'">'. $this->title .'</a>';
+                    return '<a href="'.$this->url.'">'.$this->title.'</a>';
                 })
                 ->asHtml()
                 ->readonly()
