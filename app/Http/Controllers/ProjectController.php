@@ -14,11 +14,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        // $projects = Cache::remember('home.projects', now()->addHour(), function () {
-            $projects = Project::all();
-
-            // return $projects;
-        // });
+        $projects = Project::all();
 
         return view('app.project.index')
             ->withProjects($projects);
