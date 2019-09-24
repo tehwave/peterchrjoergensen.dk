@@ -47,6 +47,7 @@
     <meta name="twitter:title" content="{{ $post->title }}">
     <meta name="twitter:description" content="{{ $post->excerpt }}">
 @endsection
+
 @section('app')
 
     <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
