@@ -29,4 +29,9 @@ mix
     .extract()
 
     // Cache Busting.
-    .version();
+    .version()
+
+    // Options.
+    .options({
+        processCssUrls: false
+    });
