@@ -5,7 +5,7 @@ Post
 -------------------------------- */
 
 .post-body {
-    @media (min-width: 992px) {
+    @media (min-width: map-get($container-max-widths, 'lg')) {
         p, h1, h2, h3, h4, h5, h6, ul, ol {
             width: 75%;
             text-align: justify;
@@ -15,7 +15,7 @@ Post
         }
     }
 
-    @media (min-width: 1200px) {
+    @media (min-width: map-get($container-max-widths, 'xl')) {
         p, h1, h2, h3, h4, h5, h6, ul, ol {
             width: 60%;
             text-align: justify;
@@ -39,6 +39,7 @@ Post
 
     // Images
     img {
+        display: block;
         border-radius: $border-radius-lg;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
         margin-bottom: 1rem;
@@ -46,19 +47,24 @@ Post
         // Responsive
         max-width: 100%;
         height: auto;
+
+        @media (min-width: map-get($container-max-widths, 'xl')) {
+            max-width: 80%;
+            margin: 0 auto 1rem auto;
+        }
     }
 
     blockquote {
         border-left: 0.25rem solid $accent;
         font-size: 1.25rem;
 
-        @media (min-width: 992px) {
+        @media (min-width: map-get($container-max-widths, 'lg')) {
             width: 80%;
             margin-left: auto;
             margin-right: auto;
         }
 
-        @media (min-width: 1200px) {
+        @media (min-width: map-get($container-max-widths, 'xl')) {
             width: 70%;
             margin-left: auto;
             margin-right: auto;
