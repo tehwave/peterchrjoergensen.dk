@@ -9,7 +9,6 @@
             <div class="row my-4 my-xl-6">
                 <div class="col-12 col-md-4">
                     <h1>Blog</h1>
-                    <div class="divider my-4"></div>
                 </div>
                 <div class="col-12 col-md mt-md-2">
                     <p class="h3">
