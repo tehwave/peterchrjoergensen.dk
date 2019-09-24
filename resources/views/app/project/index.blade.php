@@ -22,16 +22,16 @@
                     <div class="btn-group mb-2 mr-md-4" role="group" aria-label="Show All">
                         <button type="button" class="btn btn-accent font-medium px-5 px-md-4 px-lg-5" data-filter="all">All</button>
                     </div>
-                    <div class="btn-group mb-2 mr-md-4" role="group" aria-label="Filters for Type">
+                    <div class="btn-group mb-2 mr-md-4" role="group" aria-label="Additional Filters">
+                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".solo">Solo</button>
+                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".institution">Team</button>
+                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".company">Company</button>
+                    </div>
+                    <div class="btn-group mb-2" role="group" aria-label="Filters for Type">
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".game">Game</button>
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".video">Video</button>
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".website">Website</button>
                         <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".other">Other</button>
-                    </div>
-                    <div class="btn-group mb-2" role="group" aria-label="Additional Filters">
-                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".solo">Solo</button>
-                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".institution">Team</button>
-                        <button type="button" class="btn btn-accent font-medium px-4 px-md-3 px-lg-4" data-filter=".company">Company</button>
                     </div>
                 </div>
             </div>
