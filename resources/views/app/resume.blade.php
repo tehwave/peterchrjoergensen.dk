@@ -9,6 +9,7 @@
             <div class="row my-4 my-xl-6">
                 <div class="col-12 col-md-4">
                     <h1>Résumé</h1>
+                    <div class="divider my-4"></div>
                 </div>
                 <div class="col-12 col-md mt-md-2">
                     <p class="h3">I see <b>my future</b> as someone, who is <b>respected</b> by my co-workers for my <b>knowledge</b>, <b>skill</b> and <b>sharp senses</b> as well as <b>cheerfulness</b>.

@@ -9,6 +9,7 @@
             <div class="row mt-4 mt-xl-6">
                 <div class="col-12 col-md-4">
                     <h1>Portfolio</h1>
+                    <div class="divider my-4"></div>
                 </div>
                 <div class="col-12 col-md mt-md-2">
                     <p class="h3">
@@ -17,7 +18,7 @@
                 </div>
             </div>
             <div class="my-4 my-xl-6">
-                <div class="d-md-flex justify-content-md-center overflow-hidden">
+                <div class="d-md-flex justify-content-md-center">
                     <div class="btn-group mb-2 mr-md-4" role="group" aria-label="Show All">
                         <button type="button" class="btn btn-accent font-medium px-5 px-md-4 px-lg-5" data-filter="all">All</button>
                     </div>
