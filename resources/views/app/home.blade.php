@@ -111,7 +111,9 @@
                         <div class="card shadow-md">
                             <div class="card-header bg-transparent">
                                 <h3 class="card-title h4 my-2">
-                                    {{ $post->title }}
+                                    <a href="{{ $post->url }}">
+                                        {{ $post->title }}
+                                    </a>
                                 </h3>
                             </div>
                             <div class="card-body">
