@@ -55,7 +55,7 @@
             <div class="row my-4 my-xl-6 text-center">
                 <div class="col-12">
                     {{-- <div class="text-uppercase h6 text-accent wider">Category</div> --}}
-                    <h1 class="display-4">{{ $post->title }}</h1>
+                    <h1 class="display-4 mb-4">{{ $post->title }}</h1>
                     @isset ($post->excerpt)
                         <div class="h3 text-white-50 max-w-md mx-auto">
                             {!! $post->excerpt_html !!}
