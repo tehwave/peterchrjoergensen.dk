@@ -3,7 +3,8 @@ window.mixitup = require('mixitup');
 
 var mixer = mixitup(document.querySelector('#mixitup'), {
     selectors: {
-        target: '.mix'
+        target: '.mix',
+        control: '[data-filter]'
     },
     animation: {
         duration: 400,
