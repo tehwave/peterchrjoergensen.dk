@@ -96,13 +96,13 @@
                             <div class="row my-2 my-xl-4">
                                 <div class="col-12 ml-auto mb-3 col-sm-6 mb-sm-0 col-lg-4">
                                     @isset ($previousPost)
-                                        <small class="text-muted font-medium">Previous post</small>
+                                        <small class="text-muted font-medium text-uppercase wider">Previous post</small>
                                         <a class="card-link d-block" href="{{ route('post.show', $previousPost->slug) }}">{{ $previousPost->title }}</a>
                                     @endisset
                                 </div>
                                 <div class="col-12 mr-auto col-sm-6 col-lg-4 text-right">
                                     @isset ($nextPost)
-                                        <small class="text-muted font-medium">Next post</small>
+                                        <small class="text-muted font-medium text-uppercase wider">Next post</small>
                                         <a class="card-link d-block" href="{{ route('post.show', $nextPost->slug) }}">{{ $nextPost->title }}</a>
                                     @endisset
                                 </div>
