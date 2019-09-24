@@ -11,6 +11,7 @@ peterchrjoergensen.dk
 
 // Views
 @import "views/post";
+@import "views/project";
 
 /* --------------------------------
 
@@ -79,13 +80,17 @@ Utilities
 // Backgrounds.
 .navbar-background:after {
     content: '';
-    height: 75px;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: -1;
     background-color: $secondary;
+    height: 100%;
+
+    @media only screen and (min-width: map-get($grid-breakpoints, 'lg')) {
+        height: 75px;
+    }
 }
 
 // Dividers.

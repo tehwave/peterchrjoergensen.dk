@@ -6,13 +6,13 @@
             </a>
         </h3>
         <p class="card-text">
-            <ul class="list-inline mb-0 text-muted">
+            <ul class="list-inline mb-0 text-secondary font-medium">
                 <li class="list-inline-item">
                     {{ $post->published_at->format('jS F, Y') }}
                 </li>
             </ul>
         </p>
-        <p class="card-text text-muted max-w-sm font-medium">
+        <p class="card-text max-w-sm">
             {!! $post->excerpt !!}
         </p>
     </div>
