@@ -51,20 +51,25 @@
 @section('app')
 
     <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
-        {{-- // --}}
+        <div class="container text-white">
+            <div class="row my-4 my-xl-6 text-center">
+                <div class="col-12">
+                    <div class="text-uppercase h6 text-accent wider">Travel</div>
+                    <h1 class="display-4">{{ $post->title }}</h1>
+                    <div class="h3 text-white-50 max-w-md mx-auto">
+                        {!! $post->excerpt_html !!}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="container mt-4 mt-md-n6">
         <div class="row mb-4 mb-xl-6">
             <div class="col">
                 <div class="card shadow-md">
-                    <div class="card-header text-center bg-transparent">
-                        <h1 class="card-title my-4 mt-xl-6">
-                            {{ $post->title }}
-                        </h1>
-                    </div>
                     <div class="card-body">
-                        <div class="post-body mb-4 mb-xl-6">
+                        <div class="post-body my-4 my-xl-6">
                             {!! $post->body_html !!}
                         </div>
                     </div>
