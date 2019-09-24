@@ -59,6 +59,23 @@ Utilities
 .font-semibold  { font-weight: 600; }
 .font-black { font-weight: 900; }
 
+// Letter Spacing.
+.tightest { letter-spacing: -.075em; }
+.tighter { letter-spacing: -.05em; }
+.tight { letter-spacing: -.025em; }
+.normal { letter-spacing: 0; }
+.wide { letter-spacing: .025em; }
+.wider { letter-spacing: .05em; }
+.widest { letter-spacing: .1em; }
+.widest { letter-spacing: .25em; }
+
+// Max Width.
+.max-w-sm { max-width: map-get($container-max-widths, 'sm'); }
+.max-w-md { max-width: map-get($container-max-widths, 'md'); }
+.max-w-lg { max-width: map-get($container-max-widths, 'lg'); }
+.max-w-xl { max-width: map-get($container-max-widths, 'xl'); }
+
+
 // Backgrounds.
 .navbar-background:after {
     content: '';
