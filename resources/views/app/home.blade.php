@@ -109,17 +109,22 @@
                         @endif
 
                         <div class="card shadow-md">
-                            <div class="card-header bg-transparent">
-                                <h3 class="card-title h4 my-2">
-                                    <a href="{{ $post->url }}">
+                            <div class="card-body">
+                                <h3 class="card-title h2">
+                                    <a class="text-decoration-none" href="{{ $post->url }}">
                                         {{ $post->title }}
                                     </a>
                                 </h3>
-                            </div>
-                            <div class="card-body">
                                 <p class="card-text">
-                                    {!! $post->excerpt !!}
+                                    <ul class="list-inline mb-0 text-muted">
+                                        <li class="list-inline-item">
+                                            {{ $post->published_at->format('jS F, Y') }}
+                                        </li>
+                                    </ul>
                                 </p>
+                                <div class="card-text text-muted max-w-sm font-medium">
+                                    {!! $post->excerpt_html !!}
+                                </div>
                             </div>
                         </div>
                     @endforeach
