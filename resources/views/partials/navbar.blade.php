@@ -2,7 +2,7 @@
     <div class="container">
         <nav class="navbar navbar-dark navbar-expand-lg">
             <button class="navbar-toggler text-white" type="button" data-toggle="collapse" data-target="#navbar">
-                Browse
+                Menu
             </button>
             <a class="navbar-brand" href="{{ route('home') }}">
                 <div class="badge badge-primary h1 rounded-pill px-4 py-2 mb-0">
