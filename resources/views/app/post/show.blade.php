@@ -50,7 +50,7 @@
 
 @section('app')
 
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6 text-center">
                 <div class="col-12">
