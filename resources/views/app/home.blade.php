@@ -107,7 +107,6 @@
                 <div class="card-deck mb-4 mb-xl-6">
                             @continue
                         @endif
-
                         <div class="card shadow">
                             <div class="card-body">
                                 <h3 class="card-title h2">

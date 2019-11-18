@@ -22,7 +22,6 @@
                         <a class="nav-link" href="{{ route('blog') }}" title="Peter's Blog">Blog</a>
                     </li>
                 </ul>
-
             </div>
         </nav>
     </div>
