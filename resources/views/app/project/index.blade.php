@@ -4,7 +4,7 @@
 
 @section('app')
 
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row mt-4 mt-xl-6">
                 <div class="col-12 col-md-4 my-auto">

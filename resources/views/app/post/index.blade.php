@@ -4,7 +4,7 @@
 
 @section('app')
 
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6">
                 <div class="col-12 col-md-4 my-auto">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="col-12 mb-4 col-md-6 col-lg-4 ml-lg-auto mb-4">
-                    <div class="card shadow-md">
+                    <div class="card shadow">
                         <ul class="list-group list-group-flush my-4">
                             @foreach($feeds as $name => $title)
                                 <li class="list-group-item mx-auto">

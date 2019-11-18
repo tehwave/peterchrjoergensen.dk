@@ -49,8 +49,7 @@
 @endsection
 
 @section('app')
-
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6 text-center">
                 <div class="col-12">
@@ -69,7 +68,7 @@
     <div class="container mt-4 mt-md-n6">
         <div class="row mb-4 mb-xl-6">
             <div class="col">
-                <div class="card shadow-md">
+                <div class="card shadow">
                     <div class="card-body">
                         <div class="post-body my-4 my-xl-6">
                             {!! $post->body_html !!}

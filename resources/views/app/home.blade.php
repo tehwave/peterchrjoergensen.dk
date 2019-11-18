@@ -2,7 +2,7 @@
 
 @section('app')
 
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6">
                 <div class="col">
@@ -19,7 +19,7 @@
         <div class="row">
             <div class="col">
                 <div class="card-deck mb-4">
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -35,7 +35,7 @@
                             <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
                     </div>
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -52,7 +52,7 @@
                             <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
                     </div>
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -87,7 +87,7 @@
                     @foreach ($posts as $post)
 
                         @if ($loop->iteration === 2)
-                            <div class="card bg-light shadow-md">
+                            <div class="card bg-light shadow">
                                 <div class="card-header bg-secondary">
                                     <h3 class="card-title h4 my-2 text-white">
                                         Don't miss out
@@ -107,8 +107,7 @@
                 <div class="card-deck mb-4 mb-xl-6">
                             @continue
                         @endif
-
-                        <div class="card shadow-md">
+                        <div class="card shadow">
                             <div class="card-body">
                                 <h3 class="card-title h2">
                                     <a class="text-decoration-none" href="{{ $post->url }}">

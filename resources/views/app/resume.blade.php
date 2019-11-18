@@ -4,7 +4,7 @@
 
 @section('app')
 
-    <div class="jumbotron mb-0 bg-secondary rounded-0 pattern-waves">
+    <div class="jumbotron mb-0 bg-secondary pattern-waves">
         <div class="container text-white">
             <div class="row my-4 my-xl-6">
                 <div class="col-12 col-md-4 my-auto">
@@ -31,7 +31,7 @@
             <div class="col">
                 <div class="card-deck">
                     @foreach ($experiences as $experience)
-                        <div class="card shadow-md">
+                        <div class="card shadow">
                             <div class="card-header @if ($loop->first) bg-accent text-white @else bg-light @endif">
                                 {{ $experience->date }}
                             </div>
@@ -60,7 +60,7 @@
         <div class="row mb-4 mb-xl-6">
             <div class="col">
                 <div class="card-deck">
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -76,7 +76,7 @@
                             <a href="/FIRKANT" target="_blank" rel="noopener" class="card-link">Website</a>
                         </footer>
                     </div>
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -93,7 +93,7 @@
                             <a href="https://github.com/tehwave/grundfos-quiz/" target="_blank" rel="noopener" class="card-link">GitHub</a>
                         </footer>
                     </div>
-                    <div class="card shadow-md overflow-hidden">
+                    <div class="card shadow overflow-hidden">
                         <img
                             class="card-img-top"
                             data-lazy
@@ -123,7 +123,7 @@
             <div class="col">
                 <div class="card-deck">
                     @foreach ($educations as $education)
-                        <div class="card shadow-md">
+                        <div class="card shadow">
                             <div class="card-header bg-light">
                                 {{ $education->date }}
                             </div>
@@ -150,7 +150,7 @@
                 @foreach ($skills as $skillsByGroup)
                     <ul class="pl-0">
                         @foreach ($skillsByGroup as $skill)
-                            <li class="badge badge-secondary badge-md shadow-md rounded-lg mb-2 px-4">{{ $skill->name }}</li>
+                            <li class="badge badge-secondary badge-md shadow rounded-lg mb-2 px-4">{{ $skill->name }}</li>
                         @endforeach
                     </ul>
                 @endforeach
@@ -165,9 +165,9 @@
         </div>
         <div class="row mb-4 mb-xl-6">
             <div class="col">
-                <div class="card shadow-md">
+                <div class="card shadow">
                     <header class="card-header bg-light text-center">
-                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" alt="Photo of Peter" class="img-fluid rounded-circle shadow-lg" width="128" style="margin-top: -64px">
+                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" alt="Photo of Peter" class="img-fluid rounded-circle shadow" width="128" style="margin-top: -64px">
                     </header>
                     <div class="card-body">
                         <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
@@ -189,7 +189,7 @@
         </div>
         <div class="row mb-4 mb-xl-6">
             <div class="col">
-                <ul class="list-group shadow-md rounded-lg">
+                <ul class="list-group shadow rounded-lg">
                     <li class="list-group-item">
                         <strong>Nationality</strong>
                         <div>Danish</div>

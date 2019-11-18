@@ -1,4 +1,4 @@
-<div class="card shadow-md">
+<div class="card shadow">
     <div class="card-body">
         <h3 class="card-title h2">
             <a class="text-decoration-none" href="{{ $post->url }}">
