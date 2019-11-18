@@ -173,7 +173,16 @@ Badges
 
 .badge-lg {
     font-size: $font-size-lg;
-}@media only screen and (min-width: map-get($grid-breakpoints, 'lg')) {
+}
+
+/**
+ * Contained jumbotron and navbar.
+ */
+.jumbotron {
+    border-radius: 0;
+}
+
+@media only screen and (min-width: map-get($grid-breakpoints, 'lg')) {
     #navbar-bg {
         margin-top: 2rem;
         border-radius: 1rem 1rem 0 0;
@@ -193,3 +202,5 @@ Badges
 @media only screen and (min-width: map-get($grid-breakpoints, 'xl')) {
     .jumbotron, #navbar-bg {
         max-width: 1420px;
+    }
+}
