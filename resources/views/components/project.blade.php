@@ -1,4 +1,4 @@
-<div class="card shadow-md overflow-hidden">
+<div class="card shadow overflow-hidden">
     <img
         class="card-img-top"
         data-lazy

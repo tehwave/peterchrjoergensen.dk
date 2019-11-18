@@ -69,7 +69,7 @@
     <div class="container mt-4 mt-md-n6">
         <div class="row mb-4 mb-xl-6">
             <div class="col">
-                <div class="card shadow-md">
+                <div class="card shadow">
                     <div class="card-body">
                         <div class="post-body my-4 my-xl-6">
                             {!! $post->body_html !!}

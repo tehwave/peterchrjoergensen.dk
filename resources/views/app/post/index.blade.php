@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="col-12 mb-4 col-md-6 col-lg-4 ml-lg-auto mb-4">
-                    <div class="card shadow-md">
+                    <div class="card shadow">
                         <ul class="list-group list-group-flush my-4">
                             @foreach($feeds as $name => $title)
                                 <li class="list-group-item mx-auto">
