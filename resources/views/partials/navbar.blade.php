@@ -1,6 +1,6 @@
 <div class="bg-secondary pattern-waves" id="navbar-bg">
     <div class="container">
-        <nav class="navbar navbar-dark navbar-expand-lg">
+        <nav class="navbar navbar-dark navbar-expand">
             <button class="navbar-toggler text-white" type="button" data-toggle="collapse" data-target="#navbar">
                 Menu
             </button>
