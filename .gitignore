@@ -11,3 +11,13 @@ npm-debug.log
 yarn-error.log
 .env
 storage/*.index
+
+# Compiled assets.
+public/mix-manifest.json
+public/css/app.css
+public/css/bootstrap.css
+public/js/app.js
+public/js/bootstrap.js
+public/js/manifest.js
+public/js/mixitup.js
+public/js/vendor.js
