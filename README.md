@@ -76,7 +76,12 @@ Deploy Script for Laravel Forge
     php artisan down
 
     git pull origin master
+
     composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    npm ci
+
+    npm run prod
 
     php artisan migrate --force
 
