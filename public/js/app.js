@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[2],{2:function(n,o,t){n.exports=t("bUC5")},bUC5:function(n,o,t){(function(n){n(document).ready(function(){n("[data-tooltip]").tooltip(),n("[data-lazy]").lazy({})})}).call(this,t("EVdn"))}},[[2,0,1]]]);
