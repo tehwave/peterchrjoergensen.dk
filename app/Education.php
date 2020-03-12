@@ -37,7 +37,7 @@ class Education extends Model
      */
     public function institution()
     {
-        return $this->belongsTo('App\Institution');
+        return $this->belongsTo(Institution::class);
     }
 
     /**

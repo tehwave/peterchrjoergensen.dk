@@ -20,6 +20,6 @@ class Skill extends Model
      */
     public function skillGroup()
     {
-        return $this->belongsTo('App\SkillGroup');
+        return $this->belongsTo(SkillGroup::class);
     }
 }
