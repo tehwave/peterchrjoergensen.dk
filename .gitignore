@@ -21,3 +21,7 @@ public/js/bootstrap.js
 public/js/manifest.js
 public/js/mixitup.js
 public/js/vendor.js
+
+# PHPUnit
+/coverage
+.phpunit.result.cache
