@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Mix;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
@@ -19,6 +20,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->withoutMix();
+        $this->swap(Mix::class, function () {
+            return '';
+        });
     }
 }
