@@ -72,7 +72,7 @@ npm run watch
 Deploy Script for Laravel Forge
 
 ```bash
-cd /home/forge/peterchrjoergensen.dk
+cd /home/pcj/peterchrjoergensen.dk
 
 php artisan down
 
@@ -94,7 +94,8 @@ php artisan event:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "" | sudo -S service php7.4-fpm reload
+( flock -w 10 9 || exit 1
+    echo 'Restarting FPM...'; sudo -S service php7.4-fpm reload ) 9>/tmp/fpmlock
 
 php artisan up
 ```
