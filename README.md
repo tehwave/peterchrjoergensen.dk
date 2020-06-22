@@ -95,7 +95,7 @@ php artisan route:cache
 php artisan view:cache
 
 ( flock -w 10 9 || exit 1
-    echo 'Restarting FPM...'; sudo -S service php7.4-fpm reload ) 9>/tmp/fpmlock
+    echo 'Restarting FPM...'; sudo -S service php7.2-fpm reload ) 9>/tmp/fpmlock
 
 php artisan up
 ```
