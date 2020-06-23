@@ -69,7 +69,16 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan nova:publish"
+            "@php artisan nova:publish",
+            "@php artisan view:clear"
+        ],
+        "test-coverage": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/phpunit --coverage-html coverage"
+        ],
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/phpunit"
         ]
     },
     "config": {
