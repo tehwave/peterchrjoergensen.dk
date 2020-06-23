@@ -93,7 +93,6 @@ class Post extends Model implements Feedable
         return optional($this->published_at)->format('M j, Y');
     }
 
-
     /**
      * Get the route for this specific post.
      *
