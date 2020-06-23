@@ -1,19 +1,32 @@
 <div class="card shadow">
     <div class="card-body">
-        <h3 class="card-title h2">
-            <a class="text-decoration-none" href="{{ $post->url }}">
+        <h4 class="card-title h5 mt-2">
+            <a href="{{ $post->url }}" class="text-decoration-none">
                 {{ $post->title }}
             </a>
-        </h3>
-        <p class="card-text">
-            <ul class="list-inline mb-0 text-secondary font-medium">
-                <li class="list-inline-item">
-                    {{ $post->published_at->format('jS F, Y') }}
-                </li>
-            </ul>
-        </p>
-        <p class="card-text max-w-sm">
-            {!! $post->excerpt !!}
-        </p>
+        </h4>
+        <div class="card-text max-w-sm">
+            {!! $post->excerpt_html !!}
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="media">
+            <div class="media-body my-auto">
+                <small class="d-block">
+                    @if ($post->is_published)
+                        <time datetime="{{ $post->published_at }}">
+                            {{ $post->published_at_formatted }}
+                        </time>
+                        <span class="mx-1">
+                            &middot;
+                        </span>
+                    @endif
+                    <span>
+                        {{ $post->reading_time }} min read
+                    </span>
+                </small>
+            </div>
+        </div>
     </div>
 </div>
+

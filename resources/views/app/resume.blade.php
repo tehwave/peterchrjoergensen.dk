@@ -24,7 +24,7 @@
                 <h2 class="text-muted h6">Experience</h2>
             </div>
             <div class="col-4 text-right">
-                <a class="text-muted card-link" href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">Learn more</a>
+                <a class="text-muted font-size-base card-link" href="https://www.linkedin.com/in/peterchrjoergensen" target="_blank" rel="noopener">Learn more</a>
             </div>
         </div>
         <div class="row mb-4 mb-xl-6">
@@ -32,7 +32,7 @@
                 <div class="card-deck">
                     @foreach ($experiences as $experience)
                         <div class="card shadow">
-                            <div class="card-header @if ($loop->first) bg-accent text-white @else bg-light @endif">
+                            <div class="card-header @if ($loop->first) bg-accent text-white @endif">
                                 {{ $experience->date }}
                             </div>
                             <div class="card-body">
@@ -54,7 +54,7 @@
                 <h2 class="text-muted h6">Portfolio</h2>
             </div>
             <div class="col-4 text-right">
-                <a class="text-muted card-link" href="{{ route('portfolio') }}" target="_blank" rel="noopener">View all</a>
+                <a class="text-muted font-size-base card-link" href="{{ route('portfolio') }}" target="_blank" rel="noopener">View all</a>
             </div>
         </div>
         <div class="row mb-4 mb-xl-6">
@@ -124,7 +124,7 @@
                 <div class="card-deck">
                     @foreach ($educations as $education)
                         <div class="card shadow">
-                            <div class="card-header bg-light">
+                            <div class="card-header">
                                 {{ $education->date }}
                             </div>
                             <div class="card-body">

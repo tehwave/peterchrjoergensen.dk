@@ -37,7 +37,7 @@ class PostController extends Controller
     {
         $this->authorize('view', $post);
 
-        if ($post->isPublished()) {
+        if ($post->is_published) {
             $previousPost = Post::published()
                 ->where('published_at', '<', $post->published_at)
                 ->latest('published_at')

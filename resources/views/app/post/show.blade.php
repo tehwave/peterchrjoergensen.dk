@@ -84,7 +84,7 @@
                                         <span class="mr-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12" stroke-width="1"><g stroke-width="1" transform="translate(0, 0)"><polyline points="6 2.5 6 6 9.5 6" fill="none" stroke="#444444" stroke-linecap="round" stroke-linejoin="round" data-color="color-2" stroke-width="1"></polyline> <circle cx="6" cy="6" r="5.5" fill="none" stroke="#444444" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></circle></g></svg>
                                         </span>
-                                        {{ $post->published_at->format('jS F, Y') }}
+                                        {{ $post->published_at_formatted }}
                                     </li>
                                 </ul>
                             </div>
