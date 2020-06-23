@@ -71,29 +71,36 @@ npm run watch
 
 Deploy Script for Laravel Forge
 
-    cd /home/forge/peterchrjoergensen.dk
+```bash
+cd /home/pcj/peterchrjoergensen.dk
 
-    php artisan down
+php artisan down
 
-    git pull origin master
-    composer install --no-interaction --prefer-dist --optimize-autoloader
+git pull origin master
 
-    php artisan migrate --force
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    php artisan cache:clear
-    php artisan view:clear
+php artisan migrate --force
 
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
+npm ci
 
-    php artisan queue:restart
+npm run production
 
-    echo "" | sudo -S service php7.2-fpm reload
+php artisan cache:clear
+php artisan view:clear
 
-    php artisan up
+php artisan config:cache
+php artisan event:cache
+php artisan route:cache
+php artisan view:cache
 
-Replace ```php7.3-fpm``` with the version of PHP installed on the server.
+( flock -w 10 9 || exit 1
+    echo 'Restarting FPM...'; sudo -S service php7.2-fpm reload ) 9>/tmp/fpmlock
+
+php artisan up
+```
+
+Replace ```php7.4-fpm``` with the version of PHP installed on the server.
 
 ### Environment
 

@@ -148,7 +148,7 @@ $theme-colors: (
 
 $link-color:    $blue-600;
 
-$text-muted:    $gray-500;
+$text-muted:    #63B3ED;
 
 $body-bg:       rgba($blue-100, 50%);
 $body-color:    $blue;
@@ -177,14 +177,16 @@ $grid-breakpoints: (
   sm: 576px,
   md: 768px,
   lg: 992px,
-  xl: 1400px
+  xl: 1200px,
+  xxl: 1400px
 );
 
 $container-max-widths: (
   sm: 540px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px
 );
 
 /* --------------------------------
@@ -214,9 +216,9 @@ Components
 -------------------------------- */
 
 // Borders.
-$border-radius:               .25rem;
-$border-radius-lg:            1rem;
-$border-radius-sm:            .125rem;
+$border-radius:               0.25rem;
+$border-radius-lg:            0.65rem;
+$border-radius-sm:            0.125rem;
 $border-radius-pill:          9999px;
 
 $border-width:                0px;

@@ -75,7 +75,7 @@ Utilities
 .max-w-md { max-width: map-get($container-max-widths, 'md'); }
 .max-w-lg { max-width: map-get($container-max-widths, 'lg'); }
 .max-w-xl { max-width: map-get($container-max-widths, 'xl'); }
-
+.max-w-xxl { max-width: map-get($container-max-widths, 'xxl'); }
 
 // Backgrounds.
 .navbar-background:after {
@@ -201,6 +201,6 @@ Badges
 
 @media only screen and (min-width: map-get($grid-breakpoints, 'xl')) {
     .jumbotron, #navbar-bg {
-        max-width: 1420px;
+        max-width: 1800px;
     }
 }

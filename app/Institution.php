@@ -20,6 +20,6 @@ class Institution extends Model
      */
     public function educations()
     {
-        return $this->hasMany('App\Education');
+        return $this->hasMany(Education::class);
     }
 }

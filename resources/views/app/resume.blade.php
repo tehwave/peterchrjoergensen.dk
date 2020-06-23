@@ -157,30 +157,6 @@
             </div>
         </div>
 
-        <!-- Profile -->
-        <div class="row px-3 mb-2">
-            <div class="col-8">
-                <h2 class="text-muted h6">Profile</h2>
-            </div>
-        </div>
-        <div class="row mb-4 mb-xl-6">
-            <div class="col">
-                <div class="card shadow">
-                    <header class="card-header bg-light text-center">
-                        <img data-lazy src="{{ asset('img/Peter_thumbnail.png') }}" data-src="{{ asset('img/Peter.png') }}" alt="Photo of Peter" class="img-fluid rounded-circle shadow" width="128" style="margin-top: -64px">
-                    </header>
-                    <div class="card-body">
-                        <div class="col p-0 col-lg-10 m-lg-auto col-xl-8 m-xl-auto">
-                            <p class="card-text lead">I am a Multimedia Designer from Denmark with a speciality in Film & Animation, and I love to work with web and game development.</p>
-                            <p class="card-text">I am inventive and creative with lots of energy and a go-getter attitude. I always work serviceminded, and with quality in focus. I will gladly give it my all if it means that the endproduct is better for it.</p>
-                            <p class="card-text">I love to learn new things, and I strive to keep myself up to date with the industry.</p>
-                            <p class="card-text">I see my future as someone, who is respected by my co-workers for my knowledge, skill and sharp senses as well as cheerfulness.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Misc -->
         <div class="row px-3 mb-2">
             <div class="col-8">

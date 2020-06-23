@@ -77,7 +77,7 @@ class Project extends Model implements HasMedia
      */
     public function institution()
     {
-        return $this->belongsTo('App\Institution');
+        return $this->belongsTo(Institution::class);
     }
 
     /**
@@ -87,7 +87,7 @@ class Project extends Model implements HasMedia
      */
     public function company()
     {
-        return $this->belongsTo('App\Company');
+        return $this->belongsTo(Company::class);
     }
 
     /**
