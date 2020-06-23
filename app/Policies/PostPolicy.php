@@ -19,7 +19,7 @@ class PostPolicy
      */
     public function view(?User $user, Post $post)
     {
-        if ($post->isPublished() === false) {
+        if ($post->is_published === false) {
             if ($user) {
                 return true;
             }

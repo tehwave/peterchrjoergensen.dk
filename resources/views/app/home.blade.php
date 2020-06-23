@@ -78,7 +78,7 @@
                 <h2 class="text-muted h6">Latest posts from my blog</h2>
             </div>
             <div class="col-4 text-right">
-                <a class="text-muted card-link" href="{{ route('blog') }}">See all</a>
+                <a class="text-muted font-size-base card-link" href="{{ route('blog') }}">See all</a>
             </div>
         </div>
         <div class="row">
@@ -87,11 +87,11 @@
                     @foreach ($posts as $post)
 
                         @if ($loop->iteration === 2)
-                            <div class="card bg-light shadow">
-                                <div class="card-header bg-secondary">
-                                    <h3 class="card-title h4 my-2 text-white">
+                            <div class="card shadow">
+                                <div class="card-header">
+                                    <h4 class="card-title h5 my-2">
                                         Don't miss out
-                                    </h3>
+                                    </h4>
                                 </div>
                                 <div class="card-body">
                                     <p class="card-text">
@@ -107,25 +107,7 @@
                 <div class="card-deck mb-4 mb-xl-6">
                             @continue
                         @endif
-                        <div class="card shadow">
-                            <div class="card-body">
-                                <h3 class="card-title h2">
-                                    <a class="text-decoration-none" href="{{ $post->url }}">
-                                        {{ $post->title }}
-                                    </a>
-                                </h3>
-                                <p class="card-text">
-                                    <ul class="list-inline mb-0 text-secondary font-medium">
-                                        <li class="list-inline-item">
-                                            {{ $post->published_at->format('jS F, Y') }}
-                                        </li>
-                                    </ul>
-                                </p>
-                                <div class="card-text max-w-sm">
-                                    {!! $post->excerpt_html !!}
-                                </div>
-                            </div>
-                        </div>
+                        @component('components.post', ['post' => $post]) @endcomponent
                     @endforeach
                 </div>
             </div>

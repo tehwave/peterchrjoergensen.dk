@@ -2,11 +2,13 @@
 
 namespace App;
 
+use Cache;
 use Parsedown;
 use Spatie\Tags\HasTags;
 use Spatie\Feed\Feedable;
 use Spatie\Feed\FeedItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Post extends Model implements Feedable
 {
@@ -61,49 +63,34 @@ class Post extends Model implements Feedable
     }
 
     /**
-     * Scope a query to only include published posts.
+     * Scope a query to include published resources only.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopePublished($query)
+    public function scopePublished(Builder $query): Builder
     {
         return $query->whereNotNull('published_at');
     }
 
     /**
-     * Is this post published?
+     * Is this reource published?
      *
      * @return bool
      */
-    public function isPublished()
+    public function getIsPublishedAttribute(): bool
     {
         return is_null($this->published_at) === false;
     }
 
     /**
-     * Parse the Markdown content of the excerpt attribute.
+     * The published at datetime formatted for human eyes.
      *
-     * @return HTML
+     * @return string|null
      */
-    public function getExcerptHtmlAttribute()
+    public function getPublishedAtFormattedAttribute(): ?string
     {
-        return (new Parsedown())
-            ->text($this->excerpt);
-    }
-
-    /**
-     * Parse the Markdown content of the body attribute.
-     *
-     * @return HTML
-     */
-    public function getBodyHtmlAttribute()
-    {
-        $body = (new Parsedown())
-            ->text($this->body);
-
-        // Stop <p> from wrapping <img>.
-        return preg_replace('/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s', '\1', $body);
+        return optional($this->published_at)->format('M j, Y');
     }
 
     /**
@@ -128,5 +115,103 @@ class Post extends Model implements Feedable
             $this->url,
             $this->title
         );
+    }
+
+    /**
+     * Parse the Markdown content of the excerpt attribute.
+     *
+     * @return string
+     */
+    public function getExcerptHtmlAttribute(): string
+    {
+        $cacheKey = "post:{$this->id}:excerpt_html:{$this->updated_at->timestamp}";
+
+        return Cache::rememberForever($cacheKey, function () {
+            $parsedHtml = (new Parsedown())
+                ->text($this->excerpt);
+
+            // Stop <p> from wrapping <img>.
+            $unwrappedHtml = preg_replace(
+                '/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s',
+                '\1',
+                $parsedHtml
+            );
+
+            // Fix mixed content.
+            $unmixedContent = str_replace('http://', 'https://', $unwrappedHtml);
+
+            return $unmixedContent;
+        });
+    }
+
+    /**
+     * Retrieve the content without tags.
+     *
+     * @return string
+     */
+    public function getBodyStrippedAttribute(): string
+    {
+        $cacheKey = "post:{$this->id}:body_stripped:{$this->updated_at->timestamp}";
+
+        return Cache::rememberForever($cacheKey, function () {
+            return strip_tags($this->body_html);
+        });
+    }
+
+    /**
+     * The body parsed through Markdown to generate HTML.
+     *
+     * @return string
+     */
+    public function getBodyHtmlAttribute(): string
+    {
+        $cacheKey = "post:{$this->id}:body_html:{$this->updated_at->timestamp}";
+
+        return Cache::rememberForever($cacheKey, function () {
+            $parsedHtml = (new Parsedown())
+                ->text($this->body);
+
+            // Stop <p> from wrapping <img>.
+            $unwrappedHtml = preg_replace(
+                '/<p>\\s*?(<a .*?><img.*?><\\/a>|<img.*?>)?\\s*<\\/p>/s',
+                '\1',
+                $parsedHtml
+            );
+
+            // Fix mixed content.
+            $unmixedContent = str_replace('http://', 'https://', $unwrappedHtml);
+
+            return $unmixedContent;
+        });
+    }
+
+    /**
+     * How many words in the content?
+     *
+     * @return int
+     */
+    public function getWordCountAttribute(): int
+    {
+        $cacheKey = "post:{$this->id}:word_count:{$this->updated_at->timestamp}";
+
+        return Cache::rememberForever($cacheKey, function () {
+            return str_word_count($this->content_stripped);
+        });
+    }
+
+    /**
+     * How long in minutes does it aprox. take to read the post?
+     *
+     * The lowest reading time is set to 2.
+     *
+     * @return int
+     */
+    public function getReadingTimeAttribute(): int
+    {
+        $cacheKey = "post:{$this->id}:reading_time:{$this->updated_at->timestamp}";
+
+        return Cache::rememberForever($cacheKey, function () {
+            return max((int) ceil($this->word_count / 150), 2);
+        });
     }
 }
