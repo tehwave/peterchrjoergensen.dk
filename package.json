@@ -21,7 +21,7 @@
   "dependencies": {
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
-    "jquery-lazy": "^1.7.10",
+    "jquery-lazy": "^1.7.11",
     "popper.js": "^1.16.1"
   }
 }
