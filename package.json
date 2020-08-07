@@ -19,7 +19,7 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
-    "bootstrap": "^4.5.0",
+    "bootstrap": "^4.5.2",
     "jquery": "^3.5.1",
     "jquery-lazy": "^1.7.10",
     "popper.js": "^1.16.1"
