@@ -86,22 +86,12 @@
         <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700,800&display=swap"></noscript>
         @stack('styles')
 
-        <!-- Google Tag Manager -->
-        <script>
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-TKNTXKZ');
-        </script>
+        <!-- Fathom - beautiful, simple website analytics -->
+        <script src="https://cdn.usefathom.com/script.js" data-site="OXXUABJE" defer></script>
+        <!-- / Fathom -->
         @stack('head')
     </head>
     <body class="h-100" data-route="{{ Str::slug(str_replace('.', ' ', Route::currentRouteName())) }}" data-no-js>
-        <!-- Google Tag Manager (noscript) -->
-        <noscript>
-            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKNTXKZ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
-        </noscript>
-
         <!-- No JavaScript Alert -->
         <noscript>
             <div class="alert alert-danger mb-0 rounded-0" role="alert">
