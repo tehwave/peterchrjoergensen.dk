@@ -65,7 +65,7 @@ class Post extends Model implements Feedable
     /**
      * Scope a query to include published resources only.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePublished(Builder $query): Builder
