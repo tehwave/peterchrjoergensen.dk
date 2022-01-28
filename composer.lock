@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "benjaminhirsch/nova-slug-field",
-            "version": "1.2.4",
+            "version": "1.2.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/benjaminhirsch/nova-slug-field.git",
-                "reference": "207291988ea535d661e23b3f6cd33431cf9b739a"
+                "url": "https://github.com/tomhatzer/nova-slug-field.git",
+                "reference": "d602e3033ed9c0ba2928a8ce1a7e8c7a9188c048"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benjaminhirsch/nova-slug-field/zipball/207291988ea535d661e23b3f6cd33431cf9b739a",
-                "reference": "207291988ea535d661e23b3f6cd33431cf9b739a",
+                "url": "https://api.github.com/repos/tomhatzer/nova-slug-field/zipball/d602e3033ed9c0ba2928a8ce1a7e8c7a9188c048",
+                "reference": "d602e3033ed9c0ba2928a8ce1a7e8c7a9188c048",
                 "shasum": ""
             },
             "require": {
@@ -44,7 +44,7 @@
                 {
                     "name": "Benjamin Hirsch",
                     "email": "mail@benjaminhirsch.net",
-                    "homepage": "https://wwwbenjaminhirsch.net",
+                    "homepage": "https://www.benjaminhirsch.net",
                     "role": "Developer"
                 }
             ],
@@ -53,7 +53,11 @@
                 "laravel",
                 "nova"
             ],
-            "time": "2019-07-05T07:23:36+00:00"
+            "support": {
+                "issues": "https://github.com/benjaminhirsch/nova-slug-field/issues",
+                "source": "https://github.com/tomhatzer/nova-slug-field/tree/1.2.6"
+            },
+            "time": "2020-09-23T17:10:16+00:00"
         },
         {
             "name": "bensampo/laravel-enum",
@@ -6512,5 +6516,6 @@
     "platform": {
         "php": "^7.1.3"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
 }
