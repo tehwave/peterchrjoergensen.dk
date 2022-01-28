@@ -22,7 +22,7 @@
         "doctrine/dbal": "^2.9",
         "ebess/advanced-nova-media-library": "^2.7",
         "fideloper/proxy": "^4.0",
-        "laravel/framework": "5.8.*",
+        "laravel/framework": "6.18.*",
         "laravel/nova": "^2.0",
         "laravel/tinker": "^1.0",
         "spatie/laravel-feed": "^2.2",
