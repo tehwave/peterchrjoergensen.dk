@@ -2,7 +2,7 @@
 import { Picture } from "astro:assets";
 import type { Project } from "../types";
 
-interface Props extends Project {
+interface Props extends Omit<Project, "category"> {
   animationDelay?: number;
 }
 

@@ -4,6 +4,12 @@ import AnimateOnScroll from "./AnimateOnScroll.astro";
 import { projects } from "../data/projects";
 
 type Props = Record<string, never>;
+
+const categories = [
+  { id: "all", label: "All" },
+  { id: "web", label: "Web" },
+  { id: "games", label: "Games" },
+] as const;
 ---
 
 <section class="projects" id="projects">
@@ -11,22 +17,67 @@ type Props = Record<string, never>;
     <AnimateOnScroll class="projects__header">
       <span class="projects__label">SELECTED WORK</span>
       <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
+      <div class="projects__filters" role="tablist" aria-label="Filter projects by category">
+        {categories.map((cat) => (
+          <button
+            class={`projects__filter ${cat.id === "all" ? "projects__filter--active" : ""}`}
+            data-filter={cat.id}
+            role="tab"
+            aria-selected={cat.id === "all" ? "true" : "false"}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
     </AnimateOnScroll>
     <div class="projects__grid">
       {projects.map((project, index) => (
-        <ProjectCard 
-          title={project.title} 
-          description={project.description}
-          alt={project.alt}
-          tags={project.tags}
-          image={project.image}
-          link={project.link}
-          animationDelay={index}
-        />
+        <div class="projects__item" data-category={project.category}>
+          <ProjectCard 
+            title={project.title} 
+            description={project.description}
+            alt={project.alt}
+            tags={project.tags}
+            image={project.image}
+            link={project.link}
+            animationDelay={index}
+          />
+        </div>
       ))}
     </div>
   </div>
 </section>
+
+<script>
+  const filterButtons = document.querySelectorAll('.projects__filter');
+  const projectItems = document.querySelectorAll('.projects__item');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const filter = button.getAttribute('data-filter');
+      
+      // Update active button
+      filterButtons.forEach(btn => {
+        btn.classList.remove('projects__filter--active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      button.classList.add('projects__filter--active');
+      button.setAttribute('aria-selected', 'true');
+      
+      // Filter projects
+      projectItems.forEach(item => {
+        const category = item.getAttribute('data-category');
+        const shouldShow = filter === 'all' || category === filter;
+        
+        if (shouldShow) {
+          item.classList.remove('projects__item--hidden');
+        } else {
+          item.classList.add('projects__item--hidden');
+        }
+      });
+    });
+  });
+</script>
 
 <style lang="scss">
   @use "../styles/variables" as *;
@@ -73,6 +124,41 @@ type Props = Record<string, never>;
       color: $color-text-muted;
     }
 
+    &__filters {
+      display: flex;
+      gap: $space-sm;
+      margin-top: $space-xl;
+    }
+
+    &__filter {
+      padding: $space-sm $space-lg;
+      border: 2px solid $color-text-muted;
+      border-radius: 100px;
+      background: transparent;
+      color: $color-text-muted;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      cursor: pointer;
+      @include transition(all, 0.2s);
+
+      &:hover {
+        border-color: $color-text-dark;
+        color: $color-text-dark;
+      }
+
+      &--active {
+        background: $color-orange;
+        border-color: $color-orange;
+        color: $color-white;
+
+        &:hover {
+          background: $color-orange;
+          border-color: $color-orange;
+          color: $color-white;
+        }
+      }
+    }
+
     &__grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -85,6 +171,14 @@ type Props = Record<string, never>;
       @include respond-to(sm) {
         grid-template-columns: 1fr;
         gap: $space-lg;
+      }
+    }
+
+    &__item {
+      @include transition(opacity, 0.3s);
+
+      &--hidden {
+        display: none;
       }
     }
   }

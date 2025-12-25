@@ -1,6 +1,11 @@
 import type { ImageMetadata } from "astro";
 
 /**
+ * Project category for filtering
+ */
+export type ProjectCategory = "web" | "games" | "creative";
+
+/**
  * Represents a project displayed in the portfolio.
  */
 export interface Project {
@@ -16,4 +21,6 @@ export interface Project {
   image?: ImageMetadata;
   /** External link to live project or demo */
   link?: string;
+  /** Category for filtering projects */
+  category: ProjectCategory;
 }
