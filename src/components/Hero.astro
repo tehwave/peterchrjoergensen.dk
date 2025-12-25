@@ -17,8 +17,8 @@ const roles = [
   <section class="hero" id="hero" data-tilt>
     <div class="hero__container">
       <div class="hero__content">
-        <h1 class="hero__title hero__title--handwriting hero-animate" style="--anim-order: 0">Hello!</h1>
-        <div class="hero__intro hero-animate" style="--anim-order: 1">
+        <h1 class="hero__title hero__title--handwriting">Hello!</h1>
+        <div class="hero__intro">
           <p>I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
               <span class="hero__role-container">
                 {roles.map((role, index) => (
@@ -33,7 +33,7 @@ const roles = [
           <p class="hero__subline">Not just functional. Not just pretty. Meaningful.</p>
         </div>
       </div>
-      <div class="hero__image-wrapper hero-animate" style="--anim-order: 2">
+      <div class="hero__image-wrapper">
         <Picture 
           src={profileImage} 
           formats={["avif", "webp"]}
@@ -68,30 +68,6 @@ const roles = [
 <style lang="scss">
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
-
-  // Hero entrance animations
-  .hero-animate {
-    opacity: 0;
-    transform: translateY(30px);
-    animation: heroFadeInUp var(--duration-slow, 0.6s) var(--ease-out, ease-out) forwards;
-    animation-delay: calc(0.2s + (var(--anim-order, 0) * 0.15s));
-  }
-
-  @keyframes heroFadeInUp {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  // Respect reduced motion preference
-  @media (prefers-reduced-motion: reduce) {
-    .hero-animate {
-      opacity: 1;
-      transform: none;
-      animation: none;
-    }
-  }
 
   .hero-wrapper {
     padding: $space-md;
