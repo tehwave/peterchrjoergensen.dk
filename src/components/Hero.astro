@@ -14,12 +14,12 @@ const roles = [
 ---
 
 <div class="hero-wrapper">
-  <section class="hero" id="hero">
+  <section class="hero" id="hero" data-tilt>
     <div class="hero__container">
       <div class="hero__content">
-        <h1 class="hero__title hero-animate" style="--anim-order: 0">I make things.</h1>
+        <h1 class="hero__title hero__title--handwriting hero-animate" style="--anim-order: 0">Hello!</h1>
         <div class="hero__intro hero-animate" style="--anim-order: 1">
-          <p>I'm <strong>Peter</strong> — a <strong class="hero__role-wrapper">
+          <p>I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
               <span class="hero__role-container">
                 {roles.map((role, index) => (
                   <span class="hero__role" data-role-index={index}>
@@ -29,7 +29,8 @@ const roles = [
               </span>
             </strong> from <strong>Denmark.</strong>
           </p>
-          <p>Websites, games, and everything in between.</p>
+          <p>I make websites and games that make people feel something.</p>
+          <p class="hero__subline">Not just functional. Not just pretty. Meaningful.</p>
         </div>
       </div>
       <div class="hero__image-wrapper hero-animate" style="--anim-order: 2">
@@ -40,6 +41,7 @@ const roles = [
           class="hero__image"
           width={400}
           height={500}
+          loading="eager"
         />
       </div>
     </div>
@@ -95,6 +97,8 @@ const roles = [
     padding: $space-md;
     max-width: 1700px;
     margin: 0 auto;
+    perspective: 1200px;
+    perspective-origin: center center;
 
     @include respond-to(md) {
       padding: $space-sm;
@@ -117,6 +121,32 @@ const roles = [
     box-shadow: 
       0 10px 30px -5px rgba(0, 0, 0, 0.2),
       0 20px 50px -10px rgba(0, 0, 0, 0.15);
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out, box-shadow 0.3s ease-out;
+    will-change: transform;
+
+    // Floating layer effect for content
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.05) 100%
+      );
+      pointer-events: none;
+      transform: translateZ(2px);
+    }
+
+    // Enhance shadow on tilt
+    &.is-tilting {
+      box-shadow: 
+        0 15px 40px -8px rgba(0, 0, 0, 0.25),
+        0 25px 55px -12px rgba(0, 0, 0, 0.18);
+    }
 
     @include respond-to(md) {
       padding: $space-3xl $space-lg;
@@ -142,8 +172,11 @@ const roles = [
     }
 
     &__content {
+      transform: translateZ(15px);
+      
       @include respond-to(lg) {
         order: 2;
+        transform: none;
       }
     }
 
@@ -154,6 +187,13 @@ const roles = [
       line-height: 1;
       color: $color-text-light;
       margin-bottom: $space-2xl;
+
+      &--handwriting {
+        font-family: "Caveat", cursive;
+        font-weight: 700;
+        font-style: normal;
+        font-size: calc(#{$font-size-hero} * 1.3);
+      }
     }
 
     &__intro {
@@ -168,6 +208,13 @@ const roles = [
       strong {
         font-weight: 600;
       }
+    }
+
+    &__subline {
+      font-size: clamp($font-size-base, 2vw, $font-size-lg);
+      color: rgba($color-text-light, 0.7);
+      font-style: italic;
+      margin-top: $space-md;
     }
 
     &__role-wrapper {
@@ -210,9 +257,12 @@ const roles = [
       object-fit: cover;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       border: 4px solid rgba(255, 255, 255, 0.1);
+      transform: translateZ(20px);
+      transition: transform 0.3s ease-out;
 
       @include respond-to(md) {
         max-width: 250px;
+        transform: none;
       }
     }
 
@@ -262,9 +312,91 @@ function handleParallax() {
   // Only apply parallax while hero is visible
   if (scrollY < heroBottom) {
     const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
-    hero.style.transform = `translateY(${parallaxOffset}px)`;
+    hero.style.setProperty('--parallax-y', `${parallaxOffset}px`);
   }
 }
 
 window.addEventListener('scroll', handleParallax, { passive: true });
+
+// 3D Tilt effect
+const tiltElement = document.querySelector('[data-tilt]') as HTMLElement;
+const maxTilt = 2; // Maximum tilt angle in degrees
+const tiltScale = 1.01; // Subtle scale on hover
+
+let currentRotateX = 0;
+let currentRotateY = 0;
+let targetRotateX = 0;
+let targetRotateY = 0;
+let animationId: number | null = null;
+
+// Check for reduced motion preference
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function lerp(start: number, end: number, factor: number): number {
+  return start + (end - start) * factor;
+}
+
+function animate() {
+  currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
+  currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
+  
+  const parallaxY = parseFloat(tiltElement.style.getPropertyValue('--parallax-y') || '0');
+  
+  tiltElement.style.transform = `
+    translateY(${parallaxY})
+    rotateX(${currentRotateX}deg)
+    rotateY(${currentRotateY}deg)
+    scale3d(${tiltElement.classList.contains('is-tilting') ? tiltScale : 1}, ${tiltElement.classList.contains('is-tilting') ? tiltScale : 1}, 1)
+  `;
+  
+  // Continue animating if not at target
+  if (Math.abs(currentRotateX - targetRotateX) > 0.01 || Math.abs(currentRotateY - targetRotateY) > 0.01) {
+    animationId = requestAnimationFrame(animate);
+  } else {
+    animationId = null;
+  }
+}
+
+function handleMouseMove(e: MouseEvent) {
+  if (prefersReducedMotion) return;
+  
+  const rect = tiltElement.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  // Calculate mouse position relative to center (-1 to 1)
+  const mouseX = (e.clientX - centerX) / (rect.width / 2);
+  const mouseY = (e.clientY - centerY) / (rect.height / 2);
+  
+  // Invert Y for natural tilt feel (tilt toward mouse)
+  targetRotateX = -mouseY * maxTilt;
+  targetRotateY = mouseX * maxTilt;
+  
+  if (!animationId) {
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+function handleMouseEnter() {
+  if (prefersReducedMotion) return;
+  tiltElement.classList.add('is-tilting');
+}
+
+function handleMouseLeave() {
+  if (prefersReducedMotion) return;
+  tiltElement.classList.remove('is-tilting');
+  targetRotateX = 0;
+  targetRotateY = 0;
+  
+  if (!animationId) {
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+// Only enable on larger screens (no touch)
+if (window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) {
+  tiltElement.addEventListener('mousemove', handleMouseMove);
+  tiltElement.addEventListener('mouseenter', handleMouseEnter);
+  tiltElement.addEventListener('mouseleave', handleMouseLeave);
+}
 </script>

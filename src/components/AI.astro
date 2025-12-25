@@ -4,22 +4,23 @@ type Props = Record<string, never>;
 
 <section class="ai" id="ai">
   <div class="ai__container">
-    <span class="ai__label">AI Enthusiast</span>
-    <h2 class="ai__heading">I build with AI</h2>
+    <span class="ai__label">How I use AI</span>
+    <h2 class="ai__heading">My tool, not my replacement</h2>
     <div class="ai__content">
       <p class="ai__text">
-        I see enormous potential in artificial intelligence — while staying mindful of its
-        implications. It's a technology that demands both excitement and thoughtful consideration,
-        and I try to bring that balanced perspective to everything I do with it.
+        I use AI to move faster, explore more ideas, and handle the parts of development 
+        that don't need a human touch.
       </p>
       <p class="ai__text">
-        Where I really love applying AI is in code generation and web development workflows. It has
-        fundamentally changed how I approach building websites and applications. This very
-        website was built with AI assistance — from component architecture to styling decisions.
+        But every decision — what to build, how it should feel, why it matters — that's me.
       </p>
       <p class="ai__text">
-        I've given talks on AI use in businesses, helping teams understand practical applications
-        and navigate the broader implications. It's a topic I never tire of exploring.
+        AI lets me spend less time fighting with boilerplate and more time on the craft: 
+        the details that make someone lean in, the polish that makes something feel <em>right</em>, 
+        the choices that turn a product into an experience.
+      </p>
+      <p class="ai__text">
+        The technology changes. The intention stays human.
       </p>
     </div>
     <div class="ai__proof">
@@ -94,6 +95,18 @@ type Props = Record<string, never>;
 
       &:last-child {
         margin-bottom: 0;
+      }
+
+      &--lead {
+        font-size: $font-size-xl;
+        font-weight: 600;
+        color: $color-text-dark;
+        font-style: italic;
+        margin-bottom: $space-xl;
+
+        @include respond-to(sm) {
+          font-size: $font-size-lg;
+        }
       }
 
       @include respond-to(sm) {

@@ -20,8 +20,9 @@ const categories = [
       <div class="projects__filters" role="tablist" aria-label="Filter projects by category">
         {categories.map((cat) => (
           <button
-            class={`projects__filter ${cat.id === "all" ? "projects__filter--active" : ""}`}
+            class:list={["projects__filter", { "projects__filter--active": cat.id === "all" }]}
             data-filter={cat.id}
+            type="button"
             role="tab"
             aria-selected={cat.id === "all" ? "true" : "false"}
           >
@@ -32,7 +33,7 @@ const categories = [
     </AnimateOnScroll>
     <div class="projects__grid">
       {projects.map((project, index) => (
-        <div class="projects__item" data-category={project.category}>
+        <div class:list={["projects__item"]} data-category={project.category}>
           <ProjectCard 
             title={project.title} 
             description={project.description}
@@ -49,34 +50,42 @@ const categories = [
 </section>
 
 <script>
-  const filterButtons = document.querySelectorAll('.projects__filter');
-  const projectItems = document.querySelectorAll('.projects__item');
+  function initFilters() {
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.projects__filter');
+    const projectItems = document.querySelectorAll<HTMLElement>('.projects__item');
 
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const filter = button.getAttribute('data-filter');
-      
-      // Update active button
-      filterButtons.forEach(btn => {
-        btn.classList.remove('projects__filter--active');
-        btn.setAttribute('aria-selected', 'false');
-      });
-      button.classList.add('projects__filter--active');
-      button.setAttribute('aria-selected', 'true');
-      
-      // Filter projects
-      projectItems.forEach(item => {
-        const category = item.getAttribute('data-category');
-        const shouldShow = filter === 'all' || category === filter;
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const filter = button.dataset.filter;
         
-        if (shouldShow) {
-          item.classList.remove('projects__item--hidden');
-        } else {
-          item.classList.add('projects__item--hidden');
-        }
+        // Update active button
+        filterButtons.forEach(btn => {
+          btn.classList.remove('projects__filter--active');
+          btn.setAttribute('aria-selected', 'false');
+        });
+        button.classList.add('projects__filter--active');
+        button.setAttribute('aria-selected', 'true');
+        
+        // Filter projects
+        projectItems.forEach(item => {
+          const category = item.dataset.category;
+          const shouldShow = filter === 'all' || category === filter;
+          
+          if (shouldShow) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
       });
     });
-  });
+  }
+
+  // Run on initial load
+  initFilters();
+
+  // Re-run after view transitions
+  document.addEventListener('astro:after-swap', initFilters);
 </script>
 
 <style lang="scss">
@@ -128,18 +137,20 @@ const categories = [
       display: flex;
       gap: $space-sm;
       margin-top: $space-xl;
+      flex-wrap: wrap;
     }
 
     &__filter {
       padding: $space-sm $space-lg;
-      border: 2px solid $color-text-muted;
+      border: 2px solid $color-border;
       border-radius: 100px;
-      background: transparent;
+      background: $color-white;
       color: $color-text-muted;
+      font-family: inherit;
       font-size: $font-size-sm;
       font-weight: 600;
       cursor: pointer;
-      @include transition(all, 0.2s);
+      transition: all 0.2s ease;
 
       &:hover {
         border-color: $color-text-dark;
@@ -152,8 +163,8 @@ const categories = [
         color: $color-white;
 
         &:hover {
-          background: $color-orange;
-          border-color: $color-orange;
+          background: $color-orange-hover;
+          border-color: $color-orange-hover;
           color: $color-white;
         }
       }
@@ -175,11 +186,7 @@ const categories = [
     }
 
     &__item {
-      @include transition(opacity, 0.3s);
-
-      &--hidden {
-        display: none;
-      }
+      transition: opacity 0.3s ease;
     }
   }
 </style>
