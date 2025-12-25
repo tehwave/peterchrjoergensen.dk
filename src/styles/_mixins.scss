@@ -78,7 +78,7 @@
 }
 
 // Textured background with grunge overlay
-// Uses pseudo-element for texture on light backgrounds
+// Texture is automatically provided via Layout.astro define:vars
 @mixin textured-background($bg-color: $color-cream, $opacity: 0.15) {
   position: relative;
   background-color: $bg-color;
@@ -87,7 +87,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("/textures/black-paper.png");
+    background-image: var(--texture-url);
     background-repeat: repeat;
     opacity: $opacity;
     pointer-events: none;

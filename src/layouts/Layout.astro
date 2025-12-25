@@ -9,6 +9,7 @@
  */
 import "../styles/global.scss";
 import { Font } from "astro:assets";
+import textureUrl from "../assets/black-paper.png?url";
 
 interface Props {
   title: string;
@@ -182,6 +183,7 @@ const socialImageURL = new URL(image, Astro.site);
         top: 0;
       }
     </style>
+    <style define:vars={{ 'texture-url': `url(${textureUrl})` }}></style>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <slot />
   </body>
