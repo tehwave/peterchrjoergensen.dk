@@ -79,7 +79,7 @@
 
 // Textured background with grunge overlay
 // Uses pseudo-element for texture on light backgrounds
-@mixin textured-background($bg-color: $color-cream, $opacity: 1) {
+@mixin textured-background($bg-color: $color-cream, $opacity: 0.25) {
   position: relative;
   background-color: $bg-color;
 
@@ -87,7 +87,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("/textures/cubes.png");
+    background-image: url("/textures/asfalt-dark.png");
     background-repeat: repeat;
     opacity: $opacity;
     pointer-events: none;

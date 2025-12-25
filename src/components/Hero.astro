@@ -27,26 +27,16 @@ const roles = [
       <div class="hero__content">
         <h1 class="hero__title hero__title--handwriting">Hello!</h1>
         <div class="hero__intro">
+          <!-- Hidden strings for SEO crawlers and typed.js source -->
+          <div id="typed-strings" class="sr-only">
+            {roles.map((role) => <p>{role}</p>)}
+          </div>
           <p>
-            I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
-              <span
-                class="hero__role-container"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {
-                  roles.map((role, index) => (
-                    <span
-                      class="hero__role"
-                      data-role-index={index}
-                      aria-hidden={index !== 0 ? "true" : "false"}
-                    >
-                      {role}
-                    </span>
-                  ))
-                }
-              </span>
-            </strong> from <strong>Denmark.</strong>
+            I'm <strong>Peter</strong> —{" "}
+            <strong class="hero__role-wrapper" aria-label={roles.join(", ")}>
+              <span id="typed-roles" aria-hidden="true"></span>
+            </strong>{" "}
+            from <strong>Denmark.</strong>
           </p>
           <p>Always building for someone, not just something.</p>
         </div>
@@ -68,59 +58,31 @@ const roles = [
 </div>
 
 <script>
-  const wrapper = document.querySelector(".hero__role-wrapper") as HTMLElement;
-  const container = document.querySelector(
-    ".hero__role-container",
-  ) as HTMLElement;
-  const roles = document.querySelectorAll(".hero__role");
-  const roleCount = roles.length;
-  let currentIndex = 0;
+  import Typed from "typed.js";
 
-  const roleHeight = (roles[0] as HTMLElement).offsetHeight;
+  // Respect user's motion preferences (WCAG 2.3.3)
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
 
-  // Clone elements to measure their natural width without layout interference.
-  // Can't measure directly because roles are stacked and CSS may constrain width.
-  const roleWidths = Array.from(roles).map((role) => {
-    const el = role as HTMLElement;
-    const styles = window.getComputedStyle(el);
-    const clone = el.cloneNode(true) as HTMLElement;
-    clone.style.position = "absolute";
-    clone.style.visibility = "hidden";
-    clone.style.width = "auto";
-    clone.style.whiteSpace = "nowrap";
-    clone.style.fontSize = styles.fontSize;
-    clone.style.fontFamily = styles.fontFamily;
-    clone.style.fontWeight = styles.fontWeight;
-    clone.style.letterSpacing = styles.letterSpacing;
-    document.body.appendChild(clone);
-    const width = Math.ceil(clone.getBoundingClientRect().width);
-    document.body.removeChild(clone);
-    return width;
-  });
+  const typedElement = document.querySelector("#typed-roles") as HTMLElement;
 
-  function updateWidth() {
-    wrapper.style.width = `${roleWidths[currentIndex]}px`;
-  }
-
-  // Set initial width
-  updateWidth();
-
-  function updateRole() {
-    // Update aria-hidden for old and new roles
-    roles.forEach((role, index) => {
-      (role as HTMLElement).setAttribute(
-        "aria-hidden",
-        index === currentIndex ? "false" : "true",
-      );
+  if (prefersReducedMotion) {
+    // Show static first role for users who prefer reduced motion
+    typedElement.textContent = "Web Developer";
+  } else {
+    // Initialize typed.js animation
+    const typed = new Typed("#typed-roles", {
+      stringsElement: "#typed-strings",
+      typeSpeed: 50,
+      backSpeed: 30,
+      backDelay: 2000,
+      startDelay: 500,
+      loop: true,
+      showCursor: true,
+      cursorChar: "|",
     });
-
-    currentIndex = (currentIndex + 1) % roleCount;
-    const offset = currentIndex * roleHeight;
-    container.style.transform = `translateY(-${offset}px)`;
-    updateWidth();
   }
-
-  setInterval(updateRole, 2500);
 </script>
 
 <style lang="scss">
@@ -253,32 +215,51 @@ const roles = [
     }
 
     &__role-wrapper {
-      --role-height: 1.6em;
       color: $color-orange;
-      display: inline-block;
-      position: relative;
-      overflow: hidden;
-      height: var(--role-height);
-      vertical-align: bottom;
-      // Initial width for "Web Developer" - JS will take over after hydration
-      // This prevents clipping before JavaScript calculates exact widths
-      width: 8em;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-right: 10px;
+      display: inline;
+      font-style: normal;
+
+      // Typed.js cursor styling
+      :global(.typed-cursor) {
+        color: $color-orange;
+        font-weight: 400;
+        opacity: 1;
+        animation: blink 0.7s infinite;
+
+        // Respect reduced motion preference (WCAG 2.3.3)
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+          opacity: 0; // Hide cursor entirely for reduced motion
+        }
+      }
     }
 
-    &__role-container {
-      display: block;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+  }
 
-    &__role {
-      display: block;
-      height: var(--role-height);
-      line-height: 1.6;
-      white-space: nowrap;
-    }
+  // Screen reader only - hidden but accessible
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
 
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .hero {
     &__image-wrapper {
       display: flex;
       justify-content: center;
