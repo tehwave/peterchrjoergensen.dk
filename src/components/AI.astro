@@ -216,6 +216,7 @@ type Props = Record<string, never>;
       color: $color-text-dark;
       box-shadow: 0 2px 8px $color-shadow;
       @include transition(all, 0.2s);
+      @include focus-visible;
 
       &:hover {
         transform: translateY(-2px);

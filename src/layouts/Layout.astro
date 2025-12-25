@@ -149,6 +149,34 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- / Fathom -->
   </head>
   <body>
+    <!-- 
+      Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
+      Allows keyboard users to skip navigation and jump directly to main content.
+      Hidden off-screen by default, slides into view when focused via Tab key.
+      Links to #main-content in Hero component.
+    -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <slot />
   </body>
 </html>
+
+<style>
+  /* Skip link styles - positioned off-screen until focused */
+  .skip-link {
+    position: absolute;
+    top: -100px; /* Hidden above viewport */
+    left: 0;
+    background: #e87a2e;
+    color: #fff;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 10000;
+    border-radius: 0 0 4px 0;
+  }
+
+  /* Slide into view when keyboard user presses Tab */
+  .skip-link:focus {
+    top: 0;
+  }
+</style>

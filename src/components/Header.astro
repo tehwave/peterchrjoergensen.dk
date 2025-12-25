@@ -172,6 +172,7 @@ type Props = Record<string, never>;
       padding: $space-sm $space-lg;
       border-radius: 50px;
       @include transition(background-color, 0.2s);
+      @include focus-visible;
 
       &:hover {
         background-color: color.adjust($color-blue-dark, $lightness: 5%);
@@ -199,6 +200,7 @@ type Props = Record<string, never>;
       font-weight: 500;
       position: relative;
       padding: $space-xs 0;
+      @include focus-visible;
 
       &::after {
         content: "";

@@ -15,16 +15,21 @@ const roles = [
 
 <div class="hero-wrapper">
   <section class="hero" id="hero" data-tilt>
-    <div class="hero__container">
+    <!-- Skip link target - keyboard users land here when using "Skip to main content" -->
+    <div class="hero__container" id="main-content">
       <div class="hero__content">
         <h1 class="hero__title hero__title--handwriting">Hello!</h1>
         <div class="hero__intro">
           <p>
             I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
-              <span class="hero__role-container">
+              <span class="hero__role-container" aria-live="polite" aria-atomic="true">
                 {
                   roles.map((role, index) => (
-                    <span class="hero__role" data-role-index={index}>
+                    <span 
+                      class="hero__role" 
+                      data-role-index={index}
+                      aria-hidden={index !== 0 ? "true" : "false"}
+                    >
                       {role}
                     </span>
                   ))
@@ -88,6 +93,14 @@ const roles = [
   updateWidth();
 
   function updateRole() {
+    // Update aria-hidden for old and new roles
+    roles.forEach((role, index) => {
+      (role as HTMLElement).setAttribute(
+        "aria-hidden",
+        index === currentIndex ? "false" : "true"
+      );
+    });
+    
     currentIndex = (currentIndex + 1) % roleCount;
     const offset = currentIndex * roleHeight;
     container.style.transform = `translateY(-${offset}px)`;

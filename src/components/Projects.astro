@@ -49,6 +49,7 @@ const categories = [
               type="button"
               role="tab"
               aria-selected={cat.id === "all" ? "true" : "false"}
+              aria-controls="projects-grid"
             >
               {cat.label}
             </button>
@@ -56,8 +57,7 @@ const categories = [
         }
       </div>
     </div>
-    <div class="projects__grid">
-      {
+    <div class="projects__grid" id="projects-grid" role="tabpanel">{
         randomizedProjects.map((project, index) => (
           <div class:list={["projects__item"]} data-category={project.category}>
             <AnimateOnScroll delay={index * 0.1}>
@@ -207,6 +207,7 @@ const categories = [
       font-weight: 400;
       cursor: pointer;
       @include transition(all, 0.2s);
+      @include focus-visible;
 
       &:hover {
         border-color: $color-orange;

@@ -164,6 +164,8 @@ const hasLink = link && link !== "#";
       display: inline-flex;
       align-items: center;
       gap: $space-xs;
+      border-radius: 4px;
+      @include focus-visible;
 
       &:hover {
         color: $color-orange;
