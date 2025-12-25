@@ -102,6 +102,7 @@ const data = await fetch("...").then((r) => r.json());
 ### Images & Assets
 
 - Import images from `src/assets/` for automatic optimization:
+
   ```astro
   ---
   import { Image } from "astro:assets";
@@ -110,7 +111,9 @@ const data = await fetch("...").then((r) => r.json());
 
   <Image src={hero} alt="Hero image" />
   ```
+
 - Use `<Picture />` for responsive images with multiple formats:
+
   ```astro
   ---
   import { Picture } from "astro:assets";
@@ -119,6 +122,7 @@ const data = await fetch("...").then((r) => r.json());
 
   <Picture src={photo} formats={["avif", "webp"]} alt="Photo" />
   ```
+
 - Always provide `alt` attributes — they are **mandatory** for `<Image>` and `<Picture>`
 - Place unprocessed files (favicon, robots.txt) in `public/`
 
@@ -145,6 +149,7 @@ const data = await fetch("...").then((r) => r.json());
 - **Move async data fetching into separate components** to enable HTML streaming
 - Components with `await` block the page — isolate them for parallel loading
 - Return Promises directly in templates for non-blocking rendering:
+
   ```astro
   ---
   const dataPromise = fetch("...").then((r) => r.json());

@@ -62,7 +62,7 @@ const roles = [
   const initTypedAnimation = async () => {
     // Respect user's motion preferences (WCAG 2.3.3)
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
 
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
@@ -73,7 +73,7 @@ const roles = [
     } else {
       // Dynamically import typed.js only when needed
       const { default: Typed } = await import("typed.js");
-      
+
       // Initialize typed.js animation
       void new Typed("#typed-roles", {
         stringsElement: "#typed-strings",
@@ -249,7 +249,6 @@ const roles = [
         }
       }
     }
-
   }
 
   // Screen reader only - hidden but accessible

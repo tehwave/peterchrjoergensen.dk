@@ -2,7 +2,18 @@
 name: Cloudflare
 description: Expert in Cloudflare platform — Pages, Workers, DNS, CDN, security, and Astro deployments. Helps migrate, configure, and optimize sites on Cloudflare's edge network.
 tools:
-  ['execute', 'read', 'edit', 'search', 'web', 'agent', 'cloudflare-bindings/*', 'cloudflare-builds/*', 'cloudflare-dns-analytics/*', 'cloudflare-docs/*']
+  [
+    "execute",
+    "read",
+    "edit",
+    "search",
+    "web",
+    "agent",
+    "cloudflare-bindings/*",
+    "cloudflare-builds/*",
+    "cloudflare-dns-analytics/*",
+    "cloudflare-docs/*",
+  ]
 model: Claude Sonnet 4.5 (copilot)
 infer: true
 ---

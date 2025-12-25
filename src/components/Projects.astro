@@ -64,7 +64,8 @@ const categories = [
         }
       </div>
     </div>
-    <div class="projects__grid" id="projects-grid" role="tabpanel">{
+    <div class="projects__grid" id="projects-grid" role="tabpanel">
+      {
         randomizedProjects.map((project, index) => (
           <div class:list={["projects__item"]} data-category={project.category}>
             <AnimateOnScroll delay={index * 0.1}>

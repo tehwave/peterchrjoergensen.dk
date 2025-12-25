@@ -152,11 +152,9 @@ Use `<Fragment>` to pass multiple elements without a wrapper:
 Move `await` calls into separate components to enable streaming:
 
 ```astro
-// ❌ Blocks entire page
-
-const data = await fetch("...").then(r => r.json()); // ✅ Enables streaming — header
-renders while data loads --- import DataComponent from "./DataComponent.astro"; ---
-<header>Title</header>
+// ❌ Blocks entire page const data = await fetch("...").then(r => r.json()); //
+✅ Enables streaming — header
+ import DataComponent from "./DataComponent.astro"; <header>Title</header>
 <DataComponent />
 ```
 

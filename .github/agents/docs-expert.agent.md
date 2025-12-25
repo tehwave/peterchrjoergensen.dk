@@ -57,7 +57,7 @@ For project READMEs, follow this structure:
 
 ### JSDoc/TSDoc Format
 
-```typescript
+````typescript
 /**
  * Brief description of what the function does.
  *
@@ -70,7 +70,7 @@ For project READMEs, follow this structure:
  * const result = myFunction('input');
  * ```
  */
-```
+````
 
 ## Your Responsibilities
 
