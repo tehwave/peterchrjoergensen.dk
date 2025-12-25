@@ -58,30 +58,42 @@ const roles = [
 </div>
 
 <script>
-  import Typed from "typed.js";
+  // Lazy-load typed.js when browser is idle for better performance
+  const initTypedAnimation = async () => {
+    // Respect user's motion preferences (WCAG 2.3.3)
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-  // Respect user's motion preferences (WCAG 2.3.3)
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
+    const typedElement = document.querySelector("#typed-roles") as HTMLElement;
 
-  const typedElement = document.querySelector("#typed-roles") as HTMLElement;
+    if (prefersReducedMotion) {
+      // Show static first role for users who prefer reduced motion
+      typedElement.textContent = "Web Developer";
+    } else {
+      // Dynamically import typed.js only when needed
+      const { default: Typed } = await import("typed.js");
+      
+      // Initialize typed.js animation
+      void new Typed("#typed-roles", {
+        stringsElement: "#typed-strings",
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 2000,
+        startDelay: 500,
+        loop: true,
+        showCursor: true,
+        cursorChar: "|",
+      });
+    }
+  };
 
-  if (prefersReducedMotion) {
-    // Show static first role for users who prefer reduced motion
-    typedElement.textContent = "Web Developer";
+  // Wait for browser idle time before loading animation
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => void initTypedAnimation());
   } else {
-    // Initialize typed.js animation
-    void new Typed("#typed-roles", {
-      stringsElement: "#typed-strings",
-      typeSpeed: 50,
-      backSpeed: 30,
-      backDelay: 2000,
-      startDelay: 500,
-      loop: true,
-      showCursor: true,
-      cursorChar: "|",
-    });
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(() => void initTypedAnimation(), 1);
   }
 </script>
 
