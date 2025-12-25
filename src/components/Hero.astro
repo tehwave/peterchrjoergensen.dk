@@ -302,26 +302,10 @@ const roles = [
 </style>
 
 <script>
-// Parallax effect for hero
-const hero = document.querySelector('.hero') as HTMLElement;
-
-function handleParallax() {
-  const scrollY = window.scrollY;
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
-  
-  // Only apply parallax while hero is visible
-  if (scrollY < heroBottom) {
-    const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
-    hero.style.setProperty('--parallax-y', `${parallaxOffset}px`);
-  }
-}
-
-window.addEventListener('scroll', handleParallax, { passive: true });
-
 // 3D Tilt effect
+const hero = document.querySelector('.hero') as HTMLElement;
 const tiltElement = document.querySelector('[data-tilt]') as HTMLElement;
 const maxTilt = 2; // Maximum tilt angle in degrees
-const tiltScale = 1.01; // Subtle scale on hover
 
 let currentRotateX = 0;
 let currentRotateY = 0;
@@ -342,11 +326,19 @@ function animate() {
   
   const parallaxY = parseFloat(tiltElement.style.getPropertyValue('--parallax-y') || '0');
   
+  // Dynamic shadow based on tilt direction (light source from top-left)
+  const shadowX = -currentRotateY * 8; // Shadow moves opposite to tilt
+  const shadowY = currentRotateX * 8 + 20; // Base offset + tilt adjustment
+  
   tiltElement.style.transform = `
-    translateY(${parallaxY})
+    translateY(${parallaxY}px)
     rotateX(${currentRotateX}deg)
     rotateY(${currentRotateY}deg)
-    scale3d(${tiltElement.classList.contains('is-tilting') ? tiltScale : 1}, ${tiltElement.classList.contains('is-tilting') ? tiltScale : 1}, 1)
+  `;
+  
+  tiltElement.style.boxShadow = `
+    ${shadowX}px ${shadowY}px 40px -5px rgba(0, 0, 0, 0.3),
+    ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
   `;
   
   // Continue animating if not at target
@@ -357,6 +349,25 @@ function animate() {
   }
 }
 
+// Parallax effect for hero
+function handleParallax() {
+  const scrollY = window.scrollY;
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  
+  // Only apply parallax while hero is visible
+  if (scrollY < heroBottom) {
+    const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
+    hero.style.setProperty('--parallax-y', `${parallaxOffset}`);
+    
+    // Trigger animation loop to apply the parallax
+    if (!animationId) {
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+}
+
+window.addEventListener('scroll', handleParallax, { passive: true });
+
 function handleMouseMove(e: MouseEvent) {
   if (prefersReducedMotion) return;
   
@@ -364,29 +375,17 @@ function handleMouseMove(e: MouseEvent) {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
   
-  // Calculate mouse position relative to center (-1 to 1)
-  const mouseX = (e.clientX - centerX) / (rect.width / 2);
-  const mouseY = (e.clientY - centerY) / (rect.height / 2);
+  // Calculate mouse position relative to hero center, normalized to viewport
+  const mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
+  const mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
+  
+  // Clamp values to prevent extreme tilts when mouse is far away
+  const clampedX = Math.max(-1, Math.min(1, mouseX));
+  const clampedY = Math.max(-1, Math.min(1, mouseY));
   
   // Invert Y for natural tilt feel (tilt toward mouse)
-  targetRotateX = -mouseY * maxTilt;
-  targetRotateY = mouseX * maxTilt;
-  
-  if (!animationId) {
-    animationId = requestAnimationFrame(animate);
-  }
-}
-
-function handleMouseEnter() {
-  if (prefersReducedMotion) return;
-  tiltElement.classList.add('is-tilting');
-}
-
-function handleMouseLeave() {
-  if (prefersReducedMotion) return;
-  tiltElement.classList.remove('is-tilting');
-  targetRotateX = 0;
-  targetRotateY = 0;
+  targetRotateX = -clampedY * maxTilt;
+  targetRotateY = clampedX * maxTilt;
   
   if (!animationId) {
     animationId = requestAnimationFrame(animate);
@@ -395,8 +394,7 @@ function handleMouseLeave() {
 
 // Only enable on larger screens (no touch)
 if (window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) {
-  tiltElement.addEventListener('mousemove', handleMouseMove);
-  tiltElement.addEventListener('mouseenter', handleMouseEnter);
-  tiltElement.addEventListener('mouseleave', handleMouseLeave);
+  // Track mouse across entire document
+  document.addEventListener('mousemove', handleMouseMove, { passive: true });
 }
 </script>
