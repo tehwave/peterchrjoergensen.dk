@@ -1,0 +1,189 @@
+---
+/**
+ * Base layout for all pages.
+ *
+ * Centralizes SEO meta tags, Open Graph, Twitter Cards, and structured data
+ * so individual pages only need to pass title/description. Fonts are self-hosted
+ * via Fontsource to eliminate external requests and improve Core Web Vitals.
+ */
+import "../styles/global.scss";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/caveat/700.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "article";
+}
+
+const {
+  title,
+  description = "Personal website built with Astro",
+  image = "/og-image.png",
+  type = "website",
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL(image, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="author" content="Peter Chr. Jørgensen" />
+    <meta name="robots" content="index, follow" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.usefathom.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:site_name" content="Peter Chr. Jørgensen" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+
+    <!-- Sitemap -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Structured Data -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://peterchrjoergensen.dk/#website",
+            name: "Peter Chr. Jørgensen",
+            url: "https://peterchrjoergensen.dk",
+            description: "Personal website built with Astro",
+            inLanguage: "en-US",
+            publisher: {
+              "@id": "https://peterchrjoergensen.dk/#person",
+            },
+          },
+          {
+            "@type": "Person",
+            "@id": "https://peterchrjoergensen.dk/#person",
+            name: "Peter Chr. Jørgensen",
+            url: "https://peterchrjoergensen.dk",
+            image: "https://peterchrjoergensen.dk/og-image.png",
+            jobTitle: "Web Developer",
+            description:
+              "Web developer and game developer from Denmark specializing in Laravel, WordPress, Unity, and Vue.js",
+            knowsAbout: [
+              "Laravel",
+              "WordPress",
+              "Unity",
+              "Vue.js",
+              "TypeScript",
+              "PHP",
+              "JavaScript",
+              "C#",
+              "Web Development",
+              "Game Development",
+            ],
+            sameAs: [
+              "https://www.linkedin.com/in/peterchrjoergensen",
+              "https://github.com/peterchrjoergensen",
+              "https://twitter.com/tehwave",
+            ],
+            mainEntityOfPage: {
+              "@id": "https://peterchrjoergensen.dk/#website",
+            },
+          },
+          {
+            "@type": "WebPage",
+            "@id": canonicalURL + "#webpage",
+            url: canonicalURL,
+            name: title,
+            description: description,
+            isPartOf: {
+              "@id": "https://peterchrjoergensen.dk/#website",
+            },
+            about: {
+              "@id": "https://peterchrjoergensen.dk/#person",
+            },
+            inLanguage: "en-US",
+          },
+        ],
+      })}
+    />
+
+    <!-- Fathom - beautiful, simple website analytics -->
+    <script
+      is:inline
+      src="https://cdn.usefathom.com/script.js"
+      data-site="OXXUABJE"
+      defer></script>
+    <!-- / Fathom -->
+  </head>
+  <body>
+    <!-- 
+      Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
+      Allows keyboard users to skip navigation and jump directly to main content.
+      Hidden off-screen by default, slides into view when focused via Tab key.
+      Links to #main-content in Hero component.
+    -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <slot />
+  </body>
+</html>
+
+<style>
+  /* Skip link styles - positioned off-screen until focused */
+  .skip-link {
+    position: absolute;
+    top: -100px; /* Hidden above viewport */
+    left: 0;
+    background: #e87a2e;
+    color: #fff;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 10000;
+    border-radius: 0 0 4px 0;
+  }
+
+  /* Slide into view when keyboard user presses Tab */
+  .skip-link:focus {
+    top: 0;
+  }
+</style>

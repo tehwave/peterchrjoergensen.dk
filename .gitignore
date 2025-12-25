@@ -1,28 +1,24 @@
-/node_modules
-/public/hot
-/public/storage
-/storage/*.key
-/vendor
-/.idea
-/.vagrant
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
 .env
-storage/*.index
-auth.json
+.env.production
 
-# Compiled assets.
-public/mix-manifest.json
-public/css/app.css
-public/css/bootstrap.css
-public/js/app.js
-public/js/bootstrap.js
-public/js/manifest.js
-public/js/mixitup.js
-public/js/vendor.js
+# macOS-specific files
+.DS_Store
 
-# PHPUnit
-/coverage
-.phpunit.result.cache
+# jetbrains setting folder
+.idea/

@@ -1,0 +1,160 @@
+---
+/**
+ * About section emphasizing philosophy over résumé.
+ *
+ * Content focuses on approach and values rather than listing credentials —
+ * skills are shown but not the focus. Two-column layout separates the headline
+ * hook from the narrative for better scannability.
+ */
+import SkillTag from "./SkillTag.astro";
+
+type Props = Record<string, never>;
+---
+
+<section class="about" id="about">
+  <div class="about__container">
+    <div class="about__left">
+      <span class="about__label">ABOUT ME</span>
+      <h2 class="about__heading">
+        I'm passionate about digital experiences that resonate
+      </h2>
+    </div>
+    <div class="about__right">
+      <div class="about__content">
+        <h3 class="about__subheading">
+          Good work makes you feel something. That's what I'm after.
+        </h3>
+        <p class="about__text">
+          I'm a <strong>web developer</strong> and <strong
+            >game developer</strong
+          > — but what I really am is someone obsessed with how things <em
+            >feel</em
+          > to use.
+        </p>
+        <p class="about__text">
+          A website isn't just information. A game isn't just entertainment.
+          Done right, they can make someone feel powerful, spark an idea, or
+          open a door they didn't know was there.
+        </p>
+        <p class="about__text">
+          I've been building things on the internet since I was a teenager. I've
+          run
+          <strong>gm48</strong> — a game jam community — since 2013, helping hundreds
+          of developers bring their ideas to life. I've optimized VR games for budget
+          phones, architected complex web applications, and shipped projects that
+          real people depend on every day.
+        </p>
+        <p class="about__text">
+          The technical stuff? I've got it. But the part I care about most is
+          what happens on the other side of the screen — when someone uses what
+          I've made and <em>feels</em> something.
+        </p>
+        <div class="about__skills">
+          <SkillTag label="Laravel" />
+          <SkillTag label="WordPress" />
+          <SkillTag label="Unity" />
+          <SkillTag label="Vue.js" />
+          <SkillTag label="PHP" />
+          <SkillTag label="JavaScript" />
+          <SkillTag label="C#" />
+          <SkillTag label="TypeScript" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .about {
+    position: relative;
+    padding: $space-4xl $space-xl;
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: $space-4xl;
+
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+        gap: $space-2xl;
+      }
+    }
+
+    &__left {
+      display: flex;
+      flex-direction: column;
+      gap: $space-lg;
+    }
+
+    &__label {
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__right {
+      display: flex;
+      align-items: center;
+    }
+
+    &__content {
+      border-left: 3px solid $color-orange;
+      padding-left: $space-xl;
+
+      @include respond-to(lg) {
+        border-left: none;
+        border-top: 3px solid $color-orange;
+        padding-left: 0;
+        padding-top: $space-lg;
+      }
+    }
+
+    &__subheading {
+      font-size: $font-size-xl;
+      color: $color-text-dark;
+      margin-bottom: $space-lg;
+
+      @include respond-to(md) {
+        font-size: $font-size-lg;
+      }
+    }
+
+    &__text {
+      font-size: $font-size-base;
+      color: $color-text-muted;
+      line-height: 1.8;
+      margin-bottom: $space-lg;
+
+      strong {
+        color: $color-text-dark;
+        font-weight: 600;
+      }
+    }
+
+    &__skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-md;
+      margin-top: $space-xl;
+    }
+  }
+</style>

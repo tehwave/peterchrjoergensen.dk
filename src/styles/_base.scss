@@ -1,0 +1,74 @@
+// ==========================================================================
+// Base Styles
+// ==========================================================================
+
+@use "variables" as *;
+@use "mixins" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: $font-sans;
+  color: $color-text-primary;
+  background-color: $color-bg;
+  line-height: $leading-relaxed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  // Inter OpenType features: stylistic alternates for a more refined look
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  // Enable optical sizing for variable font
+  font-optical-sizing: auto;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: $color-cream;
+  background-image: url("/textures/cubes.png");
+}
+
+a {
+  color: $color-accent;
+  text-decoration: none;
+  @include transition(color, 0.2s);
+
+  &:hover {
+    color: $color-accent-hover;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: $font-weight-bold;
+  line-height: $leading-tight;
+  letter-spacing: $tracking-tight;
+  color: $color-text-primary;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+code {
+  font-family: $font-mono;
+  font-size: 0.9em;
+  background-color: $color-border;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}

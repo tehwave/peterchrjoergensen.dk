@@ -1,0 +1,272 @@
+---
+/**
+ * Project portfolio with category filtering.
+ *
+ * Projects are shuffled on each build to give equal visibility over time —
+ * no single project is always "first". Client-side filtering with ARIA tabs
+ * pattern for accessibility. Animation stagger creates visual flow.
+ */
+import ProjectCard from "./ProjectCard.astro";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+import { projects } from "../data/projects";
+
+type Props = Record<string, never>;
+
+// Fisher-Yates: unbiased shuffling so all projects get equal exposure
+function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+const randomizedProjects = shuffle(projects);
+
+const categories = [
+  { id: "all", label: "All" },
+  { id: "web", label: "Web" },
+  { id: "games", label: "Games" },
+] as const;
+---
+
+<section class="projects" id="projects">
+  <div class="projects__container">
+    <div class="projects__header">
+      <div class="projects__header-content">
+        <span class="projects__label">MY WORK</span>
+        <h2 class="projects__heading">
+          Projects I've crafted<br />over the years
+        </h2>
+      </div>
+      <div
+        class="projects__filters"
+        role="tablist"
+        aria-label="Filter projects by category"
+      >
+        {
+          categories.map((cat) => (
+            <button
+              class:list={[
+                "projects__filter",
+                { "projects__filter--active": cat.id === "all" },
+              ]}
+              data-filter={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={cat.id === "all" ? "true" : "false"}
+              aria-controls="projects-grid"
+            >
+              {cat.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <div class="projects__grid" id="projects-grid" role="tabpanel">{
+        randomizedProjects.map((project, index) => (
+          <div class:list={["projects__item"]} data-category={project.category}>
+            <AnimateOnScroll delay={index * 0.1}>
+              <ProjectCard
+                title={project.title}
+                description={project.description}
+                alt={project.alt}
+                tags={project.tags}
+                image={project.image}
+                link={project.link}
+              />
+            </AnimateOnScroll>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  function initFilters() {
+    const filterButtons =
+      document.querySelectorAll<HTMLButtonElement>(".projects__filter");
+    const projectItems =
+      document.querySelectorAll<HTMLElement>(".projects__item");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+
+        // Update active button
+        filterButtons.forEach((btn) => {
+          btn.classList.remove("projects__filter--active");
+          btn.setAttribute("aria-selected", "false");
+        });
+        button.classList.add("projects__filter--active");
+        button.setAttribute("aria-selected", "true");
+
+        // Filter projects with animation
+        projectItems.forEach((item) => {
+          const category = item.dataset.category;
+          const shouldShow = filter === "all" || category === filter;
+
+          if (shouldShow) {
+            // Show: remove hiding class, set visible
+            item.classList.remove("projects__item--hiding");
+            item.classList.remove("projects__item--hidden");
+          } else {
+            // Hide: add hiding class for animation, then fully hide after transition
+            item.classList.add("projects__item--hiding");
+
+            // After transition ends, add hidden class to remove from layout
+            const onTransitionEnd = () => {
+              if (item.classList.contains("projects__item--hiding")) {
+                item.classList.add("projects__item--hidden");
+              }
+              item.removeEventListener("transitionend", onTransitionEnd);
+            };
+            item.addEventListener("transitionend", onTransitionEnd);
+          }
+        });
+      });
+    });
+  }
+
+  // Run on initial load
+  initFilters();
+
+  // Re-run after view transitions
+  document.addEventListener("astro:after-swap", initFilters);
+</script>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .projects {
+    position: relative;
+    padding: $space-4xl $space-xl;
+    background-color: $color-cream;
+    background-image: url("/textures/cubes.png");
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
+
+    &__header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: $space-xl;
+      margin-bottom: $space-3xl;
+
+      @include respond-to(md) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $space-lg;
+      }
+    }
+
+    &__header-content {
+      flex: 1;
+    }
+
+    &__label {
+      display: block;
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: $space-md;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__subtitle {
+      color: $color-text-muted;
+    }
+
+    &__filters {
+      display: flex;
+      gap: $space-sm;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    &__filter {
+      padding: $space-sm $space-lg;
+      border: 1px solid $color-border;
+      border-radius: 100px;
+      background-color: $color-white;
+      color: $color-text-dark;
+      font-family: inherit;
+      font-size: $font-size-base;
+      font-weight: 400;
+      cursor: pointer;
+      @include transition(all, 0.2s);
+      @include focus-visible;
+
+      &:hover {
+        border-color: $color-orange;
+        color: $color-orange;
+        transform: translateY(-2px);
+      }
+
+      &--active {
+        background-color: $color-orange;
+        border-color: $color-orange;
+        color: $color-white;
+
+        &:hover {
+          background-color: $color-orange-hover;
+          border-color: $color-orange-hover;
+          color: $color-white;
+          transform: translateY(-2px);
+        }
+      }
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $space-xl;
+
+      @include respond-to(lg) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @include respond-to(sm) {
+        grid-template-columns: 1fr;
+        gap: $space-lg;
+      }
+    }
+
+    &__item {
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+
+      // Animating state (fading out, but still in layout)
+      &--hiding {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+      }
+
+      // Fully hidden state (removed from layout)
+      &--hidden {
+        display: none;
+      }
+    }
+  }
+</style>
