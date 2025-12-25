@@ -57,6 +57,7 @@ const roles = [
           width={400}
           height={500}
           loading="eager"
+          fetchpriority="high"
         />
       </div>
     </div>
@@ -220,7 +221,7 @@ const roles = [
       margin-bottom: $space-2xl;
 
       &--handwriting {
-        font-family: "Caveat", cursive;
+        font-family: var(--font-caveat), cursive;
         font-weight: 700;
         font-style: normal;
         font-size: calc(#{$font-size-hero} * 1.3);
@@ -256,6 +257,9 @@ const roles = [
       overflow: hidden;
       height: var(--role-height);
       vertical-align: bottom;
+      // Initial width for "Web Developer" - JS will take over after hydration
+      // This prevents clipping before JavaScript calculates exact widths
+      width: 8em;
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 

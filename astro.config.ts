@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import compress from "@playform/compress";
 import inline from "@playform/inline";
@@ -81,5 +81,28 @@ export default defineConfig({
   experimental: {
     // Optimize SVG components with SVGO
     svgo: true,
+
+    // Font optimization with automatic preload links and fallbacks
+    // Eliminates CSS → Font request chain for better LCP
+    fonts: [
+      {
+        name: "Inter",
+        cssVariable: "--font-inter",
+        provider: fontProviders.fontsource(),
+        weights: [400, 500, 600, 700],
+        styles: ["normal"],
+        subsets: ["latin"],
+        fallbacks: ["system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+      },
+      {
+        name: "Caveat",
+        cssVariable: "--font-caveat",
+        provider: fontProviders.fontsource(),
+        weights: [700],
+        styles: ["normal"],
+        subsets: ["latin"],
+        fallbacks: ["cursive"],
+      },
+    ],
   },
 });

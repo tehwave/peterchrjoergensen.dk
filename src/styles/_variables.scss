@@ -28,8 +28,9 @@ $color-text-primary: $color-text-dark;
 $color-text-secondary: #4a4a4a;
 
 // Typography
+// Using CSS variables from Astro's experimental Fonts API for optimal preloading
 $font-sans:
-  "Inter",
+  var(--font-inter),
   system-ui,
   -apple-system,
   BlinkMacSystemFont,
