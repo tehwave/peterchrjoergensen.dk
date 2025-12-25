@@ -1,0 +1,2 @@
+# Redirect www to apex domain
+https://www.peterchrjoergensen.dk/* https://peterchrjoergensen.dk/:splat 301

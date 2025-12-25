@@ -1,0 +1,274 @@
+---
+import { Picture } from "astro:assets";
+import profileImage from "../assets/peter-profile.jpg";
+
+type Props = Record<string, never>;
+
+const roles = [
+  "Web Developer",
+  "Web Designer",
+  "Game Developer", 
+  "Game Designer",
+  "AI Enthusiast",
+];
+---
+
+<div class="hero-wrapper">
+  <section class="hero" id="hero">
+    <div class="hero__container">
+      <div class="hero__content">
+        <h1 class="hero__title hero-animate" style="--anim-order: 0">Hello</h1>
+        <div class="hero__intro hero-animate" style="--anim-order: 1">
+          <p>My name is <strong>Peter.</strong> It's nice to meet you.</p>
+          <p>
+            I am a <strong class="hero__role-wrapper">
+              <span class="hero__role-container">
+                {roles.map((role, index) => (
+                  <span class="hero__role" data-role-index={index}>
+                    {role}
+                  </span>
+                ))}
+              </span>
+            </strong> from <strong>Denmark</strong>
+          </p>
+        </div>
+      </div>
+      <div class="hero__image-wrapper hero-animate" style="--anim-order: 2">
+        <Picture 
+          src={profileImage} 
+          formats={["avif", "webp"]}
+          alt="Peter Chr. Jørgensen" 
+          class="hero__image"
+          width={400}
+          height={500}
+        />
+      </div>
+    </div>
+    <div class="hero__scroll-indicator">
+      <span>SCROLL</span>
+      <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 0L6 18M6 18L11 13M6 18L1 13" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </div>
+  </section>
+</div>
+
+<script>
+  const container = document.querySelector('.hero__role-container') as HTMLElement;
+  const roles = document.querySelectorAll('.hero__role');
+  const roleCount = roles.length;
+  let currentIndex = 0;
+
+  const roleHeight = (roles[0] as HTMLElement).offsetHeight;
+
+  function updateRole() {
+    currentIndex = (currentIndex + 1) % roleCount;
+    const offset = currentIndex * roleHeight;
+    container.style.transform = `translateY(-${offset}px)`;
+  }
+
+  setInterval(updateRole, 2500);
+</script>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  // Hero entrance animations
+  .hero-animate {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: heroFadeInUp var(--duration-slow, 0.6s) var(--ease-out, ease-out) forwards;
+    animation-delay: calc(0.2s + (var(--anim-order, 0) * 0.15s));
+  }
+
+  @keyframes heroFadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Respect reduced motion preference
+  @media (prefers-reduced-motion: reduce) {
+    .hero-animate {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+
+  .hero-wrapper {
+    padding: $space-md;
+
+    @include respond-to(md) {
+      padding: $space-sm;
+    }
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: $space-4xl $space-xl;
+    padding-top: calc($space-4xl + 60px);
+    background-color: $color-blue;
+    background-image: 
+      url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.08' fill-rule='evenodd'/%3E%3C/svg%3E");
+    border-radius: $space-lg;
+    position: relative;
+    box-shadow: 
+      0 10px 30px -5px rgba(0, 0, 0, 0.2),
+      0 20px 50px -10px rgba(0, 0, 0, 0.15);
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+      padding-top: calc($space-3xl + 60px);
+      border-radius: $space-md;
+      min-height: auto;
+    }
+
+    &__container {
+      max-width: $max-width;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: $space-4xl;
+      align-items: center;
+
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+        gap: $space-2xl;
+        text-align: center;
+      }
+    }
+
+    &__content {
+      @include respond-to(lg) {
+        order: 2;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-hero;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1;
+      color: $color-text-light;
+      margin-bottom: $space-2xl;
+    }
+
+    &__intro {
+      font-size: clamp($font-size-lg, 2.5vw, $font-size-2xl);
+      color: $color-text-light;
+      line-height: 1.6;
+
+      p {
+        margin: 0 0 $space-sm 0;
+      }
+
+      strong {
+        font-weight: 600;
+      }
+    }
+
+    &__role-wrapper {
+      --role-height: 1.6em;
+      color: $color-orange;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      height: var(--role-height);
+      vertical-align: baseline;
+    }
+
+    &__role-container {
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &__role {
+      display: block;
+      height: var(--role-height);
+      line-height: 1.6;
+      white-space: nowrap;
+    }
+
+    &__image-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      @include respond-to(lg) {
+        order: 1;
+      }
+    }
+
+    &__image {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 4px solid rgba(255, 255, 255, 0.1);
+
+      @include respond-to(md) {
+        max-width: 250px;
+      }
+    }
+
+    &__scroll-indicator {
+      position: absolute;
+      bottom: $space-3xl;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-sm;
+      color: $color-text-light;
+      font-size: $font-size-xs;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      opacity: 0.7;
+      animation: bounce 2s infinite;
+
+      @include respond-to(md) {
+        display: none;
+      }
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    40% {
+      transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+      transform: translateX(-50%) translateY(-5px);
+    }
+  }
+</style>
+
+<script>
+// Parallax effect for hero
+const hero = document.querySelector('.hero') as HTMLElement;
+
+function handleParallax() {
+  const scrollY = window.scrollY;
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  
+  // Only apply parallax while hero is visible
+  if (scrollY < heroBottom) {
+    const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
+    hero.style.transform = `translateY(${parallaxOffset}px)`;
+  }
+}
+
+window.addEventListener('scroll', handleParallax, { passive: true });
+</script>

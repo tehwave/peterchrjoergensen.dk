@@ -1,0 +1,139 @@
+---
+import SkillTag from "./SkillTag.astro";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+
+type Props = Record<string, never>;
+---
+
+<section class="about" id="about">
+  <div class="about__container">
+    <AnimateOnScroll class="about__left">
+      <span class="about__label">ABOUT</span>
+      <h2 class="about__heading">Building digital<br />experiences</h2>
+    </AnimateOnScroll>
+    <AnimateOnScroll class="about__right" delay={0.15}>
+      <div class="about__content">
+        <h3 class="about__subheading">I build ambitious digital experiences.</h3>
+        <p class="about__text">
+          I'm a <strong>web developer</strong> and <strong>game developer</strong> based in 
+          <strong>Denmark</strong>. I specialize in building robust web applications with 
+          <strong>Laravel</strong> and <strong>WordPress</strong> for established businesses.
+        </p>
+        <p class="about__text">
+          Beyond web development, I'm passionate about <strong>game development</strong> 
+          with Unity and teaching others to create. I'm always exploring new <strong>AI tools</strong> 
+          to enhance my workflow and stay at the cutting edge.
+        </p>
+        <p class="about__text">
+          I have worked on ambitious projects, in collaborative teams, and with reputable 
+          companies to deliver quality digital products.
+        </p>
+        <div class="about__skills">
+          <SkillTag label="Laravel" />
+          <SkillTag label="WordPress" />
+          <SkillTag label="Unity" />
+          <SkillTag label="Vue.js" />
+          <SkillTag label="PHP" />
+          <SkillTag label="JavaScript" />
+          <SkillTag label="C#" />
+          <SkillTag label="TypeScript" />
+        </div>
+      </div>
+    </AnimateOnScroll>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .about {
+    position: relative;
+    padding: $space-4xl $space-xl;
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: $space-4xl;
+
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+        gap: $space-2xl;
+      }
+    }
+
+    &__left {
+      display: flex;
+      flex-direction: column;
+      gap: $space-lg;
+    }
+
+    &__label {
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__right {
+      display: flex;
+      align-items: center;
+    }
+
+    &__content {
+      border-left: 3px solid $color-orange;
+      padding-left: $space-xl;
+
+      @include respond-to(lg) {
+        border-left: none;
+        border-top: 3px solid $color-orange;
+        padding-left: 0;
+        padding-top: $space-lg;
+      }
+    }
+
+    &__subheading {
+      font-size: $font-size-xl;
+      color: $color-text-dark;
+      margin-bottom: $space-lg;
+
+      @include respond-to(md) {
+        font-size: $font-size-lg;
+      }
+    }
+
+    &__text {
+      font-size: $font-size-base;
+      color: $color-text-muted;
+      line-height: 1.8;
+      margin-bottom: $space-lg;
+
+      strong {
+        color: $color-text-dark;
+        font-weight: 600;
+      }
+    }
+
+    &__skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-md;
+      margin-top: $space-xl;
+    }
+  }
+</style>

@@ -1,0 +1,192 @@
+---
+import ProjectCard from "./ProjectCard.astro";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+
+// Import project images for Astro optimization
+import janchartImg from "../assets/projects/janchart.png";
+import grundfosImg from "../assets/projects/grundfos.png";
+import firkantImg from "../assets/projects/firkant.png";
+import gm48Img from "../assets/projects/gm48.png";
+import websiteImg from "../assets/projects/website.png";
+import showreelImg from "../assets/projects/showreel.jpg";
+import authorImg from "../assets/projects/author.jpg";
+import odensegolfklubImg from "../assets/projects/odensegolfklub.png";
+import b2bkoldingImg from "../assets/projects/b2bkolding.png";
+import westernImg from "../assets/projects/western.jpg";
+import mordombordImg from "../assets/projects/mordombord.png";
+import lennarthansenImg from "../assets/projects/lennarthhansen.png";
+
+type Props = Record<string, never>;
+
+const projects = [
+  {
+    title: "Janchart",
+    description: "I built the website in Laravel, Bootstrap and jQuery for this chartering, shipping, and shipowners company.",
+    alt: "Screenshot of the Janchart shipping company website homepage",
+    tags: ["Laravel", "Bootstrap", "jQuery"],
+    image: janchartImg,
+  },
+  {
+    title: "Grundfos Safety",
+    description: "A gamified quiz web application made in Vue.js with legacy browser support, teaching safety protocols at Grundfos.",
+    alt: "Screenshot of the Grundfos Safety quiz application interface",
+    tags: ["Vue.js", "JavaScript", "Gamification"],
+    image: grundfosImg,
+  },
+  {
+    title: "FIRKANT",
+    description: "A fun, challenging platformer video game made in GameMaker Studio. Fast-paced procedural platforming action.",
+    alt: "Screenshot of FIRKANT platformer game showing colorful pixel graphics",
+    tags: ["GameMaker", "Game Design"],
+    image: firkantImg,
+  },
+  {
+    title: "gm48.net",
+    description: "I built the website using Laravel, Bootstrap and jQuery for this game jam community with thousands of participants.",
+    alt: "Screenshot of gm48.net game jam website homepage",
+    tags: ["Laravel", "PHP", "jQuery"],
+    image: gm48Img,
+    link: "https://gm48.net"
+  },
+  {
+    title: "This Website",
+    description: "Built with Astro, TypeScript and SCSS — with AI assistance for component structure and styling decisions.",
+    alt: "Screenshot of my personal portfolio website",
+    tags: ["Astro", "TypeScript", "SCSS"],
+    image: websiteImg,
+  },
+  {
+    title: "Showreel – 2015",
+    description: "Edited in Premiere Pro with careful attention to music synchronization, showcasing various creative projects.",
+    alt: "Still frame from my 2015 video showreel",
+    tags: ["Premiere Pro", "Video Editing"],
+    image: showreelImg,
+  },
+  {
+    title: "The Author",
+    description: "I starred in this short film as the main character and handled color grading and editing in Adobe Premiere Pro.",
+    alt: "Still frame from The Author short film",
+    tags: ["Acting", "Premiere Pro", "Color Grading"],
+    image: authorImg,
+  },
+  {
+    title: "Odense Golfklub",
+    description: "A mobile application built in Unity3D featuring 360° imagery and 3D models of golf courses for club members.",
+    alt: "Screenshot of Odense Golfklub mobile app showing 3D golf course",
+    tags: ["Unity3D", "3D", "Mobile"],
+    image: odensegolfklubImg,
+  },
+  {
+    title: "B2B Kolding",
+    description: "I developed a custom WordPress theme with performance optimization, SEO and analytics integration.",
+    alt: "Screenshot of B2B Kolding business network website",
+    tags: ["WordPress", "PHP", "SEO"],
+    image: b2bkoldingImg,
+  },
+  {
+    title: "Western World",
+    description: "A Unity3D school project exploring the asset pipeline between Maya and the game engine.",
+    alt: "Screenshot of Western World 3D environment in Unity",
+    tags: ["Unity3D", "Maya", "3D"],
+    image: westernImg,
+  },
+  {
+    title: "Mord Ombord",
+    description: "A Google Cardboard VR game built in Unity3D, heavily optimized to run smoothly on older mobile devices.",
+    alt: "Screenshot of Mord Ombord VR murder mystery game",
+    tags: ["Unity3D", "C#", "VR"],
+    image: mordombordImg,
+  },
+  {
+    title: "Lennart H. Hansen",
+    description: "A professional website showcasing their construction and renovation services.",
+    alt: "Screenshot of Lennart H. Hansen company website",
+    tags: ["Web Development", "Design"],
+    image: lennarthansenImg,
+  }
+];
+---
+
+<section class="projects" id="projects">
+  <div class="projects__container">
+    <AnimateOnScroll class="projects__header">
+      <span class="projects__label">SELECTED WORK</span>
+      <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
+    </AnimateOnScroll>
+    <div class="projects__grid">
+      {projects.map((project, index) => (
+        <ProjectCard 
+          title={project.title} 
+          description={project.description}
+          alt={project.alt}
+          tags={project.tags}
+          image={project.image}
+          link={project.link}
+          animationDelay={index}
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .projects {
+    position: relative;
+    padding: $space-4xl $space-xl;
+    background-color: $color-cream;
+    background-image: url("/textures/cubes.png");
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
+
+    &__header {
+      margin-bottom: $space-3xl;
+    }
+
+    &__label {
+      display: block;
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: $space-md;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__subtitle {
+      color: $color-text-muted;
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $space-xl;
+
+      @include respond-to(lg) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @include respond-to(sm) {
+        grid-template-columns: 1fr;
+        gap: $space-lg;
+      }
+    }
+  }
+</style>

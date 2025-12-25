@@ -1,0 +1,87 @@
+---
+type Props = Record<string, never>;
+---
+
+<section class="ai" id="ai">
+  <div class="ai__container">
+    <span class="ai__label">AI Enthusiast</span>
+    <h2 class="ai__heading">I am an AI enthusiast</h2>
+    <div class="ai__content">
+      <p class="ai__text">
+        I see enormous potential in artificial intelligence — while staying mindful of its
+        implications. It's a technology that demands both excitement and thoughtful consideration,
+        and I try to bring that balanced perspective to everything I do with it.
+      </p>
+      <p class="ai__text">
+        Where I really love applying AI is in code generation and web development workflows. It has
+        fundamentally changed how I approach building websites and applications. In fact, this very
+        website was built in large part with AI assistance — from component structure to styling
+        decisions.
+      </p>
+      <p class="ai__text">
+        I've had the opportunity to give talks on AI use in businesses, and I genuinely enjoy those
+        conversations. Whether it's helping teams understand practical applications or discussing
+        the broader implications, AI is a topic I never tire of exploring.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .ai {
+    position: relative;
+    padding: $space-4xl $space-xl;
+
+    @include textured-background($color-cream, 0.03);
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    @include respond-to(sm) {
+      padding: $space-2xl $space-md;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
+
+    &__label {
+      @include section-label;
+
+      display: block;
+      margin-bottom: $space-md;
+    }
+
+    &__heading {
+      @include section-heading;
+
+      margin-bottom: $space-2xl;
+    }
+
+    &__content {
+      max-width: 800px;
+    }
+
+    &__text {
+      font-size: $font-size-lg;
+      line-height: 1.8;
+      color: $color-text-muted;
+      margin-bottom: $space-lg;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      @include respond-to(sm) {
+        font-size: $font-size-base;
+      }
+    }
+  }
+</style>

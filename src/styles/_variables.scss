@@ -1,0 +1,149 @@
+// ==========================================================================
+// Variables
+// ==========================================================================
+
+// Colors - Vibrant Light Theme with Blue Personality
+$color-blue-dark: #1e3a5f;
+$color-blue: #4a6fa5;
+$color-blue-light: #5d8bc7;
+$color-blue-pale: #dceefb;
+$color-cream: #f5f5f0;
+$color-white: #ffffff;
+$color-black: #0a0a0a;
+$color-orange: #e87a2e;
+$color-orange-hover: #d66920;
+$color-text-dark: #1a1a1a;
+$color-text-light: #fafafa;
+$color-text-muted: #666666;
+$color-border: #e0e0e0;
+$color-shadow: rgba(0, 0, 0, 0.1);
+$color-shadow-hover: rgba(0, 0, 0, 0.15);
+
+// Semantic aliases
+$color-accent: $color-orange;
+$color-accent-hover: $color-orange-hover;
+$color-bg: $color-cream;
+$color-bg-alt: $color-white;
+$color-text-primary: $color-text-dark;
+$color-text-secondary: #4a4a4a;
+
+// Typography
+$font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+// Font weights
+$font-weight-thin: 100;
+$font-weight-extralight: 200;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+$font-weight-black: 900;
+
+// Line heights
+$leading-none: 1;
+$leading-tight: 1.1;
+$leading-snug: 1.25;
+$leading-normal: 1.5;
+$leading-relaxed: 1.625;
+$leading-loose: 1.8;
+
+// Letter spacing (tracking)
+$tracking-tighter: -0.05em;
+$tracking-tight: -0.025em;
+$tracking-normal: 0;
+$tracking-wide: 0.025em;
+$tracking-wider: 0.05em;
+$tracking-widest: 0.1em;
+
+// Font sizes
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: clamp(1.5rem, 3vw, 1.75rem);
+$font-size-3xl: clamp(2rem, 4vw, 2.5rem);
+$font-size-4xl: clamp(2.5rem, 5vw, 3.5rem);
+$font-size-5xl: clamp(3rem, 6vw, 4.5rem);
+$font-size-hero: clamp(3.5rem, 10vw, 7rem);
+
+// Spacing
+$space-xs: 0.25rem;
+$space-sm: 0.5rem;
+$space-md: 1rem;
+$space-lg: 1.5rem;
+$space-xl: 2rem;
+$space-2xl: 3rem;
+$space-3xl: 4rem;
+$space-4xl: 6rem;
+
+// Layout
+$max-width: 1200px;
+$max-width-text: 65ch;
+$header-height: 80px;
+
+// Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+// CSS Custom Properties (for runtime theming if needed)
+:root {
+  --color-blue-dark: #{$color-blue-dark};
+  --color-blue: #{$color-blue};
+  --color-blue-light: #{$color-blue-light};
+  --color-cream: #{$color-cream};
+  --color-white: #{$color-white};
+  --color-orange: #{$color-orange};
+  --color-orange-hover: #{$color-orange-hover};
+  --color-text-dark: #{$color-text-dark};
+  --color-text-light: #{$color-text-light};
+  --color-text-muted: #{$color-text-muted};
+  --color-border: #{$color-border};
+  --color-shadow: #{$color-shadow};
+
+  --font-sans: #{$font-sans};
+  --font-mono: #{$font-mono};
+  
+  --font-size-xs: #{$font-size-xs};
+  --font-size-sm: #{$font-size-sm};
+  --font-size-base: #{$font-size-base};
+  --font-size-lg: #{$font-size-lg};
+  --font-size-xl: #{$font-size-xl};
+  --font-size-2xl: #{$font-size-2xl};
+  --font-size-3xl: #{$font-size-3xl};
+  --font-size-4xl: #{$font-size-4xl};
+  --font-size-5xl: #{$font-size-5xl};
+  --font-size-hero: #{$font-size-hero};
+
+  --space-xs: #{$space-xs};
+  --space-sm: #{$space-sm};
+  --space-md: #{$space-md};
+  --space-lg: #{$space-lg};
+  --space-xl: #{$space-xl};
+  --space-2xl: #{$space-2xl};
+  --space-3xl: #{$space-3xl};
+  --space-4xl: #{$space-4xl};
+
+  --max-width: #{$max-width};
+  --max-width-text: #{$max-width-text};
+  --header-height: #{$header-height};
+
+  // Animation timing
+  --duration-fast: 0.2s;
+  --duration-normal: 0.4s;
+  --duration-slow: 0.6s;
+  --duration-slower: 0.8s;
+  
+  // Animation easing
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  // Animation distance
+  --animate-distance: 30px;
+}

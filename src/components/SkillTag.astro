@@ -1,0 +1,31 @@
+---
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<span class="skill-tag">{label}</span>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .skill-tag {
+    display: inline-block;
+    padding: $space-xs $space-md;
+    border: 1px solid $color-border;
+    border-radius: 4px;
+    font-size: $font-size-sm;
+    color: $color-text-dark;
+    background-color: $color-white;
+    @include transition(all, 0.2s);
+
+    &:hover {
+      border-color: $color-orange;
+      color: $color-orange;
+      transform: translateY(-2px);
+    }
+  }
+</style>
