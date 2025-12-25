@@ -26,6 +26,7 @@ export const projects: Project[] = [
     alt: "Screenshot of the Janchart shipping company website homepage",
     tags: ["Laravel", "Bootstrap", "jQuery"],
     image: janchartImg,
+    link: "https://janchart.dk",
   },
   {
     title: "Grundfos Safety",
@@ -34,6 +35,7 @@ export const projects: Project[] = [
     alt: "Screenshot of the Grundfos Safety quiz application interface",
     tags: ["Vue.js", "JavaScript", "Gamification"],
     image: grundfosImg,
+    link: "https://tehwave.github.io/grundfos-quiz/",
   },
   {
     title: "FIRKANT",
@@ -42,6 +44,7 @@ export const projects: Project[] = [
     alt: "Screenshot of FIRKANT platformer game showing colorful pixel graphics",
     tags: ["GameMaker", "Game Design"],
     image: firkantImg,
+    link: "https://firkant.website",
   },
   {
     title: "gm48.net",
@@ -59,6 +62,7 @@ export const projects: Project[] = [
     alt: "Screenshot of my personal portfolio website",
     tags: ["Astro", "TypeScript", "SCSS"],
     image: websiteImg,
+    link: "https://github.com/tehwave/peterchrjoergensen.dk",
   },
   {
     title: "Showreel – 2015",
@@ -67,6 +71,7 @@ export const projects: Project[] = [
     alt: "Still frame from my 2015 video showreel",
     tags: ["Premiere Pro", "Video Editing"],
     image: showreelImg,
+    link: "https://www.youtube.com/watch?v=cYLeWeJryOQ",
   },
   {
     title: "The Author",
@@ -75,6 +80,7 @@ export const projects: Project[] = [
     alt: "Still frame from The Author short film",
     tags: ["Acting", "Premiere Pro", "Color Grading"],
     image: authorImg,
+    link: "https://www.youtube.com/watch?v=S0bQYYnhtGk",
   },
   {
     title: "Odense Golfklub",
@@ -91,6 +97,7 @@ export const projects: Project[] = [
     alt: "Screenshot of B2B Kolding business network website",
     tags: ["WordPress", "PHP", "SEO"],
     image: b2bkoldingImg,
+    link: "https://www.b2bkolding.dk",
   },
   {
     title: "Western World",
@@ -99,6 +106,7 @@ export const projects: Project[] = [
     alt: "Screenshot of Western World 3D environment in Unity",
     tags: ["Unity3D", "Maya", "3D"],
     image: westernImg,
+    link: "https://www.youtube.com/watch?v=0SeTUIsS5sQ",
   },
   {
     title: "Mord Ombord",
@@ -107,6 +115,7 @@ export const projects: Project[] = [
     alt: "Screenshot of Mord Ombord VR murder mystery game",
     tags: ["Unity3D", "C#", "VR"],
     image: mordombordImg,
+    link: "https://www.youtube.com/watch?v=0U42shiUG2w",
   },
   {
     title: "Lennart H. Hansen",
