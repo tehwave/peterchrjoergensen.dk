@@ -8,7 +8,7 @@ My personal website, built with performance and simplicity in mind.
 
 - **Framework:** [Astro 5](https://astro.build) — Zero-JS by default, islands architecture
 - **Styling:** Sass with scoped component styles
-- **Typography:** Inter via Fontsource (self-hosted, no external requests)
+- **Typography:** Inter & Caveat via Fontsource (self-hosted, no external requests)
 - **Deployment:** Cloudflare Pages (edge-deployed, global CDN)
 
 ## Performance Optimizations
@@ -28,9 +28,11 @@ This site is built with Core Web Vitals in mind:
 src/
 ├── assets/          # Images processed by Astro's optimizer
 ├── components/      # Reusable .astro components
+├── data/            # Structured data (projects, etc.)
 ├── layouts/         # Page layouts with SEO meta tags
 ├── pages/           # File-based routing
-└── styles/          # Global Sass (variables, mixins, base)
+├── styles/          # Global Sass (variables, mixins, base)
+└── types/           # TypeScript type definitions
 ```
 
 ## Development
@@ -42,11 +44,17 @@ npm install
 # Start dev server at localhost:4321
 npm run dev
 
+# Type-check the project
+npm run check
+
 # Build for production
 npm run build
 
 # Preview production build
 npm run preview
+
+# Format code with Prettier
+npm run format
 
 # Deploy to Cloudflare Pages
 npm run deploy
