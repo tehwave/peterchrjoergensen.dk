@@ -64,7 +64,7 @@ const skills = [
         <div class="about__skills">
           {
             skills.map((skill, index) => (
-              <AnimateOnScroll delay={index * 0.08} animation="scale">
+              <AnimateOnScroll delay={index * 0.08}>
                 <SkillTag label={skill} />
               </AnimateOnScroll>
             ))
