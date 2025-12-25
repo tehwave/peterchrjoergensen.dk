@@ -7,8 +7,20 @@
  * hook from the narrative for better scannability.
  */
 import SkillTag from "./SkillTag.astro";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
 
 type Props = Record<string, never>;
+
+const skills = [
+  "Laravel",
+  "WordPress",
+  "Unity",
+  "Vue.js",
+  "PHP",
+  "JavaScript",
+  "C#",
+  "TypeScript",
+];
 ---
 
 <section class="about" id="about">
@@ -50,14 +62,13 @@ type Props = Record<string, never>;
           I've made and <em>feels</em> something.
         </p>
         <div class="about__skills">
-          <SkillTag label="Laravel" />
-          <SkillTag label="WordPress" />
-          <SkillTag label="Unity" />
-          <SkillTag label="Vue.js" />
-          <SkillTag label="PHP" />
-          <SkillTag label="JavaScript" />
-          <SkillTag label="C#" />
-          <SkillTag label="TypeScript" />
+          {
+            skills.map((skill, index) => (
+              <AnimateOnScroll delay={index * 0.08} animation="scale">
+                <SkillTag label={skill} />
+              </AnimateOnScroll>
+            ))
+          }
         </div>
       </div>
     </div>
