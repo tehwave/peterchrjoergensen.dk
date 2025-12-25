@@ -34,7 +34,9 @@ type Props = Record<string, never>;
         </p>
       </div>
       <div class="ai__proof">
-        <h3 class="ai__proof-heading">See it in action</h3>
+        <p class="ai__text">
+          A few things I've built that leverage AI in meaningful ways:
+        </p>
         <div class="ai__links">
           <a
             href="https://github.com/tehwave/peterchrjoergensen.dk"
@@ -175,8 +177,6 @@ type Props = Record<string, never>;
 
     &__proof {
       padding: $space-lg;
-      background: #f5dcc8;
-      border-radius: 8px;
       height: fit-content;
       position: sticky;
       top: $space-xl;
@@ -186,19 +186,6 @@ type Props = Record<string, never>;
         background: transparent;
         box-shadow: none;
         position: static;
-      }
-    }
-
-    &__proof-heading {
-      font-size: $font-size-base;
-      font-weight: 600;
-      color: $color-text-dark;
-      margin-bottom: $space-lg;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-
-      @include respond-to(md) {
-        margin-top: $space-2xl;
       }
     }
 

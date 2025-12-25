@@ -83,9 +83,23 @@ type Props = Record<string, never>;
         </div>
       </div>
     </div>
-    <p class="footer__tagline">
-      Made with <span class="footer__heart">♥</span> in Denmark
-    </p>
+    <div class="footer__meta">
+      <p class="footer__tagline">
+        Made with <span class="footer__heart">♥</span> in Denmark
+      </p>
+      <p class="footer__credits">
+        Built with <a
+          href="https://astro.build"
+          target="_blank"
+          rel="noopener"
+          class="footer__link">Astro</a>. Deployed on <a
+          href="https://cloudflare.com"
+          target="_blank"
+          rel="noopener"
+          class="footer__link">Cloudflare</a
+        >.
+      </p>
+    </div>
   </div>
 </footer>
 
@@ -199,12 +213,39 @@ type Props = Record<string, never>;
       }
     }
 
+    &__meta {
+      display: flex;
+      flex-direction: column;
+      gap: $space-xs;
+      margin-top: $space-3xl;
+    }
+
     &__tagline {
       color: $color-text-light;
       font-size: $font-size-sm;
       opacity: 0.6;
       text-align: center;
-      margin-top: $space-3xl;
+    }
+
+    &__credits {
+      color: $color-text-light;
+      font-size: $font-size-xs;
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    &__link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: rgba($color-text-light, 0.3);
+      text-underline-offset: 2px;
+      border-radius: 2px;
+      @include focus-visible;
+
+      &:hover {
+        opacity: 1;
+        text-decoration-color: $color-orange;
+      }
     }
 
     &__heart {
