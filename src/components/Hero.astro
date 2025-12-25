@@ -1,6 +1,6 @@
 ---
 import { Picture } from "astro:assets";
-import profileImage from "../assets/peter-profile.jpg";
+import profileImage from "../assets/peter-profile.png";
 
 type Props = Record<string, never>;
 
@@ -43,12 +43,6 @@ const roles = [
           height={500}
         />
       </div>
-    </div>
-    <div class="hero__scroll-indicator">
-      <span>SCROLL</span>
-      <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 0L6 18M6 18L11 13M6 18L1 13" stroke="currentColor" stroke-width="2"/>
-      </svg>
     </div>
   </section>
 </div>
@@ -100,9 +94,12 @@ const roles = [
 
   .hero-wrapper {
     padding: $space-md;
+    max-width: 1700px;
+    margin: 0 auto;
 
     @include respond-to(md) {
       padding: $space-sm;
+      max-width: 100%;
     }
   }
 
@@ -210,7 +207,7 @@ const roles = [
       width: 100%;
       max-width: 320px;
       height: auto;
-      border-radius: 16px;
+      border-radius: 1000px;
       object-fit: cover;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       border: 4px solid rgba(255, 255, 255, 0.1);

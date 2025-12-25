@@ -84,8 +84,10 @@ type Props = Record<string, never>;
   .header {
     position: absolute;
     top: $space-md;
-    left: $space-md;
-    right: $space-md;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - $space-md * 2);
+    max-width: 1700px;
     z-index: 1000;
     background-color: transparent;
     padding: $space-lg 0;
@@ -98,8 +100,8 @@ type Props = Record<string, never>;
 
     @include respond-to(md) {
       top: $space-sm;
-      left: $space-sm;
-      right: $space-sm;
+      width: calc(100% - $space-sm * 2);
+      max-width: 100%;
       border-radius: $space-md $space-md 0 0;
     }
 

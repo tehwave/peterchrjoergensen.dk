@@ -1,46 +1,57 @@
-# Astro Starter Kit: Basics
+# peterchrjoergensen.dk
 
-```sh
-npm create astro@latest -- --template basics
+My personal website, built with performance and simplicity in mind.
+
+**Live site:** [peterchrjoergensen.dk](https://peterchrjoergensen.dk)
+
+## Tech Stack
+
+- **Framework:** [Astro 5](https://astro.build) — Zero-JS by default, islands architecture
+- **Styling:** Sass with scoped component styles
+- **Typography:** Inter via Fontsource (self-hosted, no external requests)
+- **Deployment:** Cloudflare Pages (edge-deployed, global CDN)
+
+## Performance Optimizations
+
+This site is built with Core Web Vitals in mind:
+
+- **Critical CSS inlining** — Faster First Contentful Paint
+- **Asset compression** — HTML, CSS, JS, and SVG minification
+- **PWA support** — Offline-capable with service worker caching
+- **Automatic sitemap generation** — SEO-friendly out of the box
+- **Image optimization** — Astro's built-in processing for modern formats
+- **Clean URLs** — Directory-based routing without `.html` extensions
+
+## Project Structure
+
+```
+src/
+├── assets/          # Images processed by Astro's optimizer
+├── components/      # Reusable .astro components
+├── layouts/         # Page layouts with SEO meta tags
+├── pages/           # File-based routing
+└── styles/          # Global Sass (variables, mixins, base)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Development
 
-## 🚀 Project Structure
+```bash
+# Install dependencies
+npm install
 
-Inside of your Astro project, you'll see the following folders and files:
+# Start dev server at localhost:4321
+npm run dev
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Deploy to Cloudflare Pages
+npm run deploy
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## License
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The code in this repository is open source for learning purposes. Feel free to use it as reference for your own Astro projects.
