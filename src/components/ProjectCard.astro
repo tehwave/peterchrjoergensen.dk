@@ -1,14 +1,8 @@
 ---
 import { Picture } from "astro:assets";
-import type { ImageMetadata } from "astro";
+import type { Project } from "../types";
 
-interface Props {
-  title: string;
-  description: string;
-  alt: string;
-  tags?: string[];
-  image?: ImageMetadata;
-  link?: string;
+interface Props extends Project {
   animationDelay?: number;
 }
 

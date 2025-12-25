@@ -4,12 +4,14 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "check": "astro check",
+    "build": "astro check && astro build",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=peterchrjoergensen",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/sitemap": "^3.6.0",
     "@fontsource/inter": "^5.2.8",
     "@playform/compress": "^0.2.0",
@@ -17,6 +19,7 @@
     "@vite-pwa/astro": "^1.2.0",
     "astro": "^5.16.6",
     "astro-seo-schema": "^5.1.0",
+    "typescript": "^5.9.3",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {

@@ -68,7 +68,7 @@ const socialImageURL = new URL(image, Astro.site);
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Structured Data -->
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Peter Chr. Jørgensen",
@@ -83,7 +83,7 @@ const socialImageURL = new URL(image, Astro.site);
     })} />
 
     <!-- Fathom - beautiful, simple website analytics -->
-    <script src="https://cdn.usefathom.com/script.js" data-site="OXXUABJE" defer></script>
+    <script is:inline src="https://cdn.usefathom.com/script.js" data-site="OXXUABJE" defer></script>
     <!-- / Fathom -->
   </head>
   <body>
