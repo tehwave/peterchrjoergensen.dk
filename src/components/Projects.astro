@@ -5,6 +5,18 @@ import { projects } from "../data/projects";
 
 type Props = Record<string, never>;
 
+// Fisher-Yates shuffle to randomize project order
+function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+const randomizedProjects = shuffle(projects);
+
 const categories = [
   { id: "all", label: "All" },
   { id: "web", label: "Web" },
@@ -16,7 +28,7 @@ const categories = [
   <div class="projects__container">
     <AnimateOnScroll class="projects__header">
       <div class="projects__header-content">
-        <span class="projects__label">SELECTED WORK</span>
+        <span class="projects__label">MY WORK</span>
         <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
       </div>
       <div class="projects__filters" role="tablist" aria-label="Filter projects by category">
@@ -34,7 +46,7 @@ const categories = [
       </div>
     </AnimateOnScroll>
     <div class="projects__grid">
-      {projects.map((project, index) => (
+      {randomizedProjects.map((project, index) => (
         <div class:list={["projects__item"]} data-category={project.category}>
           <ProjectCard 
             title={project.title} 
@@ -170,30 +182,32 @@ const categories = [
 
     &__filter {
       padding: $space-sm $space-lg;
-      border: 2px solid $color-border;
+      border: 1px solid $color-border;
       border-radius: 100px;
-      background: $color-white;
-      color: $color-text-muted;
+      background-color: $color-white;
+      color: $color-text-dark;
       font-family: inherit;
-      font-size: $font-size-sm;
-      font-weight: 600;
+      font-size: $font-size-base;
+      font-weight: 400;
       cursor: pointer;
-      transition: all 0.2s ease;
+      @include transition(all, 0.2s);
 
       &:hover {
-        border-color: $color-text-dark;
-        color: $color-text-dark;
+        border-color: $color-orange;
+        color: $color-orange;
+        transform: translateY(-2px);
       }
 
       &--active {
-        background: $color-orange;
+        background-color: $color-orange;
         border-color: $color-orange;
         color: $color-white;
 
         &:hover {
-          background: $color-orange-hover;
+          background-color: $color-orange-hover;
           border-color: $color-orange-hover;
           color: $color-white;
+          transform: translateY(-2px);
         }
       }
     }

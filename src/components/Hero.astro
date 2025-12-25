@@ -49,17 +49,45 @@ const roles = [
 </div>
 
 <script>
+  const wrapper = document.querySelector('.hero__role-wrapper') as HTMLElement;
   const container = document.querySelector('.hero__role-container') as HTMLElement;
   const roles = document.querySelectorAll('.hero__role');
   const roleCount = roles.length;
   let currentIndex = 0;
 
   const roleHeight = (roles[0] as HTMLElement).offsetHeight;
+  
+  // Measure natural widths by cloning with computed styles
+  const roleWidths = Array.from(roles).map(role => {
+    const el = role as HTMLElement;
+    const styles = window.getComputedStyle(el);
+    const clone = el.cloneNode(true) as HTMLElement;
+    clone.style.position = 'absolute';
+    clone.style.visibility = 'hidden';
+    clone.style.width = 'auto';
+    clone.style.whiteSpace = 'nowrap';
+    clone.style.fontSize = styles.fontSize;
+    clone.style.fontFamily = styles.fontFamily;
+    clone.style.fontWeight = styles.fontWeight;
+    clone.style.letterSpacing = styles.letterSpacing;
+    document.body.appendChild(clone);
+    const width = Math.ceil(clone.getBoundingClientRect().width);
+    document.body.removeChild(clone);
+    return width;
+  });
+
+  function updateWidth() {
+    wrapper.style.width = `${roleWidths[currentIndex]}px`;
+  }
+
+  // Set initial width
+  updateWidth();
 
   function updateRole() {
     currentIndex = (currentIndex + 1) % roleCount;
     const offset = currentIndex * roleHeight;
     container.style.transform = `translateY(-${offset}px)`;
+    updateWidth();
   }
 
   setInterval(updateRole, 2500);
@@ -200,7 +228,8 @@ const roles = [
       position: relative;
       overflow: hidden;
       height: var(--role-height);
-      vertical-align: baseline;
+      vertical-align: bottom;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     &__role-container {
