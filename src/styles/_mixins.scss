@@ -87,7 +87,10 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: var(--texture-url);
+    background-image: image-set(
+      url(var(--texture-webp)) type("image/webp"),
+      url(var(--texture-fallback)) 1x
+    );
     background-repeat: repeat;
     opacity: $opacity;
     pointer-events: none;

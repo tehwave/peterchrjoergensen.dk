@@ -9,7 +9,12 @@
  */
 import "../styles/global.scss";
 import { Font } from "astro:assets";
-import textureUrl from "../assets/black-paper.png?url";
+import { getImage } from "astro:assets";
+import textureSource from "../assets/black-paper.png";
+
+// Generate optimized texture images at build time
+const textureWebP = await getImage({ src: textureSource, format: "webp" });
+const textureFallback = await getImage({ src: textureSource });
 
 interface Props {
   title: string;
@@ -157,7 +162,11 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- / Fathom -->
   </head>
   <body>
-    <style define:vars={{ "texture-url": `url(${textureUrl})` }}></style>
+    <style
+      define:vars={{
+        "texture-webp": textureWebP.src,
+        "texture-fallback": textureFallback.src,
+      }}></style>
     <!-- 
       Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
       Allows keyboard users to skip navigation and jump directly to main content.
