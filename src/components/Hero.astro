@@ -1,9 +1,17 @@
 ---
+/**
+ * Hero section with animated role text rotation.
+ *
+ * Roles cycle automatically to showcase versatility without overwhelming visitors.
+ * Uses aria-live for screen reader announcements and aria-hidden to prevent
+ * reading all roles at once. Profile image uses Picture for format negotiation.
+ */
 import { Picture } from "astro:assets";
 import profileImage from "../assets/peter-profile.png";
 
 type Props = Record<string, never>;
 
+// Displayed in rotation — order matters for first impression
 const roles = [
   "Web Developer",
   "Web Designer",
@@ -66,7 +74,8 @@ const roles = [
 
   const roleHeight = (roles[0] as HTMLElement).offsetHeight;
 
-  // Measure natural widths by cloning with computed styles
+  // Clone elements to measure their natural width without layout interference.
+  // Can't measure directly because roles are stacked and CSS may constrain width.
   const roleWidths = Array.from(roles).map((role) => {
     const el = role as HTMLElement;
     const styles = window.getComputedStyle(el);

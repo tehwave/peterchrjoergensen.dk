@@ -1,11 +1,18 @@
 ---
+/**
+ * Project portfolio with category filtering.
+ *
+ * Projects are shuffled on each build to give equal visibility over time —
+ * no single project is always "first". Client-side filtering with ARIA tabs
+ * pattern for accessibility. Animation stagger creates visual flow.
+ */
 import ProjectCard from "./ProjectCard.astro";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
 import { projects } from "../data/projects";
 
 type Props = Record<string, never>;
 
-// Fisher-Yates shuffle to randomize project order
+// Fisher-Yates: unbiased shuffling so all projects get equal exposure
 function shuffle<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {

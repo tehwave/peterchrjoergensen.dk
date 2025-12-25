@@ -1,4 +1,11 @@
 ---
+/**
+ * Individual project display card.
+ *
+ * Conditionally renders link with external icon when URL provided —
+ * some projects are showcases without live links. Falls back to
+ * letter placeholder when image unavailable (graceful degradation).
+ */
 import { Picture } from "astro:assets";
 import type { ImageMetadata } from "astro";
 
@@ -13,6 +20,8 @@ interface Props {
 }
 
 const { title, description, alt, tags = [], image, link } = Astro.props;
+
+// "#" is used in data to indicate "no link yet" — treat as missing
 const hasLink = link && link !== "#";
 ---
 

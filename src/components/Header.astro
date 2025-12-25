@@ -1,4 +1,11 @@
 ---
+/**
+ * Sticky header with scroll-aware styling.
+ *
+ * Transforms from transparent to solid background after scrolling past hero,
+ * with smooth enter/exit animations. Active nav link updates based on current
+ * scroll position to provide orientation on long pages.
+ */
 type Props = Record<string, never>;
 ---
 
@@ -18,17 +25,18 @@ type Props = Record<string, never>;
   const hero = document.querySelector("#hero") as HTMLElement;
   const navLinks = document.querySelectorAll(".header__nav-link");
   const sections = document.querySelectorAll("section[id], footer[id]");
+
+  // State machine to prevent animation interruption when scrolling rapidly
   let wasScrolled = false;
   let isAnimatingOut = false;
 
   function updateActiveLink() {
     if (!header || !hero) return;
 
-    // Calculate hero bottom position
     const heroBottom = hero.offsetTop + hero.offsetHeight;
     const isScrolledPastHero = window.scrollY > heroBottom;
 
-    // Update header scrolled state when scrolled past hero
+    // Apply solid background only after hero is fully offscreen
     if (isScrolledPastHero && !isAnimatingOut) {
       header.classList.remove("scrolled-exit");
       header.classList.add("scrolled");
@@ -46,7 +54,8 @@ type Props = Record<string, never>;
       }, 300);
     }
 
-    // Update active nav link based on scroll position
+    // Highlight nav link when section is 1/3 into viewport (feels more natural
+    // than waiting until section hits the very top of the screen)
     let currentSection = "";
     const scrollPosition = window.scrollY + window.innerHeight / 3;
 

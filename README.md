@@ -35,6 +35,18 @@ src/
 └── types/           # TypeScript type definitions
 ```
 
+## Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `Layout.astro` | Base wrapper handling SEO, Open Graph, and structured data |
+| `Hero.astro` | Landing section with animated role rotation |
+| `Header.astro` | Scroll-aware sticky navigation |
+| `About.astro` | Philosophy-first bio with skill tags |
+| `Projects.astro` | Portfolio with filtering; shuffled on build for equal exposure |
+| `AI.astro` | Transparency section on AI usage |
+| `AnimateOnScroll.astro` | Intersection Observer wrapper for scroll animations |
+
 ## Development
 
 ```bash
