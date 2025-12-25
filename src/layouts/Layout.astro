@@ -34,10 +34,16 @@ const socialImageURL = new URL(image, Astro.site);
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
+    <meta name="author" content="Peter Chr. Jørgensen" />
+    <meta name="robots" content="index, follow" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
+
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://cdn.usefathom.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -74,23 +80,62 @@ const socialImageURL = new URL(image, Astro.site);
       type="application/ld+json"
       set:html={JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "Person",
-        name: "Peter Chr. Jørgensen",
-        url: "https://peterchrjoergensen.dk",
-        jobTitle: "Web Developer",
-        knowsAbout: [
-          "Laravel",
-          "WordPress",
-          "Unity",
-          "Vue.js",
-          "TypeScript",
-          "PHP",
-          "JavaScript",
-        ],
-        sameAs: [
-          "https://www.linkedin.com/in/peterchrjoergensen",
-          "https://github.com/peterchrjoergensen",
-          "https://twitter.com/peterunfold",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://peterchrjoergensen.dk/#website",
+            name: "Peter Chr. Jørgensen",
+            url: "https://peterchrjoergensen.dk",
+            description: "Personal website built with Astro",
+            inLanguage: "en-US",
+            publisher: {
+              "@id": "https://peterchrjoergensen.dk/#person",
+            },
+          },
+          {
+            "@type": "Person",
+            "@id": "https://peterchrjoergensen.dk/#person",
+            name: "Peter Chr. Jørgensen",
+            url: "https://peterchrjoergensen.dk",
+            image: "https://peterchrjoergensen.dk/og-image.png",
+            jobTitle: "Web Developer",
+            description:
+              "Web developer and game developer from Denmark specializing in Laravel, WordPress, Unity, and Vue.js",
+            knowsAbout: [
+              "Laravel",
+              "WordPress",
+              "Unity",
+              "Vue.js",
+              "TypeScript",
+              "PHP",
+              "JavaScript",
+              "C#",
+              "Web Development",
+              "Game Development",
+            ],
+            sameAs: [
+              "https://www.linkedin.com/in/peterchrjoergensen",
+              "https://github.com/peterchrjoergensen",
+              "https://twitter.com/tehwave",
+            ],
+            mainEntityOfPage: {
+              "@id": "https://peterchrjoergensen.dk/#website",
+            },
+          },
+          {
+            "@type": "WebPage",
+            "@id": canonicalURL + "#webpage",
+            url: canonicalURL,
+            name: title,
+            description: description,
+            isPartOf: {
+              "@id": "https://peterchrjoergensen.dk/#website",
+            },
+            about: {
+              "@id": "https://peterchrjoergensen.dk/#person",
+            },
+            inLanguage: "en-US",
+          },
         ],
       })}
     />

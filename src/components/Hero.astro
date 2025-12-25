@@ -377,7 +377,10 @@ const roles = [
 
     // Only apply parallax while hero is visible
     if (scrollY < heroBottom) {
-      const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
+      // Reduce parallax on mobile for better performance
+      const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+      const parallaxFactor = isMobile ? 0.03 : 0.1;
+      const parallaxOffset = scrollY * parallaxFactor;
       hero.style.setProperty("--parallax-y", `${parallaxOffset}`);
 
       // Trigger animation loop to apply the parallax
