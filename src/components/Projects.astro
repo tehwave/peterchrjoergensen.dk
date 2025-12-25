@@ -26,7 +26,7 @@ const categories = [
 
 <section class="projects" id="projects">
   <div class="projects__container">
-    <AnimateOnScroll class="projects__header">
+    <div class="projects__header">
       <div class="projects__header-content">
         <span class="projects__label">MY WORK</span>
         <h2 class="projects__heading">
@@ -56,20 +56,21 @@ const categories = [
           ))
         }
       </div>
-    </AnimateOnScroll>
+    </div>
     <div class="projects__grid">
       {
         randomizedProjects.map((project, index) => (
           <div class:list={["projects__item"]} data-category={project.category}>
-            <ProjectCard
-              title={project.title}
-              description={project.description}
-              alt={project.alt}
-              tags={project.tags}
-              image={project.image}
-              link={project.link}
-              animationDelay={index}
-            />
+            <AnimateOnScroll delay={index * 0.1}>
+              <ProjectCard
+                title={project.title}
+                description={project.description}
+                alt={project.alt}
+                tags={project.tags}
+                image={project.image}
+                link={project.link}
+              />
+            </AnimateOnScroll>
           </div>
         ))
       }
@@ -151,7 +152,7 @@ const categories = [
       margin: 0 auto;
     }
 
-    :global(.projects__header) {
+    &__header {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;

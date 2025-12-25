@@ -1,19 +1,18 @@
 ---
 import SkillTag from "./SkillTag.astro";
-import AnimateOnScroll from "./AnimateOnScroll.astro";
 
 type Props = Record<string, never>;
 ---
 
 <section class="about" id="about">
   <div class="about__container">
-    <AnimateOnScroll class="about__left">
+    <div class="about__left">
       <span class="about__label">ABOUT ME</span>
       <h2 class="about__heading">
         I build for the other side<br />of the screen
       </h2>
-    </AnimateOnScroll>
-    <AnimateOnScroll class="about__right" delay={0.15}>
+    </div>
+    <div class="about__right">
       <div class="about__content">
         <h3 class="about__subheading">
           Good work makes you feel something. That's what I'm after.
@@ -54,7 +53,7 @@ type Props = Record<string, never>;
           <SkillTag label="TypeScript" />
         </div>
       </div>
-    </AnimateOnScroll>
+    </div>
   </div>
 </section>
 
