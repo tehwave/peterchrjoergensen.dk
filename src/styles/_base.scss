@@ -36,13 +36,18 @@ a {
   color: $color-accent;
   text-decoration: none;
   @include transition(color, 0.2s);
-  
+
   &:hover {
     color: $color-accent-hover;
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
   font-weight: $font-weight-bold;
   line-height: $leading-tight;

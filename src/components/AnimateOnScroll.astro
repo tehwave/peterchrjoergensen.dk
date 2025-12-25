@@ -1,21 +1,21 @@
 ---
 /**
  * AnimateOnScroll Component
- * 
+ *
  * Wraps content in a container that animates when scrolled into view.
  * Uses Intersection Observer for performance-friendly scroll detection.
  * Respects prefers-reduced-motion automatically via CSS.
- * 
+ *
  * @example
  * <AnimateOnScroll>
  *   <h2>This will fade in when scrolled into view</h2>
  * </AnimateOnScroll>
- * 
+ *
  * @example With delay
  * <AnimateOnScroll delay={0.2}>
  *   <p>This will animate with a 200ms delay</p>
  * </AnimateOnScroll>
- * 
+ *
  * @example With custom animation
  * <AnimateOnScroll animation="fade">
  *   <div>Fade only, no movement</div>
@@ -35,17 +35,21 @@ interface Props {
   as?: "div" | "section" | "article" | "aside" | "span";
 }
 
-const { 
-  delay = 0, 
+const {
+  delay = 0,
   animation = "fade-up",
   threshold = 0.1,
   class: className = "",
-  as: Tag = "div"
+  as: Tag = "div",
 }: Props = Astro.props;
 ---
 
-<Tag 
-  class:list={["animate-on-scroll", `animate-on-scroll--${animation}`, className]}
+<Tag
+  class:list={[
+    "animate-on-scroll",
+    `animate-on-scroll--${animation}`,
+    className,
+  ]}
   data-aos-threshold={threshold}
   style={delay > 0 ? `--aos-delay: ${delay}s` : undefined}
 >
@@ -60,11 +64,11 @@ const {
     &--fade-up {
       opacity: 0;
       transform: translateY(var(--animate-distance, 30px));
-      
+
       &.is-visible {
         opacity: 1;
         transform: translateY(0);
-        transition: 
+        transition:
           opacity var(--duration-slow, 0.6s) var(--ease-out, ease-out),
           transform var(--duration-slow, 0.6s) var(--ease-out, ease-out);
         transition-delay: var(--aos-delay, 0s);
@@ -74,7 +78,7 @@ const {
     // Fade only animation
     &--fade {
       opacity: 0;
-      
+
       &.is-visible {
         opacity: 1;
         transition: opacity var(--duration-slow, 0.6s) var(--ease-out, ease-out);
@@ -86,11 +90,11 @@ const {
     &--scale {
       opacity: 0;
       transform: scale(0.95);
-      
+
       &.is-visible {
         opacity: 1;
         transform: scale(1);
-        transition: 
+        transition:
           opacity var(--duration-slow, 0.6s) var(--ease-out, ease-out),
           transform var(--duration-slow, 0.6s) var(--ease-out-back, ease-out);
         transition-delay: var(--aos-delay, 0s);
@@ -109,26 +113,30 @@ const {
 <script>
   // Intersection Observer for scroll-triggered animations
   // Uses a single observer instance for all elements (performance optimization)
-  
+
   function initAnimateOnScroll() {
-    const elements = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
-    
+    const elements = document.querySelectorAll(
+      ".animate-on-scroll:not(.is-visible)",
+    );
+
     if (!elements.length) return;
 
     // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (prefersReducedMotion) {
       // If user prefers reduced motion, show all elements immediately
-      elements.forEach(el => el.classList.add('is-visible'));
+      elements.forEach((el) => el.classList.add("is-visible"));
       return;
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
+            entry.target.classList.add("is-visible");
             // Stop observing once animated (one-time animation)
             observer.unobserve(entry.target);
           }
@@ -136,30 +144,30 @@ const {
       },
       {
         root: null, // viewport
-        rootMargin: '0px 0px -50px 0px', // Trigger slightly before element enters viewport
-        threshold: 0.1 // Default threshold, can be overridden per-element
-      }
+        rootMargin: "0px 0px -50px 0px", // Trigger slightly before element enters viewport
+        threshold: 0.1, // Default threshold, can be overridden per-element
+      },
     );
 
-    elements.forEach(el => {
+    elements.forEach((el) => {
       // Use element's custom threshold if specified
-      const customThreshold = el.getAttribute('data-aos-threshold');
+      const customThreshold = el.getAttribute("data-aos-threshold");
       if (customThreshold) {
         // Create individual observer for custom threshold
         const customObserver = new IntersectionObserver(
           (entries) => {
-            entries.forEach(entry => {
+            entries.forEach((entry) => {
               if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
+                entry.target.classList.add("is-visible");
                 customObserver.unobserve(entry.target);
               }
             });
           },
           {
             root: null,
-            rootMargin: '0px 0px -50px 0px',
-            threshold: parseFloat(customThreshold)
-          }
+            rootMargin: "0px 0px -50px 0px",
+            threshold: parseFloat(customThreshold),
+          },
         );
         customObserver.observe(el);
       } else {
@@ -169,12 +177,12 @@ const {
   }
 
   // Initialize on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAnimateOnScroll);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAnimateOnScroll);
   } else {
     initAnimateOnScroll();
   }
 
   // Re-initialize on Astro page transitions (if View Transitions are added later)
-  document.addEventListener('astro:page-load', initAnimateOnScroll);
+  document.addEventListener("astro:page-load", initAnimateOnScroll);
 </script>

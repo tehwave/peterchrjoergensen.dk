@@ -7,7 +7,7 @@ type Props = Record<string, never>;
 const roles = [
   "Web Developer",
   "Web Designer",
-  "Game Developer", 
+  "Game Developer",
   "Game Designer",
   "AI Enthusiast",
 ];
@@ -19,25 +19,30 @@ const roles = [
       <div class="hero__content">
         <h1 class="hero__title hero__title--handwriting">Hello!</h1>
         <div class="hero__intro">
-          <p>I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
+          <p>
+            I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
               <span class="hero__role-container">
-                {roles.map((role, index) => (
-                  <span class="hero__role" data-role-index={index}>
-                    {role}
-                  </span>
-                ))}
+                {
+                  roles.map((role, index) => (
+                    <span class="hero__role" data-role-index={index}>
+                      {role}
+                    </span>
+                  ))
+                }
               </span>
             </strong> from <strong>Denmark.</strong>
           </p>
           <p>I make websites and games that make people feel something.</p>
-          <p class="hero__subline">Not just functional. Not just pretty. Meaningful.</p>
+          <p class="hero__subline">
+            Not just functional. Not just pretty. Meaningful.
+          </p>
         </div>
       </div>
       <div class="hero__image-wrapper">
-        <Picture 
-          src={profileImage} 
+        <Picture
+          src={profileImage}
           formats={["avif", "webp"]}
-          alt="Peter Chr. Jørgensen" 
+          alt="Peter Chr. Jørgensen"
           class="hero__image"
           width={400}
           height={500}
@@ -49,23 +54,25 @@ const roles = [
 </div>
 
 <script>
-  const wrapper = document.querySelector('.hero__role-wrapper') as HTMLElement;
-  const container = document.querySelector('.hero__role-container') as HTMLElement;
-  const roles = document.querySelectorAll('.hero__role');
+  const wrapper = document.querySelector(".hero__role-wrapper") as HTMLElement;
+  const container = document.querySelector(
+    ".hero__role-container",
+  ) as HTMLElement;
+  const roles = document.querySelectorAll(".hero__role");
   const roleCount = roles.length;
   let currentIndex = 0;
 
   const roleHeight = (roles[0] as HTMLElement).offsetHeight;
-  
+
   // Measure natural widths by cloning with computed styles
-  const roleWidths = Array.from(roles).map(role => {
+  const roleWidths = Array.from(roles).map((role) => {
     const el = role as HTMLElement;
     const styles = window.getComputedStyle(el);
     const clone = el.cloneNode(true) as HTMLElement;
-    clone.style.position = 'absolute';
-    clone.style.visibility = 'hidden';
-    clone.style.width = 'auto';
-    clone.style.whiteSpace = 'nowrap';
+    clone.style.position = "absolute";
+    clone.style.visibility = "hidden";
+    clone.style.width = "auto";
+    clone.style.whiteSpace = "nowrap";
     clone.style.fontSize = styles.fontSize;
     clone.style.fontFamily = styles.fontFamily;
     clone.style.fontWeight = styles.fontWeight;
@@ -118,20 +125,21 @@ const roles = [
     padding: $space-4xl $space-xl;
     padding-top: calc($space-4xl + 60px);
     background-color: $color-blue;
-    background-image: 
-      url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.08' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.08' fill-rule='evenodd'/%3E%3C/svg%3E");
     border-radius: $space-lg;
     position: relative;
-    box-shadow: 
+    box-shadow:
       0 10px 30px -5px rgba(0, 0, 0, 0.2),
       0 20px 50px -10px rgba(0, 0, 0, 0.15);
     transform-style: preserve-3d;
-    transition: transform 0.15s ease-out, box-shadow 0.3s ease-out;
+    transition:
+      transform 0.15s ease-out,
+      box-shadow 0.3s ease-out;
     will-change: transform;
 
     // Floating layer effect for content
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       border-radius: inherit;
@@ -147,7 +155,7 @@ const roles = [
 
     // Enhance shadow on tilt
     &.is-tilting {
-      box-shadow: 
+      box-shadow:
         0 15px 40px -8px rgba(0, 0, 0, 0.25),
         0 25px 55px -12px rgba(0, 0, 0, 0.18);
     }
@@ -177,7 +185,7 @@ const roles = [
 
     &__content {
       transform: translateZ(15px);
-      
+
       @include respond-to(lg) {
         order: 2;
         transform: none;
@@ -294,7 +302,11 @@ const roles = [
   }
 
   @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
       transform: translateX(-50%) translateY(0);
     }
     40% {
@@ -307,99 +319,151 @@ const roles = [
 </style>
 
 <script>
-// 3D Tilt effect
-const hero = document.querySelector('.hero') as HTMLElement;
-const tiltElement = document.querySelector('[data-tilt]') as HTMLElement;
-const maxTilt = 2; // Maximum tilt angle in degrees
+  // 3D Tilt effect
+  const hero = document.querySelector(".hero") as HTMLElement;
+  const tiltElement = document.querySelector("[data-tilt]") as HTMLElement;
+  const maxTilt = 2; // Maximum tilt angle in degrees
 
-let currentRotateX = 0;
-let currentRotateY = 0;
-let targetRotateX = 0;
-let targetRotateY = 0;
-let animationId: number | null = null;
+  let currentRotateX = 0;
+  let currentRotateY = 0;
+  let targetRotateX = 0;
+  let targetRotateY = 0;
+  let animationId: number | null = null;
 
-// Check for reduced motion preference
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
 
-function lerp(start: number, end: number, factor: number): number {
-  return start + (end - start) * factor;
-}
+  function lerp(start: number, end: number, factor: number): number {
+    return start + (end - start) * factor;
+  }
 
-function animate() {
-  currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
-  currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
-  
-  const parallaxY = parseFloat(tiltElement.style.getPropertyValue('--parallax-y') || '0');
-  
-  // Dynamic shadow based on tilt direction (light source from top-left)
-  const shadowX = -currentRotateY * 8; // Shadow moves opposite to tilt
-  const shadowY = currentRotateX * 8 + 20; // Base offset + tilt adjustment
-  
-  tiltElement.style.transform = `
+  function animate() {
+    currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
+    currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
+
+    const parallaxY = parseFloat(
+      tiltElement.style.getPropertyValue("--parallax-y") || "0",
+    );
+
+    // Dynamic shadow based on tilt direction (light source from top-left)
+    const shadowX = -currentRotateY * 8; // Shadow moves opposite to tilt
+    const shadowY = currentRotateX * 8 + 20; // Base offset + tilt adjustment
+
+    tiltElement.style.transform = `
     translateY(${parallaxY}px)
     rotateX(${currentRotateX}deg)
     rotateY(${currentRotateY}deg)
   `;
-  
-  tiltElement.style.boxShadow = `
+
+    tiltElement.style.boxShadow = `
     ${shadowX}px ${shadowY}px 40px -5px rgba(0, 0, 0, 0.3),
     ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
   `;
-  
-  // Continue animating if not at target
-  if (Math.abs(currentRotateX - targetRotateX) > 0.01 || Math.abs(currentRotateY - targetRotateY) > 0.01) {
-    animationId = requestAnimationFrame(animate);
-  } else {
-    animationId = null;
-  }
-}
 
-// Parallax effect for hero
-function handleParallax() {
-  const scrollY = window.scrollY;
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
-  
-  // Only apply parallax while hero is visible
-  if (scrollY < heroBottom) {
-    const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
-    hero.style.setProperty('--parallax-y', `${parallaxOffset}`);
-    
-    // Trigger animation loop to apply the parallax
+    // Continue animating if not at target
+    if (
+      Math.abs(currentRotateX - targetRotateX) > 0.01 ||
+      Math.abs(currentRotateY - targetRotateY) > 0.01
+    ) {
+      animationId = requestAnimationFrame(animate);
+    } else {
+      animationId = null;
+    }
+  }
+
+  // Parallax effect for hero
+  function handleParallax() {
+    const scrollY = window.scrollY;
+    const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+    // Only apply parallax while hero is visible
+    if (scrollY < heroBottom) {
+      const parallaxOffset = scrollY * 0.1; // Slower scroll = depth effect
+      hero.style.setProperty("--parallax-y", `${parallaxOffset}`);
+
+      // Trigger animation loop to apply the parallax
+      if (!animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
+    }
+  }
+
+  window.addEventListener("scroll", handleParallax, { passive: true });
+
+  function handleMouseMove(e: MouseEvent) {
+    if (prefersReducedMotion) return;
+
+    const rect = tiltElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Calculate mouse position relative to hero center, normalized to viewport
+    const mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
+    const mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
+
+    // Clamp values to prevent extreme tilts when mouse is far away
+    const clampedX = Math.max(-1, Math.min(1, mouseX));
+    const clampedY = Math.max(-1, Math.min(1, mouseY));
+
+    // Invert Y for natural tilt feel (tilt toward mouse)
+    targetRotateX = -clampedY * maxTilt;
+    targetRotateY = clampedX * maxTilt;
+
     if (!animationId) {
       animationId = requestAnimationFrame(animate);
     }
   }
-}
 
-window.addEventListener('scroll', handleParallax, { passive: true });
-
-function handleMouseMove(e: MouseEvent) {
-  if (prefersReducedMotion) return;
-  
-  const rect = tiltElement.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  
-  // Calculate mouse position relative to hero center, normalized to viewport
-  const mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
-  const mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
-  
-  // Clamp values to prevent extreme tilts when mouse is far away
-  const clampedX = Math.max(-1, Math.min(1, mouseX));
-  const clampedY = Math.max(-1, Math.min(1, mouseY));
-  
-  // Invert Y for natural tilt feel (tilt toward mouse)
-  targetRotateX = -clampedY * maxTilt;
-  targetRotateY = clampedX * maxTilt;
-  
-  if (!animationId) {
-    animationId = requestAnimationFrame(animate);
+  // Desktop: track mouse across entire document
+  if (window.matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
+    document.addEventListener("mousemove", handleMouseMove, { passive: true });
   }
-}
 
-// Only enable on larger screens (no touch)
-if (window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) {
-  // Track mouse across entire document
-  document.addEventListener('mousemove', handleMouseMove, { passive: true });
-}
+  // Touch: tilt based on touch position anywhere on screen
+  function handleTouchMove(e: TouchEvent) {
+    if (prefersReducedMotion) return;
+
+    const touch = e.touches[0];
+    const rect = tiltElement.getBoundingClientRect();
+
+    // Calculate touch position relative to hero center, normalized to viewport
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const touchX = (touch.clientX - centerX) / (window.innerWidth / 2);
+    const touchY = (touch.clientY - centerY) / (window.innerHeight / 2);
+
+    // Clamp and apply tilt
+    const clampedX = Math.max(-1, Math.min(1, touchX));
+    const clampedY = Math.max(-1, Math.min(1, touchY));
+
+    targetRotateX = -clampedY * maxTilt;
+    targetRotateY = clampedX * maxTilt;
+
+    tiltElement.classList.add("is-tilting");
+
+    if (!animationId) {
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+
+  function handleTouchEnd() {
+    // Reset tilt smoothly when touch ends
+    targetRotateX = 0;
+    targetRotateY = 0;
+    tiltElement.classList.remove("is-tilting");
+
+    if (!animationId) {
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+
+  // Enable touch tilt on mobile/tablet — track touches anywhere on document
+  if (window.matchMedia("(max-width: 1023px)").matches) {
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd);
+    document.addEventListener("touchcancel", handleTouchEnd);
+  }
 </script>

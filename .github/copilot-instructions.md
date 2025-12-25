@@ -62,7 +62,7 @@ Every `.astro` file has two parts:
 ---
 // Component Script (runs at build time on server)
 import Component from "../components/Component.astro";
-const data = await fetch("...").then(r => r.json());
+const data = await fetch("...").then((r) => r.json());
 ---
 
 <!-- Component Template (HTML output) -->
@@ -107,6 +107,7 @@ const data = await fetch("...").then(r => r.json());
   import { Image } from "astro:assets";
   import hero from "../assets/hero.jpg";
   ---
+
   <Image src={hero} alt="Hero image" />
   ```
 - Use `<Picture />` for responsive images with multiple formats:
@@ -115,6 +116,7 @@ const data = await fetch("...").then(r => r.json());
   import { Picture } from "astro:assets";
   import photo from "../assets/photo.png";
   ---
+
   <Picture src={photo} formats={["avif", "webp"]} alt="Photo" />
   ```
 - Always provide `alt` attributes — they are **mandatory** for `<Image>` and `<Picture>`
@@ -145,8 +147,9 @@ const data = await fetch("...").then(r => r.json());
 - Return Promises directly in templates for non-blocking rendering:
   ```astro
   ---
-  const dataPromise = fetch("...").then(r => r.json());
+  const dataPromise = fetch("...").then((r) => r.json());
   ---
+
   <p>{dataPromise}</p>
   ```
 
@@ -195,6 +198,7 @@ For SPA-like navigation with animations:
 ---
 import { ViewTransitions } from "astro:transitions";
 ---
+
 <head>
   <ViewTransitions />
 </head>
@@ -217,6 +221,7 @@ interface Props {
 }
 const { title, description } = Astro.props;
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -237,6 +242,7 @@ const { title, description } = Astro.props;
 ---
 import Layout from "../layouts/Layout.astro";
 ---
+
 <Layout title="Home" description="Welcome to my site">
   <h1>Welcome</h1>
 </Layout>

@@ -18,43 +18,62 @@ const hasLink = link && link !== "#";
 
 <article class="project-card">
   <div class="project-card__image-wrapper">
-    {image ? (
-      <Picture 
-        src={image} 
-        formats={["avif", "webp"]}
-        alt={alt} 
-        class="project-card__image" 
-        loading="lazy"
-        width={480}
-        height={300}
-      />
-    ) : (
-      <div class="project-card__placeholder">
-        <span>{title.charAt(0)}</span>
-      </div>
-    )}
+    {
+      image ? (
+        <Picture
+          src={image}
+          formats={["avif", "webp"]}
+          alt={alt}
+          class="project-card__image"
+          loading="lazy"
+          width={480}
+          height={300}
+        />
+      ) : (
+        <div class="project-card__placeholder">
+          <span>{title.charAt(0)}</span>
+        </div>
+      )
+    }
   </div>
   <div class="project-card__content">
     <h3 class="project-card__title">
-      {hasLink ? (
-        <a href={link} target="_blank" rel="noopener noreferrer" class="project-card__link">
-          {title}
-          <svg class="project-card__link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M7 17L17 7M17 7H7M17 7V17"/>
-          </svg>
-        </a>
-      ) : (
-        title
-      )}
+      {
+        hasLink ? (
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="project-card__link"
+          >
+            {title}
+            <svg
+              class="project-card__link-icon"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
+          </a>
+        ) : (
+          title
+        )
+      }
     </h3>
     <p class="project-card__description">{description}</p>
-    {tags.length > 0 && (
-      <div class="project-card__tags">
-        {tags.map((tag) => (
-          <span class="project-card__tag">{tag}</span>
-        ))}
-      </div>
-    )}
+    {
+      tags.length > 0 && (
+        <div class="project-card__tags">
+          {tags.map((tag) => (
+            <span class="project-card__tag">{tag}</span>
+          ))}
+        </div>
+      )
+    }
   </div>
 </article>
 
@@ -82,7 +101,11 @@ const hasLink = link && link !== "#";
       }
 
       .project-card__placeholder {
-        background: linear-gradient(135deg, color.adjust($color-blue, $lightness: 5%) 0%, $color-blue-dark 100%);
+        background: linear-gradient(
+          135deg,
+          color.adjust($color-blue, $lightness: 5%) 0%,
+          $color-blue-dark 100%
+        );
       }
     }
 
@@ -105,9 +128,13 @@ const hasLink = link && link !== "#";
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
+      background: linear-gradient(
+        135deg,
+        $color-blue 0%,
+        $color-blue-dark 100%
+      );
       @include transition(background, 0.3s);
-      
+
       span {
         font-size: $font-size-4xl;
         font-weight: 700;

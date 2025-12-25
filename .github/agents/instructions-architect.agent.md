@@ -43,7 +43,7 @@ You are THE expert for creating, analyzing, and optimizing GitHub Copilot custom
 
 ```yaml
 ---
-applyTo: "**/*.ts"  # Glob pattern for when to apply
+applyTo: "**/*.ts" # Glob pattern for when to apply
 ---
 ```
 
@@ -113,18 +113,23 @@ Brief description of what this repository does.
 ## Build & Development
 
 ### Setup
+
 [Commands to bootstrap the project]
 
 ### Development
+
 [Commands to run the dev server]
 
 ### Build
+
 [Commands to build for production]
 
 ### Test
+
 [Commands to run tests]
 
 ### Lint
+
 [Commands to lint/format code]
 
 ## Coding Conventions
@@ -151,7 +156,6 @@ Brief description of what this repository does.
 ---
 applyTo: "**/*.tsx"
 ---
-
 # React Component Guidelines
 
 - Use functional components with hooks
@@ -194,11 +198,11 @@ applyTo: "**/*.tsx"
 
 ## File Locations
 
-| Type | Location |
-|------|----------|
-| Repository-wide | `.github/copilot-instructions.md` |
-| Path-specific | `.github/instructions/*.instructions.md` |
-| Agent instructions | `AGENTS.md` (root or subfolders) |
+| Type               | Location                                 |
+| ------------------ | ---------------------------------------- |
+| Repository-wide    | `.github/copilot-instructions.md`        |
+| Path-specific      | `.github/instructions/*.instructions.md` |
+| Agent instructions | `AGENTS.md` (root or subfolders)         |
 
 ## Your Communication Style
 

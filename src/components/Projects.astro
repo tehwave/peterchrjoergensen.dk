@@ -29,78 +29,94 @@ const categories = [
     <AnimateOnScroll class="projects__header">
       <div class="projects__header-content">
         <span class="projects__label">MY WORK</span>
-        <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
+        <h2 class="projects__heading">
+          Projects I've crafted<br /><span class="projects__subtitle"
+            >over the years</span>
+        </h2>
       </div>
-      <div class="projects__filters" role="tablist" aria-label="Filter projects by category">
-        {categories.map((cat) => (
-          <button
-            class:list={["projects__filter", { "projects__filter--active": cat.id === "all" }]}
-            data-filter={cat.id}
-            type="button"
-            role="tab"
-            aria-selected={cat.id === "all" ? "true" : "false"}
-          >
-            {cat.label}
-          </button>
-        ))}
+      <div
+        class="projects__filters"
+        role="tablist"
+        aria-label="Filter projects by category"
+      >
+        {
+          categories.map((cat) => (
+            <button
+              class:list={[
+                "projects__filter",
+                { "projects__filter--active": cat.id === "all" },
+              ]}
+              data-filter={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={cat.id === "all" ? "true" : "false"}
+            >
+              {cat.label}
+            </button>
+          ))
+        }
       </div>
     </AnimateOnScroll>
     <div class="projects__grid">
-      {randomizedProjects.map((project, index) => (
-        <div class:list={["projects__item"]} data-category={project.category}>
-          <ProjectCard 
-            title={project.title} 
-            description={project.description}
-            alt={project.alt}
-            tags={project.tags}
-            image={project.image}
-            link={project.link}
-            animationDelay={index}
-          />
-        </div>
-      ))}
+      {
+        randomizedProjects.map((project, index) => (
+          <div class:list={["projects__item"]} data-category={project.category}>
+            <ProjectCard
+              title={project.title}
+              description={project.description}
+              alt={project.alt}
+              tags={project.tags}
+              image={project.image}
+              link={project.link}
+              animationDelay={index}
+            />
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>
 
 <script>
   function initFilters() {
-    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.projects__filter');
-    const projectItems = document.querySelectorAll<HTMLElement>('.projects__item');
+    const filterButtons =
+      document.querySelectorAll<HTMLButtonElement>(".projects__filter");
+    const projectItems =
+      document.querySelectorAll<HTMLElement>(".projects__item");
 
-    filterButtons.forEach(button => {
-      button.addEventListener('click', () => {
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
         const filter = button.dataset.filter;
-        
+
         // Update active button
-        filterButtons.forEach(btn => {
-          btn.classList.remove('projects__filter--active');
-          btn.setAttribute('aria-selected', 'false');
+        filterButtons.forEach((btn) => {
+          btn.classList.remove("projects__filter--active");
+          btn.setAttribute("aria-selected", "false");
         });
-        button.classList.add('projects__filter--active');
-        button.setAttribute('aria-selected', 'true');
-        
+        button.classList.add("projects__filter--active");
+        button.setAttribute("aria-selected", "true");
+
         // Filter projects with animation
-        projectItems.forEach(item => {
+        projectItems.forEach((item) => {
           const category = item.dataset.category;
-          const shouldShow = filter === 'all' || category === filter;
-          
+          const shouldShow = filter === "all" || category === filter;
+
           if (shouldShow) {
             // Show: remove hiding class, set visible
-            item.classList.remove('projects__item--hiding');
-            item.classList.remove('projects__item--hidden');
+            item.classList.remove("projects__item--hiding");
+            item.classList.remove("projects__item--hidden");
           } else {
             // Hide: add hiding class for animation, then fully hide after transition
-            item.classList.add('projects__item--hiding');
-            
+            item.classList.add("projects__item--hiding");
+
             // After transition ends, add hidden class to remove from layout
             const onTransitionEnd = () => {
-              if (item.classList.contains('projects__item--hiding')) {
-                item.classList.add('projects__item--hidden');
+              if (item.classList.contains("projects__item--hiding")) {
+                item.classList.add("projects__item--hidden");
               }
-              item.removeEventListener('transitionend', onTransitionEnd);
+              item.removeEventListener("transitionend", onTransitionEnd);
             };
-            item.addEventListener('transitionend', onTransitionEnd);
+            item.addEventListener("transitionend", onTransitionEnd);
           }
         });
       });
@@ -111,7 +127,7 @@ const categories = [
   initFilters();
 
   // Re-run after view transitions
-  document.addEventListener('astro:after-swap', initFilters);
+  document.addEventListener("astro:after-swap", initFilters);
 </script>
 
 <style lang="scss">
@@ -228,15 +244,17 @@ const categories = [
     }
 
     &__item {
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+
       // Animating state (fading out, but still in layout)
       &--hiding {
         opacity: 0;
         transform: scale(0.95);
         pointer-events: none;
       }
-      
+
       // Fully hidden state (removed from layout)
       &--hidden {
         display: none;

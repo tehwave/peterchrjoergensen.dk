@@ -34,7 +34,8 @@ const data = await fetchData();
 
 <!-- 6. Scoped styles -->
 <style>
-  .container { }
+  .container {
+  }
 </style>
 ```
 
@@ -64,7 +65,7 @@ const data = await fetchData();
 - Use `<style is:global>` only when truly needed for site-wide styles
 - Use `class:list` for conditional classes:
   ```astro
-  <div class:list={["base", { active: isActive, "has-error": error }]}>
+  <div class:list={["base", { active: isActive, "has-error": error }]}></div>
   ```
 
 ## Images & Assets
@@ -76,6 +77,7 @@ Import and use the `<Image>` component for automatic optimization:
 import { Image } from "astro:assets";
 import heroImage from "../assets/hero.jpg";
 ---
+
 <Image src={heroImage} alt="Hero" />
 ```
 
@@ -86,6 +88,7 @@ For responsive images with multiple formats:
 import { Picture } from "astro:assets";
 import photo from "../assets/photo.png";
 ---
+
 <Picture src={photo} formats={["avif", "webp"]} alt="Photo" />
 ```
 
@@ -150,14 +153,9 @@ Move `await` calls into separate components to enable streaming:
 
 ```astro
 // ❌ Blocks entire page
----
-const data = await fetch("...").then(r => r.json());
----
 
-// ✅ Enables streaming — header renders while data loads
----
-import DataComponent from "./DataComponent.astro";
----
+const data = await fetch("...").then(r => r.json()); // ✅ Enables streaming — header
+renders while data loads --- import DataComponent from "./DataComponent.astro"; ---
 <header>Title</header>
 <DataComponent />
 ```
@@ -166,8 +164,9 @@ Or use Promises directly in templates (renders in parallel):
 
 ```astro
 ---
-const dataPromise = fetch("...").then(r => r.json());
+const dataPromise = fetch("...").then((r) => r.json());
 ---
+
 <p>{dataPromise}</p>
 ```
 

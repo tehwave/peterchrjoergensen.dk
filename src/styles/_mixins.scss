@@ -7,13 +7,21 @@
 // Responsive breakpoints
 @mixin respond-to($breakpoint) {
   @if $breakpoint == sm {
-    @media (max-width: $breakpoint-sm) { @content; }
+    @media (max-width: $breakpoint-sm) {
+      @content;
+    }
   } @else if $breakpoint == md {
-    @media (max-width: $breakpoint-md) { @content; }
+    @media (max-width: $breakpoint-md) {
+      @content;
+    }
   } @else if $breakpoint == lg {
-    @media (max-width: $breakpoint-lg) { @content; }
+    @media (max-width: $breakpoint-lg) {
+      @content;
+    }
   } @else if $breakpoint == xl {
-    @media (max-width: $breakpoint-xl) { @content; }
+    @media (max-width: $breakpoint-xl) {
+      @content;
+    }
   }
 }
 
@@ -22,7 +30,7 @@
   max-width: $max-width;
   margin: 0 auto;
   padding: 0 $space-xl;
-  
+
   @include respond-to(md) {
     padding: 0 $space-lg;
   }
@@ -55,7 +63,7 @@
 // Hover lift effect
 @mixin hover-lift($distance: -4px) {
   @include transition(transform);
-  
+
   &:hover {
     transform: translateY($distance);
   }
@@ -110,7 +118,7 @@
 @mixin animate-on-scroll-hidden {
   opacity: 0;
   transform: translateY(var(--animate-distance, 30px));
-  
+
   @include reduced-motion {
     opacity: 1;
     transform: none;
@@ -122,11 +130,11 @@
 @mixin animate-on-scroll-visible($delay: 0s) {
   opacity: 1;
   transform: translateY(0);
-  transition: 
+  transition:
     opacity var(--duration-slow) var(--ease-out),
     transform var(--duration-slow) var(--ease-out);
   transition-delay: $delay;
-  
+
   @include reduced-motion {
     transition: none;
   }

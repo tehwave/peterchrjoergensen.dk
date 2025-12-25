@@ -55,7 +55,10 @@ type Props = Record<string, never>;
       const sectionTop = el.offsetTop;
       const sectionHeight = el.offsetHeight;
 
-      if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+      if (
+        scrollPosition >= sectionTop &&
+        scrollPosition < sectionTop + sectionHeight
+      ) {
         currentSection = el.getAttribute("id") || "";
       }
     });
