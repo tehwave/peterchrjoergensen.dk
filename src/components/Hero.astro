@@ -29,11 +29,15 @@ const roles = [
         <div class="hero__intro">
           <p>
             I'm <strong>Peter</strong> — <strong class="hero__role-wrapper">
-              <span class="hero__role-container" aria-live="polite" aria-atomic="true">
+              <span
+                class="hero__role-container"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 {
                   roles.map((role, index) => (
-                    <span 
-                      class="hero__role" 
+                    <span
+                      class="hero__role"
                       data-role-index={index}
                       aria-hidden={index !== 0 ? "true" : "false"}
                     >
@@ -106,10 +110,10 @@ const roles = [
     roles.forEach((role, index) => {
       (role as HTMLElement).setAttribute(
         "aria-hidden",
-        index === currentIndex ? "false" : "true"
+        index === currentIndex ? "false" : "true",
       );
     });
-    
+
     currentIndex = (currentIndex + 1) % roleCount;
     const offset = currentIndex * roleHeight;
     container.style.transform = `translateY(-${offset}px)`;
@@ -260,12 +264,12 @@ const roles = [
       // This prevents clipping before JavaScript calculates exact widths
       width: 8em;
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-right: 10px;
     }
 
     &__role-container {
       display: block;
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-right: 10px;
     }
 
     &__role {
