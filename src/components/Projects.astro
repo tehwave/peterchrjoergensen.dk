@@ -15,8 +15,10 @@ const categories = [
 <section class="projects" id="projects">
   <div class="projects__container">
     <AnimateOnScroll class="projects__header">
-      <span class="projects__label">SELECTED WORK</span>
-      <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
+      <div class="projects__header-content">
+        <span class="projects__label">SELECTED WORK</span>
+        <h2 class="projects__heading">Projects I've crafted<br /><span class="projects__subtitle">over the years</span></h2>
+      </div>
       <div class="projects__filters" role="tablist" aria-label="Filter projects by category">
         {categories.map((cat) => (
           <button
@@ -66,15 +68,27 @@ const categories = [
         button.classList.add('projects__filter--active');
         button.setAttribute('aria-selected', 'true');
         
-        // Filter projects
+        // Filter projects with animation
         projectItems.forEach(item => {
           const category = item.dataset.category;
           const shouldShow = filter === 'all' || category === filter;
           
           if (shouldShow) {
-            item.style.display = '';
+            // Show: remove hiding class, set visible
+            item.classList.remove('projects__item--hiding');
+            item.classList.remove('projects__item--hidden');
           } else {
-            item.style.display = 'none';
+            // Hide: add hiding class for animation, then fully hide after transition
+            item.classList.add('projects__item--hiding');
+            
+            // After transition ends, add hidden class to remove from layout
+            const onTransitionEnd = () => {
+              if (item.classList.contains('projects__item--hiding')) {
+                item.classList.add('projects__item--hidden');
+              }
+              item.removeEventListener('transitionend', onTransitionEnd);
+            };
+            item.addEventListener('transitionend', onTransitionEnd);
           }
         });
       });
@@ -109,8 +123,22 @@ const categories = [
       margin: 0 auto;
     }
 
-    &__header {
+    :global(.projects__header) {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: $space-xl;
       margin-bottom: $space-3xl;
+
+      @include respond-to(md) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $space-lg;
+      }
+    }
+
+    &__header-content {
+      flex: 1;
     }
 
     &__label {
@@ -136,8 +164,8 @@ const categories = [
     &__filters {
       display: flex;
       gap: $space-sm;
-      margin-top: $space-xl;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     &__filter {
@@ -186,7 +214,19 @@ const categories = [
     }
 
     &__item {
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      
+      // Animating state (fading out, but still in layout)
+      &--hiding {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+      }
+      
+      // Fully hidden state (removed from layout)
+      &--hidden {
+        display: none;
+      }
     }
   }
 </style>

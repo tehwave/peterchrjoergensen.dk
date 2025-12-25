@@ -1,8 +1,14 @@
 ---
 import { Picture } from "astro:assets";
-import type { Project } from "../types";
+import type { ImageMetadata } from "astro";
 
-interface Props extends Omit<Project, "category"> {
+interface Props {
+  title: string;
+  description: string;
+  alt: string;
+  tags?: string[];
+  image?: ImageMetadata;
+  link?: string;
   animationDelay?: number;
 }
 
