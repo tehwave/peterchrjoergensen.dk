@@ -79,7 +79,7 @@ description: "One compelling sentence for SEO and previews — 120-155 chars ide
 pubDate: YYYY-MM-DD  # Today's date unless specified
 author: "Peter Chr. Jørgensen"  # Always this unless told otherwise
 tags: ["tag1", "tag2"]  # Lowercase, relevant, 2-5 tags
-heroImage: ""  # Optional - path to image in src/assets/blog/ or external URL
+heroImage: "../../assets/blog/post-slug/hero.jpg"  # Optional - relative path to local image
 heroImageAlt: ""  # Required if heroImage is set — describe for accessibility
 heroImageCaption: ""  # Optional — credit or context for the image
 ---
@@ -91,7 +91,7 @@ heroImageCaption: ""  # Optional — credit or context for the image
 2. **description**: Write for humans first, SEO second. Make it intriguing but accurate.
 3. **pubDate**: Use ISO format (YYYY-MM-DD). Use today's date unless the user specifies.
 4. **tags**: Lowercase, hyphenated if multi-word (`web-development`). Include the main technology and topic.
-5. **heroImage**: Can be a relative path (`../../assets/blog/image.jpg`) or external URL. Optional.
+5. **heroImage**: Relative path to local image (`../../assets/blog/post-slug/hero.jpg`). Optional.
 6. **heroImageAlt**: Mandatory if heroImage exists. Describe what's in the image for screen readers.
 7. **heroImageCaption**: Optional. Use for photo credits or context.
 
@@ -259,11 +259,12 @@ Don't defend your draft. Improve it.
 2. **Research the codebase** — Use search/read tools to gather real facts before writing
 3. **Research if needed** — Use search to find relevant code patterns or existing content
 4. **Find images** — Use #tool:unsplash/search_photos for hero and content images when appropriate
-5. **Draft the frontmatter first** — Get the metadata right, including hero image if found
-6. **Write the content** — In Peter's voice, with proper structure
-7. **Fact-check ruthlessly** — Verify every claim, number, and experience against reality
-8. **Review** — Check technical accuracy, voice consistency, and frontmatter completeness
-9. **Expect revision** — The first draft is a proposal. Be ready to iterate based on feedback.
+5. **Download images** — Create directory structure and download all images locally with proper naming
+6. **Draft the frontmatter first** — Get the metadata right, including local hero image path
+7. **Write the content** — In Peter's voice, with proper structure and imported Figure components
+8. **Fact-check ruthlessly** — Verify every claim, number, and experience against reality
+9. **Review** — Check technical accuracy, voice consistency, and frontmatter completeness
+10. **Expect revision** — The first draft is a proposal. Be ready to iterate based on feedback.
 
 ## File Format & Location
 
@@ -290,8 +291,10 @@ import Figure from '../../components/Figure.astro';
 **Always use the Figure component for images** — never raw `<img>` tags or Markdown image syntax.
 
 ```mdx
+import myImage from '../../assets/blog/post-slug/figure-01.jpg';
+
 <Figure
-  src="https://images.unsplash.com/photo-example"
+  src={myImage}
   alt="Descriptive alt text for accessibility"
   caption="Photo by Author on Unsplash"
 />
@@ -302,9 +305,10 @@ import Figure from '../../components/Figure.astro';
 - Consistent styling with the site design
 - Proper accessibility with required alt text
 - Beautiful edge-to-edge presentation on wide screens
+- **Automatic optimization** — Astro generates AVIF, WebP, and responsive srcsets at build time
 
 **Rules for images:**
-- `src` — External URL or path to image
+- `src` — **Must be an imported ImageMetadata object**, not a URL string
 - `alt` — **Required**. Describe what's in the image for screen readers
 - `caption` — Optional. Use for photo credits ("Photo by X on Unsplash") or context
 
@@ -312,11 +316,49 @@ import Figure from '../../components/Figure.astro';
 
 You have access to the Unsplash MCP server via the #tool:unsplash/search_photos tool. **Use this to find high-quality, relevant images** for blog posts.
 
+**Critical: All images must be downloaded locally** — Never use external Unsplash URLs. This enables Astro's build-time optimization (AVIF, WebP, responsive srcsets).
+
 ### When to Search for Images
 
 1. **Hero images** — Search when the user requests a hero image or when the topic would benefit from one
 2. **Content images** — Search when illustrating concepts, breaking up long text, or adding visual interest
 3. **User request** — When explicitly asked to find images for a post
+
+### Downloading Images Locally
+
+**Every Unsplash image must be downloaded to the project.** Never use external URLs in blog posts.
+
+**Directory structure:**
+```
+src/assets/blog/
+  post-slug/
+    hero.jpg       # Hero image for the post
+    figure-01.jpg  # First content image
+    figure-02.jpg  # Second content image
+    ...
+```
+
+**Download process:**
+
+1. **Find the image** — Use #tool:unsplash/search_photos to search
+2. **Get the download URL** — Extract the full-resolution URL from results
+3. **Create the directory** — Ask the user to run: `mkdir -p src/assets/blog/post-slug/`
+4. **Download the image** — Ask the user to run: `curl -L "<url>?q=90" -o "src/assets/blog/post-slug/hero.jpg"`
+5. **Verify the download** — Ask the user to confirm the file exists and has a reasonable size
+
+**File naming:**
+- `hero.jpg` — Hero image for frontmatter
+- `figure-01.jpg`, `figure-02.jpg`, etc. — Content images in order of appearance
+
+**Image quality:**
+- Always download as `.jpg` format
+- Use `?q=90` parameter for high quality (90% JPEG compression)
+- Typical file sizes: 200KB-1MB for hero images
+
+**Download command pattern:**
+```bash
+curl -L "https://images.unsplash.com/photo-XXXXX?q=90" -o "src/assets/blog/post-slug/hero.jpg"
+```
 
 ### How to Use the Unsplash Tool
 
@@ -339,15 +381,18 @@ Use the #tool:unsplash/search_photos tool with these parameters:
 
 **For hero images** — Add to frontmatter:
 ```yaml
-heroImage: "https://images.unsplash.com/photo-XXXXX?w=1600&q=80"
+heroImage: "../../assets/blog/post-slug/hero.jpg"
 heroImageAlt: "Descriptive alt text for the image"
 heroImageCaption: "Photo by [Photographer Name](https://unsplash.com/@username) on [Unsplash](https://unsplash.com)"
 ```
 
-**For content images** — Use the Figure component:
+**For content images** — Import and use the Figure component:
 ```mdx
+import Figure from '../../components/Figure.astro';
+import contentImage from '../../assets/blog/post-slug/figure-01.jpg';
+
 <Figure
-  src="https://images.unsplash.com/photo-XXXXX?w=1200&q=80"
+  src={contentImage}
   alt="Descriptive alt text"
   caption="Photo by [Photographer Name](https://unsplash.com/@username) on Unsplash"
 />
@@ -365,12 +410,25 @@ The Unsplash API doesn't always return photographer info. **When author credit i
 **Never skip attribution.** Unsplash requires photographer credit. If you can't find the author, don't use the image.
 ```
 
-### Unsplash URL Best Practices
+### Image Workflow Summary
 
-1. **Add size parameters** — Append `?w=1600&q=80` for hero images, `?w=1200&q=80` for content
-2. **Always credit photographers** — Use their name and link in captions
-3. **Write meaningful alt text** — Describe what's in the image, not just "stock photo"
-4. **Match the mood** — Choose images that fit the post's tone and topic
+**Complete workflow for adding images to a blog post:**
+
+1. **Search** — Use #tool:unsplash/search_photos with relevant keywords
+2. **Select** — Choose an image that fits the post's tone and content
+3. **Get credit info** — If photographer info is missing, fetch the Unsplash photo page to extract it
+4. **Create directory** — Make `src/assets/blog/post-slug/` if it doesn't exist
+5. **Download** — Use curl to download the image as `hero.jpg` or `figure-XX.jpg`
+6. **Verify** — Check that the file downloaded successfully (should be 100KB-1MB)
+7. **Reference in post** — Use relative path in frontmatter or import statement in MDX
+8. **Add attribution** — Include photographer credit in caption
+
+**Image quality guidelines:**
+- **Always credit photographers** — Use their name and link in captions
+- **Write meaningful alt text** — Describe what's in the image, not just "stock photo"
+- **Match the mood** — Choose images that fit the post's tone and topic
+- **Download high quality** — Use `?q=90` for JPEG quality
+- **Let Astro optimize** — Imported images get automatic AVIF/WebP conversion and responsive srcsets
 
 ### Search Query Tips
 
