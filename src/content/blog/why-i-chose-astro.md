@@ -5,8 +5,9 @@ pubDate: 2024-12-10
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "web development", "performance", "meta"]
 draft: false
-heroImage: ../../assets/blog/sample-hero.svg
-heroImageAlt: "Blog hero image"
+heroImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80"
+heroImageAlt: "Modern laptop workspace with coffee and notebook"
+heroImageCaption: "Building the perfect development environment — Photo by Unsplash"
 ---
 
 After years of building websites with various frameworks, I decided to rebuild my portfolio with Astro. Here's why.

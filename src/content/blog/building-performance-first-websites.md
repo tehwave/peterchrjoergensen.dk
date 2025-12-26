@@ -7,6 +7,9 @@ pubDate: 2024-12-20
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "performance", "web development", "optimization"]
 draft: false
+heroImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80"
+heroImageAlt: "Laptop with code editor open on a desk"
+heroImageCaption: "The modern developer's toolkit keeps expanding — Photo by Clément Hélardot"
 ---
 
 # Building Performance-First Websites
@@ -38,7 +41,7 @@ Unlike traditional frameworks, Astro ships zero JavaScript to the browser by def
 
 Astro's islands architecture lets you add interactivity only where needed:
 
-\`\`\`astro
+```astro
 ---
 import InteractiveWidget from '../components/InteractiveWidget.jsx';
 ---
@@ -47,7 +50,7 @@ import InteractiveWidget from '../components/InteractiveWidget.jsx';
   <h1>Mostly Static Page</h1>
   <InteractiveWidget client:visible />
 </div>
-\`\`\`
+```
 
 The `client:visible` directive means the component only hydrates when it enters the viewport.
 
@@ -55,7 +58,7 @@ The `client:visible` directive means the component only hydrates when it enters 
 
 Astro's built-in image optimization is fantastic:
 
-\`\`\`astro
+```astro
 ---
 import { Image } from 'astro:assets';
 import hero from '../assets/hero.jpg';
@@ -69,7 +72,7 @@ import hero from '../assets/hero.jpg';
   loading="lazy"
   decoding="async"
 />
-\`\`\`
+```
 
 This automatically:
 - Generates optimized formats (WebP, AVIF)
@@ -83,6 +86,9 @@ After migrating my portfolio to Astro, I saw:
 - **90% reduction** in JavaScript bundle size
 - **Lighthouse scores** all above 95
 - **LCP improved** from 4.2s to 1.1s
+
+![Developer workspace with multiple monitors showing code](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80)
+*A well-optimized development environment helps you build faster websites — Photo by Clément Hélardot on Unsplash*
 
 ## Best Practices
 

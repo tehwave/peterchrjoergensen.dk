@@ -14,8 +14,9 @@ pubDate: 2024-12-15
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "content", "typescript", "tutorial"]
 draft: false
-heroImage: ../../assets/blog/sample-hero.svg
-heroImageAlt: "Blog hero image"
+heroImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80"
+heroImageAlt: "Developer working on code with multiple screens"
+heroImageCaption: "Organizing content at scale — Photo by Clément Hélardot"
 ---
 
 Content Collections are one of Astro's most powerful features, providing type-safe content management for your static site.

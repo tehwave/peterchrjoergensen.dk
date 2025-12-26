@@ -1,19 +1,17 @@
 ---
 /**
- * Blog Index Page
+ * Blog Index Page — "The Journal"
  *
- * Displays a grid of all published blog posts with preview cards.
- * Each card shows:
- * - Hero image (if available)
- * - Title and publication date
- * - Tags for categorization
- * - Post description/excerpt
+ * Newspaper-style blog listing with minimal design:
+ * - Single-column centered layout
+ * - Date + reading time, title, description, tags
+ * - Horizontal dividers between posts
+ * - No hero images (kept for individual post pages only)
  *
  * Posts are sorted by publication date (newest first).
  */
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
-import { Picture } from "astro:assets";
 import AnimateOnScroll from "../../components/AnimateOnScroll.astro";
 
 type Props = Record<string, never>;
@@ -26,109 +24,119 @@ const sortedPosts = posts.sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
+// Calculate reading time from post body
+function getReadingTime(post: (typeof sortedPosts)[0]): number {
+	const wordsPerMinute = 200;
+	const words = (post.body ?? "").split(/\s+/).filter(Boolean).length;
+	return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+
+// Prepare posts with reading time
+const postsWithReadingTime = sortedPosts.map((post) => ({
+	...post,
+	readingTime: getReadingTime(post),
+}));
+
 // SEO metadata
-const title = "Blog";
-const description = "Articles, thoughts, and updates from my work";
+const title = "The Journal";
+const description = "Thoughts on craft, technology, and the spaces between";
 
 // Custom view transition: fade out down → fade in up
 const customFadeAnimation = {
-  forwards: {
-    old: [
-      {
-        name: "fadeOutDown",
-        duration: "0.3s",
-        easing: "ease-in",
-        fillMode: "forwards",
-      },
-    ],
-    new: [
-      {
-        name: "fadeInUp",
-        duration: "0.4s",
-        easing: "ease-out",
-        fillMode: "backwards",
-        delay: "0.3s",
-      },
-    ],
-  },
-  backwards: {
-    old: [
-      {
-        name: "fadeOutDown",
-        duration: "0.3s",
-        easing: "ease-in",
-        fillMode: "forwards",
-      },
-    ],
-    new: [
-      {
-        name: "fadeInUp",
-        duration: "0.4s",
-        easing: "ease-out",
-        fillMode: "backwards",
-        delay: "0.3s",
-      },
-    ],
-  },
+	forwards: {
+		old: [
+			{
+				name: "fadeOutDown",
+				duration: "0.3s",
+				easing: "ease-in",
+				fillMode: "forwards",
+			},
+		],
+		new: [
+			{
+				name: "fadeInUp",
+				duration: "0.4s",
+				easing: "ease-out",
+				fillMode: "backwards",
+				delay: "0.3s",
+			},
+		],
+	},
+	backwards: {
+		old: [
+			{
+				name: "fadeOutDown",
+				duration: "0.3s",
+				easing: "ease-in",
+				fillMode: "forwards",
+			},
+		],
+		new: [
+			{
+				name: "fadeInUp",
+				duration: "0.4s",
+				easing: "ease-out",
+				fillMode: "backwards",
+				delay: "0.3s",
+			},
+		],
+	},
 };
 ---
 
 <Layout title={title} description={description}>
-	<main class="blog-index" transition:animate={customFadeAnimation}>
-		<header class="blog-index__header">
-			<h1 class="blog-index__title">Blog</h1>
-			<p class="blog-index__description">{description}</p>
-		</header>
+	<main class="journal" transition:animate={customFadeAnimation}>
+		<div class="journal__container">
+			<header class="journal__header">
+				<div class="journal__header-left">
+					<span class="journal__label">WRITING</span>
+					<h1 class="journal__title">The Journal</h1>
+				</div>
+				<p class="journal__tagline">{description}</p>
+			</header>
 
-		{
-			sortedPosts.length === 0 ? (
-				<p class="blog-index__no-posts">No posts yet. Check back soon!</p>
-			) : (
-				<div class="blog-index__grid">
-					{sortedPosts.map((post, index) => (
-						<AnimateOnScroll animation="fade-up" delay={index * 100}>
-							<article class="post-card">
-								<a href={`/blog/${post.id}`} class="post-card__link">
-									{post.data.heroImage && (
-										<div class="post-card__image">
-											<Picture
-												src={post.data.heroImage}
-												formats={["avif", "webp"]}
-												alt={post.data.heroImageAlt || post.data.title}
-												widths={[400, 600, 800]}
-												sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-												loading={index < 3 ? "eager" : "lazy"}
-												class="post-card__img"
-											/>
+			{
+				postsWithReadingTime.length === 0 ? (
+					<p class="journal__empty">No posts yet. Check back soon!</p>
+				) : (
+					<div class="journal__list">
+						{postsWithReadingTime.map((post, index) => (
+							<AnimateOnScroll animation="fade-up" delay={index * 80}>
+								<article class="post">
+									<div class="post__meta">
+										<time datetime={post.data.pubDate.toISOString()}>
+											{post.data.pubDate.toLocaleDateString("en-US", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</time>
+										<span class="post__separator" aria-hidden="true" />
+										<span class="post__reading-time">
+											{post.readingTime} min read
+										</span>
+									</div>
+
+									<a href={`/blog/${post.id}`} class="post__link">
+										<h2 class="post__title">{post.data.title}</h2>
+									</a>
+
+									<p class="post__description">{post.data.description}</p>
+
+									{post.data.tags && post.data.tags.length > 0 && (
+										<div class="post__tags">
+											{post.data.tags.map((tag) => (
+												<span class="post__tag">{tag}</span>
+											))}
 										</div>
 									)}
-									<div class="post-card__content">
-										<h2 class="post-card__title">{post.data.title}</h2>
-										<p class="post-card__meta">
-											<time datetime={post.data.pubDate.toISOString()}>
-												{post.data.pubDate.toLocaleDateString("en-US", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-												})}
-											</time>
-										</p>
-										{post.data.tags && post.data.tags.length > 0 && (
-											<div class="post-card__tags">
-												{post.data.tags.map((tag) => (
-													<span class="post-card__tag">{tag}</span>
-												))}
-											</div>
-										)}
-										<p class="post-card__description">{post.data.description}</p>
-									</div>
-								</a>
-							</article>
-						</AnimateOnScroll>
-					))}
-				</div>
-			)
-		}
+								</article>
+							</AnimateOnScroll>
+						))}
+					</div>
+				)
+			}
+		</div>
 	</main>
 </Layout>
 
@@ -136,8 +144,8 @@ const customFadeAnimation = {
 	@use "../../styles/variables" as *;
 	@use "../../styles/mixins" as *;
 
-	.blog-index {
-		@include container;
+	.journal {
+		position: relative;
 		padding: $space-4xl $space-xl;
 		padding-top: calc($space-4xl + 100px);
 
@@ -146,136 +154,161 @@ const customFadeAnimation = {
 			padding-top: calc($space-3xl + 80px);
 		}
 
+		&__container {
+			position: relative;
+			z-index: 1;
+			max-width: $max-width;
+			margin: 0 auto;
+		}
+
 		&__header {
-			text-align: center;
+			display: grid;
+			grid-template-columns: 1fr 1.5fr;
+			gap: $space-4xl;
 			margin-bottom: $space-3xl;
+			padding-bottom: $space-2xl;
+			border-bottom: 1px solid $color-border;
+
+			@include respond-to(lg) {
+				grid-template-columns: 1fr;
+				gap: $space-xl;
+			}
+		}
+
+		&__header-left {
+			display: flex;
+			flex-direction: column;
+			gap: $space-md;
+		}
+
+		&__label {
+			color: $color-orange;
+			font-size: $font-size-sm;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
 		}
 
 		&__title {
-			@include section-heading;
+			font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+			font-weight: $font-weight-bold;
 			color: $color-text-dark;
-			margin-bottom: $space-md;
+			line-height: $leading-tight;
 		}
 
-		&__description {
+		&__tagline {
 			font-size: $font-size-lg;
 			color: $color-text-muted;
 			line-height: $leading-relaxed;
+			align-self: center;
+
+			@include respond-to(lg) {
+				align-self: flex-start;
+			}
 		}
 
-		&__no-posts {
+		&__empty {
 			text-align: center;
 			font-size: $font-size-lg;
 			color: $color-text-muted;
 			padding: $space-3xl 0;
 		}
 
-		&__grid {
+		&__list {
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 			gap: $space-2xl;
 
-			@include respond-to(lg) {
-				grid-template-columns: repeat(3, 1fr);
-			}
-
 			@include respond-to(md) {
-				grid-template-columns: repeat(2, 1fr);
-				gap: $space-xl;
-			}
-
-			@include respond-to(sm) {
 				grid-template-columns: 1fr;
+				gap: $space-xl;
 			}
 		}
 	}
 
-	.post-card {
-		background: $color-white;
+	.post {
+		padding: $space-xl;
+		background: $color-bg-alt;
 		border-radius: 12px;
-		overflow: hidden;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		transition: transform var(--duration-normal) var(--ease-out),
-			box-shadow var(--duration-normal) var(--ease-out);
+		border: 1px solid $color-border;
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		@include transition(box-shadow, border-color);
 
 		&:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+			border-color: $color-orange;
+			box-shadow: 0 4px 20px $color-shadow;
+		}
+
+		&__meta {
+			display: flex;
+			align-items: center;
+			gap: $space-sm;
+			font-size: $font-size-sm;
+			color: $color-text-muted;
+			margin-bottom: $space-md;
+
+			time {
+				color: $color-text-muted;
+			}
+		}
+
+		&__separator {
+			display: inline-block;
+			width: 3px;
+			height: 3px;
+			border-radius: 50%;
+			background: $color-text-muted;
+		}
+
+		&__reading-time {
+			color: $color-text-muted;
 		}
 
 		&__link {
 			text-decoration: none;
-			color: inherit;
-			display: flex;
-			flex-direction: column;
-			height: 100%;
-		}
-
-		&__image {
-			aspect-ratio: 2 / 1;
-			overflow: hidden;
-			background: $color-cream;
-		}
-
-		&__img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		&__content {
-			padding: $space-xl;
-			display: flex;
-			flex-direction: column;
-			flex-grow: 1;
+			display: block;
 		}
 
 		&__title {
 			font-size: $font-size-xl;
 			font-weight: $font-weight-semibold;
 			color: $color-text-dark;
+			line-height: $leading-snug;
 			margin-bottom: $space-sm;
-			line-height: $leading-tight;
-			transition: color var(--duration-fast) var(--ease-out);
+			@include transition(color);
 
-			.post-card:hover & {
+			&:hover {
 				color: $color-orange;
 			}
 		}
 
-		&__meta {
-			font-size: $font-size-sm;
+		&__description {
+			font-size: $font-size-base;
 			color: $color-text-muted;
+			line-height: $leading-relaxed;
 			margin-bottom: $space-md;
-			display: flex;
-			align-items: center;
-			gap: $space-md;
+			flex-grow: 1;
 		}
 
 		&__tags {
 			display: flex;
 			gap: $space-sm;
 			flex-wrap: wrap;
-			margin-bottom: $space-md;
+			margin-top: auto;
 		}
 
 		&__tag {
 			display: inline-block;
 			padding: $space-xs $space-sm;
-			background: $color-cream;
-			color: $color-text-dark;
-			border-radius: 16px;
+			background: rgba($color-orange, 0.1);
+			color: $color-orange;
 			font-size: $font-size-xs;
 			font-weight: $font-weight-medium;
-		}
-
-		&__description {
-			color: $color-text-muted;
-			line-height: $leading-relaxed;
-			flex-grow: 1;
+			text-transform: lowercase;
+			letter-spacing: $tracking-wide;
+			border-radius: 4px;
 		}
 	}
 </style>

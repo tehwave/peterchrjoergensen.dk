@@ -31,6 +31,7 @@ const blog = defineCollection({
 			// Image handling with Astro's built-in optimization
 			heroImage: image().optional(), // Optimized automatically (WebP, AVIF, responsive)
 			heroImageAlt: z.string().optional(), // Alt text for accessibility
+			heroImageCaption: z.string().optional(), // Caption displayed below hero image
 		}),
 });
 
