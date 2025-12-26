@@ -9,6 +9,7 @@ import websiteImg from "../assets/projects/website.png";
 import odensegolfklubImg from "../assets/projects/odensegolfklub.png";
 import westernImg from "../assets/projects/western.jpg";
 import mordombordImg from "../assets/projects/mordombord.png";
+import torpedoTrumpImg from "../assets/projects/torpedo-trump.png";
 
 // Client projects
 import kirppuImg from "../assets/projects/kirppu.png";
@@ -57,7 +58,7 @@ export const projects: Project[] = [
     description:
       "The home of a game jam community I've run since 2013. Built with Laravel — over 50 jams hosted and thousands of games submitted.",
     alt: "Screenshot of gm48.net game jam website homepage",
-    tags: ["Laravel", "PHP", "Community"],
+    tags: ["Laravel", "PHP", "MySQL"],
     image: gm48Img,
     link: "https://gm48.net",
     category: "web",
@@ -79,7 +80,7 @@ export const projects: Project[] = [
     description:
       "Tech lead for Denmark's leading car sales platform. Full-stack development across WordPress and Laravel.",
     alt: "Screenshot of Solgt.com car sales platform homepage",
-    tags: ["Laravel", "WordPress", "E-commerce"],
+    tags: ["Laravel", "WordPress", "WooCommerce"],
     image: solgtImg,
     link: "https://solgt.com",
     category: "web",
@@ -89,7 +90,7 @@ export const projects: Project[] = [
     description:
       "Senior web developer and tech lead for a luxury vacation rental company. Full-stack WordPress and Laravel.",
     alt: "Screenshot of VillaVilla luxury vacation rental website",
-    tags: ["Laravel", "WordPress", "E-commerce"],
+    tags: ["Laravel", "WordPress", "WooCommerce"],
     image: villavillaImg,
     link: "https://villavilla.dk",
     category: "web",
@@ -99,7 +100,7 @@ export const projects: Project[] = [
     description:
       "Built the Laravel CRM and quote system that now supports this multi-million lawn care business.",
     alt: "Screenshot of DM Greenkeeping lawn care service website",
-    tags: ["Laravel", "CRM", "E-commerce"],
+    tags: ["Laravel", "CRM", "MySQL"],
     image: dmgreenkeepingImg,
     link: "https://dmgreenkeeping.dk",
     category: "web",
@@ -109,7 +110,7 @@ export const projects: Project[] = [
     description:
       "Learning CMS platform with WordPress frontend and Laravel backend. Denmark's largest video education portal.",
     alt: "Screenshot of Restudy video education platform",
-    tags: ["Laravel", "WordPress", "Education"],
+    tags: ["Laravel", "WordPress", "API Integration"],
     image: restudyImg,
     link: "https://restudy.dk",
     category: "web",
@@ -119,7 +120,7 @@ export const projects: Project[] = [
     description:
       "Denmark's largest secondhand chain. AI-powered image analysis for product categorization.",
     alt: "Screenshot of Kirppu secondhand marketplace website",
-    tags: ["WordPress", "AI", "E-commerce"],
+    tags: ["WordPress", "AI", "WooCommerce"],
     image: kirppuImg,
     link: "https://kirppu.dk",
     category: "web",
@@ -129,7 +130,7 @@ export const projects: Project[] = [
     description:
       "WordPress webshop with thousands of SKUs imported from Microsoft NAV. Denmark's largest ski outlet.",
     alt: "Screenshot of SkiOutlet ski equipment webshop",
-    tags: ["WordPress", "WooCommerce", "E-commerce"],
+    tags: ["WordPress", "WooCommerce", "API Integration"],
     image: skioutletImg,
     link: "https://skioutlet.nu",
     category: "web",
@@ -139,7 +140,7 @@ export const projects: Project[] = [
     description:
       "WordPress webshop for a traditional family butcher since 1939. Famous for their award-winning sausages.",
     alt: "Screenshot of Slagter Lampe butcher webshop",
-    tags: ["WordPress", "WooCommerce", "E-commerce"],
+    tags: ["WordPress", "WooCommerce", "PHP"],
     image: slagterlampeImg,
     link: "https://slagterlampe.dk",
     category: "web",
@@ -149,7 +150,7 @@ export const projects: Project[] = [
     description:
       "Laravel developer support for this B2B car trading platform operating in 12 European markets.",
     alt: "Screenshot of AutoProff B2B car trading platform",
-    tags: ["Laravel", "B2B", "Automotive"],
+    tags: ["Laravel", "API Integration", "MySQL"],
     image: autoproffImg,
     link: "https://www.autoproff.dk",
     category: "web",
@@ -159,7 +160,7 @@ export const projects: Project[] = [
     description:
       "WordPress website for a summer house builder with 37+ years of experience.",
     alt: "Screenshot of Planet Huse summer house builder website",
-    tags: ["WordPress", "Construction"],
+    tags: ["WordPress", "PHP"],
     image: planetHuseImg,
     link: "https://planet-huse.dk",
     category: "web",
@@ -169,7 +170,7 @@ export const projects: Project[] = [
     description:
       "WordPress website for modular tiny houses and garden rooms.",
     alt: "Screenshot of Planet Living tiny house website",
-    tags: ["WordPress", "Construction"],
+    tags: ["WordPress", "PHP"],
     image: planetLivingImg,
     link: "https://planet-living.dk",
     category: "web",
@@ -179,7 +180,7 @@ export const projects: Project[] = [
     description:
       "Drupal to WordPress migration for this Danish insurance company (formerly Sønderjysk Forsikring).",
     alt: "Screenshot of Forsia insurance company website",
-    tags: ["WordPress", "Migration", "Insurance"],
+    tags: ["WordPress", "Migration", "Drupal"],
     image: forsiaImg,
     link: "https://forsia.dk",
     category: "web",
@@ -189,7 +190,7 @@ export const projects: Project[] = [
     description:
       "WordPress maintenance and support for a major Danish car dealer with multiple locations.",
     alt: "Screenshot of Autocentralen car dealer website",
-    tags: ["WordPress", "Automotive"],
+    tags: ["WordPress", "PHP"],
     image: autocentralenImg,
     link: "https://www.autocentralen.com",
     category: "web",
@@ -199,7 +200,7 @@ export const projects: Project[] = [
     description:
       "WordPress support for a Swan-certified cleaning company with 700+ employees since 1987.",
     alt: "Screenshot of Renell cleaning company website",
-    tags: ["WordPress", "Facility Services"],
+    tags: ["WordPress", "PHP"],
     image: renellImg,
     link: "https://www.renell.dk",
     category: "web",
@@ -209,7 +210,7 @@ export const projects: Project[] = [
     description:
       "WordPress support for a 90-year-old premium flooring manufacturer targeting architects.",
     alt: "Screenshot of Hørning Floor parquet flooring website",
-    tags: ["WordPress", "Manufacturing"],
+    tags: ["WordPress", "PHP"],
     image: horningfloorImg,
     link: "https://www.horningfloor.dk",
     category: "web",
@@ -253,6 +254,16 @@ export const projects: Project[] = [
     alt: "Screenshot of Odense Golfklub mobile app showing 3D golf course",
     tags: ["Unity3D", "3D", "Mobile"],
     image: odensegolfklubImg,
+    category: "games",
+  },
+  {
+    title: "Torpedo Trump",
+    description:
+      "A satirical game jam entry that placed 3rd at EAL Game Jam 2016. Made as a political spoof.",
+    alt: "Screenshot of Torpedo Trump game showing glitchy presidential imagery",
+    tags: ["GameMaker", "Game Design"],
+    image: torpedoTrumpImg,
+    link: "https://tehwave.itch.io/torpedo-trump-make-america-great-again",
     category: "games",
   },
 ];
