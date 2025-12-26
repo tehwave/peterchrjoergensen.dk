@@ -16,13 +16,13 @@ import Figure from '../../components/Figure.astro';
 
 I rebuilt this site because the old one had expired. It was from 2021, and it no longer reflected what I'm capable of. It also didn't match what I care about: shipping less, building things that perform well, and keeping sites accessible.
 
-The workflow had become friction. Writing a post meant juggling Markdown files, manually checking metadata, and hoping nothing broke. I was shipping JavaScript for navigation and animations that never needed to be interactive. I wanted something modern that felt right to work with. Astro gave me that.
+The workflow had become friction. Nova was a big tool for a small problem, but I couldn't be bothered to build an admin system. Laravel needed a database because that's how it handles content through models and MVC. I was shipping heavy JavaScript (jQuery + Bootstrap) for things that didn't need to be interactive. I wanted something modern that felt right to work with. Astro gave me that.
 
 ## What was wrong with the old build
 
 The site looked fine. Maintaining it didn't.
 
-**Too much client JavaScript.** Navigation, animations, even simple lists hydrated by default. Debugging a layout shift meant sifting through bundles I didn't need.
+**Too much client JavaScript.** jQuery + Bootstrap shipped for everything. Navigation, animations, even simple lists. Debugging a layout shift meant sifting through bundles I didn't need.
 
 **Scattered design tokens.** Colors, spacing, and typography lived in different files. Small tweaks cascaded into a weekend of regression checking.
 
@@ -64,8 +64,6 @@ Astro sits in the JavaScript ecosystem, but the output is boring (in the best wa
 
 Having an Astro documentation MCP tool in my editor is a real workflow upgrade. When I'm writing a component and can query the docs directly, I stay in flow.
 
-Learning Astro from scratch was *fun*. I'd never touched it before this project. Coming in fresh meant I questioned patterns instead of copying them. The site that came out feels like mine, not something I adapted from a template.
-
 ## How I approached the rebuild
 
 I came into Astro completely new. I'd never touched it before this project. That meant I approached it with a learning mindset: try things, see what works, experiment.
@@ -74,7 +72,7 @@ AI helped a lot here. It was already an expert with Astro, so I could move fast 
 
 The blue hero card was the only thing that survived from the old design, and even that got a complete redesign with 3D perspective and parallax effects. Everything else evolved through experimentation.
 
-The source code is on GitHub. Take a look. I welcome feedback.
+The source code is on [GitHub](https://github.com/peterchrjoergensen/peterchrjoergensen.dk). Take a look. I welcome feedback.
 
 ## Performance after the switch
 
