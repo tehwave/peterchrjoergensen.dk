@@ -93,7 +93,12 @@ heroImageCaption: ""  # Optional — credit or context for the image
 4. **tags**: Lowercase, hyphenated if multi-word (`web-development`). Include the main technology and topic.
 5. **heroImage**: Relative path to local image (`../../assets/blog/post-slug/hero.jpg`). Optional.
 6. **heroImageAlt**: Mandatory if heroImage exists. Describe what's in the image for screen readers.
-7. **heroImageCaption**: Optional. Use for photo credits or context.
+7. **heroImageCaption**: Optional. Use for photo credits or context. **Watch for stray newlines** — keep multiline strings properly formatted.
+
+**Common frontmatter errors to avoid:**
+- Stray newlines in values (especially in URLs or names)
+- Missing closing quotes
+- Incorrect relative paths for images
 
 ## Blog Post Structure
 
@@ -261,10 +266,11 @@ Don't defend your draft. Improve it.
 4. **Find images** — Use #tool:unsplash/search_photos for hero and content images when appropriate
 5. **Download images** — Create directory structure and download all images locally with proper naming
 6. **Draft the frontmatter first** — Get the metadata right, including local hero image path
-7. **Write the content** — In Peter's voice, with proper structure and imported Figure components
+7. **Write the content** — In Peter's voice, with proper structure and imported Figure components (if using content images)
 8. **Fact-check ruthlessly** — Verify every claim, number, and experience against reality
 9. **Review** — Check technical accuracy, voice consistency, and frontmatter completeness
-10. **Expect revision** — The first draft is a proposal. Be ready to iterate based on feedback.
+10. **Verify no external image URLs** — All images must be local imports, never external URLs (especially Unsplash URLs)
+11. **Expect revision** — The first draft is a proposal. Be ready to iterate based on feedback.
 
 ## File Format & Location
 
@@ -276,7 +282,7 @@ MDX allows importing and using Astro components within blog posts, which is esse
 
 ### Required Import
 
-Every blog post should import the Figure component for images:
+**Import the Figure component only when using content images:**
 
 ```mdx
 ---
@@ -285,6 +291,8 @@ Every blog post should import the Figure component for images:
 
 import Figure from '../../components/Figure.astro';
 ```
+
+Posts with only a hero image don't need the import.
 
 ### Using the Figure Component
 
@@ -309,8 +317,13 @@ import myImage from '../../assets/blog/post-slug/figure-01.jpg';
 
 **Rules for images:**
 - `src` — **Must be an imported ImageMetadata object**, not a URL string
+  - ✅ Correct: `import hero from '../../assets/blog/post-slug/hero.jpg';` then `<Figure src={hero} ... />`
+  - ❌ Wrong: `<Figure src="https://images.unsplash.com/..." ... />`
+  - ❌ Wrong: `<Figure src="../../assets/blog/post-slug/hero.jpg" ... />` (string path, not import)
 - `alt` — **Required**. Describe what's in the image for screen readers
 - `caption` — Optional. Use for photo credits ("Photo by X on Unsplash") or context
+
+**Critical: External URLs break Astro optimization.** If you catch yourself using a URL string in `src`, stop and download the image locally first.
 
 ## Using Unsplash for Images
 
