@@ -1,0 +1,134 @@
+---
+title: "Why I Rebuilt My Site with Astro (and What Changed)"
+description: "I tore down my old portfolio and rebuilt it in Astro to cut JavaScript, simplify content, and keep performance honest."
+pubDate: 2025-12-26
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "portfolio", "performance", "dx"]
+heroImage: "https://images.unsplash.com/photo-1537183673931-f890242dbaef?w=1600&q=80"
+heroImageAlt: "Space Gray laptop showing Mars against a starry night sky, lit by a desk lamp"
+heroImageCaption: "Photo by [Andras Vas](https://unsplash.com/@andrasvasas) on [Unsplash](https://unsplash.com/photos/a-photo-of-mars-on-a-space-gray-macbook-pro-screen-Fzffxyt4ACM)"
+---
+
+import Figure from '../../components/Figure.astro';
+
+## The decision to start over
+
+I rebuilt this site because the old one had expired. It was from 2021, and it no longer reflected what I'm capable of. It also didn't match what I care about: shipping less, building things that perform well, and keeping sites accessible.
+
+The workflow had become friction. Writing a post meant juggling Markdown files, manually checking metadata, and hoping nothing broke. I was shipping JavaScript for navigation and animations that never needed to be interactive. I wanted something modern that felt right to work with. Astro gave me that.
+
+## What was wrong with the old build
+
+The site looked fine. Maintaining it didn't.
+
+**Too much client JavaScript.** Navigation, animations, even simple lists hydrated by default. Debugging a layout shift meant sifting through bundles I didn't need.
+
+**Scattered design tokens.** Colors, spacing, and typography lived in different files. Small tweaks cascaded into a weekend of regression checking.
+
+**Publishing friction.** Drafting a post meant juggling Markdown, image handling, and manual metadata checks. Miss one field and previews broke.
+
+**Deploy anxiety.** I handle production incidents when things break at work. I don't want that energy for a personal site.
+
+## What the previous stack looked like
+
+The old site was from 2021, and it was very deliberately a “proof” site. At the time I wanted the repo itself to communicate: I can ship real Laravel.
+
+It was Laravel 5.8 with the full production setup: Nova admin, MySQL, Redis, Forge deployment scripts, Laravel Mix bundling, FPM config caching. Classic full-stack PHP. Blade + jQuery + Bootstrap for the frontend.
+
+That stack wasn't wrong. It showed I could build and operate a real Laravel app. But in 2025, the job changed. I don't need database migrations and queue workers for a portfolio. I need a fast, low-maintenance place to write and showcase projects.
+
+## Why Astro
+
+I didn't come to Astro through careful evaluation. I found https://justfuckinguseastro.com/, which is blunt and annoyingly correct.
+
+The argument is simple: if you're building a content site and defaulting to an SPA, you're optimizing for developer convenience over user experience. A website should behave like a website. HTML first. JavaScript only where it earns its keep.
+
+That aligned with something I care about: **shipping less matters for climate impact**. Smaller payloads mean less energy transferring, parsing, and executing code. It's small on one site, but defaults matter. If I'm building portfolios or content sites, I want the lightest option that works.
+
+Once I started prototyping, Astro fit how I wanted to build:
+
+**Zero JavaScript by default.** Anything interactive has to justify itself with a `client:` directive. That keeps the baseline honest.
+
+**Content Collections with Zod validation.** Type-checked frontmatter means missing fields get caught at build time, not production.
+
+**Scoped components with SASS tokens.** The design system lives in one place. Less drift, fewer surprises.
+
+**Static output to Cloudflare Pages.** No servers to babysit. No cold starts.
+
+There was also a practical accelerant: AI help works well here.
+
+Astro sits in the JavaScript ecosystem, but the output is boring (in the best way): HTML + CSS with clearly scoped components. That makes it easy to ask an AI for changes and get back something I can review quickly.
+
+Having an Astro documentation MCP tool in my editor is a real workflow upgrade. When I'm writing a component and can query the docs directly, I stay in flow.
+
+Learning Astro from scratch was *fun*. I'd never touched it before this project. Coming in fresh meant I questioned patterns instead of copying them. The site that came out feels like mine, not something I adapted from a template.
+
+## How I approached the rebuild
+
+I treated this like a small product launch with tight scope:
+
+1. **Freeze content.** List what matters: homepage, blog index, post template, projects grid.
+2. **Define tokens first.** Colors, spacing, and typography went into SASS variables and mixins before building any layouts.
+3. **Build the layout shell.** Header, footer, and layout components in Astro with zero client code. Slots everywhere.
+4. **Move content into collections.** All posts now live in `src/content/blog/` with schema validation. Missing fields get caught at build time.
+5. **Hydrate intentionally.** The only hydrated component at launch was a scroll animation. Everything else stayed server-rendered HTML.
+
+## Patterns that stuck
+
+**Typed content fetching.** Content Collections give you type-safe data at build time:
+
+```astro
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+---
+
+<Layout title="Blog">
+  <section>
+    {posts.map(({ id, data }) => (
+      <article>
+        <h2>{data.title}</h2>
+        <p>{data.description}</p>
+      </article>
+    ))}
+  </section>
+</Layout>
+```
+
+**Design tokens everywhere.** Every component imports `_variables.scss` and `_mixins.scss`. Consistency beats cleverness.
+
+**Islands only when they earn it.** If a component doesn't improve after hydration, it stays static.
+
+**SCSS over utility classes.** I like explicit class names and small, scoped files. It keeps refactors calm.
+
+## Performance after the switch
+
+I don't chase Lighthouse scores, but the delta was obvious:
+
+The homepage ships almost no JavaScript. Only the scroll animation hydrates. Everything else is static HTML and CSS.
+
+LCP stays under a second without hero-image gymnastics. CLS is effectively zero because nothing waits on client scripts to settle.
+
+Lighthouse landed in the high 90s without tweaking. Better: it stays there between deploys because the baseline is static.
+
+## Content workflow now
+
+Publishing feels lightweight now:
+
+**Frontmatter is enforced.** The content collection schema catches missing fields at build time.
+
+**Images stay consistent.** When I need a visual, I use the `<Figure />` component with proper alt text. No ad-hoc Markdown syntax.
+
+**MDX for flexibility.** I can embed components when I need them (demos, diagrams) without reaching for a full SPA.
+
+## What I learned
+
+Rebuilding this site wasn't about chasing a new framework. It was about aligning what I ship with what I care about: performance, simplicity, and less code.
+
+The old Laravel stack did its job in 2021. It showed I could build and operate a real web app. But four years later, the job changed. I needed a portfolio that was fast, maintainable, and didn't fight me when I wanted to write.
+
+Astro gave me that. Zero JavaScript by default. Type-checked content. Scoped styles that don't leak. Static output that deploys cleanly.
+
+If your personal site feels heavier than it should, strip it back to HTML and see what actually needs to be interactive. You'll be surprised how little does. The result is easier to maintain, faster for visitors, and lighter on the planet.
