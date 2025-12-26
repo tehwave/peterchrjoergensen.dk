@@ -37,26 +37,8 @@ const { src, alt, caption } = Astro.props;
   {caption && <figcaption set:html={parseInlineMarkdown(caption)} />}
 </figure>
 
-<style lang="scss">
-  @use "../styles/variables" as *;
-  @use "../styles/mixins" as *;
-
-  figure {
-    margin: 0;
-  }
-
-  img {
-    width: 100%;
-    height: auto;
-    display: block;
+<style>
+  figure img {
     margin-bottom: 0 !important;
-  }
-
-  figcaption {
-    margin-top: $space-md;
-    font-size: $font-size-sm;
-    color: $color-text-muted;
-    text-align: center;
-    font-style: italic;
   }
 </style>

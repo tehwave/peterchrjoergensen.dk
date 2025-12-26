@@ -470,6 +470,11 @@ const structuredData = {
     width: 100%;
     max-width: 1600px;
     margin: 0 auto;
+    padding: 0 $space-xl;
+
+    @include respond-to(md) {
+      padding: 0 $space-lg;
+    }
   }
 
   .blog-post__hero {
@@ -611,6 +616,7 @@ const structuredData = {
       font-size: 0.9em;
       font-family: ui-monospace, "Courier New", monospace;
       color: $color-text-primary;
+      font-weight: 600;
     }
 
     :global(pre) {
@@ -649,22 +655,33 @@ const structuredData = {
     :global(img),
     :global(figure) {
       max-width: 120ch;
-      width: calc(100% + 20rem);
-      margin-inline: -10rem;
       margin-block: $space-3xl;
-      border-radius: 24px;
 
-      @include respond-to(md) {
+      @media (min-width: 1600px) {
+        width: calc(100% + 16rem);
+        margin-inline: -8rem;
+      }
+
+      @media (min-width: 1200px) and (max-width: 1599px) {
+        width: calc(100% + 8rem);
+        margin-inline: -4rem;
+      }
+
+      @include respond-to(lg) {
         width: 100%;
         margin-inline: 0;
         margin-block: $space-2xl;
-        border-radius: 16px;
       }
     }
 
     :global(img) {
       height: auto;
       display: block;
+      border-radius: 24px;
+
+      @include respond-to(md) {
+        border-radius: 16px;
+      }
     }
 
     :global(figcaption) {

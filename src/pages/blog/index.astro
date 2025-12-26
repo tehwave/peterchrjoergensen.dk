@@ -112,7 +112,7 @@ const collectionSchema = {
         ) : (
           <div class="journal__list">
             {postsWithReadingTime.map((post, index) => (
-              <AnimateOnScroll animation="fade-up" delay={index * 0.08}>
+              <AnimateOnScroll animation="fade-up">
                 <BlogPostCard
                   title={post.data.title}
                   description={post.data.description}

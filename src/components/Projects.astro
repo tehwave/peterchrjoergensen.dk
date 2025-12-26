@@ -66,7 +66,7 @@ const categories = [
       {
         randomizedProjects.map((project, index) => (
           <div class:list={["projects__item"]} data-category={project.category}>
-            <AnimateOnScroll delay={index * 0.1}>
+            <AnimateOnScroll>
               <ProjectCard
                 title={project.title}
                 description={project.description}
@@ -247,6 +247,7 @@ const categories = [
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: $space-xl;
+      align-items: stretch;
 
       @include respond-to(lg) {
         grid-template-columns: repeat(2, 1fr);
@@ -259,6 +260,7 @@ const categories = [
     }
 
     &__item {
+      display: flex;
       transition:
         opacity 0.3s ease,
         transform 0.3s ease;
