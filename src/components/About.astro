@@ -12,14 +12,25 @@ import AnimateOnScroll from "./AnimateOnScroll.astro";
 type Props = Record<string, never>;
 
 const skills = [
+  "Astro",
   "Laravel",
   "WordPress",
   "Unity",
   "Vue.js",
   "PHP",
   "JavaScript",
-  "C#",
   "TypeScript",
+  "C#",
+  "SCSS",
+  "MySQL",
+  "WooCommerce",
+  "GameMaker",
+  "VR",
+  "Bootstrap",
+  "jQuery",
+  "AWS",
+  "Cloudflare",
+  "Redis",
 ];
 ---
 
@@ -64,7 +75,7 @@ const skills = [
         <div class="about__skills">
           {
             skills.map((skill, index) => (
-              <AnimateOnScroll delay={index * 0.08}>
+              <AnimateOnScroll>
                 <SkillTag label={skill} />
               </AnimateOnScroll>
             ))
