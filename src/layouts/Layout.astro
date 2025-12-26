@@ -17,7 +17,7 @@ import Footer from "../components/Footer.astro";
 
 // Generate optimized texture images at build time
 const textureWebP = await getImage({ src: textureSource, format: "webp" });
-const textureFallback = await getImage({ src: textureSource });
+const textureFallback = await getImage({ src: textureSource, format: "png" });
 
 interface Props {
   title: string;
@@ -173,8 +173,8 @@ const socialImageURL = new URL(image, Astro.site);
   <body>
     <style
       define:vars={{
-        "texture-webp": textureWebP.src,
-        "texture-fallback": textureFallback.src,
+        "texture-webp": `url(${textureWebP.src})`,
+        "texture-fallback": `url(${textureFallback.src})`,
       }}
     ></style>
     <!-- 

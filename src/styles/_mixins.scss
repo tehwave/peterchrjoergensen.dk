@@ -88,8 +88,8 @@
     position: absolute;
     inset: 0;
     background-image: image-set(
-      url(var(--texture-webp)) type("image/webp"),
-      url(var(--texture-fallback)) 1x
+      var(--texture-webp) type("image/webp"),
+      var(--texture-fallback) type("image/png")
     );
     background-repeat: repeat;
     opacity: $opacity;
