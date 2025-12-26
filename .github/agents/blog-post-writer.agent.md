@@ -107,6 +107,9 @@ Reference Peter's real work when relevant:
 - **This portfolio site** — Built with Astro, AI-assisted
 - **VR optimization** — Experience optimizing for mobile VR
 - **Laravel/WordPress** — Backend experience
+- **Agency leadership** — Leading a team, mentoring, hiring/firing, running delivery in a client environment
+- **Incidents & reliability** — The “when things break” stories: diagnosing, communicating, recovering, preventing repeats
+- **Performance work** — Profiling, budgets, caching/CDN, trade-offs that actually move metrics
 
 ### Technical Accuracy
 
