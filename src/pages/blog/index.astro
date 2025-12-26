@@ -1,0 +1,239 @@
+---
+/**
+ * Blog Index Page
+ *
+ * Displays a grid of all published blog posts with preview cards.
+ * Each card shows:
+ * - Hero image (if available)
+ * - Title and publication date
+ * - Tags for categorization
+ * - Post description/excerpt
+ *
+ * Posts are sorted by publication date (newest first).
+ */
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { Picture } from "astro:assets";
+import AnimateOnScroll from "../../components/AnimateOnScroll.astro";
+
+type Props = Record<string, never>;
+
+// Fetch all blog posts from the content collection
+const posts = await getCollection("blog");
+
+// Sort posts by publication date, newest first
+const sortedPosts = posts.sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// SEO metadata
+const title = "Blog";
+const description = "Articles, thoughts, and updates from my work";
+---
+
+<Layout title={title} description={description}>
+	<main class="blog-index">
+		<header class="blog-index__header">
+			<h1 class="blog-index__title">Blog</h1>
+			<p class="blog-index__description">{description}</p>
+		</header>
+
+		{
+			sortedPosts.length === 0 ? (
+				<p class="blog-index__no-posts">No posts yet. Check back soon!</p>
+			) : (
+				<div class="blog-index__grid">
+					{sortedPosts.map((post, index) => (
+						<AnimateOnScroll animation="fade-up" delay={index * 100}>
+							<article class="post-card">
+								<a href={`/blog/${post.id}`} class="post-card__link">
+									{post.data.heroImage && (
+										<div class="post-card__image">
+											<Picture
+												src={post.data.heroImage}
+												formats={["avif", "webp"]}
+												alt={post.data.heroImageAlt || post.data.title}
+												widths={[400, 600, 800]}
+												sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+												loading={index < 3 ? "eager" : "lazy"}
+												class="post-card__img"
+											/>
+										</div>
+									)}
+									<div class="post-card__content">
+										<h2 class="post-card__title">{post.data.title}</h2>
+										<p class="post-card__meta">
+											<time datetime={post.data.pubDate.toISOString()}>
+												{post.data.pubDate.toLocaleDateString("en-US", {
+													year: "numeric",
+													month: "long",
+													day: "numeric",
+												})}
+											</time>
+										</p>
+										{post.data.tags && post.data.tags.length > 0 && (
+											<div class="post-card__tags">
+												{post.data.tags.map((tag) => (
+													<span class="post-card__tag">{tag}</span>
+												))}
+											</div>
+										)}
+										<p class="post-card__description">{post.data.description}</p>
+									</div>
+								</a>
+							</article>
+						</AnimateOnScroll>
+					))}
+				</div>
+			)
+		}
+	</main>
+</Layout>
+
+<style lang="scss">
+	@use "../../styles/variables" as *;
+	@use "../../styles/mixins" as *;
+
+	.blog-index {
+		@include container;
+		padding: $space-4xl $space-xl;
+		padding-top: calc($space-4xl + 100px);
+
+		@include respond-to(md) {
+			padding: $space-3xl $space-lg;
+			padding-top: calc($space-3xl + 80px);
+		}
+
+		&__header {
+			text-align: center;
+			margin-bottom: $space-3xl;
+		}
+
+		&__title {
+			@include section-heading;
+			color: $color-text-dark;
+			margin-bottom: $space-md;
+		}
+
+		&__description {
+			font-size: $font-size-lg;
+			color: $color-text-muted;
+			line-height: $leading-relaxed;
+		}
+
+		&__no-posts {
+			text-align: center;
+			font-size: $font-size-lg;
+			color: $color-text-muted;
+			padding: $space-3xl 0;
+		}
+
+		&__grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			gap: $space-2xl;
+
+			@include respond-to(lg) {
+				grid-template-columns: repeat(3, 1fr);
+			}
+
+			@include respond-to(md) {
+				grid-template-columns: repeat(2, 1fr);
+				gap: $space-xl;
+			}
+
+			@include respond-to(sm) {
+				grid-template-columns: 1fr;
+			}
+		}
+	}
+
+	.post-card {
+		background: $color-white;
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		transition: transform var(--duration-normal) var(--ease-out),
+			box-shadow var(--duration-normal) var(--ease-out);
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+
+		&:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+		}
+
+		&__link {
+			text-decoration: none;
+			color: inherit;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		&__image {
+			aspect-ratio: 2 / 1;
+			overflow: hidden;
+			background: $color-cream;
+		}
+
+		&__img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		&__content {
+			padding: $space-xl;
+			display: flex;
+			flex-direction: column;
+			flex-grow: 1;
+		}
+
+		&__title {
+			font-size: $font-size-xl;
+			font-weight: $font-weight-semibold;
+			color: $color-text-dark;
+			margin-bottom: $space-sm;
+			line-height: $leading-tight;
+			transition: color var(--duration-fast) var(--ease-out);
+
+			.post-card:hover & {
+				color: $color-orange;
+			}
+		}
+
+		&__meta {
+			font-size: $font-size-sm;
+			color: $color-text-muted;
+			margin-bottom: $space-md;
+			display: flex;
+			align-items: center;
+			gap: $space-md;
+		}
+
+		&__tags {
+			display: flex;
+			gap: $space-sm;
+			flex-wrap: wrap;
+			margin-bottom: $space-md;
+		}
+
+		&__tag {
+			display: inline-block;
+			padding: $space-xs $space-sm;
+			background: $color-cream;
+			color: $color-text-dark;
+			border-radius: 16px;
+			font-size: $font-size-xs;
+			font-weight: $font-weight-medium;
+		}
+
+		&__description {
+			color: $color-text-muted;
+			line-height: $leading-relaxed;
+			flex-grow: 1;
+		}
+	}
+</style>

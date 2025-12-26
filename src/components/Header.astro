@@ -13,25 +13,37 @@ type Props = Record<string, never>;
   <div class="header__container">
     <a href="/" class="header__logo">Peter C. Jørgensen</a>
     <nav class="header__nav" aria-label="Main navigation">
-      <a href="#projects" class="header__nav-link">Projects</a>
-      <a href="#blog" class="header__nav-link">Blog</a>
-      <a href="#ai" class="header__nav-link">AI</a>
+      <a href="/#projects" class="header__nav-link">Projects</a>
+      <a href="/#blog" class="header__nav-link">Blog</a>
+      <a href="/#ai" class="header__nav-link">AI</a>
     </nav>
   </div>
 </header>
 
 <script>
   const header = document.querySelector(".header");
-  const hero = document.querySelector("#hero") as HTMLElement;
+  const hero = document.querySelector("#hero") as HTMLElement | null;
   const navLinks = document.querySelectorAll(".header__nav-link");
   const sections = document.querySelectorAll("section[id], footer[id]");
+
+  // Detect if we're on homepage (has hero) or other pages (blog, etc.)
+  const isHomepage = hero !== null;
 
   // State machine to prevent animation interruption when scrolling rapidly
   let wasScrolled = false;
   let isAnimatingOut = false;
 
   function updateActiveLink() {
-    if (!header || !hero) return;
+    if (!header) return;
+
+    // On non-homepage pages, show solid background immediately and skip scroll logic
+    if (!isHomepage) {
+      header.classList.add("scrolled");
+      return;
+    }
+
+    // Homepage-only scroll behavior (requires hero element)
+    if (!hero) return;
 
     const heroBottom = hero.offsetTop + hero.offsetHeight;
     const isScrolledPastHero = window.scrollY > heroBottom;
@@ -56,6 +68,7 @@ type Props = Record<string, never>;
 
     // Highlight nav link when section is 1/3 into viewport (feels more natural
     // than waiting until section hits the very top of the screen)
+    // Only works on homepage where sections exist
     let currentSection = "";
     const scrollPosition = window.scrollY + window.innerHeight / 3;
 
@@ -75,7 +88,8 @@ type Props = Record<string, never>;
     navLinks.forEach((link) => {
       link.classList.remove("active");
       const href = link.getAttribute("href");
-      if (href === `#${currentSection}`) {
+      // Match both #section and /#section formats
+      if (href === `#${currentSection}` || href === `/#${currentSection}`) {
         link.classList.add("active");
       }
     });

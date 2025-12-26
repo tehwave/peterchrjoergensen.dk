@@ -28,18 +28,20 @@ When you need to look up Astro APIs, patterns, or best practices, use the `searc
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (user is always running this - never start it)
 npm run dev
 
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build (only use when specifically testing with Chrome DevTools)
 npm run preview
 
 # Format code
 npx prettier --write .
 ```
+
+**Important:** NEVER run `npm run dev` - the user is always running it. NEVER run `npm run preview` or `killall node` commands unless specifically testing production builds with Chrome DevTools.
 
 ## Project Structure
 
@@ -286,4 +288,4 @@ Before committing, always:
 
 1. Run `npm run build` to ensure no build errors
 2. Run `npx prettier --check .` for formatting
-3. Test with `npm run preview` for production behavior
+3. For normal testing, use the running `npm run dev` server (no need to run `npm run preview`)

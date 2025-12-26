@@ -12,6 +12,8 @@ import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
 import { ViewTransitions } from "astro:transitions";
 import textureSource from "../assets/black-paper.png";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 
 // Generate optimized texture images at build time
 const textureWebP = await getImage({ src: textureSource, format: "webp" });
@@ -198,6 +200,8 @@ const socialImageURL = new URL(image, Astro.site);
       }
     </style>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
     <slot />
+    <Footer />
   </body>
 </html>
