@@ -1,16 +1,13 @@
 ---
 import { Picture } from "astro:assets";
-import authorImage from "../assets/projects/author.jpg";
+import authorImage from "../assets/author-bio.png";
 
-interface Props {
-  name: string;
-  bio: string;
-}
-
-const { name, bio } = Astro.props;
+const name = "Peter Chr. Jørgensen";
+const bio = "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
+const url = "https://peterchrjoergensen.dk";
 ---
 
-<section class="author-bio">
+<section class="author-bio" itemscope itemtype="https://schema.org/Person" itemid="https://peterchrjoergensen.dk/#person">
   <div class="author-bio__container">
     <Picture
       src={authorImage}
@@ -21,11 +18,12 @@ const { name, bio } = Astro.props;
       class="author-bio__image"
       loading="lazy"
       inferSize={true}
+      itemprop="image"
     />
     <div class="author-bio__content">
       <span class="author-bio__label">Written by</span>
-      <h3 class="author-bio__name">{name}</h3>
-      <p class="author-bio__text">{bio}</p>
+      <h3 class="author-bio__name" itemprop="name">{name}</h3>
+      <p class="author-bio__text" itemprop="description">{bio}</p>
     </div>
   </div>
 </section>
@@ -35,35 +33,37 @@ const { name, bio } = Astro.props;
   @use "../styles/mixins" as *;
 
   .author-bio {
+    padding-block: $space-3xl;
+    padding-inline: $space-xl;
     background: $color-cream;
     border-top: 1px solid $color-border;
-    padding: $space-3xl $space-xl;
 
     @include respond-to(md) {
-      padding: $space-2xl $space-lg;
+      padding-block: $space-2xl;
+      padding-inline: $space-lg;
     }
   }
 
   .author-bio__container {
-    max-width: $max-width-text;
-    margin: 0 auto;
     display: flex;
-    gap: $space-xl;
     align-items: flex-start;
+    gap: $space-xl;
+    max-width: $max-width-text;
+    margin-inline: auto;
 
     @include respond-to(md) {
       flex-direction: column;
       align-items: center;
-      text-align: center;
       gap: $space-lg;
+      text-align: center;
     }
   }
 
   .author-bio__image {
+    flex-shrink: 0;
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    flex-shrink: 0;
     object-fit: cover;
   }
 
@@ -73,25 +73,25 @@ const { name, bio } = Astro.props;
 
   .author-bio__label {
     display: block;
+    margin-bottom: $space-xs;
     font-size: $font-size-xs;
     font-weight: $font-weight-medium;
     color: $color-text-muted;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: $space-xs;
   }
 
   .author-bio__name {
+    margin-block: 0 $space-sm;
     font-size: $font-size-xl;
     font-weight: $font-weight-semibold;
     color: $color-text-primary;
-    margin: 0 0 $space-sm 0;
   }
 
   .author-bio__text {
-    font-size: $font-size-base;
-    color: $color-text-secondary;
-    line-height: 1.6;
     margin: 0;
+    font-size: $font-size-base;
+    line-height: 1.6;
+    color: $color-text-secondary;
   }
 </style>
