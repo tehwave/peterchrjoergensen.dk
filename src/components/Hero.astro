@@ -119,6 +119,7 @@ const roles = [
                 if (entry.isIntersecting) {
                   typedInstance.start();
                 } else {
+                  // Pause animation to save CPU when scrolled out of view
                   typedInstance.stop();
                 }
               }
@@ -236,6 +237,7 @@ const roles = [
       box-shadow 0.3s ease-out;
     will-change: transform;
 
+    // CLS prevention: Lock height on tiny screens where text must wrap
     @media (max-width: 479px) {
       max-height: 650px;
       overflow: visible;
@@ -325,6 +327,9 @@ const roles = [
       p {
         margin: 0 0 $space-sm 0;
         
+        // CLS prevention: On larger screens, force text to single line
+        // to prevent vertical shifts as role text changes length.
+        // Text can overflow horizontally over image column.
         @media (min-width: 480px) {
           white-space: nowrap;
           overflow: visible;
