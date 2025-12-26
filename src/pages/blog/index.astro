@@ -29,10 +29,52 @@ const sortedPosts = posts.sort(
 // SEO metadata
 const title = "Blog";
 const description = "Articles, thoughts, and updates from my work";
+
+// Custom view transition: fade out down → fade in up
+const customFadeAnimation = {
+  forwards: {
+    old: [
+      {
+        name: "fadeOutDown",
+        duration: "0.3s",
+        easing: "ease-in",
+        fillMode: "forwards",
+      },
+    ],
+    new: [
+      {
+        name: "fadeInUp",
+        duration: "0.4s",
+        easing: "ease-out",
+        fillMode: "backwards",
+        delay: "0.3s",
+      },
+    ],
+  },
+  backwards: {
+    old: [
+      {
+        name: "fadeOutDown",
+        duration: "0.3s",
+        easing: "ease-in",
+        fillMode: "forwards",
+      },
+    ],
+    new: [
+      {
+        name: "fadeInUp",
+        duration: "0.4s",
+        easing: "ease-out",
+        fillMode: "backwards",
+        delay: "0.3s",
+      },
+    ],
+  },
+};
 ---
 
 <Layout title={title} description={description}>
-	<main class="blog-index">
+	<main class="blog-index" transition:animate={customFadeAnimation}>
 		<header class="blog-index__header">
 			<h1 class="blog-index__title">Blog</h1>
 			<p class="blog-index__description">{description}</p>
