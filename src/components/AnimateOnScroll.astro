@@ -176,13 +176,25 @@ const {
     });
   }
 
+  // Store handler to prevent duplicates
+  let animateHandler: (() => void) | null = null;
+
+  const ensureAnimateHandler = () => {
+    if (animateHandler) {
+      document.removeEventListener("astro:page-load", animateHandler);
+    }
+    animateHandler = initAnimateOnScroll;
+    document.addEventListener("astro:page-load", animateHandler);
+  };
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initAnimateOnScroll);
+    document.addEventListener("DOMContentLoaded", () => {
+      initAnimateOnScroll();
+      ensureAnimateHandler();
+    });
   } else {
     initAnimateOnScroll();
+    ensureAnimateHandler();
   }
-
-  // Re-initialize on Astro page transitions (if View Transitions are added later)
-  document.addEventListener("astro:page-load", initAnimateOnScroll);
 </script>

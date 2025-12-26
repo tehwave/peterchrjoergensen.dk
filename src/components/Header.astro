@@ -109,19 +109,48 @@ type Props = Record<string, never>;
       updateActiveLink();
     }
 
-    // Cleanup function for view transitions
-    document.addEventListener("astro:before-preparation", () => {
+    // Return cleanup function
+    return () => {
       if (header) {
         window.removeEventListener("scroll", updateActiveLink);
       }
-    });
+    };
   }
 
-  // Run on initial page load
-  initHeader();
+  // Store handlers to prevent duplicates
+  let headerCleanup: (() => void) | null = null;
+  let headerInitHandler: (() => void) | null = null;
+  let headerCleanupHandler: (() => void) | null = null;
 
-  // Re-run after view transitions (SPA-like navigation)
-  document.addEventListener("astro:page-load", initHeader);
+  const ensureHeaderHandlers = () => {
+    // Remove existing
+    if (headerInitHandler) {
+      document.removeEventListener("astro:page-load", headerInitHandler);
+    }
+    if (headerCleanupHandler) {
+      document.removeEventListener("astro:before-preparation", headerCleanupHandler);
+    }
+
+    // Wrapper that manages cleanup
+    headerInitHandler = () => {
+      if (headerCleanup) headerCleanup();
+      headerCleanup = initHeader();
+    };
+
+    headerCleanupHandler = () => {
+      if (headerCleanup) {
+        headerCleanup();
+        headerCleanup = null;
+      }
+    };
+
+    document.addEventListener("astro:page-load", headerInitHandler);
+    document.addEventListener("astro:before-preparation", headerCleanupHandler);
+  };
+
+  // Run on initial page load
+  headerCleanup = initHeader();
+  ensureHeaderHandlers();
 </script>
 
 <style lang="scss">
@@ -286,9 +315,16 @@ type Props = Record<string, never>;
         }
       }
 
-      &.active::after {
-        width: 6px;
-        opacity: 1;
+      &.active {
+        text-decoration: underline;
+        text-decoration-color: $color-orange;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 6px;
+
+        &::after {
+          width: 6px;
+          opacity: 1;
+        }
       }
 
       @include respond-to(md) {

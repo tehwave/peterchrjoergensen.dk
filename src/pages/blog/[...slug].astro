@@ -123,6 +123,8 @@ const structuredData = {
       inLanguage: "en-US",
       wordCount: wordCount,
       keywords: tags?.join(", ") || "",
+      articleSection: tags?.[0] || "Blog",
+      articleBody: description,
       ...(heroImage && {
         image: {
           "@type": "ImageObject",
@@ -130,6 +132,7 @@ const structuredData = {
           width: heroImage.width,
           height: heroImage.height,
         },
+        thumbnailUrl: new URL(heroImage.src, Astro.site).toString(),
       }),
     },
     {
@@ -159,7 +162,7 @@ const structuredData = {
 };
 ---
 
-<Layout title={title} description={description}>
+<Layout title={`${title} | Peter Chr. Jørgensen`} description={description}>
   <Fragment slot="head">
     <!-- 
 			Social Media Meta Tags
@@ -611,7 +614,7 @@ const structuredData = {
     }
 
     :global(pre) {
-      background: #1e1e1e;
+      background: $color-code-bg;
       padding: $space-xl;
       border-radius: 16px;
       overflow-x: auto;
@@ -628,7 +631,7 @@ const structuredData = {
         background: none;
         padding: 0;
         border-radius: 0;
-        color: #d4d4d4;
+        color: $color-code-text;
         line-height: 1.6;
       }
     }

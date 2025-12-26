@@ -34,7 +34,7 @@ const roles = [
           <p>
             I'm <strong>Peter</strong> —{" "}
             <strong class="hero__role-wrapper">
-              <span id="typed-roles" aria-hidden="true"></span>
+              <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
@@ -59,8 +59,10 @@ const roles = [
 </div>
 
 <script>
-  // Store Typed instance for cleanup
+  // Store Typed instance and handlers for cleanup
   let typedInstance: any = null;
+  let startTypedAnimationHandler: (() => void) | null = null;
+  let cleanupTypedAnimationHandler: (() => void) | null = null;
 
   // Lazy-load typed.js when browser is idle for better performance
   const initTypedAnimation = async () => {
@@ -140,14 +142,28 @@ const roles = [
     }
   };
 
+  // Wrapper to prevent duplicates on view transitions
+  const ensureTypedHandlers = () => {
+    // Remove existing handlers if present
+    if (startTypedAnimationHandler) {
+      document.removeEventListener("astro:page-load", startTypedAnimationHandler);
+    }
+    if (cleanupTypedAnimationHandler) {
+      document.removeEventListener("astro:before-preparation", cleanupTypedAnimationHandler);
+    }
+
+    // Store handlers for later removal
+    startTypedAnimationHandler = startTypedAnimation;
+    cleanupTypedAnimationHandler = cleanupTypedAnimation;
+
+    // Re-register
+    document.addEventListener("astro:page-load", startTypedAnimationHandler);
+    document.addEventListener("astro:before-preparation", cleanupTypedAnimationHandler);
+  };
+
   // Run on initial page load
   startTypedAnimation();
-
-  // Re-initialize after view transitions
-  document.addEventListener("astro:page-load", startTypedAnimation);
-
-  // Cleanup before navigation
-  document.addEventListener("astro:before-preparation", cleanupTypedAnimation);
+  ensureTypedHandlers();
 </script>
 
 <style lang="scss">
@@ -589,9 +605,18 @@ const roles = [
     });
   }
 
+  // Store handler ref to prevent duplicates
+  let tiltHandler: (() => void) | null = null;
+
+  const ensureTiltHandler = () => {
+    if (tiltHandler) {
+      document.removeEventListener("astro:page-load", tiltHandler);
+    }
+    tiltHandler = initTiltEffect;
+    document.addEventListener("astro:page-load", tiltHandler);
+  };
+
   // Run on initial page load
   initTiltEffect();
-
-  // Re-initialize after view transitions
-  document.addEventListener("astro:page-load", initTiltEffect);
+  ensureTiltHandler();
 </script>

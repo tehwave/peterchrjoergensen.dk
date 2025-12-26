@@ -1,2 +1,6 @@
 # Redirect www to apex domain
 https://www.peterchrjoergensen.dk/* https://peterchrjoergensen.dk/:splat 301
+
+# Enforce trailing slashes (Astro default)
+/blog /blog/ 301
+/projects /projects/ 301

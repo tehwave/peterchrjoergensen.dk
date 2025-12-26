@@ -177,7 +177,12 @@ type Props = Record<string, never>;
       text-decoration-thickness: 2px;
       text-underline-offset: 3px;
       border-radius: 4px;
-      @include focus-visible;
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 4px;
+        background-color: rgba($color-orange, 0.15);
+      }
 
       &:hover {
         color: $color-orange;
@@ -195,7 +200,12 @@ type Props = Record<string, never>;
       opacity: 0.7;
       @include transition(all, 0.2s);
       border-radius: 4px;
-      @include focus-visible;
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 4px;
+        background-color: rgba($color-orange, 0.15);
+      }
 
       &:hover {
         opacity: 1;
@@ -241,7 +251,12 @@ type Props = Record<string, never>;
       text-decoration-color: rgba($color-text-light, 0.3);
       text-underline-offset: 2px;
       border-radius: 2px;
-      @include focus-visible;
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 2px;
+        background-color: rgba($color-orange, 0.15);
+      }
 
       &:hover {
         opacity: 1;

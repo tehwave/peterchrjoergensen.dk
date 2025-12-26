@@ -42,7 +42,7 @@ const categories = [
       </div>
       <div
         class="projects__filters"
-        role="tablist"
+        role="group"
         aria-label="Filter projects by category"
       >
         {
@@ -54,9 +54,7 @@ const categories = [
               ]}
               data-filter={cat.id}
               type="button"
-              role="tab"
-              aria-selected={cat.id === "all" ? "true" : "false"}
-              aria-controls="projects-grid"
+              aria-pressed={cat.id === "all" ? "true" : "false"}
             >
               {cat.label}
             </button>
@@ -64,7 +62,7 @@ const categories = [
         }
       </div>
     </div>
-    <div class="projects__grid" id="projects-grid" role="tabpanel">
+    <div class="projects__grid" id="projects-grid">
       {
         randomizedProjects.map((project, index) => (
           <div class:list={["projects__item"]} data-category={project.category}>
@@ -99,10 +97,10 @@ const categories = [
         // Update active button
         filterButtons.forEach((btn) => {
           btn.classList.remove("projects__filter--active");
-          btn.setAttribute("aria-selected", "false");
+          btn.setAttribute("aria-pressed", "false");
         });
         button.classList.add("projects__filter--active");
-        button.setAttribute("aria-selected", "true");
+        button.setAttribute("aria-pressed", "true");
 
         // Filter projects with animation
         projectItems.forEach((item) => {
@@ -131,14 +129,24 @@ const categories = [
     });
   }
 
+  // Store handler to prevent duplicates
+  let filterHandler: (() => void) | null = null;
+
+  const ensureFilterHandler = () => {
+    if (filterHandler) {
+      document.removeEventListener("astro:after-swap", filterHandler);
+    }
+    filterHandler = initFilters;
+    document.addEventListener("astro:after-swap", filterHandler);
+  };
+
   // Run on initial load
   initFilters();
-
-  // Re-run after view transitions
-  document.addEventListener("astro:after-swap", initFilters);
+  ensureFilterHandler();
 </script>
 
 <style lang="scss">
+  @use "sass:color";
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
 
@@ -227,8 +235,8 @@ const categories = [
         color: $color-white;
 
         &:hover {
-          background-color: #17304f;
-          border-color: #17304f;
+          background-color: color.adjust($color-blue-dark, $lightness: 5%);
+          border-color: color.adjust($color-blue-dark, $lightness: 5%);
           color: $color-white;
           transform: translateY(-2px);
         }
