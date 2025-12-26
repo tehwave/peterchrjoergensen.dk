@@ -166,6 +166,9 @@ const socialImageURL = new URL(image, Astro.site);
       data-site="OXXUABJE"
       defer></script>
     <!-- / Fathom -->
+
+    <!-- Page-specific head content -->
+    <slot name="head" />
   </head>
   <body>
     <style
