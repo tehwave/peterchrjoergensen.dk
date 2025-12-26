@@ -1,0 +1,84 @@
+---
+import { Picture } from "astro:assets";
+import authorImage from "../assets/projects/profile.png";
+
+interface Props {
+  name: string;
+  bio: string;
+}
+
+const { name, bio } = Astro.props;
+---
+
+<section class="author-bio">
+  <div class="author-bio__container">
+    <Picture
+      src={authorImage}
+      alt={`Photo of ${name}`}
+      formats={["avif", "webp"]}
+      widths={[80, 160]}
+      sizes="80px"
+      class="author-bio__image"
+      loading="lazy"
+    />
+    <div class="author-bio__content">
+      <h3 class="author-bio__name">{name}</h3>
+      <p class="author-bio__text">{bio}</p>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .author-bio {
+    background: $color-background-secondary;
+    padding: $space-3xl $space-xl;
+    border-top: 1px solid $color-border;
+
+    @include respond-to(md) {
+      padding: $space-2xl $space-lg;
+    }
+  }
+
+  .author-bio__container {
+    max-width: $max-width-text;
+    margin: 0 auto;
+    display: flex;
+    gap: $space-xl;
+    align-items: center;
+
+    @include respond-to(md) {
+      flex-direction: column;
+      text-align: center;
+      gap: $space-lg;
+    }
+  }
+
+  .author-bio__image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+
+  .author-bio__content {
+    flex: 1;
+  }
+
+  .author-bio__name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin: 0 0 $space-sm 0;
+  }
+
+  .author-bio__text {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    line-height: 1.6;
+    margin: 0;
+  }
+</style>
