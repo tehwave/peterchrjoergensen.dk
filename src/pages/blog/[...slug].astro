@@ -53,12 +53,11 @@ type Props = {
 	nextPost: CollectionEntry<"blog"> | null;
 };
 
-const { post, prevPost, nextPost } = Astro.props;
+const { post } = Astro.props;
 
 // Render the Markdown/MDX content into HTML
 // Content: The rendered component to display the post body
-// headings: Array of h2-h6 headings for table of contents
-const { Content, headings } = await render(post);
+const { Content } = await render(post);
 
 // Calculate reading time and word count from post body
 const readingTime = getReadingTime(post.body ?? "");
@@ -220,7 +219,7 @@ const structuredData = {
 		<link rel="canonical" href={canonicalURL} />
 		
 		<!-- Structured data -->
-		<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	</Fragment>
 
 	<article class="blog-post" transition:animate={customFadeAnimation}>

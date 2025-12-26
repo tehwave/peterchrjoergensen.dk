@@ -130,7 +130,7 @@ const collectionSchema = {
 <Layout title={title} description={description}>
 	<Fragment slot="head">
 		<!-- Structured data for blog collection -->
-		<script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 	</Fragment>
 	<main class="journal" transition:animate={customFadeAnimation}>
 		<div class="journal__container">
