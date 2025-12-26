@@ -39,7 +39,7 @@ const postsWithReadingTime = sortedPosts.map((post) => ({
 
 // SEO metadata
 const title = "The Journal";
-const description = "Thoughts on craft, technology, and the spaces between";
+const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
 
 // Custom view transition: fade out down → fade in up
 const customFadeAnimation = {
@@ -82,9 +82,61 @@ const customFadeAnimation = {
 		],
 	},
 };
+
+// Structured data for blog listing page
+const collectionSchema = {
+	"@context": "https://schema.org",
+	"@graph": [
+		{
+			"@type": "CollectionPage",
+			"@id": "https://peterchrjoergensen.dk/blog#collection",
+			url: "https://peterchrjoergensen.dk/blog",
+			name: title,
+			description: description,
+			inLanguage: "en-US",
+			isPartOf: {
+				"@id": "https://peterchrjoergensen.dk/#website",
+			},
+			mainEntity: {
+				"@id": "https://peterchrjoergensen.dk/blog#itemlist",
+			},
+		},
+		{
+			"@type": "ItemList",
+			"@id": "https://peterchrjoergensen.dk/blog#itemlist",
+			itemListElement: postsWithReadingTime.map((post, index) => ({
+				"@type": "ListItem",
+				position: index + 1,
+				url: `https://peterchrjoergensen.dk/blog/${post.id}`,
+				name: post.data.title,
+			})),
+		},
+		{
+			"@type": "BreadcrumbList",
+			itemListElement: [
+				{
+					"@type": "ListItem",
+					position: 1,
+					name: "Home",
+					item: "https://peterchrjoergensen.dk",
+				},
+				{
+					"@type": "ListItem",
+					position: 2,
+					name: "Blog",
+					item: "https://peterchrjoergensen.dk/blog",
+				},
+			],
+		},
+	],
+};
 ---
 
 <Layout title={title} description={description}>
+	<Fragment slot="head">
+		<!-- Structured data for blog collection -->
+		<script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+	</Fragment>
 	<main class="journal" transition:animate={customFadeAnimation}>
 		<div class="journal__container">
 			<header class="journal__header">
@@ -112,7 +164,7 @@ const customFadeAnimation = {
 											})}
 										</time>
 										<span class="post__separator" aria-hidden="true" />
-										<span class="post__reading-time">
+									<span class="post__reading-time" aria-label={`${post.readingTime} minute read`}>
 											{post.readingTime} min read
 										</span>
 									</div>
@@ -266,18 +318,19 @@ const customFadeAnimation = {
 			color: $color-text-muted;
 		}
 
-		&__link {
-			text-decoration: none;
-			display: block;
-		}
-
 		&__title {
 			font-size: $font-size-xl;
 			font-weight: $font-weight-semibold;
-			color: $color-text-dark;
 			line-height: $leading-snug;
 			margin-bottom: $space-sm;
+		}
+
+		&__link {
+			text-decoration: none;
+			color: $color-text-dark;
+			display: inline;
 			@include transition(color);
+			@include focus-visible;
 
 			&:hover {
 				color: $color-orange;

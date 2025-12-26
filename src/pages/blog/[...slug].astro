@@ -59,6 +59,16 @@ const { post, prevPost, nextPost } = Astro.props;
 // headings: Array of h2-h6 headings for table of contents
 const { Content, headings } = await render(post);
 
+// Calculate reading time from post body
+function getReadingTime(postContent: string): number {
+	const wordsPerMinute = 200;
+	const words = postContent.split(/\s+/).filter(Boolean).length;
+	return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+
+const readingTime = getReadingTime(post.body ?? "");
+const wordCount = (post.body ?? "").split(/\s+/).filter(Boolean).length;
+
 // Generate canonical URL for SEO
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
@@ -114,26 +124,70 @@ const customFadeAnimation = {
  * and display rich results in search (author, date, etc.)
  *
  * @see https://schema.org/BlogPosting
+ * @see https://schema.org/BreadcrumbList
  */
-const articleSchema = {
+const structuredData = {
 	"@context": "https://schema.org",
-	"@type": "BlogPosting",
-	headline: title,
-	description: description,
-	author: {
-		"@type": "Person",
-		name: author,
-	},
-	datePublished: pubDate.toISOString(),
-	// Add modification date if the post was updated
-	...(updatedDate && { dateModified: updatedDate.toISOString() }),
-	// Add hero image URL if one exists
-	...(heroImage && {
-		image: {
-			"@type": "ImageObject",
-			url: new URL(heroImage.src, Astro.site).toString(),
+	"@graph": [
+		{
+			"@type": "BlogPosting",
+			"@id": canonicalURL + "#article",
+			headline: title,
+			description: description,
+			url: canonicalURL.toString(),
+			mainEntityOfPage: {
+				"@type": "WebPage",
+				"@id": canonicalURL.toString(),
+			},
+			author: {
+				"@type": "Person",
+				"@id": "https://peterchrjoergensen.dk/#person",
+				name: author,
+			},
+			publisher: {
+				"@type": "Person",
+				"@id": "https://peterchrjoergensen.dk/#person",
+				name: "Peter Chr. Jørgensen",
+				url: "https://peterchrjoergensen.dk",
+			},
+			datePublished: pubDate.toISOString(),
+			...(updatedDate && { dateModified: updatedDate.toISOString() }),
+			inLanguage: "en-US",
+			wordCount: wordCount,
+			keywords: tags?.join(", ") || "",
+			...(heroImage && {
+				image: {
+					"@type": "ImageObject",
+					url: new URL(heroImage.src, Astro.site).toString(),
+					width: heroImage.width,
+					height: heroImage.height,
+				},
+			}),
 		},
-	}),
+		{
+			"@type": "BreadcrumbList",
+			itemListElement: [
+				{
+					"@type": "ListItem",
+					position: 1,
+					name: "Home",
+					item: "https://peterchrjoergensen.dk",
+				},
+				{
+					"@type": "ListItem",
+					position: 2,
+					name: "Blog",
+					item: "https://peterchrjoergensen.dk/blog",
+				},
+				{
+					"@type": "ListItem",
+					position: 3,
+					name: title,
+					item: canonicalURL.toString(),
+				},
+			],
+		},
+	],
 };
 ---
 
@@ -171,7 +225,7 @@ const articleSchema = {
 		<link rel="canonical" href={canonicalURL} />
 		
 		<!-- Structured data -->
-		<script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+		<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	</Fragment>
 
 	<article class="blog-post" transition:animate={customFadeAnimation}>
@@ -194,13 +248,15 @@ const articleSchema = {
 							day: "numeric",
 						})}
 					</time>
-					<span class="read-time">4 min read</span>
+					<span class="read-time" aria-label={`${Math.max(1, Math.ceil((post.body ?? '').split(/\s+/).filter(Boolean).length / 200))} minute read`}>
+						{Math.max(1, Math.ceil((post.body ?? '').split(/\s+/).filter(Boolean).length / 200))} min read
+					</span>
 				</div>
 
 				{tags && tags.length > 0 && (
-					<div class="post-tags">
+					<div class="post-tags" role="list" aria-label="Post tags">
 						{tags.map((tag) => (
-							<span class="tag">#{tag}</span>
+							<span class="tag" role="listitem">#{tag}</span>
 						))}
 					</div>
 				)}
@@ -239,22 +295,22 @@ const articleSchema = {
 	/>
 
 	{(prevPost || nextPost) && (
-		<nav class="post-navigation">
+		<nav class="post-navigation" aria-label="Blog post navigation">
 			<div class="post-navigation__container">
 				{prevPost ? (
-					<a href={`/blog/${prevPost.id}`} class="post-navigation__link post-navigation__link--prev">
-						<span class="post-navigation__label">← Previous</span>
+					<a href={`/blog/${prevPost.id}`} class="post-navigation__link post-navigation__link--prev" aria-label={`Previous post: ${prevPost.data.title}`}>
+						<span class="post-navigation__label" aria-hidden="true">← Previous</span>
 						<span class="post-navigation__title">{prevPost.data.title}</span>
 					</a>
 				) : (
 					<div class="post-navigation__spacer"></div>
 				)}
 				
-				<a href="/blog" class="post-navigation__all">All articles</a>
+				<a href="/blog" class="post-navigation__all" aria-label="View all blog posts">All articles</a>
 				
 				{nextPost ? (
-					<a href={`/blog/${nextPost.id}`} class="post-navigation__link post-navigation__link--next">
-						<span class="post-navigation__label">Next →</span>
+					<a href={`/blog/${nextPost.id}`} class="post-navigation__link post-navigation__link--next" aria-label={`Next post: ${nextPost.data.title}`}>
+						<span class="post-navigation__label" aria-hidden="true">Next →</span>
 						<span class="post-navigation__title">{nextPost.data.title}</span>
 					</a>
 				) : (
@@ -301,6 +357,7 @@ const articleSchema = {
 		text-decoration: none;
 		font-size: $font-size-sm;
 		@include transition(opacity);
+		@include focus-visible;
 	}
 
 	.back-link:hover {
@@ -418,14 +475,14 @@ const articleSchema = {
 	.hero-caption {
 		max-width: $max-width;
 		margin: 0 auto;
-		padding: $space-lg $space-xl 0;
+		padding: $space-sm $space-xl 0;
 		font-size: $font-size-sm;
 		color: $color-text-muted;
 		text-align: center;
 		font-style: italic;
 
 		@include respond-to(md) {
-			padding: $space-md $space-lg 0;
+			padding: $space-xs $space-lg 0;
 		}
 	}
 
@@ -607,20 +664,19 @@ const articleSchema = {
 		}
 	}
 
-	// Style italic paragraphs after images as captions
-	.prose :global(img + p em),
-	.prose :global(img + p:has(em):only-child) {
+	// Style italic text directly after images as captions (Markdown: img followed by em on next line)
+	.prose :global(img + em) {
 		display: block;
 		max-width: $max-width;
 		margin: 0 auto;
-		padding: $space-lg $space-xl 0;
+		padding: $space-sm $space-xl 0;
 		font-size: $font-size-sm;
 		color: $color-text-muted;
 		text-align: center;
 		font-style: italic;
 
 		@include respond-to(md) {
-			padding: $space-md $space-lg 0;
+			padding: $space-xs $space-lg 0;
 		}
 	}
 
@@ -654,6 +710,7 @@ const articleSchema = {
 		gap: $space-xs;
 		text-decoration: none;
 		@include transition(opacity);
+		@include focus-visible;
 
 		&:hover {
 			opacity: 0.7;
@@ -689,6 +746,7 @@ const articleSchema = {
 		text-decoration: none;
 		align-self: center;
 		@include transition(color);
+		@include focus-visible;
 
 		&:hover {
 			color: $color-text-primary;
