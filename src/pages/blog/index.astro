@@ -43,8 +43,8 @@ const collectionSchema = {
 	"@graph": [
 		{
 			"@type": "CollectionPage",
-			"@id": "https://peterchrjoergensen.dk/blog#collection",
-			url: "https://peterchrjoergensen.dk/blog",
+			"@id": "https://peterchrjoergensen.dk/blog/#collection",
+			url: "https://peterchrjoergensen.dk/blog/",
 			name: title,
 			description: description,
 			inLanguage: "en-US",
@@ -52,16 +52,16 @@ const collectionSchema = {
 				"@id": "https://peterchrjoergensen.dk/#website",
 			},
 			mainEntity: {
-				"@id": "https://peterchrjoergensen.dk/blog#itemlist",
+				"@id": "https://peterchrjoergensen.dk/blog/#itemlist",
 			},
 		},
 		{
 			"@type": "ItemList",
-			"@id": "https://peterchrjoergensen.dk/blog#itemlist",
+			"@id": "https://peterchrjoergensen.dk/blog/#itemlist",
 			itemListElement: postsWithReadingTime.map((post, index) => ({
 				"@type": "ListItem",
 				position: index + 1,
-				url: `https://peterchrjoergensen.dk/blog/${post.id}`,
+				url: `https://peterchrjoergensen.dk/blog/${post.id}/`,
 				name: post.data.title,
 			})),
 		},
@@ -78,7 +78,7 @@ const collectionSchema = {
 					"@type": "ListItem",
 					position: 2,
 					name: "Blog",
-					item: "https://peterchrjoergensen.dk/blog",
+					item: "https://peterchrjoergensen.dk/blog/",
 				},
 			],
 		},
@@ -114,7 +114,7 @@ const collectionSchema = {
 									pubDate={post.data.pubDate}
 									readingTime={post.readingTime}
 									tags={post.data.tags}
-									href={`/blog/${post.id}`}
+									href={`/blog/${post.id}/`}
 								/>
 							</AnimateOnScroll>
 						))}
