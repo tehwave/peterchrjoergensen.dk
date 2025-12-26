@@ -22,6 +22,7 @@ import AuthorBio from "../../components/AuthorBio.astro";
 import BlogTag from "../../components/BlogTag.astro";
 import { getReadingTime, getWordCount } from "../../utils/reading-time";
 import { fadeAnimation } from "../../utils/transitions";
+import { parseInlineMarkdown } from "../../utils/markdown";
 
 /**
  * Generate static paths for all blog posts at build time
@@ -287,9 +288,10 @@ const structuredData = {
 						/>
 					</div>
 					{heroImageCaption && (
-						<figcaption class="blog-post__hero-caption">
-							{heroImageCaption}
-						</figcaption>
+						<figcaption
+							class="blog-post__hero-caption"
+							set:html={parseInlineMarkdown(heroImageCaption)}
+						/>
 					)}
 				</figure>
 			)

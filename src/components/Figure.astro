@@ -21,6 +21,7 @@
 
 import { Picture } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import { parseInlineMarkdown } from "../utils/markdown";
 
 interface Props {
 	src: ImageMetadata;
@@ -33,7 +34,7 @@ const { src, alt, caption } = Astro.props;
 
 <figure>
 	<Picture src={src} formats={["avif", "webp"]} alt={alt} inferSize />
-	{caption && <figcaption>{caption}</figcaption>}
+	{caption && <figcaption set:html={parseInlineMarkdown(caption)} />}
 </figure>
 
 <style lang="scss">
