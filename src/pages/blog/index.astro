@@ -13,6 +13,8 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import AnimateOnScroll from "../../components/AnimateOnScroll.astro";
+import BlogPostCard from "../../components/BlogPostCard.astro";
+import { getReadingTime } from "../../utils/reading-time";
 
 type Props = Record<string, never>;
 
@@ -24,17 +26,10 @@ const sortedPosts = posts.sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
-// Calculate reading time from post body
-function getReadingTime(post: (typeof sortedPosts)[0]): number {
-	const wordsPerMinute = 200;
-	const words = (post.body ?? "").split(/\s+/).filter(Boolean).length;
-	return Math.max(1, Math.ceil(words / wordsPerMinute));
-}
-
 // Prepare posts with reading time
 const postsWithReadingTime = sortedPosts.map((post) => ({
 	...post,
-	readingTime: getReadingTime(post),
+	readingTime: getReadingTime(post.body ?? ""),
 }));
 
 // SEO metadata
@@ -141,7 +136,7 @@ const collectionSchema = {
 		<div class="journal__container">
 			<header class="journal__header">
 				<div class="journal__header-left">
-					<span class="journal__label">WRITING</span>
+					<span class="journal__label">MY WRITING</span>
 					<h1 class="journal__title">The Journal</h1>
 				</div>
 				<p class="journal__tagline">{description}</p>

@@ -19,6 +19,7 @@ import { getCollection, type CollectionEntry, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { Picture } from "astro:assets";
 import AuthorBio from "../../components/AuthorBio.astro";
+import { getReadingTime, getWordCount } from "../../utils/reading-time";
 
 /**
  * Generate static paths for all blog posts at build time
@@ -59,15 +60,9 @@ const { post, prevPost, nextPost } = Astro.props;
 // headings: Array of h2-h6 headings for table of contents
 const { Content, headings } = await render(post);
 
-// Calculate reading time from post body
-function getReadingTime(postContent: string): number {
-	const wordsPerMinute = 200;
-	const words = postContent.split(/\s+/).filter(Boolean).length;
-	return Math.max(1, Math.ceil(words / wordsPerMinute));
-}
-
+// Calculate reading time and word count from post body
 const readingTime = getReadingTime(post.body ?? "");
-const wordCount = (post.body ?? "").split(/\s+/).filter(Boolean).length;
+const wordCount = getWordCount(post.body ?? "");
 
 // Generate canonical URL for SEO
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -248,8 +243,8 @@ const structuredData = {
 							day: "numeric",
 						})}
 					</time>
-					<span class="read-time" aria-label={`${Math.max(1, Math.ceil((post.body ?? '').split(/\s+/).filter(Boolean).length / 200))} minute read`}>
-						{Math.max(1, Math.ceil((post.body ?? '').split(/\s+/).filter(Boolean).length / 200))} min read
+					<span class="read-time" aria-label={`${readingTime} minute read`}>
+						{readingTime} min read
 					</span>
 				</div>
 
@@ -293,32 +288,6 @@ const structuredData = {
 		name="Peter Chr. Jørgensen"
 		bio="Developer and writer exploring technology and Code. Building fast, accessible websites. I use AI to move faster, explore more ideas, and handle the parts of development that don't need a human touch."
 	/>
-
-	{(prevPost || nextPost) && (
-		<nav class="post-navigation" aria-label="Blog post navigation">
-			<div class="post-navigation__container">
-				{prevPost ? (
-					<a href={`/blog/${prevPost.id}`} class="post-navigation__link post-navigation__link--prev" rel="prev" aria-label={`Previous post: ${prevPost.data.title}`}>
-						<span class="post-navigation__label" aria-hidden="true">← Previous</span>
-						<span class="post-navigation__title">{prevPost.data.title}</span>
-					</a>
-				) : (
-					<div class="post-navigation__spacer"></div>
-				)}
-				
-				<a href="/blog" class="post-navigation__all" aria-label="View all blog posts">All articles</a>
-				
-				{nextPost ? (
-					<a href={`/blog/${nextPost.id}`} class="post-navigation__link post-navigation__link--next" rel="next" aria-label={`Next post: ${nextPost.data.title}`}>
-						<span class="post-navigation__label" aria-hidden="true">Next →</span>
-						<span class="post-navigation__title">{nextPost.data.title}</span>
-					</a>
-				) : (
-					<div class="post-navigation__spacer"></div>
-				)}
-			</div>
-		</nav>
-	)}
 </Layout>
 
 <style lang="scss">
@@ -662,95 +631,5 @@ const structuredData = {
 		@include respond-to(md) {
 			padding: $space-md $space-lg 0;
 		}
-	}
-
-	.post-navigation {
-		border-top: 1px solid $color-border;
-		padding: $space-2xl $space-xl;
-		background: $color-cream;
-
-		@include respond-to(md) {
-			padding: $space-xl $space-lg;
-		}
-	}
-
-	.post-navigation__container {
-		max-width: $max-width-text;
-		margin: 0 auto;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		gap: $space-lg;
-		align-items: start;
-
-		@include respond-to(md) {
-			grid-template-columns: 1fr;
-			gap: $space-xl;
-		}
-	}
-
-	.post-navigation__link {
-		display: flex;
-		flex-direction: column;
-		gap: $space-xs;
-		text-decoration: none;
-		@include transition(opacity);
-		@include focus-visible;
-
-		&:hover {
-			opacity: 0.7;
-		}
-	}
-
-	.post-navigation__link--prev {
-		align-items: flex-start;
-
-		@include respond-to(md) {
-			order: 1;
-		}
-	}
-
-	.post-navigation__link--next {
-		text-align: right;
-		align-items: flex-end;
-
-		@include respond-to(md) {
-			text-align: left;
-			align-items: flex-start;
-			order: 2;
-		}
-	}
-
-	.post-navigation__spacer {
-		// Empty spacer to maintain grid layout
-	}
-
-	.post-navigation__all {
-		font-size: $font-size-base;
-		color: $color-text-secondary;
-		text-decoration: none;
-		align-self: center;
-		@include transition(color);
-		@include focus-visible;
-
-		&:hover {
-			color: $color-text-primary;
-		}
-
-		@include respond-to(md) {
-			order: 0;
-			align-self: flex-start;
-		}
-	}
-
-	.post-navigation__label {
-		font-size: $font-size-sm;
-		color: $color-text-muted;
-	}
-
-	.post-navigation__title {
-		font-size: $font-size-base;
-		color: $color-text-primary;
-		font-weight: $font-weight-medium;
-		line-height: 1.4;
 	}
 </style>

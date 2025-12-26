@@ -81,7 +81,7 @@ heroImageCaption: ""  # Optional — credit or context for the image
 - Use `##` for main sections, `###` for subsections
 - Include code blocks with proper language tags (```astro, ```typescript, etc.)
 - Use bullet lists for quick points, numbered lists for steps
-- Add images where they help understanding — always with alt text
+- **Always use the `<Figure>` component for images** — never raw `<img>` or `![]()`
 - Link to relevant external resources and documentation
 
 ### Length
@@ -139,11 +139,48 @@ Reference Peter's real work when relevant:
 4. **Write the content** — In Peter's voice, with proper structure
 5. **Review** — Check technical accuracy, voice consistency, and frontmatter completeness
 
-## File Location
+## File Format & Location
 
 Blog posts go in: `src/content/blog/`
 
-Filename format: `kebab-case-title.md` (or `.mdx` if using components)
+**Always use MDX format** — Filename: `kebab-case-title.mdx`
+
+MDX allows importing and using Astro components within blog posts, which is essential for rich content.
+
+### Required Import
+
+Every blog post should import the Figure component for images:
+
+```mdx
+---
+# frontmatter here
+---
+
+import Figure from '../../components/Figure.astro';
+```
+
+### Using the Figure Component
+
+**Always use the Figure component for images** — never raw `<img>` tags or Markdown image syntax.
+
+```mdx
+<Figure
+  src="https://images.unsplash.com/photo-example"
+  alt="Descriptive alt text for accessibility"
+  caption="Photo credit or context (optional)"
+/>
+```
+
+**Figure component benefits:**
+- Semantic `<figure>` and `<figcaption>` markup
+- Consistent styling with the site design
+- Proper accessibility with required alt text
+- Beautiful edge-to-edge presentation on wide screens
+
+**Rules for images:**
+- `src` — External URL or path to image
+- `alt` — **Required**. Describe what's in the image for screen readers
+- `caption` — Optional. Use for photo credits ("Photo by X on Unsplash") or context
 
 ---
 
