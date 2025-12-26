@@ -236,6 +236,11 @@ const roles = [
       box-shadow 0.3s ease-out;
     will-change: transform;
 
+    @media (max-width: 479px) {
+      max-height: 650px;
+      overflow: visible;
+    }
+
     // Dynamic light sheen offset (%) - slides highlight across surface
     --sheen-offset: 50%;
 
@@ -288,6 +293,7 @@ const roles = [
 
     &__content {
       transform: translateZ(15px);
+      overflow: visible;
 
       @include respond-to(lg) {
         order: 2;
@@ -318,6 +324,11 @@ const roles = [
 
       p {
         margin: 0 0 $space-sm 0;
+        
+        @media (min-width: 480px) {
+          white-space: nowrap;
+          overflow: visible;
+        }
       }
 
       strong {
