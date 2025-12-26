@@ -19,6 +19,7 @@ import { getCollection, type CollectionEntry, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { Picture } from "astro:assets";
 import AuthorBio from "../../components/AuthorBio.astro";
+import BlogTag from "../../components/BlogTag.astro";
 import { getReadingTime, getWordCount } from "../../utils/reading-time";
 
 /**
@@ -250,7 +251,7 @@ const structuredData = {
 				{tags && tags.length > 0 && (
 					<div class="post-tags" role="list" aria-label="Post tags">
 						{tags.map((tag) => (
-							<span class="tag" role="listitem">#{tag}</span>
+							<BlogTag tag={tag} />
 						))}
 					</div>
 				)}
@@ -387,28 +388,8 @@ const structuredData = {
 	.post-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: $space-sm;
+		gap: $space-xs;
 		margin-top: $space-lg;
-	}
-
-	.tag {
-		display: inline-block;
-		padding: $space-xs $space-md;
-		border: 1px solid $color-border;
-		border-radius: 4px;
-		font-size: $font-size-sm;
-		color: $color-text-dark;
-		background-color: $color-white;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		font-weight: $font-weight-normal;
-		@include transition(all, 0.2s);
-
-		&:hover {
-			border-color: $color-orange;
-			color: $color-orange;
-			transform: translateY(-2px);
-		}
 	}
 
 	.hero-image-figure {

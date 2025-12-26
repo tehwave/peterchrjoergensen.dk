@@ -51,6 +51,7 @@ const roles = [
           height={500}
           loading="eager"
           fetchpriority="high"
+          inferSize={true}
         />
       </div>
     </div>
@@ -64,9 +65,13 @@ const roles = [
   // Lazy-load typed.js when browser is idle for better performance
   const initTypedAnimation = async () => {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
+    const stringsElement = document.querySelector("#typed-strings") as HTMLElement;
     
-    // Early return if element doesn't exist (Hero not on page)
-    if (!typedElement) return;
+    // Early return if elements don't exist (Hero not on page)
+    if (!typedElement || !stringsElement) {
+      console.warn("Typed.js elements not found");
+      return;
+    }
 
     // Respect user's motion preferences (WCAG 2.3.3)
     const prefersReducedMotion = window.matchMedia(
@@ -77,20 +82,32 @@ const roles = [
       // Show static first role for users who prefer reduced motion
       typedElement.textContent = "Web Developer";
     } else {
-      // Dynamically import typed.js only when needed
-      const { default: Typed } = await import("typed.js");
+      try {
+        // Dynamically import typed.js only when needed
+        const { default: Typed } = await import("typed.js");
 
-      // Initialize typed.js animation and store instance for cleanup
-      typedInstance = new Typed("#typed-roles", {
-        stringsElement: "#typed-strings",
-        typeSpeed: 50,
-        backSpeed: 30,
-        backDelay: 2000,
-        startDelay: 500,
-        loop: true,
-        showCursor: true,
-        cursorChar: "|",
-      });
+        // Cleanup any existing instance before creating new one
+        if (typedInstance) {
+          typedInstance.destroy();
+          typedInstance = null;
+        }
+
+        // Initialize typed.js animation and store instance for cleanup
+        typedInstance = new Typed("#typed-roles", {
+          stringsElement: "#typed-strings",
+          typeSpeed: 50,
+          backSpeed: 30,
+          backDelay: 2000,
+          startDelay: 500,
+          loop: true,
+          showCursor: true,
+          cursorChar: "|",
+        });
+      } catch (error) {
+        console.error("Failed to initialize Typed.js:", error);
+        // Fallback to static text if typed.js fails to load
+        typedElement.textContent = "Web Developer";
+      }
     }
   };
 
@@ -106,10 +123,18 @@ const roles = [
   const startTypedAnimation = () => {
     // Wait for browser idle time before loading animation
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => void initTypedAnimation());
+      requestIdleCallback(() => {
+        initTypedAnimation().catch((err) => {
+          console.error("Typed animation error:", err);
+        });
+      });
     } else {
       // Fallback for browsers without requestIdleCallback
-      setTimeout(() => void initTypedAnimation(), 1);
+      setTimeout(() => {
+        initTypedAnimation().catch((err) => {
+          console.error("Typed animation error:", err);
+        });
+      }, 1);
     }
   };
 

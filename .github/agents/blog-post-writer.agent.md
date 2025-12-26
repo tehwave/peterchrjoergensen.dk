@@ -48,7 +48,6 @@ description: "One compelling sentence for SEO and previews — 120-155 chars ide
 pubDate: YYYY-MM-DD  # Today's date unless specified
 author: "Peter Chr. Jørgensen"  # Always this unless told otherwise
 tags: ["tag1", "tag2"]  # Lowercase, relevant, 2-5 tags
-draft: false  # Set true only if explicitly a draft
 heroImage: ""  # Optional - path to image in src/assets/blog/ or external URL
 heroImageAlt: ""  # Required if heroImage is set — describe for accessibility
 heroImageCaption: ""  # Optional — credit or context for the image
@@ -61,10 +60,9 @@ heroImageCaption: ""  # Optional — credit or context for the image
 2. **description**: Write for humans first, SEO second. Make it intriguing but accurate.
 3. **pubDate**: Use ISO format (YYYY-MM-DD). Use today's date unless the user specifies.
 4. **tags**: Lowercase, hyphenated if multi-word (`web-development`). Include the main technology and topic.
-5. **draft**: Default to `false`. Only set `true` if user says it's a draft.
-6. **heroImage**: Can be a relative path (`../../assets/blog/image.jpg`) or external URL. Optional.
-7. **heroImageAlt**: Mandatory if heroImage exists. Describe what's in the image for screen readers.
-8. **heroImageCaption**: Optional. Use for photo credits or context.
+5. **heroImage**: Can be a relative path (`../../assets/blog/image.jpg`) or external URL. Optional.
+6. **heroImageAlt**: Mandatory if heroImage exists. Describe what's in the image for screen readers.
+7. **heroImageCaption**: Optional. Use for photo credits or context.
 
 ## Blog Post Structure
 

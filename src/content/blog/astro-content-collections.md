@@ -5,7 +5,6 @@
 # pubDate: Publication date (YYYY-MM-DD format)
 # author: Author name (optional)
 # tags: Array of tags for categorization (optional)
-# draft: Set to true to hide from production (optional, default: false)
 # heroImage: Path to hero image (optional)
 # heroImageAlt: Alt text for hero image (optional, but required if heroImage is set)
 title: "Getting Started with Astro Content Collections"
@@ -13,7 +12,6 @@ description: "A practical guide to using Astro's Content Collections API for typ
 pubDate: 2024-12-15
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "content", "typescript", "tutorial"]
-draft: false
 heroImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80"
 heroImageAlt: "Developer working on code with multiple screens"
 heroImageCaption: "Organizing content at scale — Photo by Clément Hélardot"
@@ -59,7 +57,6 @@ Use `getCollection()` to fetch all posts:
 import { getCollection } from "astro:content";
 
 const posts = await getCollection("blog");
-const published = posts.filter(post => !post.data.draft);
 ```
 
 ## Rendering Content

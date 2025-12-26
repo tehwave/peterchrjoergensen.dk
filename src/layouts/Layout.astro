@@ -10,7 +10,7 @@
 import "../styles/global.scss";
 import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import textureSource from "../assets/black-paper.png";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -61,8 +61,8 @@ const socialImageURL = new URL(image, Astro.site);
     <Font cssVariable="--font-inter" preload />
     <Font cssVariable="--font-caveat" preload />
 
-    <!-- View Transitions -->
-    <ViewTransitions />
+    <!-- Client Router for View Transitions -->
+    <ClientRouter />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

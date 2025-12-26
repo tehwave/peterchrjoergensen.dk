@@ -26,7 +26,6 @@ const blog = defineCollection({
 			updatedDate: z.coerce.date().optional(), // Show "Updated" date if post is revised
 			author: z.string().default("Peter Chr. Jørgensen"),
 			tags: z.array(z.string()).optional(), // For categorization and filtering
-			draft: z.boolean().default(false), // Draft posts are filtered out in production
 
 			// Image handling with Astro's built-in optimization
 			heroImage: image().optional(), // Optimized automatically (WebP, AVIF, responsive)

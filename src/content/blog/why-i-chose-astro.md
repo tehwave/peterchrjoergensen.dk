@@ -4,7 +4,6 @@ description: "The technical and philosophical reasons behind choosing Astro as t
 pubDate: 2024-12-10
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "web development", "performance", "meta"]
-draft: false
 heroImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80"
 heroImageAlt: "Modern laptop workspace with coffee and notebook"
 heroImageCaption: "Building the perfect development environment — Photo by Unsplash"

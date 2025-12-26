@@ -1,0 +1,31 @@
+---
+/**
+ * Blog Tag Component
+ *
+ * Displays a single blog post tag with consistent styling across the site.
+ * Used in both blog post cards and individual blog post pages.
+ */
+interface Props {
+  tag: string;
+}
+
+const { tag } = Astro.props;
+---
+
+<span class="blog-tag">#{tag}</span>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .blog-tag {
+    font-size: $font-size-xs;
+    color: $color-orange;
+    background-color: rgba($color-orange, 0.1);
+    padding: $space-xs $space-sm;
+    border-radius: 4px;
+    font-weight: $font-weight-medium;
+    text-transform: lowercase;
+    letter-spacing: $tracking-wide;
+  }
+</style>
