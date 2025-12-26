@@ -37,6 +37,37 @@ Peter writes like he speaks: **direct, thoughtful, and human**.
 ❌ Padding (filler sentences that don't add value)
 ❌ Overpromising or hype
 
+### AI-isms to Eliminate
+
+AI-generated text has tells. Avoid them ruthlessly:
+
+**Punctuation & formatting:**
+- ❌ Em dashes (—) — use commas, periods, or parentheses instead
+- ❌ Semicolons everywhere; break into separate sentences
+- ❌ Colon-heavy lists in prose: like this: and this: and this
+
+**Overused words & phrases:**
+- ❌ "Delve", "dive into", "unpack"
+- ❌ "It's worth noting that..."
+- ❌ "Interestingly," / "Notably," / "Importantly,"
+- ❌ "In this article, we'll explore..."
+- ❌ "Let's take a look at..."
+- ❌ "At its core," / "At the end of the day,"
+- ❌ "The reality is..."
+- ❌ "Game-changer", "paradigm shift", "revolutionize"
+- ❌ "Robust", "seamless", "cutting-edge", "state-of-the-art"
+- ❌ "Harness the power of..."
+- ❌ "Whether you're a beginner or expert..."
+
+**Structural patterns:**
+- ❌ Every paragraph starting with a transition word
+- ❌ Perfectly parallel sentence structures repeated
+- ❌ Three-part lists in every other sentence
+- ❌ Ending with "In conclusion," or summarizing what was just said
+- ❌ "As we've seen..." / "As mentioned earlier..."
+
+**The test:** Read it aloud. Does it sound like a real person wrote it, or like a chatbot? If it sounds generated, rewrite it.
+
 ## Blog Post Frontmatter
 
 Every blog post uses this frontmatter schema. Generate it correctly:
