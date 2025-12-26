@@ -14,10 +14,17 @@ type Props = Record<string, never>;
 // Displayed in rotation — order matters for first impression
 const roles = [
   "Web Developer",
-  "Web Designer",
   "Game Developer",
-  "Game Designer",
   "AI Enthusiast",
+  "Laravel Expert",
+  "WordPress Expert",
+  "GameDev Teacher",
+  "WebDev Architect",
+  "Astro Amateur",
+  "Prompt Engineer",
+  "Game Jam Organizer",
+  "Unity3D Developer",
+  "VR Developer",
 ];
 ---
 
@@ -34,7 +41,8 @@ const roles = [
           <p>
             I'm <strong>Peter</strong> —{" "}
             <strong class="hero__role-wrapper">
-              <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
+              <span id="typed-roles" aria-live="polite" aria-atomic="true"
+              ></span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
@@ -125,7 +133,7 @@ const roles = [
               }
             });
           },
-          { threshold: 0.1 } // Trigger when 10% visible
+          { threshold: 0.1 }, // Trigger when 10% visible
         );
 
         observer.observe(heroElement);
@@ -178,10 +186,16 @@ const roles = [
 
     // Remove existing handlers if present
     if (startTypedAnimationHandler) {
-      document.removeEventListener("astro:page-load", startTypedAnimationHandler);
+      document.removeEventListener(
+        "astro:page-load",
+        startTypedAnimationHandler,
+      );
     }
     if (cleanupTypedAnimationHandler) {
-      document.removeEventListener("astro:before-preparation", cleanupTypedAnimationHandler);
+      document.removeEventListener(
+        "astro:before-preparation",
+        cleanupTypedAnimationHandler,
+      );
     }
 
     // Store handlers for later removal
@@ -190,7 +204,10 @@ const roles = [
 
     // Re-register
     document.addEventListener("astro:page-load", startTypedAnimationHandler);
-    document.addEventListener("astro:before-preparation", cleanupTypedAnimationHandler);
+    document.addEventListener(
+      "astro:before-preparation",
+      cleanupTypedAnimationHandler,
+    );
   };
 
   // Run on initial page load only if Hero exists
@@ -326,7 +343,7 @@ const roles = [
 
       p {
         margin: 0 0 $space-sm 0;
-        
+
         // CLS prevention: On larger screens, force text to single line
         // to prevent vertical shifts as role text changes length.
         // Text can overflow horizontally over image column.
