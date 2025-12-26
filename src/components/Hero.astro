@@ -119,6 +119,12 @@ const roles = [
           cursorChar: "|",
         });
 
+        // Cleanup existing observer before creating new one
+        if (observer) {
+          observer.disconnect();
+          observer = null;
+        }
+
         // Set up IntersectionObserver to pause when out of view
         observer = new IntersectionObserver(
           (entries) => {
@@ -179,41 +185,28 @@ const roles = [
   // Only initialize if Hero component exists on page
   const heroExists = () => document.querySelector("#typed-roles") !== null;
 
-  // Wrapper to prevent duplicates on view transitions
-  const ensureTypedHandlers = () => {
-    // Only set up handlers if Hero exists
-    if (!heroExists()) return;
+  // Initialize the animation (can be called multiple times safely)
+  if (heroExists()) {
+    startTypedAnimation();
 
-    // Remove existing handlers if present
-    if (startTypedAnimationHandler) {
-      document.removeEventListener(
-        "astro:page-load",
-        startTypedAnimationHandler,
-      );
-    }
-    if (cleanupTypedAnimationHandler) {
-      document.removeEventListener(
+    // Only register event listeners once globally
+    if (!(window as any).__heroTypedInitialized) {
+      (window as any).__heroTypedInitialized = true;
+
+      // Store handlers for cleanup
+      startTypedAnimationHandler = startTypedAnimation;
+      cleanupTypedAnimationHandler = () => {
+        cleanupTypedAnimation();
+        (window as any).__heroTypedInitialized = false;
+      };
+
+      // Set up event listeners for view transitions
+      document.addEventListener("astro:page-load", startTypedAnimationHandler);
+      document.addEventListener(
         "astro:before-preparation",
         cleanupTypedAnimationHandler,
       );
     }
-
-    // Store handlers for later removal
-    startTypedAnimationHandler = startTypedAnimation;
-    cleanupTypedAnimationHandler = cleanupTypedAnimation;
-
-    // Re-register
-    document.addEventListener("astro:page-load", startTypedAnimationHandler);
-    document.addEventListener(
-      "astro:before-preparation",
-      cleanupTypedAnimationHandler,
-    );
-  };
-
-  // Run on initial page load only if Hero exists
-  if (heroExists()) {
-    startTypedAnimation();
-    ensureTypedHandlers();
   }
 </script>
 

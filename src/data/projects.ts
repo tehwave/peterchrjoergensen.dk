@@ -56,7 +56,7 @@ export const projects: Project[] = [
   {
     title: "gm48.net",
     description:
-      "The home of a game jam community I've run since 2013. Built with Laravel — over 50 jams hosted and thousands of games submitted.",
+      "The home of a game jam community I've run since 2013. Built with Laravel — over 48 jams hosted and thousands of games submitted.",
     alt: "Screenshot of gm48.net game jam website homepage",
     tags: ["Laravel", "PHP", "MySQL"],
     image: gm48Img,
@@ -110,7 +110,7 @@ export const projects: Project[] = [
     description:
       "Learning CMS platform with WordPress frontend and Laravel backend. Denmark's largest video education portal.",
     alt: "Screenshot of Restudy video education platform",
-    tags: ["Laravel", "WordPress", "API Integration"],
+    tags: ["Laravel", "WordPress", "LMS"],
     image: restudyImg,
     link: "https://restudy.dk",
     category: "web",
@@ -130,7 +130,7 @@ export const projects: Project[] = [
     description:
       "WordPress webshop with thousands of SKUs imported from Microsoft NAV. Denmark's largest ski outlet.",
     alt: "Screenshot of SkiOutlet ski equipment webshop",
-    tags: ["WordPress", "WooCommerce", "API Integration"],
+    tags: ["WordPress", "WooCommerce", "CRM"],
     image: skioutletImg,
     link: "https://skioutlet.nu",
     category: "web",
@@ -150,7 +150,7 @@ export const projects: Project[] = [
     description:
       "Laravel developer support for this B2B car trading platform operating in 12 European markets.",
     alt: "Screenshot of AutoProff B2B car trading platform",
-    tags: ["Laravel", "API Integration", "MySQL"],
+    tags: ["Laravel", "CRM", "MySQL"],
     image: autoproffImg,
     link: "https://www.autoproff.dk",
     category: "web",
