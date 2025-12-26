@@ -38,6 +38,7 @@ const hasLink = link && link !== "#";
           width={480}
           height={300}
           inferSize={true}
+          densities={[1, 2]}
         />
       ) : (
         <div class="project-card__placeholder">
@@ -123,6 +124,8 @@ const hasLink = link && link !== "#";
       aspect-ratio: 16 / 10;
       overflow: hidden;
       background-color: $color-cream;
+      // Reserve space to prevent CLS
+      contain: layout style paint;
     }
 
     &__image {
@@ -130,6 +133,8 @@ const hasLink = link && link !== "#";
       height: 100%;
       object-fit: cover;
       @include transition(transform, 0.3s);
+      // Explicit aspect-ratio for CLS prevention
+      aspect-ratio: 16 / 10;
     }
 
     &__placeholder {

@@ -84,6 +84,16 @@ export default defineConfig({
   // Automatic responsive image styles
   image: {
     responsiveStyles: true,
+    // Optimize image quality for better file sizes
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+      config: {
+        limitInputPixels: false,
+        // Default quality: 80 (good balance of quality vs file size)
+        // Can be overridden per-image if needed
+        quality: 80,
+      },
+    },
   },
 
   build: {

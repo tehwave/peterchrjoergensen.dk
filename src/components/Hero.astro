@@ -60,6 +60,7 @@ const roles = [
           loading="eager"
           fetchpriority="high"
           inferSize={true}
+          densities={[1, 2]}
         />
       </div>
     </div>
@@ -538,16 +539,23 @@ const roles = [
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 1;
+      margin: 0 auto;
 
       @include respond-to(lg) {
         order: 1;
+      }
+
+      @include respond-to(md) {
+        max-width: 250px;
       }
     }
 
     &__image {
       width: 100%;
-      max-width: 320px;
-      height: auto;
+      height: 100%;
       border-radius: 1000px;
       object-fit: cover;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);

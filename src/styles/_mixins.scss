@@ -95,6 +95,9 @@
     opacity: $opacity;
     pointer-events: none;
     z-index: 0;
+    // Prevent CLS from texture background
+    will-change: auto;
+    contain: layout style paint;
   }
 
   // Ensure content stays above texture
