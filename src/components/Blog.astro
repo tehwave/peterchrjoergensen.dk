@@ -1,0 +1,331 @@
+---
+/**
+ * Blog section for home page.
+ * Displays latest blog posts with excerpts and metadata.
+ * Posts are sorted by publication date (newest first).
+ */
+import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+
+type Props = Record<string, never>;
+
+// Get all published blog posts, sorted by date (newest first)
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+
+// Initial display: 3 posts, rest hidden for "View more" functionality
+const initialCount = 3;
+const remainingCount = Math.max(0, sortedPosts.length - initialCount);
+---
+
+<section class="blog" id="blog">
+  <div class="blog__container">
+    <div class="blog__header">
+      <span class="blog__label">WRITING</span>
+      <h2 class="blog__heading">Latest from the blog</h2>
+    </div>
+
+    <div class="blog__grid">
+      {
+        sortedPosts.map((post, index) => (
+          <AnimateOnScroll
+            animation="fade-up"
+            delay={index * 100}
+            class={`blog__card-wrapper ${index >= initialCount ? "blog__card-wrapper--hidden" : ""}`}
+            data-blog-card
+          >
+            <article class="blog-card">
+              {post.data.heroImage && (
+                <a href={`/blog/${post.id}`} class="blog-card__image-link">
+                  <Image
+                    src={post.data.heroImage}
+                    alt={post.data.heroImageAlt || ""}
+                    width={600}
+                    height={315}
+                    format="webp"
+                    class="blog-card__image"
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                </a>
+              )}
+
+              <div class="blog-card__content">
+                <time class="blog-card__date" datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+
+                <h3 class="blog-card__title">
+                  <a href={`/blog/${post.id}`}>{post.data.title}</a>
+                </h3>
+
+                <p class="blog-card__description">{post.data.description}</p>
+
+                {post.data.tags && post.data.tags.length > 0 && (
+                  <div class="blog-card__tags">
+                    {post.data.tags.map((tag) => (
+                      <span class="blog-card__tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+
+                <a href={`/blog/${post.id}`} class="blog-card__link">
+                  Read more →
+                </a>
+              </div>
+            </article>
+          </AnimateOnScroll>
+        ))
+      }
+    </div>
+
+    {
+      remainingCount > 0 && (
+        <div class="blog__more">
+          <button class="blog__more-button" data-blog-more-button>
+            View {remainingCount} more {remainingCount === 1 ? "post" : "posts"}
+          </button>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  function initBlogPagination() {
+    const moreButton = document.querySelector(
+      "[data-blog-more-button]",
+    ) as HTMLButtonElement | null;
+    const hiddenCards = document.querySelectorAll(
+      ".blog__card-wrapper--hidden",
+    ) as NodeListOf<HTMLElement>;
+
+    if (!moreButton || hiddenCards.length === 0) return;
+
+    moreButton.addEventListener("click", () => {
+      // Show all hidden cards
+      hiddenCards.forEach((card) => {
+        card.classList.remove("blog__card-wrapper--hidden");
+        card.classList.add("blog__card-wrapper--revealed");
+      });
+
+      // Hide the button after showing all posts
+      moreButton.style.display = "none";
+    });
+  }
+
+  // Run on initial load
+  initBlogPagination();
+
+  // Re-run after view transitions
+  document.addEventListener("astro:after-swap", initBlogPagination);
+</script>
+
+<style lang="scss">
+  @use "../styles/mixins" as *;
+  @use "../styles/variables" as *;
+
+  .blog {
+    position: relative;
+    padding: $space-4xl $space-xl;
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
+
+    &__header {
+      margin-bottom: $space-3xl;
+      text-align: center;
+    }
+
+    &__label {
+      display: block;
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: $space-md;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: $space-2xl;
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+        gap: $space-xl;
+      }
+    }
+
+    &__card-wrapper {
+      display: flex;
+
+      &--hidden {
+        display: none;
+      }
+
+      &--revealed {
+        animation: fadeInUp 0.4s ease-out forwards;
+      }
+    }
+
+    &__more {
+      margin-top: $space-2xl;
+      text-align: center;
+    }
+
+    &__more-button {
+      padding: $space-md $space-2xl;
+      border: 2px solid $color-orange;
+      border-radius: 100px;
+      background-color: transparent;
+      color: $color-orange;
+      font-family: inherit;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+      @include transition(all, 0.2s);
+      @include focus-visible;
+
+      &:hover {
+        background-color: $color-orange;
+        color: $color-white;
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .blog-card {
+    display: flex;
+    flex-direction: column;
+    background: $color-white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    @include transition(all, 0.3s);
+    height: 100%;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &__image-link {
+      display: block;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+    }
+
+    &__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+
+      .blog-card:hover & {
+        transform: scale(1.05);
+      }
+    }
+
+    &__content {
+      padding: $space-xl;
+      display: flex;
+      flex-direction: column;
+      gap: $space-md;
+      flex: 1;
+    }
+
+    &__date {
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    &__title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      line-height: 1.3;
+      margin: 0;
+
+      a {
+        color: $color-text-dark;
+        text-decoration: none;
+        @include transition(color, 0.2s);
+
+        &:hover {
+          color: $color-orange;
+        }
+      }
+    }
+
+    &__description {
+      color: $color-text-muted;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    &__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-xs;
+    }
+
+    &__tag {
+      font-size: $font-size-xs;
+      padding: $space-xs $space-sm;
+      background: $color-cream;
+      color: $color-text-muted;
+      border-radius: 100px;
+      text-transform: lowercase;
+    }
+
+    &__link {
+      color: $color-orange;
+      text-decoration: none;
+      font-weight: $font-weight-semibold;
+      @include transition(color, 0.2s);
+      align-self: flex-start;
+
+      &:hover {
+        color: darken($color-orange, 10%);
+      }
+    }
+  }
+</style>

@@ -49,6 +49,7 @@ src/
 | `Header.astro`          | Scroll-aware sticky navigation                                 |
 | `About.astro`           | Philosophy-first bio with skill tags                           |
 | `Projects.astro`        | Portfolio with filtering; shuffled on build for equal exposure |
+| `Blog.astro`            | Latest blog posts section with cards (3 most recent)           |
 | `AI.astro`              | Transparency section on AI usage                               |
 | `AnimateOnScroll.astro` | Intersection Observer wrapper for scroll animations            |
 
@@ -93,8 +94,9 @@ Your content here...
 ### Blog Architecture
 
 - **Content Schema**: `src/content/config.ts` — Defines post structure and validation
-- **Blog Index**: `src/pages/blog/index.astro` — Lists all posts with previews
+- **Blog Section**: `src/components/Blog.astro` — Shows 3 latest posts on home page
 - **Post Template**: `src/pages/blog/[...slug].astro` — Renders individual posts
+- **Sitemap**: Blog posts automatically included in sitemap via `@astrojs/sitemap`
 - **Performance**: LCP < 50ms, CLS = 0.00, fully static generation
 
 ## Development

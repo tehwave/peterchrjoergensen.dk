@@ -101,18 +101,7 @@ const data = await fetch("...").then((r) => r.json());
 
 ### Images & Assets
 
-- Import images from `src/assets/` for automatic optimization:
-
-  ```astro
-  ---
-  import { Image } from "astro:assets";
-  import hero from "../assets/hero.jpg";
-  ---
-
-  <Image src={hero} alt="Hero image" />
-  ```
-
-- Use `<Picture />` for responsive images with multiple formats:
+- **Always use `<Picture />` from `astro:assets`** for all image assets — it provides optimal responsive images with modern formats:
 
   ```astro
   ---
@@ -120,10 +109,14 @@ const data = await fetch("...").then((r) => r.json());
   import photo from "../assets/photo.png";
   ---
 
-  <Picture src={photo} formats={["avif", "webp"]} alt="Photo" />
+  <Picture src={photo} formats={["avif", "webp"]} alt="Photo description" />
   ```
 
-- Always provide `alt` attributes — they are **mandatory** for `<Image>` and `<Picture>`
+- `<Picture />` automatically generates multiple formats (AVIF, WebP, fallback) and optimizes images at build time
+- Import images from `src/assets/` for automatic optimization
+- Always specify `formats={["avif", "webp"]}` for best performance
+- The `alt` attribute is **mandatory** — builds will fail without it
+- Use `<Image />` only when you don't need multiple formats or responsive srcsets
 - Place unprocessed files (favicon, robots.txt) in `public/`
 
 ### TypeScript
