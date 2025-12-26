@@ -149,35 +149,14 @@ const collectionSchema = {
 					<div class="journal__list">
 						{postsWithReadingTime.map((post, index) => (
 							<AnimateOnScroll animation="fade-up" delay={index * 80}>
-								<article class="post">
-									<div class="post__meta">
-										<time datetime={post.data.pubDate.toISOString()}>
-											{post.data.pubDate.toLocaleDateString("en-US", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</time>
-										<span class="post__separator" aria-hidden="true" />
-									<span class="post__reading-time" aria-label={`${post.readingTime} minute read`}>
-											{post.readingTime} min read
-										</span>
-									</div>
-
-									<a href={`/blog/${post.id}`} class="post__link">
-										<h2 class="post__title">{post.data.title}</h2>
-									</a>
-
-									<p class="post__description">{post.data.description}</p>
-
-									{post.data.tags && post.data.tags.length > 0 && (
-										<div class="post__tags">
-											{post.data.tags.map((tag) => (
-												<span class="post__tag">{tag}</span>
-											))}
-										</div>
-									)}
-								</article>
+								<BlogPostCard
+									title={post.data.title}
+									description={post.data.description}
+									pubDate={post.data.pubDate}
+									readingTime={post.readingTime}
+									tags={post.data.tags}
+									href={`/blog/${post.id}`}
+								/>
 							</AnimateOnScroll>
 						))}
 					</div>
@@ -270,93 +249,6 @@ const collectionSchema = {
 				grid-template-columns: 1fr;
 				gap: $space-xl;
 			}
-		}
-	}
-
-	.post {
-		padding: $space-xl;
-		background: $color-bg-alt;
-		border-radius: 12px;
-		border: 1px solid $color-border;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		@include transition(box-shadow, border-color);
-
-		&:hover {
-			border-color: $color-orange;
-			box-shadow: 0 4px 20px $color-shadow;
-		}
-
-		&__meta {
-			display: flex;
-			align-items: center;
-			gap: $space-sm;
-			font-size: $font-size-sm;
-			color: $color-text-muted;
-			margin-bottom: $space-md;
-
-			time {
-				color: $color-text-muted;
-			}
-		}
-
-		&__separator {
-			display: inline-block;
-			width: 3px;
-			height: 3px;
-			border-radius: 50%;
-			background: $color-text-muted;
-		}
-
-		&__reading-time {
-			color: $color-text-muted;
-		}
-
-		&__title {
-			font-size: $font-size-xl;
-			font-weight: $font-weight-semibold;
-			line-height: $leading-snug;
-			margin-bottom: $space-sm;
-		}
-
-		&__link {
-			text-decoration: none;
-			color: $color-text-dark;
-			display: inline;
-			@include transition(color);
-			@include focus-visible;
-
-			&:hover {
-				color: $color-orange;
-			}
-		}
-
-		&__description {
-			font-size: $font-size-base;
-			color: $color-text-muted;
-			line-height: $leading-relaxed;
-			margin-bottom: $space-md;
-			flex-grow: 1;
-		}
-
-		&__tags {
-			display: flex;
-			gap: $space-sm;
-			flex-wrap: wrap;
-			margin-top: auto;
-		}
-
-		&__tag {
-			display: inline-block;
-			padding: $space-xs $space-sm;
-			background: rgba($color-orange, 0.1);
-			color: $color-orange;
-			font-size: $font-size-xs;
-			font-weight: $font-weight-medium;
-			text-transform: lowercase;
-			letter-spacing: $tracking-wide;
-			border-radius: 4px;
 		}
 	}
 </style>
