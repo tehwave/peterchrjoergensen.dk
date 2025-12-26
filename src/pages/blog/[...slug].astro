@@ -21,6 +21,7 @@ import { Picture } from "astro:assets";
 import AuthorBio from "../../components/AuthorBio.astro";
 import BlogTag from "../../components/BlogTag.astro";
 import { getReadingTime, getWordCount } from "../../utils/reading-time";
+import { fadeAnimation } from "../../utils/transitions";
 
 /**
  * Generate static paths for all blog posts at build time
@@ -69,48 +70,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Extract frontmatter data from the post
 const { title, description, pubDate, updatedDate, author, tags, heroImage, heroImageAlt, heroImageCaption } = post.data;
-
-// Custom view transition: fade out down → fade in up
-const customFadeAnimation = {
-  forwards: {
-    old: [
-      {
-        name: "fadeOutDown",
-        duration: "0.3s",
-        easing: "ease-in",
-        fillMode: "forwards",
-      },
-    ],
-    new: [
-      {
-        name: "fadeInUp",
-        duration: "0.4s",
-        easing: "ease-out",
-        fillMode: "backwards",
-        delay: "0.3s",
-      },
-    ],
-  },
-  backwards: {
-    old: [
-      {
-        name: "fadeOutDown",
-        duration: "0.3s",
-        easing: "ease-in",
-        fillMode: "forwards",
-      },
-    ],
-    new: [
-      {
-        name: "fadeInUp",
-        duration: "0.4s",
-        easing: "ease-out",
-        fillMode: "backwards",
-        delay: "0.3s",
-      },
-    ],
-  },
-};
 
 /**
  * Generate JSON-LD structured data for search engines
@@ -223,7 +182,7 @@ const structuredData = {
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	</Fragment>
 
-	<article class="blog-post" transition:animate={customFadeAnimation}>
+	<article class="blog-post" transition:animate={fadeAnimation}>
 		<div class="post-header-container">
 			<header class="post-header">
 				<div class="post-meta-header">
@@ -268,6 +227,7 @@ const structuredData = {
 						widths={[800, 1200, 1600, 2400]}
 						sizes="100vw"
 						loading="eager"
+						fetchpriority="high"
 						inferSize={true}
 					/>
 				</div>

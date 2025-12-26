@@ -12,7 +12,7 @@ interface Props {
 const { tag } = Astro.props;
 ---
 
-<span class="blog-tag">#{tag}</span>
+<span class="blog-tag" role="listitem">#{tag}</span>
 
 <style lang="scss">
   @use "../styles/variables" as *;

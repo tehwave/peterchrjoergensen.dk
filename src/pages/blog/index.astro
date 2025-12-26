@@ -15,6 +15,7 @@ import Layout from "../../layouts/Layout.astro";
 import AnimateOnScroll from "../../components/AnimateOnScroll.astro";
 import BlogPostCard from "../../components/BlogPostCard.astro";
 import { getReadingTime } from "../../utils/reading-time";
+import { fadeAnimation } from "../../utils/transitions";
 
 type Props = Record<string, never>;
 
@@ -35,48 +36,6 @@ const postsWithReadingTime = sortedPosts.map((post) => ({
 // SEO metadata
 const title = "The Journal";
 const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
-
-// Custom view transition: fade out down → fade in up
-const customFadeAnimation = {
-	forwards: {
-		old: [
-			{
-				name: "fadeOutDown",
-				duration: "0.3s",
-				easing: "ease-in",
-				fillMode: "forwards",
-			},
-		],
-		new: [
-			{
-				name: "fadeInUp",
-				duration: "0.4s",
-				easing: "ease-out",
-				fillMode: "backwards",
-				delay: "0.3s",
-			},
-		],
-	},
-	backwards: {
-		old: [
-			{
-				name: "fadeOutDown",
-				duration: "0.3s",
-				easing: "ease-in",
-				fillMode: "forwards",
-			},
-		],
-		new: [
-			{
-				name: "fadeInUp",
-				duration: "0.4s",
-				easing: "ease-out",
-				fillMode: "backwards",
-				delay: "0.3s",
-			},
-		],
-	},
-};
 
 // Structured data for blog listing page
 const collectionSchema = {
@@ -132,7 +91,7 @@ const collectionSchema = {
 		<!-- Structured data for blog collection -->
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 	</Fragment>
-	<main class="journal" transition:animate={customFadeAnimation}>
+	<main class="journal" transition:animate={fadeAnimation}>
 		<div class="journal__container">
 			<header class="journal__header">
 				<div class="journal__header-left">
