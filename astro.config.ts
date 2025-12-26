@@ -22,7 +22,7 @@ export default defineConfig({
     compress({
       CSS: true,
       HTML: true,
-      Image: false, // Already handled by Astro's built-in image optimization
+      Image: true,
       JavaScript: true,
       SVG: true,
     }),
