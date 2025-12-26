@@ -264,6 +264,23 @@ import Layout from "../layouts/Layout.astro";
 
 This is a **personal website**, so all written content should reflect a consistent voice:
 
+### Background Context (About Me)
+
+- I’m a **senior web developer** with **8 years** of professional experience (I’ve been programming since I was **14**; I’m **32** now)
+- For **6 of those 8 years**, I led a department ( **8 developers** + **2 project leads** ) in a digital marketing agency
+- I’ve shipped in **PHP**, **Laravel**, and **WordPress** across everything from local business websites to **multi‑million** businesses
+- I’m comfortable in both **legacy** and **greenfield** codebases, and on teams ranging from solo to ~6+ developers (including external collaborators)
+- I know **performance**, **DevOps/server ops**, and what it takes to run projects when things break (incident handling, trade-offs, and pragmatism)
+- I’ve trained developers, hired and fired, and worked as developer, project lead, and designer
+### Communication Level & Working Style
+
+**Treat me as a senior peer:**
+
+- Skip basics and "what is X" explanations — assume familiarity with modern web tooling, architectural patterns, and production realities
+- Focus on sharp edges, trade-offs, constraints, and decision-making heuristics
+- Prefer concrete specifics over generic best-practice lists
+- When suggesting approaches, explain the "why" (constraints, performance impact, maintainability trade-offs) not just the "what"
+- Default to practitioner-level specificity: real metrics, before/after comparisons, edge cases that actually happen
 ### Perspective
 
 - Always use **first-person singular**: "I am", "I think", "I built", "My experience"
@@ -275,6 +292,11 @@ This is a **personal website**, so all written content should reflect a consiste
 - **Confident but humble** — Demonstrate competence without arrogance
 - **Specific and concrete** — Use real examples, avoid vague claims
 - **Knowledgeable** — Show depth of understanding, explain the "why" not just the "what"
+
+Additional tone guardrails:
+
+- Avoid “junior framing” and generic advice; default to practitioner-level specificity and real trade-offs
+- Don’t describe me with empty superlatives (“highly skilled”); let specifics (scope, constraints, outcomes) carry the credibility
 
 ### Writing Style
 

@@ -4,6 +4,12 @@ My personal website, built with performance and simplicity in mind.
 
 **Live site:** [peterchrjoergensen.dk](https://peterchrjoergensen.dk)
 
+## About Me
+
+I've been building for the web for a long time—started as a kid, turned it into a career. Most of my professional experience comes from running a dev team at a marketing agency, where I shipped everything from small local sites to projects for multi-million dollar businesses. PHP, Laravel, WordPress—whatever the job needed. I've worked in codebases that were ancient and ones that were brand new, with teams big and small, in-house and remote.
+
+I care about performance, reliability, and keeping things pragmatic. I've mentored devs, made hiring decisions, and been the one on call when things caught fire.
+
 ## Tech Stack
 
 - **Framework:** [Astro 5](https://astro.build) — Zero-JS by default, islands architecture
