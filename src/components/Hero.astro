@@ -51,6 +51,7 @@ const roles = [
           height={500}
           loading="eager"
           fetchpriority="high"
+          inferSize={true}
         />
       </div>
     </div>
@@ -58,43 +59,95 @@ const roles = [
 </div>
 
 <script>
+  // Store Typed instance for cleanup
+  let typedInstance: any = null;
+
   // Lazy-load typed.js when browser is idle for better performance
   const initTypedAnimation = async () => {
+    const typedElement = document.querySelector("#typed-roles") as HTMLElement;
+    const stringsElement = document.querySelector(
+      "#typed-strings",
+    ) as HTMLElement;
+
+    // Early return if elements don't exist (Hero not on page)
+    if (!typedElement || !stringsElement) {
+      console.warn("Typed.js elements not found");
+      return;
+    }
+
     // Respect user's motion preferences (WCAG 2.3.3)
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    const typedElement = document.querySelector("#typed-roles") as HTMLElement;
-
     if (prefersReducedMotion) {
       // Show static first role for users who prefer reduced motion
       typedElement.textContent = "Web Developer";
     } else {
-      // Dynamically import typed.js only when needed
-      const { default: Typed } = await import("typed.js");
+      try {
+        // Dynamically import typed.js only when needed
+        const { default: Typed } = await import("typed.js");
 
-      // Initialize typed.js animation
-      void new Typed("#typed-roles", {
-        stringsElement: "#typed-strings",
-        typeSpeed: 50,
-        backSpeed: 30,
-        backDelay: 2000,
-        startDelay: 500,
-        loop: true,
-        showCursor: true,
-        cursorChar: "|",
-      });
+        // Cleanup any existing instance before creating new one
+        if (typedInstance) {
+          typedInstance.destroy();
+          typedInstance = null;
+        }
+
+        // Initialize typed.js animation and store instance for cleanup
+        typedInstance = new Typed("#typed-roles", {
+          stringsElement: "#typed-strings",
+          typeSpeed: 50,
+          backSpeed: 30,
+          backDelay: 2000,
+          startDelay: 500,
+          loop: true,
+          showCursor: true,
+          cursorChar: "|",
+        });
+      } catch (error) {
+        console.error("Failed to initialize Typed.js:", error);
+        // Fallback to static text if typed.js fails to load
+        typedElement.textContent = "Web Developer";
+      }
     }
   };
 
-  // Wait for browser idle time before loading animation
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(() => void initTypedAnimation());
-  } else {
-    // Fallback for browsers without requestIdleCallback
-    setTimeout(() => void initTypedAnimation(), 1);
-  }
+  // Cleanup function for view transitions
+  const cleanupTypedAnimation = () => {
+    if (typedInstance) {
+      typedInstance.destroy();
+      typedInstance = null;
+    }
+  };
+
+  // Initialize on page load (works for both initial load and view transitions)
+  const startTypedAnimation = () => {
+    // Wait for browser idle time before loading animation
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => {
+        initTypedAnimation().catch((err) => {
+          console.error("Typed animation error:", err);
+        });
+      });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        initTypedAnimation().catch((err) => {
+          console.error("Typed animation error:", err);
+        });
+      }, 1);
+    }
+  };
+
+  // Run on initial page load
+  startTypedAnimation();
+
+  // Re-initialize after view transitions
+  document.addEventListener("astro:page-load", startTypedAnimation);
+
+  // Cleanup before navigation
+  document.addEventListener("astro:before-preparation", cleanupTypedAnimation);
 </script>
 
 <style lang="scss">
@@ -342,159 +395,203 @@ const roles = [
 </style>
 
 <script>
-  // 3D Tilt effect
-  const hero = document.querySelector(".hero") as HTMLElement;
-  const tiltElement = document.querySelector("[data-tilt]") as HTMLElement;
-  const maxTilt = 2; // Maximum tilt angle in degrees
+  // 3D Tilt effect - wrapped for view transitions support
+  function initTiltEffect() {
+    const hero = document.querySelector(".hero") as HTMLElement;
+    const tiltElement = document.querySelector("[data-tilt]") as HTMLElement;
 
-  let currentRotateX = 0;
-  let currentRotateY = 0;
-  let targetRotateX = 0;
-  let targetRotateY = 0;
-  let animationId: number | null = null;
+    // Early return if elements don't exist (Hero not on page)
+    if (!hero || !tiltElement) return;
 
-  // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
+    const maxTilt = 2; // Maximum tilt angle in degrees
 
-  function lerp(start: number, end: number, factor: number): number {
-    return start + (end - start) * factor;
-  }
+    let currentRotateX = 0;
+    let currentRotateY = 0;
+    let targetRotateX = 0;
+    let targetRotateY = 0;
+    let animationId: number | null = null;
 
-  function animate() {
-    currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
-    currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    const parallaxY = parseFloat(
-      tiltElement.style.getPropertyValue("--parallax-y") || "0",
-    );
-
-    // Dynamic shadow based on tilt direction (light source from top-left)
-    const shadowX = -currentRotateY * 8; // Shadow moves opposite to tilt
-    const shadowY = currentRotateX * 8 + 20; // Base offset + tilt adjustment
-
-    // Light sheen slides across surface based on tilt
-    // Combines both axes - tilting toward light source moves highlight across
-    const sheenOffset = 50 + currentRotateY * 8 - currentRotateX * 5;
-    tiltElement.style.setProperty("--sheen-offset", `${sheenOffset}%`);
-
-    tiltElement.style.transform = `
-    translateY(${parallaxY}px)
-    rotateX(${currentRotateX}deg)
-    rotateY(${currentRotateY}deg)
-  `;
-
-    tiltElement.style.boxShadow = `
-    ${shadowX}px ${shadowY}px 40px -5px rgba(0, 0, 0, 0.3),
-    ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
-  `;
-
-    // Continue animating if not at target
-    if (
-      Math.abs(currentRotateX - targetRotateX) > 0.01 ||
-      Math.abs(currentRotateY - targetRotateY) > 0.01
-    ) {
-      animationId = requestAnimationFrame(animate);
-    } else {
-      animationId = null;
+    function lerp(start: number, end: number, factor: number): number {
+      return start + (end - start) * factor;
     }
-  }
 
-  // Parallax effect for hero
-  function handleParallax() {
-    const scrollY = window.scrollY;
-    const heroBottom = hero.offsetTop + hero.offsetHeight;
+    function animate() {
+      currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
+      currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
 
-    // Only apply parallax while hero is visible
-    if (scrollY < heroBottom) {
-      // Reduce parallax on mobile for better performance
-      const isMobile = window.matchMedia("(max-width: 1023px)").matches;
-      const parallaxFactor = isMobile ? 0.03 : 0.1;
-      const parallaxOffset = scrollY * parallaxFactor;
-      hero.style.setProperty("--parallax-y", `${parallaxOffset}`);
+      const parallaxY = parseFloat(
+        tiltElement.style.getPropertyValue("--parallax-y") || "0",
+      );
 
-      // Trigger animation loop to apply the parallax
+      // Dynamic shadow based on tilt direction (light source from top-left)
+      const shadowX = -currentRotateY * 8; // Shadow moves opposite to tilt
+      const shadowY = currentRotateX * 8 + 20; // Base offset + tilt adjustment
+
+      // Light sheen slides across surface based on tilt
+      // Combines both axes - tilting toward light source moves highlight across
+      const sheenOffset = 50 + currentRotateY * 8 - currentRotateX * 5;
+      tiltElement.style.setProperty("--sheen-offset", `${sheenOffset}%`);
+
+      tiltElement.style.transform = `
+      translateY(${parallaxY}px)
+      rotateX(${currentRotateX}deg)
+      rotateY(${currentRotateY}deg)
+    `;
+
+      tiltElement.style.boxShadow = `
+      ${shadowX}px ${shadowY}px 40px -5px rgba(0, 0, 0, 0.3),
+      ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
+    `;
+
+      // Continue animating if not at target
+      if (
+        Math.abs(currentRotateX - targetRotateX) > 0.01 ||
+        Math.abs(currentRotateY - targetRotateY) > 0.01
+      ) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        animationId = null;
+      }
+    }
+
+    // Parallax effect for hero
+    function handleParallax() {
+      const scrollY = window.scrollY;
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+      // Only apply parallax while hero is visible
+      if (scrollY < heroBottom) {
+        // Reduce parallax on mobile for better performance
+        const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+        const parallaxFactor = isMobile ? 0.03 : 0.1;
+        const parallaxOffset = scrollY * parallaxFactor;
+        hero.style.setProperty("--parallax-y", `${parallaxOffset}`);
+
+        // Trigger animation loop to apply the parallax
+        if (!animationId) {
+          animationId = requestAnimationFrame(animate);
+        }
+      }
+    }
+
+    function handleMouseMove(e: MouseEvent) {
+      if (prefersReducedMotion) return;
+
+      const rect = tiltElement.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Calculate mouse position relative to hero center, normalized to viewport
+      const mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
+      const mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
+
+      // Clamp values to prevent extreme tilts when mouse is far away
+      const clampedX = Math.max(-1, Math.min(1, mouseX));
+      const clampedY = Math.max(-1, Math.min(1, mouseY));
+
+      // Invert Y for natural tilt feel (tilt toward mouse)
+      targetRotateX = -clampedY * maxTilt;
+      targetRotateY = clampedX * maxTilt;
+
       if (!animationId) {
         animationId = requestAnimationFrame(animate);
       }
     }
-  }
 
-  window.addEventListener("scroll", handleParallax, { passive: true });
+    // Touch: tilt based on touch position anywhere on screen
+    function handleTouchMove(e: TouchEvent) {
+      if (prefersReducedMotion) return;
 
-  function handleMouseMove(e: MouseEvent) {
-    if (prefersReducedMotion) return;
+      const touch = e.touches[0];
+      const rect = tiltElement.getBoundingClientRect();
 
-    const rect = tiltElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+      // Calculate touch position relative to hero center, normalized to viewport
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
 
-    // Calculate mouse position relative to hero center, normalized to viewport
-    const mouseX = (e.clientX - centerX) / (window.innerWidth / 2);
-    const mouseY = (e.clientY - centerY) / (window.innerHeight / 2);
+      const touchX = (touch.clientX - centerX) / (window.innerWidth / 2);
+      const touchY = (touch.clientY - centerY) / (window.innerHeight / 2);
 
-    // Clamp values to prevent extreme tilts when mouse is far away
-    const clampedX = Math.max(-1, Math.min(1, mouseX));
-    const clampedY = Math.max(-1, Math.min(1, mouseY));
+      // Clamp and apply tilt
+      const clampedX = Math.max(-1, Math.min(1, touchX));
+      const clampedY = Math.max(-1, Math.min(1, touchY));
 
-    // Invert Y for natural tilt feel (tilt toward mouse)
-    targetRotateX = -clampedY * maxTilt;
-    targetRotateY = clampedX * maxTilt;
+      targetRotateX = -clampedY * maxTilt;
+      targetRotateY = clampedX * maxTilt;
 
-    if (!animationId) {
-      animationId = requestAnimationFrame(animate);
+      tiltElement.classList.add("is-tilting");
+
+      if (!animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
     }
-  }
 
-  // Desktop: track mouse across entire document
-  if (window.matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
-    document.addEventListener("mousemove", handleMouseMove, { passive: true });
-  }
+    function handleTouchEnd() {
+      // Reset tilt smoothly when touch ends
+      targetRotateX = 0;
+      targetRotateY = 0;
+      tiltElement.classList.remove("is-tilting");
 
-  // Touch: tilt based on touch position anywhere on screen
-  function handleTouchMove(e: TouchEvent) {
-    if (prefersReducedMotion) return;
-
-    const touch = e.touches[0];
-    const rect = tiltElement.getBoundingClientRect();
-
-    // Calculate touch position relative to hero center, normalized to viewport
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const touchX = (touch.clientX - centerX) / (window.innerWidth / 2);
-    const touchY = (touch.clientY - centerY) / (window.innerHeight / 2);
-
-    // Clamp and apply tilt
-    const clampedX = Math.max(-1, Math.min(1, touchX));
-    const clampedY = Math.max(-1, Math.min(1, touchY));
-
-    targetRotateX = -clampedY * maxTilt;
-    targetRotateY = clampedX * maxTilt;
-
-    tiltElement.classList.add("is-tilting");
-
-    if (!animationId) {
-      animationId = requestAnimationFrame(animate);
+      if (!animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
     }
-  }
 
-  function handleTouchEnd() {
-    // Reset tilt smoothly when touch ends
-    targetRotateX = 0;
-    targetRotateY = 0;
-    tiltElement.classList.remove("is-tilting");
+    // Attach event listeners based on device capabilities
+    window.addEventListener("scroll", handleParallax, { passive: true });
 
-    if (!animationId) {
-      animationId = requestAnimationFrame(animate);
+    // Desktop: track mouse across entire document
+    if (window.matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: true,
+      });
     }
+
+    // Enable touch tilt on mobile/tablet — track touches anywhere on document
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: true,
+      });
+      document.addEventListener("touchend", handleTouchEnd);
+      document.addEventListener("touchcancel", handleTouchEnd);
+    }
+
+    // Cleanup function for view transitions
+    const cleanup = () => {
+      // Cancel any active animation frame
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+
+      // Remove all event listeners
+      window.removeEventListener("scroll", handleParallax);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchcancel", handleTouchEnd);
+
+      // Reset state
+      currentRotateX = 0;
+      currentRotateY = 0;
+      targetRotateX = 0;
+      targetRotateY = 0;
+    };
+
+    // Register cleanup for view transitions
+    document.addEventListener("astro:before-preparation", cleanup, {
+      once: true,
+    });
   }
 
-  // Enable touch tilt on mobile/tablet — track touches anywhere on document
-  if (window.matchMedia("(max-width: 1023px)").matches) {
-    document.addEventListener("touchmove", handleTouchMove, { passive: true });
-    document.addEventListener("touchend", handleTouchEnd);
-    document.addEventListener("touchcancel", handleTouchEnd);
-  }
+  // Run on initial page load
+  initTiltEffect();
+
+  // Re-initialize after view transitions
+  document.addEventListener("astro:page-load", initTiltEffect);
 </script>

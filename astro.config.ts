@@ -5,15 +5,20 @@ import inline from "@playform/inline";
 
 import vitePwa from "@vite-pwa/astro";
 
+import mdx from "@astrojs/mdx";
+
 // https://astro.build/config
 export default defineConfig({
   // Production URL for sitemap and canonical URLs
   site: "https://peterchrjoergensen.dk",
 
+  // Ensure consistent trailing slash behavior with directory-based URLs
+  trailingSlash: "always",
+
   // Integrations for SEO and functionality
   integrations: [
-    sitemap(),
-    inline(), // Inline critical CSS for faster FCP
+    sitemap(), // Inline critical CSS for faster FCP
+    inline(),
     compress({
       CSS: true,
       HTML: true,
@@ -65,7 +70,19 @@ export default defineConfig({
         ],
       },
     }),
+    mdx(),
   ],
+
+  // Prefetch links for faster navigation
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
+  },
+
+  // Automatic responsive image styles
+  image: {
+    responsiveStyles: true,
+  },
 
   build: {
     // Generate clean URLs without .html extension

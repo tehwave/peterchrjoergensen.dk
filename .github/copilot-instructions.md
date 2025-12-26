@@ -28,18 +28,20 @@ When you need to look up Astro APIs, patterns, or best practices, use the `searc
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (user is always running this - never start it)
 npm run dev
 
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build (only use when specifically testing with Chrome DevTools)
 npm run preview
 
 # Format code
 npx prettier --write .
 ```
+
+**Important:** NEVER run `npm run dev` - the user is always running it. NEVER run `npm run preview` or `killall node` commands unless specifically testing production builds with Chrome DevTools.
 
 ## Project Structure
 
@@ -66,10 +68,17 @@ const data = await fetch("...").then((r) => r.json());
 ---
 
 <!-- Component Template (HTML output) -->
-<div>{data.title}</div>
+<div class="component">
+  <h1>{data.title}</h1>
+</div>
 
-<style>
-  /* Scoped styles (only affect this component) */
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .component {
+    color: $color-text-primary;
+  }
 </style>
 ```
 
@@ -93,26 +102,20 @@ const data = await fetch("...").then((r) => r.json());
 
 ### Styling Best Practices
 
-- **Scoped styles by default** — Astro automatically scopes `<style>` to the component
+- **Always use scoped SASS** — Every component must have `<style lang="scss">`
+- **Import design tokens**: Always `@use "../styles/variables" as *;` and `@use "../styles/mixins" as *;`
+- **BEM naming**: `.component`, `.component__element`, `.component--modifier`
+- **Automatic scoping** — Styles only affect the current component, never leak
+- **Use design tokens** from `_variables.scss` — never hardcode colors, spacing, or breakpoints
+- **Use mixins** from `_mixins.scss` — `@include respond-to(md)`, `@include container`, etc.
 - Low-specificity selectors like `h1 {}` are safe — they get scoped automatically
-- Use `<style is:global>` **sparingly** for truly global styles
+- Use `<style is:global>` **never** — global styles belong in `src/styles/global.scss`
 - Use `:global()` selector to style child components: `article :global(h1) { }`
 - Use `class:list` for conditional classes: `<div class:list={["base", { active: isActive }]}>`
 
 ### Images & Assets
 
-- Import images from `src/assets/` for automatic optimization:
-
-  ```astro
-  ---
-  import { Image } from "astro:assets";
-  import hero from "../assets/hero.jpg";
-  ---
-
-  <Image src={hero} alt="Hero image" />
-  ```
-
-- Use `<Picture />` for responsive images with multiple formats:
+- **Always use `<Picture />` from `astro:assets`** for all image assets — it provides optimal responsive images with modern formats:
 
   ```astro
   ---
@@ -120,10 +123,14 @@ const data = await fetch("...").then((r) => r.json());
   import photo from "../assets/photo.png";
   ---
 
-  <Picture src={photo} formats={["avif", "webp"]} alt="Photo" />
+  <Picture src={photo} formats={["avif", "webp"]} alt="Photo description" />
   ```
 
-- Always provide `alt` attributes — they are **mandatory** for `<Image>` and `<Picture>`
+- `<Picture />` automatically generates multiple formats (AVIF, WebP, fallback) and optimizes images at build time
+- Import images from `src/assets/` for automatic optimization
+- Always specify `formats={["avif", "webp"]}` for best performance
+- The `alt` attribute is **mandatory** — builds will fail without it
+- Use `<Image />` only when you don't need multiple formats or responsive srcsets
 - Place unprocessed files (favicon, robots.txt) in `public/`
 
 ### TypeScript
@@ -257,6 +264,25 @@ import Layout from "../layouts/Layout.astro";
 
 This is a **personal website**, so all written content should reflect a consistent voice:
 
+### Background Context (About Me)
+
+- I’m a **senior web developer** with **8 years** of professional experience (I’ve been programming since I was **14**; I’m **32** now)
+- For **6 of those 8 years**, I led a department ( **8 developers** + **2 project leads** ) in a digital marketing agency
+- I’ve shipped in **PHP**, **Laravel**, and **WordPress** across everything from local business websites to **multi‑million** businesses
+- I’m comfortable in both **legacy** and **greenfield** codebases, and on teams ranging from solo to ~6+ developers (including external collaborators)
+- I know **performance**, **DevOps/server ops**, and what it takes to run projects when things break (incident handling, trade-offs, and pragmatism)
+- I’ve trained developers, hired and fired, and worked as developer, project lead, and designer
+
+### Communication Level & Working Style
+
+**Treat me as a senior peer:**
+
+- Skip basics and "what is X" explanations — assume familiarity with modern web tooling, architectural patterns, and production realities
+- Focus on sharp edges, trade-offs, constraints, and decision-making heuristics
+- Prefer concrete specifics over generic best-practice lists
+- When suggesting approaches, explain the "why" (constraints, performance impact, maintainability trade-offs) not just the "what"
+- Default to practitioner-level specificity: real metrics, before/after comparisons, edge cases that actually happen
+
 ### Perspective
 
 - Always use **first-person singular**: "I am", "I think", "I built", "My experience"
@@ -268,6 +294,11 @@ This is a **personal website**, so all written content should reflect a consiste
 - **Confident but humble** — Demonstrate competence without arrogance
 - **Specific and concrete** — Use real examples, avoid vague claims
 - **Knowledgeable** — Show depth of understanding, explain the "why" not just the "what"
+
+Additional tone guardrails:
+
+- Avoid “junior framing” and generic advice; default to practitioner-level specificity and real trade-offs
+- Don’t describe me with empty superlatives (“highly skilled”); let specifics (scope, constraints, outcomes) carry the credibility
 
 ### Writing Style
 
@@ -293,4 +324,4 @@ Before committing, always:
 
 1. Run `npm run build` to ensure no build errors
 2. Run `npx prettier --check .` for formatting
-3. Test with `npm run preview` for production behavior
+3. For normal testing, use the running `npm run dev` server (no need to run `npm run preview`)

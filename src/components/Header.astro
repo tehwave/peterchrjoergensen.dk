@@ -11,81 +11,117 @@ type Props = Record<string, never>;
 
 <header class="header">
   <div class="header__container">
-    <a href="/" class="header__logo">Peter C. Jørgensen</a>
+    <a href="/" class="header__logo">Peter Chr. Jørgensen</a>
     <nav class="header__nav" aria-label="Main navigation">
-      <a href="#about" class="header__nav-link">About</a>
-      <a href="#projects" class="header__nav-link">Projects</a>
-      <a href="#ai" class="header__nav-link">AI</a>
+      <a href="/#projects" class="header__nav-link">Projects</a>
+      <a href="/#ai" class="header__nav-link">AI</a>
+      <a href="/#blog" class="header__nav-link">Blog</a>
     </nav>
   </div>
 </header>
 
 <script>
-  const header = document.querySelector(".header");
-  const hero = document.querySelector("#hero") as HTMLElement;
-  const navLinks = document.querySelectorAll(".header__nav-link");
-  const sections = document.querySelectorAll("section[id], footer[id]");
+  function initHeader() {
+    const header = document.querySelector(".header");
+    const hero = document.querySelector("#hero") as HTMLElement | null;
+    const navLinks = document.querySelectorAll(".header__nav-link");
+    const sections = document.querySelectorAll("section[id], footer[id]");
 
-  // State machine to prevent animation interruption when scrolling rapidly
-  let wasScrolled = false;
-  let isAnimatingOut = false;
+    // Detect if we're on homepage (has hero) or other pages (blog, etc.)
+    const isHomepage = hero !== null;
 
-  function updateActiveLink() {
-    if (!header || !hero) return;
+    // State machine to prevent animation interruption when scrolling rapidly
+    let wasScrolled = false;
+    let isAnimatingOut = false;
+    let isInitialLoad = true;
 
-    const heroBottom = hero.offsetTop + hero.offsetHeight;
-    const isScrolledPastHero = window.scrollY > heroBottom;
+    function updateActiveLink() {
+      if (!header) return;
 
-    // Apply solid background only after hero is fully offscreen
-    if (isScrolledPastHero && !isAnimatingOut) {
-      header.classList.remove("scrolled-exit");
-      header.classList.add("scrolled");
-      wasScrolled = true;
-    } else if (!isScrolledPastHero && wasScrolled && !isAnimatingOut) {
-      // Trigger exit animation
-      isAnimatingOut = true;
-      header.classList.add("scrolled-exit");
+      // On non-homepage pages, show solid background immediately and skip scroll logic
+      if (!isHomepage) {
+        // Use no-animation class on initial load to prevent slide-down effect
+        if (isInitialLoad) {
+          header.classList.add("scrolled-no-animation");
+          isInitialLoad = false;
+        } else {
+          header.classList.add("scrolled");
+        }
+        return;
+      }
 
-      // After animation completes, remove classes
-      setTimeout(() => {
-        header.classList.remove("scrolled", "scrolled-exit");
-        wasScrolled = false;
-        isAnimatingOut = false;
-      }, 300);
+      // Homepage-only scroll behavior (requires hero element)
+      if (!hero) return;
+
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
+      const isScrolledPastHero = window.scrollY > heroBottom;
+
+      // Apply solid background only after hero is fully offscreen
+      if (isScrolledPastHero && !isAnimatingOut) {
+        header.classList.remove("scrolled-exit");
+        header.classList.add("scrolled");
+        wasScrolled = true;
+      } else if (!isScrolledPastHero && wasScrolled && !isAnimatingOut) {
+        // Trigger exit animation
+        isAnimatingOut = true;
+        header.classList.add("scrolled-exit");
+
+        // After animation completes, remove classes
+        setTimeout(() => {
+          header.classList.remove("scrolled", "scrolled-exit");
+          wasScrolled = false;
+          isAnimatingOut = false;
+        }, 300);
+      }
+
+      // Highlight nav link when section is 1/3 into viewport (feels more natural
+      // than waiting until section hits the very top of the screen)
+      // Only works on homepage where sections exist
+      let currentSection = "";
+      const scrollPosition = window.scrollY + window.innerHeight / 3;
+
+      sections.forEach((section) => {
+        const el = section as HTMLElement;
+        const sectionTop = el.offsetTop;
+        const sectionHeight = el.offsetHeight;
+
+        if (
+          scrollPosition >= sectionTop &&
+          scrollPosition < sectionTop + sectionHeight
+        ) {
+          currentSection = el.getAttribute("id") || "";
+        }
+      });
+
+      navLinks.forEach((link) => {
+        link.classList.remove("active");
+        const href = link.getAttribute("href");
+        // Match both #section and /#section formats
+        if (href === `#${currentSection}` || href === `/#${currentSection}`) {
+          link.classList.add("active");
+        }
+      });
     }
 
-    // Highlight nav link when section is 1/3 into viewport (feels more natural
-    // than waiting until section hits the very top of the screen)
-    let currentSection = "";
-    const scrollPosition = window.scrollY + window.innerHeight / 3;
+    if (header) {
+      window.addEventListener("scroll", updateActiveLink);
+      // Run on page load
+      updateActiveLink();
+    }
 
-    sections.forEach((section) => {
-      const el = section as HTMLElement;
-      const sectionTop = el.offsetTop;
-      const sectionHeight = el.offsetHeight;
-
-      if (
-        scrollPosition >= sectionTop &&
-        scrollPosition < sectionTop + sectionHeight
-      ) {
-        currentSection = el.getAttribute("id") || "";
-      }
-    });
-
-    navLinks.forEach((link) => {
-      link.classList.remove("active");
-      const href = link.getAttribute("href");
-      if (href === `#${currentSection}`) {
-        link.classList.add("active");
+    // Cleanup function for view transitions
+    document.addEventListener("astro:before-preparation", () => {
+      if (header) {
+        window.removeEventListener("scroll", updateActiveLink);
       }
     });
   }
 
-  if (header) {
-    window.addEventListener("scroll", updateActiveLink);
-    // Run on page load
-    updateActiveLink();
-  }
+  // Run on initial page load
+  initHeader();
+
+  // Re-run after view transitions (SPA-like navigation)
+  document.addEventListener("astro:page-load", initHeader);
 </script>
 
 <style lang="scss">
@@ -127,6 +163,22 @@ type Props = Record<string, never>;
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
       backdrop-filter: blur(10px);
       border-radius: 50px;
+
+      @include respond-to(md) {
+        top: $space-sm;
+      }
+    }
+
+    &.scrolled-no-animation {
+      position: fixed;
+      top: $space-md;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba($color-blue, 0.95);
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      backdrop-filter: blur(10px);
+      border-radius: 50px;
+      animation: none;
 
       @include respond-to(md) {
         top: $space-sm;

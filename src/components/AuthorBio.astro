@@ -1,0 +1,103 @@
+---
+import { Picture } from "astro:assets";
+import authorImage from "../assets/author-bio.png";
+
+const name = "Peter Chr. Jørgensen";
+const bio =
+  "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
+---
+
+<section
+  class="author-bio"
+  itemscope
+  itemtype="https://schema.org/Person"
+  itemid="https://peterchrjoergensen.dk/#person"
+>
+  <div class="author-bio__container">
+    <Picture
+      src={authorImage}
+      alt={`Photo of ${name}`}
+      formats={["avif", "webp"]}
+      widths={[80, 160]}
+      sizes="80px"
+      class="author-bio__image"
+      loading="lazy"
+      inferSize={true}
+      itemprop="image"
+    />
+    <div class="author-bio__content">
+      <span class="author-bio__label">Written by</span>
+      <h3 class="author-bio__name" itemprop="name">{name}</h3>
+      <p class="author-bio__text" itemprop="description">{bio}</p>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .author-bio {
+    padding-bottom: $space-3xl;
+    padding-inline: $space-xl;
+    background: $color-cream;
+
+    @include respond-to(md) {
+      padding-bottom: $space-2xl;
+      padding-inline: $space-lg;
+    }
+  }
+
+  .author-bio__container {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-xl;
+    max-width: $max-width-text;
+    margin-inline: auto;
+    border-top: 1px solid $color-border;
+    padding-top: $space-3xl;
+
+    @include respond-to(md) {
+      padding-top: $space-2xl;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-lg;
+      text-align: center;
+    }
+  }
+
+  .author-bio__image {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .author-bio__content {
+    flex: 1;
+  }
+
+  .author-bio__label {
+    display: block;
+    margin-bottom: $space-xs;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .author-bio__name {
+    margin-block: 0 $space-sm;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .author-bio__text {
+    margin: 0;
+    font-size: $font-size-base;
+    line-height: 1.6;
+  }
+</style>

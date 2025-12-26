@@ -12,7 +12,7 @@ Always structure `.astro` files with frontmatter first, then template, then styl
 ---
 // 1. Imports
 import Component from "./Component.astro";
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 
 // 2. Props interface (if accepting props)
 interface Props {
@@ -29,12 +29,20 @@ const data = await fetchData();
 
 <!-- 5. Template -->
 <div class="container">
-  <h1>{title}</h1>
+  <h1 class="container__title">{title}</h1>
 </div>
 
-<!-- 6. Scoped styles -->
-<style>
+<!-- 6. Scoped SASS styles — always use lang="scss" -->
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
   .container {
+    padding: $space-lg;
+  }
+
+  .container__title {
+    font-size: $font-size-xl;
   }
 </style>
 ```
@@ -48,25 +56,116 @@ const data = await fetchData();
 - For required children: `type Props = { children: any }`
 - Props interface is auto-detected by Astro VS Code extension for IntelliSense
 
-## Scoped Styles
+## Styling — Always Scoped SASS
 
-- Styles are **automatically scoped** — they only affect the current component
-- Low-specificity selectors like `h1 {}` are safe to use
-- Scoped styles **don't leak** to child components or the rest of the site
-- To style child components, wrap them in a styleable element or use `:global()`:
-  ```astro
-  <style>
-    /* Only affects h1 inside this component's article */
-    article :global(h1) {
-      color: blue;
-    }
-  </style>
-  ```
-- Use `<style is:global>` only when truly needed for site-wide styles
+**Every component must use scoped SASS.** Never use plain CSS.
+
+### Required Pattern
+
+```astro
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .component-name {
+    color: $color-text-primary;
+    @include transition(opacity, 0.3s);
+  }
+</style>
+```
+
+### SASS Rules
+
+- **Always add `lang="scss"`** to the `<style>` tag
+- **Always use `@use`** to import `variables` and `mixins` at the top of styles
+- Use SASS partials path: `@use "../styles/variables" as *;`
+- Import both even if only using one — keeps consistency
+- Use `@use` (modern) not `@import` (deprecated)
+
+### Scoping & Naming
+
+- Styles are **automatically scoped** — they only affect this component
+- Use **BEM naming convention**: `.component`, `.component__element`, `.component--modifier`
+- Low-specificity selectors like `h1 {}` are safe — scoping prevents leaks
+- Never use `<style is:global>` — global styles belong in `src/styles/global.scss`
+
+### Styling Child Components
+
+Use `:global()` to pierce scoped styles when styling child component markup:
+
+```astro
+<style lang="scss">
+  article :global(h1) {
+    color: blue; /* Only affects h1 inside this component's article */
+  }
+</style>
+```
+
+### Variables & Mixins Usage
+
+**Always use design tokens from `_variables.scss`:**
+
+- Colors: `$color-text-primary`, `$color-blue`, `$color-accent`
+- Spacing: `$space-sm`, `$space-md`, `$space-lg`, `$space-xl`
+- Typography: `$font-sans`, `$font-size-lg`, `$font-weight-semibold`
+- Breakpoints: Use mixins, not raw values
+
+**Use mixins from `_mixins.scss` for common patterns:**
+
+- `@include respond-to(md)` — Media queries
+- `@include container` — Max-width centered container
+- `@include transition(property, duration)` — Smooth transitions
+- `@include section-label` — Uppercase accent labels
+- `@include section-heading` — Large section titles
+
+### Clean CSS Patterns
+
+- **Keep specificity low** — single class selectors when possible
+- **Avoid nesting beyond 3 levels** — flatter is better
+- **Use logical property names**: `margin-inline`, `padding-block`
+- **Group related properties**: layout → box model → typography → visual
+- **One selector per line** for multi-selectors
 - Use `class:list` for conditional classes:
   ```astro
-  <div class:list={["base", { active: isActive, "has-error": error }]}></div>
+  <div class:list={["base", { active: isActive, error }]}></div>
   ```
+
+### Example Component Styles
+
+```astro
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .hero {
+    background: $color-bg;
+    padding: $space-xl 0;
+
+    @include respond-to(md) {
+      padding: $space-lg 0;
+    }
+  }
+
+  .hero__container {
+    @include container;
+    display: grid;
+    gap: $space-lg;
+  }
+
+  .hero__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    @include transition(color, 0.2s);
+  }
+
+  .hero__image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+</style>
+```
 
 ## Images & Assets
 
@@ -153,8 +252,10 @@ Move `await` calls into separate components to enable streaming:
 
 ```astro
 // ❌ Blocks entire page const data = await fetch("...").then(r => r.json()); //
-✅ Enables streaming — header
- import DataComponent from "./DataComponent.astro"; <header>Title</header>
+✅ Enables streaming — header import DataComponent from "./DataComponent.astro"; <header
+>
+  Title
+</header>
 <DataComponent />
 ```
 

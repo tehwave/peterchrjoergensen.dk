@@ -1,0 +1,77 @@
+---
+title: "Building Performance Into the Foundation"
+description: "Fast by default, not through optimization heroics. Here's how I made speed inevitable."
+pubDate: 2025-12-26
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "performance", "web-development"]
+heroImage: "../../assets/blog/building-performance-first-websites/hero.jpg"
+heroImageAlt: "Laptop with code editor open on a desk"
+heroImageCaption: "Photo by [Clément Hélardot](https://unsplash.com/@clemhlrdt) on [Unsplash](https://unsplash.com)"
+---
+
+Most performance work happens after something is too slow. You build the thing, measure it, then spend days shaving milliseconds. I wanted to try the opposite: make choices upfront that would make speed inevitable.
+
+This site was my test case.
+
+## Static First
+
+Every page gets pre-rendered at build time. Homepage, blog index, individual posts. All HTML before anyone visits. Cloudflare Pages caches it at the edge, so most requests never touch the origin.
+
+If your content doesn't change per request, render it once. Simple, but easy to forget when you're reaching for a framework.
+
+## The JavaScript I Actually Shipped
+
+No React. No Vue. No client hydration. The interactive bits use plain JavaScript in `<script>` tags inside Astro components.
+
+The hero animation runs Typed.js to rotate through "Web Developer", "Game Developer", etc. I lazy-load it with `requestIdleCallback` so it doesn't block initial render:
+
+```typescript
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(() => {
+    initTypedAnimation();
+  });
+}
+```
+
+If someone has `prefers-reduced-motion` set, I skip the animation entirely and show static text instead. Accessibility and performance often point in the same direction.
+
+Scroll animations fade elements in as they enter the viewport. I built an `AnimateOnScroll` component using Intersection Observer. No library, just a script that checks `isIntersecting` and toggles a CSS class.
+
+The navigation header transitions from transparent to a solid backdrop when you scroll past the hero. A scroll listener with some state management to prevent animation interruption when scrolling fast.
+
+Three small scripts, all inline in the components that need them. Nothing more.
+
+## Images Without the Manual Work
+
+Astro's `<Picture>` component generates AVIF and WebP versions at build time. You import an image, pass it to `<Picture>`, and the framework handles the rest:
+
+```astro
+import {Picture} from 'astro:assets'; import profileImage from
+'../assets/peter-profile.png';
+
+<Picture
+  src={profileImage}
+  formats={["avif", "webp"]}
+  alt="Peter Chr. Jørgensen"
+  loading="eager"
+  fetchpriority="high"
+/>
+```
+
+The hero image uses `loading="eager"` and `fetchpriority="high"` because it's above the fold. Everything else gets lazy loading by default.
+
+I don't write `srcset` by hand. I don't manually convert images. Import, use, done.
+
+## Where This Works
+
+This site is mostly static content. Blog posts, project descriptions, an about page. Nothing needs real-time data. That made Astro the obvious choice.
+
+The whole site ships under 100KB of JavaScript. Builds complete in seconds. I haven't needed to profile anything because there's nothing slow enough to profile.
+
+That's the real win: not having to optimize, because the defaults are already fast.
+
+## Where It Doesn't
+
+I wouldn't build a dashboard or SaaS app this way. Astro is optimized for content sites where most of the page is static. Anything that needs backend logic, databases, or per-request rendering? I'd reach for Laravel.
+
+For a portfolio? It's been exactly right. Fast by default, minimal JavaScript, and I haven't fought the framework once.

@@ -1,0 +1,124 @@
+---
+/**
+ * Blog section for home page.
+ * Displays latest blog posts with excerpts and metadata.
+ * Posts are sorted by publication date (newest first).
+ */
+import { getCollection } from "astro:content";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+import BlogPostCard from "./BlogPostCard.astro";
+import { getReadingTime } from "../utils/reading-time";
+
+type Props = Record<string, never>;
+
+// Get all blog posts, sorted by date (newest first)
+const allPosts = await getCollection("blog");
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+
+<section class="blog" id="blog">
+  <div class="blog__container">
+    <div class="blog__header">
+      <span class="blog__label">MY WRITING</span>
+      <h2 class="blog__heading">Latest from the Journal</h2>
+    </div>
+
+    <div class="blog__grid">
+      {
+        sortedPosts.map((post, index) => {
+          const readingTime = getReadingTime(post.body || "");
+          const animationDelay = index * 0.1; // 100ms = 0.1s per post
+
+          return (
+            <AnimateOnScroll
+              animation="fade-up"
+              delay={animationDelay}
+              class="blog__card-wrapper"
+            >
+              <BlogPostCard
+                title={post.data.title}
+                description={post.data.description}
+                pubDate={post.data.pubDate}
+                readingTime={readingTime}
+                tags={post.data.tags}
+                href={`/blog/${post.id}/`}
+                heroImage={post.data.heroImage}
+                heroImageAlt={post.data.heroImageAlt}
+              />
+            </AnimateOnScroll>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "../styles/mixins" as *;
+  @use "../styles/variables" as *;
+
+  .blog {
+    position: relative;
+    padding: $space-4xl $space-xl;
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
+
+    &__header {
+      margin-bottom: $space-3xl;
+      text-align: center;
+    }
+
+    &__label {
+      display: block;
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: $space-md;
+    }
+
+    &__heading {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      color: $color-text-dark;
+      line-height: 1.2;
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: $space-2xl;
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+        gap: $space-xl;
+      }
+    }
+
+    &__card-wrapper {
+      display: flex;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
