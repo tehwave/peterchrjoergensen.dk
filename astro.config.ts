@@ -2,9 +2,7 @@ import { defineConfig, fontProviders } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import compress from "@playform/compress";
 import inline from "@playform/inline";
-
 import vitePwa from "@vite-pwa/astro";
-
 import mdx from "@astrojs/mdx";
 
 // https://astro.build/config
