@@ -64,15 +64,19 @@ const roles = [
   let startTypedAnimationHandler: (() => void) | null = null;
   let cleanupTypedAnimationHandler: (() => void) | null = null;
 
+  // IntersectionObserver to pause/resume animation when out of view
+  let observer: IntersectionObserver | null = null;
+
   // Lazy-load typed.js when browser is idle for better performance
   const initTypedAnimation = async () => {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
     const stringsElement = document.querySelector(
       "#typed-strings",
     ) as HTMLElement;
+    const heroElement = document.querySelector(".hero") as HTMLElement;
 
     // Early return if elements don't exist (Hero not on page)
-    if (!typedElement || !stringsElement) {
+    if (!typedElement || !stringsElement || !heroElement) {
       return;
     }
 
@@ -106,6 +110,24 @@ const roles = [
           showCursor: true,
           cursorChar: "|",
         });
+
+        // Set up IntersectionObserver to pause when out of view
+        observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (typedInstance) {
+                if (entry.isIntersecting) {
+                  typedInstance.start();
+                } else {
+                  typedInstance.stop();
+                }
+              }
+            });
+          },
+          { threshold: 0.1 } // Trigger when 10% visible
+        );
+
+        observer.observe(heroElement);
       } catch (error) {
         console.error("Failed to initialize Typed.js:", error);
         // Fallback to static text if typed.js fails to load
@@ -116,6 +138,10 @@ const roles = [
 
   // Cleanup function for view transitions
   const cleanupTypedAnimation = () => {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
     if (typedInstance) {
       typedInstance.destroy();
       typedInstance = null;
