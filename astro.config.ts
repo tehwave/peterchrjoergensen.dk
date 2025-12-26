@@ -1,9 +1,10 @@
 import { defineConfig, fontProviders } from "astro/config";
-import sitemap from "@astrojs/sitemap";
+import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import compress from "@playform/compress";
 import inline from "@playform/inline";
 import vitePwa from "@vite-pwa/astro";
 import mdx from "@astrojs/mdx";
+import { serializeSitemap } from "./src/utils/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,8 +16,11 @@ export default defineConfig({
 
   // Integrations for SEO and functionality
   integrations: [
-    sitemap(), // Inline critical CSS for faster FCP
-    inline(),
+    sitemap({
+      // Customize sitemap entries with frontmatter data
+      serialize: (item) => serializeSitemap(item, ChangeFreqEnum),
+    }),
+    inline(), // Inline critical CSS for faster FCP
     compress({
       CSS: true,
       HTML: true,
