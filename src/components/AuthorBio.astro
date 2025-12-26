@@ -3,11 +3,17 @@ import { Picture } from "astro:assets";
 import authorImage from "../assets/author-bio.png";
 
 const name = "Peter Chr. Jørgensen";
-const bio = "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
+const bio =
+  "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
 const url = "https://peterchrjoergensen.dk";
 ---
 
-<section class="author-bio" itemscope itemtype="https://schema.org/Person" itemid="https://peterchrjoergensen.dk/#person">
+<section
+  class="author-bio"
+  itemscope
+  itemtype="https://schema.org/Person"
+  itemid="https://peterchrjoergensen.dk/#person"
+>
   <div class="author-bio__container">
     <Picture
       src={authorImage}
@@ -33,13 +39,12 @@ const url = "https://peterchrjoergensen.dk";
   @use "../styles/mixins" as *;
 
   .author-bio {
-    padding-block: $space-3xl;
+    padding-bottom: $space-3xl;
     padding-inline: $space-xl;
     background: $color-cream;
-    border-top: 1px solid $color-border;
 
     @include respond-to(md) {
-      padding-block: $space-2xl;
+      padding-bottom: $space-2xl;
       padding-inline: $space-lg;
     }
   }
@@ -50,8 +55,11 @@ const url = "https://peterchrjoergensen.dk";
     gap: $space-xl;
     max-width: $max-width-text;
     margin-inline: auto;
+    border-top: 1px solid $color-border;
+    padding-top: $space-3xl;
 
     @include respond-to(md) {
+      padding-top: $space-2xl;
       flex-direction: column;
       align-items: center;
       gap: $space-lg;
@@ -92,6 +100,5 @@ const url = "https://peterchrjoergensen.dk";
     margin: 0;
     font-size: $font-size-base;
     line-height: 1.6;
-    color: $color-text-secondary;
   }
 </style>
