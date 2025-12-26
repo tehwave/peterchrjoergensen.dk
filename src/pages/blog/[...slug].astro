@@ -31,32 +31,32 @@ import { parseInlineMarkdown } from "../../utils/markdown";
  * a static HTML file for each blog post.
  */
 export async function getStaticPaths() {
-	const posts = await getCollection("blog");
-	// Sort posts by date (newest first)
-	const sortedPosts = posts.sort(
-		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-	);
+  const posts = await getCollection("blog");
+  // Sort posts by date (newest first)
+  const sortedPosts = posts.sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
 
-	return sortedPosts.map((post, index) => {
-		const prevPost =
-			index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
-		const nextPost = index > 0 ? sortedPosts[index - 1] : null;
+  return sortedPosts.map((post, index) => {
+    const prevPost =
+      index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+    const nextPost = index > 0 ? sortedPosts[index - 1] : null;
 
-		return {
-			params: { slug: post.id },
-			props: {
-				post,
-				prevPost,
-				nextPost,
-			},
-		};
-	});
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        prevPost,
+        nextPost,
+      },
+    };
+  });
 }
 
 type Props = {
-	post: CollectionEntry<"blog">;
-	prevPost: CollectionEntry<"blog"> | null;
-	nextPost: CollectionEntry<"blog"> | null;
+  post: CollectionEntry<"blog">;
+  prevPost: CollectionEntry<"blog"> | null;
+  nextPost: CollectionEntry<"blog"> | null;
 };
 
 const { post } = Astro.props;
@@ -74,15 +74,15 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Extract frontmatter data from the post
 const {
-	title,
-	description,
-	pubDate,
-	updatedDate,
-	author,
-	tags,
-	heroImage,
-	heroImageAlt,
-	heroImageCaption,
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  author,
+  tags,
+  heroImage,
+  heroImageAlt,
+  heroImageCaption,
 } = post.data;
 
 /**
@@ -95,599 +95,587 @@ const {
  * @see https://schema.org/BreadcrumbList
  */
 const structuredData = {
-	"@context": "https://schema.org",
-	"@graph": [
-		{
-			"@type": "BlogPosting",
-			"@id": canonicalURL + "#article",
-			headline: title,
-			description: description,
-			url: canonicalURL.toString(),
-			mainEntityOfPage: {
-				"@type": "WebPage",
-				"@id": canonicalURL.toString(),
-			},
-			author: {
-				"@type": "Person",
-				"@id": "https://peterchrjoergensen.dk/#person",
-				name: author,
-			},
-			publisher: {
-				"@type": "Person",
-				"@id": "https://peterchrjoergensen.dk/#person",
-				name: "Peter Chr. Jørgensen",
-				url: "https://peterchrjoergensen.dk",
-			},
-			datePublished: pubDate.toISOString(),
-			...(updatedDate && { dateModified: updatedDate.toISOString() }),
-			inLanguage: "en-US",
-			wordCount: wordCount,
-			keywords: tags?.join(", ") || "",
-			...(heroImage && {
-				image: {
-					"@type": "ImageObject",
-					url: new URL(heroImage.src, Astro.site).toString(),
-					width: heroImage.width,
-					height: heroImage.height,
-				},
-			}),
-		},
-		{
-			"@type": "BreadcrumbList",
-			itemListElement: [
-				{
-					"@type": "ListItem",
-					position: 1,
-					name: "Home",
-					item: "https://peterchrjoergensen.dk",
-				},
-				{
-					"@type": "ListItem",
-					position: 2,
-					name: "Blog",
-					item: "https://peterchrjoergensen.dk/blog",
-				},
-				{
-					"@type": "ListItem",
-					position: 3,
-					name: title,
-					item: canonicalURL.toString(),
-				},
-			],
-		},
-	],
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": canonicalURL + "#article",
+      headline: title,
+      description: description,
+      url: canonicalURL.toString(),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalURL.toString(),
+      },
+      author: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: author,
+      },
+      publisher: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: "Peter Chr. Jørgensen",
+        url: "https://peterchrjoergensen.dk",
+      },
+      datePublished: pubDate.toISOString(),
+      ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+      inLanguage: "en-US",
+      wordCount: wordCount,
+      keywords: tags?.join(", ") || "",
+      ...(heroImage && {
+        image: {
+          "@type": "ImageObject",
+          url: new URL(heroImage.src, Astro.site).toString(),
+          width: heroImage.width,
+          height: heroImage.height,
+        },
+      }),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://peterchrjoergensen.dk",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Blog",
+          item: "https://peterchrjoergensen.dk/blog",
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: title,
+          item: canonicalURL.toString(),
+        },
+      ],
+    },
+  ],
 };
 ---
 
 <Layout title={title} description={description}>
-	<Fragment slot="head">
-		<!-- 
+  <Fragment slot="head">
+    <!-- 
 			Social Media Meta Tags
 			These control how the post appears when shared on social platforms
 		-->
 
-		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="article" />
-		<meta property="og:url" content={canonicalURL} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
-		{
-			heroImage && (
-				<meta
-					property="og:image"
-					content={new URL(heroImage.src, Astro.site)}
-				/>
-			)
-		}
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {
+      heroImage && (
+        <meta
+          property="og:image"
+          content={new URL(heroImage.src, Astro.site)}
+        />
+      )
+    }
 
-		<!-- Twitter -->
-		<meta
-			property="twitter:card"
-			content={heroImage ? "summary_large_image" : "summary"}
-		/>
-		<meta property="twitter:url" content={canonicalURL} />
-		<meta property="twitter:title" content={title} />
-		<meta property="twitter:description" content={description} />
-		{
-			heroImage && (
-				<meta
-					property="twitter:image"
-					content={new URL(heroImage.src, Astro.site)}
-				/>
-			)
-		}
+    <!-- Twitter -->
+    <meta
+      property="twitter:card"
+      content={heroImage ? "summary_large_image" : "summary"}
+    />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    {
+      heroImage && (
+        <meta
+          property="twitter:image"
+          content={new URL(heroImage.src, Astro.site)}
+        />
+      )
+    }
 
-		<!-- Article metadata -->
-		<meta
-			property="article:published_time"
-			content={pubDate.toISOString()}
-		/>
-		{
-			updatedDate && (
-				<meta
-					property="article:modified_time"
-					content={updatedDate.toISOString()}
-				/>
-			)
-		}
-		<meta property="article:author" content={author} />
-		{tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+    <!-- Article metadata -->
+    <meta property="article:published_time" content={pubDate.toISOString()} />
+    {
+      updatedDate && (
+        <meta
+          property="article:modified_time"
+          content={updatedDate.toISOString()}
+        />
+      )
+    }
+    <meta property="article:author" content={author} />
+    {tags?.map((tag) => <meta property="article:tag" content={tag} />)}
 
-		<!-- Canonical URL -->
-		<link rel="canonical" href={canonicalURL} />
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
 
-		<!-- Structured data -->
-		<script
-			is:inline
-			type="application/ld+json"
-			set:html={JSON.stringify(structuredData)}
-		/>
-	</Fragment>
+    <!-- Structured data -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
+  </Fragment>
 
-	<article class="blog-post" transition:animate={fadeAnimation}>
-		<div class="blog-post__header-container">
-			<header class="blog-post__header">
-				<div class="blog-post__meta-header">
-					<a href="/blog/" class="blog-post__back-link"
-						>← Back to Blog</a
-					>
-				</div>
+  <article class="blog-post" transition:animate={fadeAnimation}>
+    <div class="blog-post__header-container">
+      <header class="blog-post__header">
+        <div class="blog-post__meta-header">
+          <a href="/blog/" class="blog-post__back-link">← Back to Blog</a>
+        </div>
 
-				<h1>{title}</h1>
+        <h1>{title}</h1>
 
-				<p class="blog-post__description">{description}</p>
+        <p class="blog-post__description">{description}</p>
 
-				<div class="blog-post__meta">
-					<span class="author">{author}</span>
-					<time datetime={pubDate.toISOString()}>
-						{
-							pubDate.toLocaleDateString("en-US", {
-								year: "numeric",
-								month: "long",
-								day: "numeric",
-							})
-						}
-					</time>
-					<span
-						class="read-time"
-						aria-label={`${readingTime} minute read`}
-					>
-						{readingTime} min read
-					</span>
-				</div>
+        <div class="blog-post__meta">
+          <span class="author">{author}</span>
+          <time datetime={pubDate.toISOString()}>
+            {
+              pubDate.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }
+          </time>
+          <span class="read-time" aria-label={`${readingTime} minute read`}>
+            {readingTime} min read
+          </span>
+        </div>
 
-				{
-					tags && tags.length > 0 && (
-						<div
-							class="blog-post__tags"
-							role="list"
-							aria-label="Post tags"
-						>
-							{tags.map((tag) => (
-								<BlogTag tag={tag} />
-							))}
-						</div>
-					)
-				}
-			</header>
-		</div>
+        {
+          tags && tags.length > 0 && (
+            <div class="blog-post__tags" role="list" aria-label="Post tags">
+              {tags.map((tag) => (
+                <BlogTag tag={tag} />
+              ))}
+            </div>
+          )
+        }
+      </header>
+    </div>
 
-		{
-			heroImage && (
-				<figure class="blog-post__hero-figure">
-					<div class="blog-post__hero">
-						<Picture
-							src={heroImage}
-							alt={heroImageAlt || title}
-							formats={["avif", "webp"]}
-							widths={[800, 1200, 1600, 2400]}
-							sizes="100vw"
-							loading="eager"
-							fetchpriority="high"
-							inferSize={true}
-						/>
-					</div>
-					{heroImageCaption && (
-						<figcaption
-							class="blog-post__hero-caption"
-							set:html={parseInlineMarkdown(heroImageCaption)}
-						/>
-					)}
-				</figure>
-			)
-		}
+    {
+      heroImage && (
+        <figure class="blog-post__hero-figure">
+          <div class="blog-post__hero">
+            <Picture
+              src={heroImage}
+              alt={heroImageAlt || title}
+              formats={["avif", "webp"]}
+              widths={[800, 1200, 1600, 2400]}
+              sizes="100vw"
+              loading="eager"
+              fetchpriority="high"
+              inferSize={true}
+            />
+          </div>
+          {heroImageCaption && (
+            <figcaption
+              class="blog-post__hero-caption"
+              set:html={parseInlineMarkdown(heroImageCaption)}
+            />
+          )}
+        </figure>
+      )
+    }
 
-		<div class="blog-post__content">
-			<div class="blog-post__prose">
-				<Content />
-			</div>
-		</div>
-	</article>
+    <div class="blog-post__content">
+      <div class="blog-post__prose">
+        <Content />
+      </div>
+    </div>
+  </article>
 
-	<AuthorBio />
+  <AuthorBio />
 </Layout>
 
 <script>
-	/**
-	 * Simple parallax effect for blog post hero image
-	 * Adapted from Hero.astro but without 3D tilt complexity
-	 */
-	function initParallax() {
-		const hero = document.querySelector(".blog-post__hero") as HTMLElement;
-		
-		// Early return if hero image doesn't exist on this page
-		if (!hero) return;
+  /**
+   * Simple parallax effect for blog post hero image
+   * Adapted from Hero.astro but without 3D tilt complexity
+   */
+  function initParallax() {
+    const hero = document.querySelector(".blog-post__hero") as HTMLElement;
 
-		// Respect user's motion preferences (WCAG 2.3.3)
-		const prefersReducedMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
+    // Early return if hero image doesn't exist on this page
+    if (!hero) return;
 
-		if (prefersReducedMotion) return;
+    // Respect user's motion preferences (WCAG 2.3.3)
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-		function handleParallax() {
-			const scrollY = window.scrollY;
-			const heroBottom = hero.offsetTop + hero.offsetHeight;
+    if (prefersReducedMotion) return;
 
-			// Only apply parallax while hero is visible
-			if (scrollY < heroBottom) {
-				// Subtle parallax - reduced on mobile for better performance
-				const isMobile = window.matchMedia("(max-width: 1023px)").matches;
-				const parallaxFactor = isMobile ? 0.015 : 0.05;
-				const parallaxOffset = scrollY * parallaxFactor;
-				// Reverse parallax - image moves up as you scroll down
-				hero.style.transform = `translateY(-${parallaxOffset}px)`;
-			}
-		}
+    function handleParallax() {
+      const scrollY = window.scrollY;
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
 
-		// Attach scroll listener with passive flag for better performance
-		window.addEventListener("scroll", handleParallax, { passive: true });
+      // Only apply parallax while hero is visible
+      if (scrollY < heroBottom) {
+        // Subtle parallax - reduced on mobile for better performance
+        const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+        const parallaxFactor = isMobile ? 0.015 : 0.05;
+        const parallaxOffset = scrollY * parallaxFactor;
+        // Reverse parallax - image moves up as you scroll down
+        hero.style.transform = `translateY(-${parallaxOffset}px)`;
+      }
+    }
 
-		// Cleanup function for view transitions
-		const cleanup = () => {
-			window.removeEventListener("scroll", handleParallax);
-			// Reset transform on cleanup
-			if (hero) {
-				hero.style.transform = "";
-			}
-		};
+    // Attach scroll listener with passive flag for better performance
+    window.addEventListener("scroll", handleParallax, { passive: true });
 
-		// Register cleanup before navigation
-		document.addEventListener("astro:before-preparation", cleanup, {
-			once: true,
-		});
-	}
+    // Cleanup function for view transitions
+    const cleanup = () => {
+      window.removeEventListener("scroll", handleParallax);
+      // Reset transform on cleanup
+      if (hero) {
+        hero.style.transform = "";
+      }
+    };
 
-	// Run on initial page load
-	initParallax();
+    // Register cleanup before navigation
+    document.addEventListener("astro:before-preparation", cleanup, {
+      once: true,
+    });
+  }
 
-	// Re-initialize after view transitions
-	document.addEventListener("astro:page-load", initParallax);
+  // Run on initial page load
+  initParallax();
+
+  // Re-initialize after view transitions
+  document.addEventListener("astro:page-load", initParallax);
 </script>
 
 <style lang="scss">
-	@use "../../styles/variables" as *;
-	@use "../../styles/mixins" as *;
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
 
-	// Layout
-	.blog-post {
-		padding-top: $header-height;
+  // Layout
+  .blog-post {
+    padding-top: $header-height;
 
-		@include respond-to(md) {
-			padding-top: calc($header-height - 20px);
-		}
-	}
+    @include respond-to(md) {
+      padding-top: calc($header-height - 20px);
+    }
+  }
 
-	// Post header section
-	.blog-post__header-container {
-		max-width: $max-width;
-		margin: 0 auto;
-		padding: $space-4xl $space-xl $space-3xl;
+  // Post header section
+  .blog-post__header-container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-4xl $space-xl $space-3xl;
 
-		@include respond-to(md) {
-			padding: $space-3xl $space-lg $space-2xl;
-		}
-	}
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg $space-2xl;
+    }
+  }
 
-	.blog-post__header {
-		max-width: calc($max-width-text * 1.4);
-		margin: 0 auto;
+  .blog-post__header {
+    max-width: calc($max-width-text * 1.4);
+    margin: 0 auto;
 
-		h1 {
-			font-size: 4.5rem;
-			font-weight: $font-weight-bold;
-			line-height: 1.1;
-			margin: 0 0 $space-xl 0;
-			color: $color-text-primary;
+    h1 {
+      font-size: 4.5rem;
+      font-weight: $font-weight-bold;
+      line-height: 1.1;
+      margin: 0 0 $space-xl 0;
+      color: $color-text-primary;
 
-			@include respond-to(md) {
-				font-size: $font-size-3xl;
-			}
-		}
-	}
+      @include respond-to(md) {
+        font-size: $font-size-3xl;
+      }
+    }
+  }
 
-	.blog-post__meta-header {
-		margin-bottom: $space-lg;
-	}
+  .blog-post__meta-header {
+    margin-bottom: $space-lg;
+  }
 
-	.blog-post__back-link {
-		display: block;
-		color: $color-orange;
-		font-size: $font-size-sm;
-		font-weight: 600;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		margin-bottom: $space-md;
-		text-decoration: none;
-		@include transition(opacity);
-		@include focus-visible;
+  .blog-post__back-link {
+    display: block;
+    color: $color-orange;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: $space-md;
+    text-decoration: none;
+    @include transition(opacity);
+    @include focus-visible;
 
-		&:hover {
-			opacity: 0.7;
-		}
-	}
+    &:hover {
+      opacity: 0.7;
+    }
+  }
 
-	.blog-post__description {
-		font-size: $font-size-xl;
-		line-height: 1.5;
-		color: $color-text-secondary;
-		margin: 0 0 $space-2xl 0;
+  .blog-post__description {
+    font-size: $font-size-xl;
+    line-height: 1.5;
+    color: $color-text-secondary;
+    margin: 0 0 $space-2xl 0;
 
-		@include respond-to(md) {
-			font-size: $font-size-lg;
-		}
-	}
+    @include respond-to(md) {
+      font-size: $font-size-lg;
+    }
+  }
 
-	.blog-post__meta {
-		display: flex;
-		flex-wrap: wrap;
-		gap: $space-md;
-		font-size: $font-size-sm;
-		color: $color-text-secondary;
-		align-items: center;
+  .blog-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-md;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    align-items: center;
 
-		&::before {
-			content: "";
-			display: block;
-			width: 100%;
-			height: 1px;
-			background: $color-border;
-			margin-bottom: $space-sm;
-		}
+    &::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 1px;
+      background: $color-border;
+      margin-bottom: $space-sm;
+    }
 
-		> * {
-			display: flex;
-			align-items: center;
+    > * {
+      display: flex;
+      align-items: center;
 
-			&:not(:last-child)::after {
-				content: "•";
-				margin-left: $space-md;
-				color: $color-text-muted;
-			}
-		}
-	}
+      &:not(:last-child)::after {
+        content: "•";
+        margin-left: $space-md;
+        color: $color-text-muted;
+      }
+    }
+  }
 
-	.blog-post__tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: $space-xs;
-		margin-top: $space-lg;
-	}
+  .blog-post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-xs;
+    margin-top: $space-lg;
+  }
 
-	// Hero image section
-	.blog-post__hero-figure {
-		width: 100%;
-		max-width: 1600px;
-		margin: 0 auto;
-	}
+  // Hero image section
+  .blog-post__hero-figure {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
 
-	.blog-post__hero {
-		width: 100%;
-		aspect-ratio: 21 / 9;
-		overflow: hidden;
-		border-radius: 24px;
-		will-change: transform;
+  .blog-post__hero {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    border-radius: 24px;
+    will-change: transform;
 
-		// Only apply transition if user hasn't requested reduced motion
-		@media (prefers-reduced-motion: no-preference) {
-			transition: transform 0.1s ease-out;
-		}
+    // Only apply transition if user hasn't requested reduced motion
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.1s ease-out;
+    }
 
-		@include respond-to(lg) {
-			aspect-ratio: 16 / 9;
-		}
+    @include respond-to(lg) {
+      aspect-ratio: 16 / 9;
+    }
 
-		@include respond-to(md) {
-			aspect-ratio: 3 / 2;
-			border-radius: 16px;
-		}
+    @include respond-to(md) {
+      aspect-ratio: 3 / 2;
+      border-radius: 16px;
+    }
 
-		:global(img) {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			display: block;
-		}
-	}
+    :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
 
-	.blog-post__hero-caption {
-		max-width: $max-width;
-		margin: 0 auto;
-		padding: $space-sm $space-xl 0;
-		font-size: $font-size-sm;
-		color: $color-text-muted;
-		text-align: center;
-		font-style: italic;
+  .blog-post__hero-caption {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-sm $space-xl 0;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-align: center;
+    font-style: italic;
 
-		@include respond-to(md) {
-			padding: $space-xs $space-lg 0;
-		}
-	}
+    @include respond-to(md) {
+      padding: $space-xs $space-lg 0;
+    }
+  }
 
-	// Content section
-	.blog-post__content {
-		max-width: $max-width;
-		margin: 0 auto;
-		padding: $space-4xl $space-xl;
+  // Content section
+  .blog-post__content {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-4xl $space-xl;
 
-		@include respond-to(md) {
-			padding: $space-3xl $space-lg;
-		}
-	}
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+    }
+  }
 
-	// Prose styles
-	.blog-post__prose {
-		max-width: $max-width-text;
-		margin: 0 auto;
-		font-size: $font-size-lg;
-		line-height: 1.75;
-		color: $color-text-primary;
+  // Prose styles
+  .blog-post__prose {
+    max-width: $max-width-text;
+    margin: 0 auto;
+    font-size: $font-size-lg;
+    line-height: 1.75;
+    color: $color-text-primary;
 
-		@include respond-to(md) {
-			font-size: $font-size-base;
-		}
+    @include respond-to(md) {
+      font-size: $font-size-base;
+    }
 
-		// Typography
-		:global(h2),
-		:global(h3),
-		:global(h4) {
-			font-weight: $font-weight-bold;
-			line-height: 1.3;
-			color: $color-text-primary;
-		}
+    // Typography
+    :global(h2),
+    :global(h3),
+    :global(h4) {
+      font-weight: $font-weight-bold;
+      line-height: 1.3;
+      color: $color-text-primary;
+    }
 
-		:global(h2) {
-			font-size: $font-size-2xl;
-			margin-top: $space-4xl;
-			margin-bottom: $space-lg;
+    :global(h2) {
+      font-size: $font-size-2xl;
+      margin-top: $space-4xl;
+      margin-bottom: $space-lg;
 
-			@include respond-to(md) {
-				font-size: $font-size-xl;
-				margin-top: $space-3xl;
-			}
-		}
+      @include respond-to(md) {
+        font-size: $font-size-xl;
+        margin-top: $space-3xl;
+      }
+    }
 
-		:global(h3) {
-			font-size: $font-size-xl;
-			font-weight: $font-weight-semibold;
-			margin-top: $space-3xl;
-			margin-bottom: $space-md;
+    :global(h3) {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      margin-top: $space-3xl;
+      margin-bottom: $space-md;
 
-			@include respond-to(md) {
-				font-size: $font-size-lg;
-				margin-top: $space-2xl;
-			}
-		}
+      @include respond-to(md) {
+        font-size: $font-size-lg;
+        margin-top: $space-2xl;
+      }
+    }
 
-		:global(h4) {
-			font-size: $font-size-lg;
-			font-weight: $font-weight-semibold;
-			margin-top: $space-2xl;
-			margin-bottom: $space-sm;
-		}
+    :global(h4) {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      margin-top: $space-2xl;
+      margin-bottom: $space-sm;
+    }
 
-		:global(p) {
-			margin-bottom: $space-xl;
-		}
+    :global(p) {
+      margin-bottom: $space-xl;
+    }
 
-		// Links
-		:global(a) {
-			color: $color-accent;
-			text-decoration: underline;
-			@include transition(opacity);
+    // Links
+    :global(a) {
+      color: $color-accent;
+      text-decoration: underline;
+      @include transition(opacity);
 
-			&:hover {
-				opacity: 0.7;
-			}
-		}
+      &:hover {
+        opacity: 0.7;
+      }
+    }
 
-		// Lists
-		:global(ul),
-		:global(ol) {
-			margin-bottom: $space-xl;
-			padding-left: $space-2xl;
-		}
+    // Lists
+    :global(ul),
+    :global(ol) {
+      margin-bottom: $space-xl;
+      padding-left: $space-2xl;
+    }
 
-		:global(li) {
-			margin-bottom: $space-sm;
-		}
+    :global(li) {
+      margin-bottom: $space-sm;
+    }
 
-		// Code
-		:global(code) {
-			background: $color-cream;
-			padding: 0.125rem 0.375rem;
-			border-radius: 4px;
-			font-size: 0.9em;
-			font-family: ui-monospace, "Courier New", monospace;
-			color: $color-text-primary;
-		}
+    // Code
+    :global(code) {
+      background: $color-cream;
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, "Courier New", monospace;
+      color: $color-text-primary;
+    }
 
-		:global(pre) {
-			background: #1e1e1e;
-			padding: $space-xl;
-			border-radius: 16px;
-			overflow-x: auto;
-			margin: $space-2xl 0;
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    :global(pre) {
+      background: #1e1e1e;
+      padding: $space-xl;
+      border-radius: 16px;
+      overflow-x: auto;
+      margin: $space-2xl 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-			@include respond-to(md) {
-				padding: $space-lg;
-				border-radius: 12px;
-			}
+      @include respond-to(md) {
+        padding: $space-lg;
+        border-radius: 12px;
+      }
 
-			:global(code) {
-				background: none;
-				padding: 0;
-				border-radius: 0;
-				color: #d4d4d4;
-				line-height: 1.6;
-			}
-		}
+      :global(code) {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        color: #d4d4d4;
+        line-height: 1.6;
+      }
+    }
 
-		// Blockquotes
-		:global(blockquote) {
-			border-left: 4px solid $color-accent;
-			padding-left: $space-xl;
-			margin: $space-2xl 0;
-			font-style: italic;
-			color: $color-text-secondary;
-		}
+    // Blockquotes
+    :global(blockquote) {
+      border-left: 4px solid $color-accent;
+      padding-left: $space-xl;
+      margin: $space-2xl 0;
+      font-style: italic;
+      color: $color-text-secondary;
+    }
 
-		// Images and figures - wider than text content
-		:global(img),
-		:global(figure) {
-			max-width: 120ch;
-			width: calc(100% + 20rem);
-			margin-inline: -10rem;
-			margin-block: $space-3xl;
-			border-radius: 24px;
+    // Images and figures - wider than text content
+    :global(img),
+    :global(figure) {
+      max-width: 120ch;
+      width: calc(100% + 20rem);
+      margin-inline: -10rem;
+      margin-block: $space-3xl;
+      border-radius: 24px;
 
-			@include respond-to(md) {
-				width: 100%;
-				margin-inline: 0;
-				margin-block: $space-2xl;
-				border-radius: 16px;
-			}
-		}
+      @include respond-to(md) {
+        width: 100%;
+        margin-inline: 0;
+        margin-block: $space-2xl;
+        border-radius: 16px;
+      }
+    }
 
-		:global(img) {
-			height: auto;
-			display: block;
-		}
+    :global(img) {
+      height: auto;
+      display: block;
+    }
 
-		:global(figcaption) {
-			max-width: $max-width;
-			margin: 0 auto;
-			padding: $space-lg $space-xl 0;
-			font-size: $font-size-sm;
-			color: $color-text-muted;
-			text-align: center;
-			font-style: italic;
+    :global(figcaption) {
+      max-width: $max-width;
+      margin: 0 auto;
+      padding: $space-lg $space-xl 0;
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      text-align: center;
+      font-style: italic;
 
-			@include respond-to(md) {
-				padding: $space-md $space-lg 0;
-			}
-		}
-	}
+      @include respond-to(md) {
+        padding: $space-md $space-lg 0;
+      }
+    }
+  }
 </style>

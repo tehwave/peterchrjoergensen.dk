@@ -140,25 +140,25 @@ Use `:global()` to pierce scoped styles when styling child component markup:
   .hero {
     background: $color-bg;
     padding: $space-xl 0;
-    
+
     @include respond-to(md) {
       padding: $space-lg 0;
     }
   }
-  
+
   .hero__container {
     @include container;
     display: grid;
     gap: $space-lg;
   }
-  
+
   .hero__title {
     font-size: $font-size-3xl;
     font-weight: $font-weight-bold;
     color: $color-text-primary;
     @include transition(color, 0.2s);
   }
-  
+
   .hero__image {
     width: 100%;
     height: auto;
@@ -252,8 +252,10 @@ Move `await` calls into separate components to enable streaming:
 
 ```astro
 // ❌ Blocks entire page const data = await fetch("...").then(r => r.json()); //
-✅ Enables streaming — header
- import DataComponent from "./DataComponent.astro"; <header>Title</header>
+✅ Enables streaming — header import DataComponent from "./DataComponent.astro"; <header
+>
+  Title
+</header>
 <DataComponent />
 ```
 

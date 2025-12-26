@@ -24,190 +24,195 @@ const posts = await getCollection("blog");
 
 // Sort posts by publication date, newest first
 const sortedPosts = posts.sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 // Prepare posts with reading time
 const postsWithReadingTime = sortedPosts.map((post) => ({
-	...post,
-	readingTime: getReadingTime(post.body ?? ""),
+  ...post,
+  readingTime: getReadingTime(post.body ?? ""),
 }));
 
 // SEO metadata
 const title = "The Journal";
-const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
+const description =
+  "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
 
 // Structured data for blog listing page
 const collectionSchema = {
-	"@context": "https://schema.org",
-	"@graph": [
-		{
-			"@type": "CollectionPage",
-			"@id": "https://peterchrjoergensen.dk/blog/#collection",
-			url: "https://peterchrjoergensen.dk/blog/",
-			name: title,
-			description: description,
-			inLanguage: "en-US",
-			isPartOf: {
-				"@id": "https://peterchrjoergensen.dk/#website",
-			},
-			mainEntity: {
-				"@id": "https://peterchrjoergensen.dk/blog/#itemlist",
-			},
-		},
-		{
-			"@type": "ItemList",
-			"@id": "https://peterchrjoergensen.dk/blog/#itemlist",
-			itemListElement: postsWithReadingTime.map((post, index) => ({
-				"@type": "ListItem",
-				position: index + 1,
-				url: `https://peterchrjoergensen.dk/blog/${post.id}/`,
-				name: post.data.title,
-			})),
-		},
-		{
-			"@type": "BreadcrumbList",
-			itemListElement: [
-				{
-					"@type": "ListItem",
-					position: 1,
-					name: "Home",
-					item: "https://peterchrjoergensen.dk",
-				},
-				{
-					"@type": "ListItem",
-					position: 2,
-					name: "Blog",
-					item: "https://peterchrjoergensen.dk/blog/",
-				},
-			],
-		},
-	],
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://peterchrjoergensen.dk/blog/#collection",
+      url: "https://peterchrjoergensen.dk/blog/",
+      name: title,
+      description: description,
+      inLanguage: "en-US",
+      isPartOf: {
+        "@id": "https://peterchrjoergensen.dk/#website",
+      },
+      mainEntity: {
+        "@id": "https://peterchrjoergensen.dk/blog/#itemlist",
+      },
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://peterchrjoergensen.dk/blog/#itemlist",
+      itemListElement: postsWithReadingTime.map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://peterchrjoergensen.dk/blog/${post.id}/`,
+        name: post.data.title,
+      })),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://peterchrjoergensen.dk",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Blog",
+          item: "https://peterchrjoergensen.dk/blog/",
+        },
+      ],
+    },
+  ],
 };
 ---
 
 <Layout title={title} description={description}>
-	<Fragment slot="head">
-		<!-- Structured data for blog collection -->
-		<script is:inline type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
-	</Fragment>
-	<main class="journal" transition:animate={fadeAnimation}>
-		<div class="journal__container">
-			<header class="journal__header">
-				<div class="journal__header-left">
-					<span class="journal__label">MY WRITING</span>
-					<h1 class="journal__title">The Journal</h1>
-				</div>
-				<p class="journal__tagline">{description}</p>
-			</header>
+  <Fragment slot="head">
+    <!-- Structured data for blog collection -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(collectionSchema)}
+    />
+  </Fragment>
+  <main class="journal" transition:animate={fadeAnimation}>
+    <div class="journal__container">
+      <header class="journal__header">
+        <div class="journal__header-left">
+          <span class="journal__label">MY WRITING</span>
+          <h1 class="journal__title">The Journal</h1>
+        </div>
+        <p class="journal__tagline">{description}</p>
+      </header>
 
-			{
-				postsWithReadingTime.length === 0 ? (
-					<p class="journal__empty">No posts yet. Check back soon!</p>
-				) : (
-					<div class="journal__list">
-						{postsWithReadingTime.map((post, index) => (
-							<AnimateOnScroll animation="fade-up" delay={index * 0.08}>
-								<BlogPostCard
-									title={post.data.title}
-									description={post.data.description}
-									pubDate={post.data.pubDate}
-									readingTime={post.readingTime}
-									tags={post.data.tags}
-									href={`/blog/${post.id}/`}
-								/>
-							</AnimateOnScroll>
-						))}
-					</div>
-				)
-			}
-		</div>
-	</main>
+      {
+        postsWithReadingTime.length === 0 ? (
+          <p class="journal__empty">No posts yet. Check back soon!</p>
+        ) : (
+          <div class="journal__list">
+            {postsWithReadingTime.map((post, index) => (
+              <AnimateOnScroll animation="fade-up" delay={index * 0.08}>
+                <BlogPostCard
+                  title={post.data.title}
+                  description={post.data.description}
+                  pubDate={post.data.pubDate}
+                  readingTime={post.readingTime}
+                  tags={post.data.tags}
+                  href={`/blog/${post.id}/`}
+                />
+              </AnimateOnScroll>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </main>
 </Layout>
 
 <style lang="scss">
-	@use "../../styles/variables" as *;
-	@use "../../styles/mixins" as *;
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
 
-	.journal {
-		position: relative;
-		padding: $space-4xl $space-xl;
-		padding-top: calc($space-4xl + 100px);
+  .journal {
+    position: relative;
+    padding: $space-4xl $space-xl;
+    padding-top: calc($space-4xl + 100px);
 
-		@include respond-to(md) {
-			padding: $space-3xl $space-lg;
-			padding-top: calc($space-3xl + 80px);
-		}
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg;
+      padding-top: calc($space-3xl + 80px);
+    }
 
-		&__container {
-			position: relative;
-			z-index: 1;
-			max-width: $max-width;
-			margin: 0 auto;
-		}
+    &__container {
+      position: relative;
+      z-index: 1;
+      max-width: $max-width;
+      margin: 0 auto;
+    }
 
-		&__header {
-			display: grid;
-			grid-template-columns: 1fr 1.5fr;
-			gap: $space-4xl;
-			margin-bottom: $space-3xl;
-			padding-bottom: $space-2xl;
-			border-bottom: 1px solid $color-border;
+    &__header {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: $space-4xl;
+      margin-bottom: $space-3xl;
+      padding-bottom: $space-2xl;
+      border-bottom: 1px solid $color-border;
 
-			@include respond-to(lg) {
-				grid-template-columns: 1fr;
-				gap: $space-xl;
-			}
-		}
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+        gap: $space-xl;
+      }
+    }
 
-		&__header-left {
-			display: flex;
-			flex-direction: column;
-			gap: $space-md;
-		}
+    &__header-left {
+      display: flex;
+      flex-direction: column;
+      gap: $space-md;
+    }
 
-		&__label {
-			color: $color-orange;
-			font-size: $font-size-sm;
-			font-weight: 600;
-			letter-spacing: 0.1em;
-			text-transform: uppercase;
-		}
+    &__label {
+      color: $color-orange;
+      font-size: $font-size-sm;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
-		&__title {
-			font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
-			font-weight: $font-weight-bold;
-			color: $color-text-dark;
-			line-height: $leading-tight;
-		}
+    &__title {
+      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+      font-weight: $font-weight-bold;
+      color: $color-text-dark;
+      line-height: $leading-tight;
+    }
 
-		&__tagline {
-			font-size: $font-size-lg;
-			color: $color-text-muted;
-			line-height: $leading-relaxed;
-			align-self: center;
+    &__tagline {
+      font-size: $font-size-lg;
+      color: $color-text-muted;
+      line-height: $leading-relaxed;
+      align-self: center;
 
-			@include respond-to(lg) {
-				align-self: flex-start;
-			}
-		}
+      @include respond-to(lg) {
+        align-self: flex-start;
+      }
+    }
 
-		&__empty {
-			text-align: center;
-			font-size: $font-size-lg;
-			color: $color-text-muted;
-			padding: $space-3xl 0;
-		}
+    &__empty {
+      text-align: center;
+      font-size: $font-size-lg;
+      color: $color-text-muted;
+      padding: $space-3xl 0;
+    }
 
-		&__list {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-			gap: $space-2xl;
+    &__list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: $space-2xl;
 
-			@include respond-to(md) {
-				grid-template-columns: 1fr;
-				gap: $space-xl;
-			}
-		}
-	}
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+        gap: $space-xl;
+      }
+    }
+  }
 </style>

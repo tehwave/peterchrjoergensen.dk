@@ -30,7 +30,7 @@ const sortedPosts = allPosts.sort(
         sortedPosts.map((post, index) => {
           const readingTime = getReadingTime(post.body || "");
           const animationDelay = index * 0.1; // 100ms = 0.1s per post
-          
+
           return (
             <AnimateOnScroll
               animation="fade-up"

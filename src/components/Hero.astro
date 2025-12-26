@@ -65,8 +65,10 @@ const roles = [
   // Lazy-load typed.js when browser is idle for better performance
   const initTypedAnimation = async () => {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
-    const stringsElement = document.querySelector("#typed-strings") as HTMLElement;
-    
+    const stringsElement = document.querySelector(
+      "#typed-strings",
+    ) as HTMLElement;
+
     // Early return if elements don't exist (Hero not on page)
     if (!typedElement || !stringsElement) {
       console.warn("Typed.js elements not found");
@@ -397,7 +399,7 @@ const roles = [
   function initTiltEffect() {
     const hero = document.querySelector(".hero") as HTMLElement;
     const tiltElement = document.querySelector("[data-tilt]") as HTMLElement;
-    
+
     // Early return if elements don't exist (Hero not on page)
     if (!hero || !tiltElement) return;
 
@@ -545,12 +547,16 @@ const roles = [
 
     // Desktop: track mouse across entire document
     if (window.matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
-      document.addEventListener("mousemove", handleMouseMove, { passive: true });
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: true,
+      });
     }
 
     // Enable touch tilt on mobile/tablet — track touches anywhere on document
     if (window.matchMedia("(max-width: 1023px)").matches) {
-      document.addEventListener("touchmove", handleTouchMove, { passive: true });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: true,
+      });
       document.addEventListener("touchend", handleTouchEnd);
       document.addEventListener("touchcancel", handleTouchEnd);
     }
@@ -578,7 +584,9 @@ const roles = [
     };
 
     // Register cleanup for view transitions
-    document.addEventListener("astro:before-preparation", cleanup, { once: true });
+    document.addEventListener("astro:before-preparation", cleanup, {
+      once: true,
+    });
   }
 
   // Run on initial page load

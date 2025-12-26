@@ -70,7 +70,7 @@ export default defineConfig({
         ],
       },
     }),
-    mdx()
+    mdx(),
   ],
 
   // Prefetch links for faster navigation

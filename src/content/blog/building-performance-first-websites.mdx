@@ -46,12 +46,12 @@ Three small scripts, all inline in the components that need them. Nothing more.
 Astro's `<Picture>` component generates AVIF and WebP versions at build time. You import an image, pass it to `<Picture>`, and the framework handles the rest:
 
 ```astro
-import { Picture } from 'astro:assets';
-import profileImage from '../assets/peter-profile.png';
+import {Picture} from 'astro:assets'; import profileImage from
+'../assets/peter-profile.png';
 
-<Picture 
-  src={profileImage} 
-  formats={['avif', 'webp']}
+<Picture
+  src={profileImage}
+  formats={["avif", "webp"]}
   alt="Peter Chr. Jørgensen"
   loading="eager"
   fetchpriority="high"

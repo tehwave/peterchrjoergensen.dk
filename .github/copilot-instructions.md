@@ -272,6 +272,7 @@ This is a **personal website**, so all written content should reflect a consiste
 - I’m comfortable in both **legacy** and **greenfield** codebases, and on teams ranging from solo to ~6+ developers (including external collaborators)
 - I know **performance**, **DevOps/server ops**, and what it takes to run projects when things break (incident handling, trade-offs, and pragmatism)
 - I’ve trained developers, hired and fired, and worked as developer, project lead, and designer
+
 ### Communication Level & Working Style
 
 **Treat me as a senior peer:**
@@ -281,6 +282,7 @@ This is a **personal website**, so all written content should reflect a consiste
 - Prefer concrete specifics over generic best-practice lists
 - When suggesting approaches, explain the "why" (constraints, performance impact, maintainability trade-offs) not just the "what"
 - Default to practitioner-level specificity: real metrics, before/after comparisons, edge cases that actually happen
+
 ### Perspective
 
 - Always use **first-person singular**: "I am", "I think", "I built", "My experience"

@@ -86,8 +86,8 @@ pubDate: 2024-12-26
 author: "Peter Chr. Jørgensen"
 tags: ["astro", "performance"]
 draft: false
-heroImage: ../../assets/blog/hero.jpg  # Optional
-heroImageAlt: "Description of hero image"  # Optional
+heroImage: ../../assets/blog/hero.jpg # Optional
+heroImageAlt: "Description of hero image" # Optional
 ---
 
 Your content here...

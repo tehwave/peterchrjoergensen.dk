@@ -46,19 +46,21 @@ const formattedDate = pubDate.toLocaleDateString("en-US", {
 ---
 
 <article class="blog-post-card">
-  {heroImage && (
-    <a href={href} class="blog-post-card__image-link">
-      <Picture
-        src={heroImage}
-        formats={["avif", "webp"]}
-        alt={heroImageAlt}
-        widths={[400, 600, 800]}
-        sizes="(min-width: 768px) 400px, 100vw"
-        inferSize={true}
-        class="blog-post-card__image"
-      />
-    </a>
-  )}
+  {
+    heroImage && (
+      <a href={href} class="blog-post-card__image-link">
+        <Picture
+          src={heroImage}
+          formats={["avif", "webp"]}
+          alt={heroImageAlt}
+          widths={[400, 600, 800]}
+          sizes="(min-width: 768px) 400px, 100vw"
+          inferSize={true}
+          class="blog-post-card__image"
+        />
+      </a>
+    )
+  }
   <div class="blog-post-card__content">
     <div class="blog-post-card__meta">
       <time datetime={pubDate.toISOString()}>
@@ -68,7 +70,10 @@ const formattedDate = pubDate.toLocaleDateString("en-US", {
         readingTime && (
           <>
             <span class="blog-post-card__separator" aria-hidden="true" />
-            <span class="blog-post-card__reading-time" aria-label={`${readingTime} minute read`}>
+            <span
+              class="blog-post-card__reading-time"
+              aria-label={`${readingTime} minute read`}
+            >
               {readingTime} min read
             </span>
           </>

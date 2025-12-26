@@ -9,11 +9,11 @@
  * @returns Reading time in minutes (minimum 1)
  */
 export function getReadingTime(
-	text: string,
-	wordsPerMinute: number = 200,
+  text: string,
+  wordsPerMinute: number = 200,
 ): number {
-	const words = text.split(/\s+/).filter(Boolean).length;
-	return Math.max(1, Math.ceil(words / wordsPerMinute));
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
 }
 
 /**
@@ -26,5 +26,5 @@ export function getReadingTime(
  * @returns Total word count
  */
 export function getWordCount(text: string): number {
-	return text.split(/\s+/).filter(Boolean).length;
+  return text.split(/\s+/).filter(Boolean).length;
 }
