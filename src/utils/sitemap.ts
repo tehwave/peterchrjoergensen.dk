@@ -22,7 +22,9 @@ export async function lastModifiedBlogPost(slug: string): Promise<Date | null> {
 
     // Extract pubDate and updatedDate from frontmatter using regex
     // Prefer updatedDate if available, otherwise use pubDate
-    const updatedDateMatch = content.match(/^updatedDate:\s*(\d{4}-\d{2}-\d{2})/m);
+    const updatedDateMatch = content.match(
+      /^updatedDate:\s*(\d{4}-\d{2}-\d{2})/m,
+    );
     const pubDateMatch = content.match(/^pubDate:\s*(\d{4}-\d{2}-\d{2})/m);
 
     if (updatedDateMatch) {

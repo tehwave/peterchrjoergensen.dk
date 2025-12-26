@@ -167,8 +167,7 @@ export const projects: Project[] = [
   },
   {
     title: "Planet Living",
-    description:
-      "WordPress website for modular tiny houses and garden rooms.",
+    description: "WordPress website for modular tiny houses and garden rooms.",
     alt: "Screenshot of Planet Living tiny house website",
     tags: ["WordPress", "PHP"],
     image: planetLivingImg,

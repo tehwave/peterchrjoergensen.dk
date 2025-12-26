@@ -83,13 +83,17 @@ const roles = [
 
   async function initTypedAnimation() {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
-    const stringsElement = document.querySelector("#typed-strings") as HTMLElement;
+    const stringsElement = document.querySelector(
+      "#typed-strings",
+    ) as HTMLElement;
     const heroElement = document.querySelector(".hero") as HTMLElement;
 
     if (!typedElement || !stringsElement || !heroElement) return;
 
     // Respect reduced motion preference
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     if (prefersReducedMotion) {
       typedElement.textContent = "Web Developer";
@@ -126,11 +130,13 @@ const roles = [
         (entries) => {
           entries.forEach((entry) => {
             if (typedInstance) {
-              entry.isIntersecting ? typedInstance.start() : typedInstance.stop();
+              entry.isIntersecting
+                ? typedInstance.start()
+                : typedInstance.stop();
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
       typedObserver.observe(heroElement);
@@ -176,7 +182,9 @@ const roles = [
     let targetRotateY = 0;
     let animationId: number | null = null;
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     function lerp(start: number, end: number, factor: number): number {
       return start + (end - start) * factor;
@@ -186,7 +194,9 @@ const roles = [
       currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
       currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
 
-      const parallaxY = parseFloat(tiltElement.style.getPropertyValue("--parallax-y") || "0");
+      const parallaxY = parseFloat(
+        tiltElement.style.getPropertyValue("--parallax-y") || "0",
+      );
       const shadowX = -currentRotateY * 8;
       const shadowY = currentRotateX * 8 + 20;
       const sheenOffset = 50 + currentRotateY * 8 - currentRotateX * 5;
@@ -202,7 +212,10 @@ const roles = [
         ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
       `;
 
-      if (Math.abs(currentRotateX - targetRotateX) > 0.01 || Math.abs(currentRotateY - targetRotateY) > 0.01) {
+      if (
+        Math.abs(currentRotateX - targetRotateX) > 0.01 ||
+        Math.abs(currentRotateY - targetRotateY) > 0.01
+      ) {
         animationId = requestAnimationFrame(animate);
       } else {
         animationId = null;
@@ -284,11 +297,15 @@ const roles = [
     window.addEventListener("scroll", handleParallax, { passive: true });
 
     if (window.matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
-      document.addEventListener("mousemove", handleMouseMove, { passive: true });
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: true,
+      });
     }
 
     if (window.matchMedia("(max-width: 1023px)").matches) {
-      document.addEventListener("touchmove", handleTouchMove, { passive: true });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: true,
+      });
       document.addEventListener("touchend", handleTouchEnd);
       document.addEventListener("touchcancel", handleTouchEnd);
     }
