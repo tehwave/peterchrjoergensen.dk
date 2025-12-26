@@ -1,111 +1,77 @@
 ---
-# Blog Post Frontmatter
-# Standard Markdown posts work too - no need for MDX unless you want to import components
-title: "Building Performance-First Websites with Astro"
-description: "Learn how to build blazingly fast websites using Astro's island architecture and modern performance optimization techniques."
-pubDate: 2024-12-20
+title: "Building Performance Into the Foundation"
+description: "Fast by default, not through optimization heroics. Here's how I made speed inevitable."
+pubDate: 2024-12-26
 author: "Peter Chr. Jørgensen"
-tags: ["astro", "performance", "web development", "optimization"]
-heroImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80"
+tags: ["astro", "performance", "web-development"]
+heroImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=80"
 heroImageAlt: "Laptop with code editor open on a desk"
-heroImageCaption: "The modern developer's toolkit keeps expanding — Photo by Clément Hélardot"
+heroImageCaption: "Photo by [Clément Hélardot](https://unsplash.com/@clemhlrdt) on [Unsplash](https://unsplash.com)"
 ---
 
-import Figure from '../../components/Figure.astro';
+Most performance work happens after something is too slow. You build the thing, measure it, then spend days shaving milliseconds. I wanted to try the opposite: make choices upfront that would make speed inevitable.
 
-## Building Performance-First Websites
+This site was my test case.
 
-Performance isn't just a nice-to-have feature—it's essential for user experience, SEO, and conversions. Here's how I approach building fast websites with Astro.
+## Static First
 
-## The Performance Budget
+Every page gets pre-rendered at build time. Homepage, blog index, individual posts. All HTML before anyone visits. Cloudflare Pages caches it at the edge, so most requests never touch the origin.
 
-I always start with clear performance goals:
+If your content doesn't change per request, render it once. Simple, but easy to forget when you're reaching for a framework.
 
-- **Lighthouse Score**: 95+ in all categories
-- **Largest Contentful Paint (LCP)**: < 2.5s
-- **First Input Delay (FID)**: < 100ms
-- **Cumulative Layout Shift (CLS)**: < 0.1
+## The JavaScript I Actually Shipped
 
-## Astro's Secret Sauce
+No React. No Vue. No client hydration. The interactive bits use plain JavaScript in `<script>` tags inside Astro components.
 
-Astro achieves incredible performance through several key innovations:
+The hero animation runs Typed.js to rotate through "Web Developer", "Game Developer", etc. I lazy-load it with `requestIdleCallback` so it doesn't block initial render:
 
-### 1. Zero JavaScript by Default
-
-Unlike traditional frameworks, Astro ships zero JavaScript to the browser by default. This means:
-
-- Faster initial page loads
-- Better SEO (search engines can easily crawl static HTML)
-- Reduced bundle sizes
-
-### 2. Islands Architecture
-
-Astro's islands architecture lets you add interactivity only where needed:
-
-```astro
----
-import InteractiveWidget from '../components/InteractiveWidget.jsx';
----
-
-<div>
-  <h1>Mostly Static Page</h1>
-  <InteractiveWidget client:visible />
-</div>
+```typescript
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(() => {
+    initTypedAnimation();
+  });
+}
 ```
 
-The `client:visible` directive means the component only hydrates when it enters the viewport.
+If someone has `prefers-reduced-motion` set, I skip the animation entirely and show static text instead. Accessibility and performance often point in the same direction.
 
-### 3. Image Optimization
+Scroll animations fade elements in as they enter the viewport. I built an `AnimateOnScroll` component using Intersection Observer. No library, just a script that checks `isIntersecting` and toggles a CSS class.
 
-Astro's built-in image optimization is fantastic:
+The navigation header transitions from transparent to a solid backdrop when you scroll past the hero. A scroll listener with some state management to prevent animation interruption when scrolling fast.
+
+Three small scripts, all inline in the components that need them. Nothing more.
+
+## Images Without the Manual Work
+
+Astro's `<Picture>` component generates AVIF and WebP versions at build time. You import an image, pass it to `<Picture>`, and the framework handles the rest:
 
 ```astro
----
-import { Image } from 'astro:assets';
-import hero from '../assets/hero.jpg';
----
+import { Picture } from 'astro:assets';
+import profileImage from '../assets/peter-profile.png';
 
-<Image 
-  src={hero} 
-  alt="Hero image"
-  width={1200}
-  height={630}
-  loading="lazy"
-  decoding="async"
+<Picture 
+  src={profileImage} 
+  formats={['avif', 'webp']}
+  alt="Peter Chr. Jørgensen"
+  loading="eager"
+  fetchpriority="high"
 />
 ```
 
-This automatically:
-- Generates optimized formats (WebP, AVIF)
-- Creates responsive images
-- Lazy loads images below the fold
+The hero image uses `loading="eager"` and `fetchpriority="high"` because it's above the fold. Everything else gets lazy loading by default.
 
-## Real-World Results
+I don't write `srcset` by hand. I don't manually convert images. Import, use, done.
 
-After migrating my portfolio to Astro, I saw:
+## Where This Works
 
-- **90% reduction** in JavaScript bundle size
-- **Lighthouse scores** all above 95
-- **LCP improved** from 4.2s to 1.1s
+This site is mostly static content. Blog posts, project descriptions, an about page. Nothing needs real-time data. That made Astro the obvious choice.
 
-<Figure
-  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80"
-  alt="Developer workspace with multiple monitors showing code"
-  caption="A well-optimized development environment helps you build faster websites — Photo by Clément Hélardot on Unsplash"
-/>
+The whole site ships under 100KB of JavaScript. Builds complete in seconds. I haven't needed to profile anything because there's nothing slow enough to profile.
 
-## Best Practices
+That's the real win: not having to optimize, because the defaults are already fast.
 
-Here are my top tips for performance:
+## Where It Doesn't
 
-1. **Minimize JavaScript**: Only hydrate what needs to be interactive
-2. **Optimize Images**: Use Astro's `<Image>` component everywhere
-3. **Defer Non-Critical Resources**: Load analytics and other scripts after the page loads
-4. **Use Static Generation**: Pre-render pages at build time whenever possible
-5. **Monitor Performance**: Use tools like Lighthouse and Web Vitals
+I wouldn't build a dashboard or SaaS app this way. Astro is optimized for content sites where most of the page is static. Anything that needs backend logic, databases, or per-request rendering? I'd reach for Laravel.
 
-## Conclusion
-
-Astro makes it easy to build fast websites without sacrificing developer experience. The island architecture and zero-JS default approach are game-changers for content-driven sites.
-
-If you haven't tried Astro yet, I highly recommend giving it a shot. Your users (and your Lighthouse scores) will thank you!
+For a portfolio? It's been exactly right. Fast by default, minimal JavaScript, and I haven't fought the framework once.
