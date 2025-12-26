@@ -52,9 +52,37 @@ src/
 ├── layouts/         # Page layouts with <slot /> for content
 ├── pages/           # File-based routing (each file = a route)
 public/              # Static files served as-is (favicon, robots.txt)
+├── _headers         # Cloudflare Pages headers (CSP, security)
+├── _redirects       # Cloudflare Pages redirects
 ```
 
 **Important:** `src/pages/` is the **only required directory** in Astro. Without it, your site has no routes.
+
+## Security & Headers
+
+### Content Security Policy (CSP)
+
+This site uses a strict CSP configured in `public/_headers`:
+
+```
+Content-Security-Policy: 
+  default-src 'self'; 
+  script-src 'self' 'unsafe-inline' data: https://cdn.usefathom.com https://static.cloudflareinsights.com https://analytics.ahrefs.com; 
+  style-src 'self' 'unsafe-inline'; 
+  img-src 'self' data: https:; 
+  font-src 'self'; 
+  connect-src 'self' https://cdn.usefathom.com https://cloudflareinsights.com; 
+  frame-ancestors 'none'; 
+  base-uri 'self'; 
+  form-action 'self'
+```
+
+**When adding third-party scripts:**
+
+1. Add the script domain to `script-src` in `public/_headers`
+2. If the script makes network requests, add domains to `connect-src`
+3. Test CSP violations in browser DevTools Console
+4. Redeploy to Cloudflare Pages for changes to take effect
 
 ## Astro Component Anatomy
 
