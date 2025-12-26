@@ -73,7 +73,6 @@ const roles = [
 
     // Early return if elements don't exist (Hero not on page)
     if (!typedElement || !stringsElement) {
-      console.warn("Typed.js elements not found");
       return;
     }
 
@@ -142,8 +141,14 @@ const roles = [
     }
   };
 
+  // Only initialize if Hero component exists on page
+  const heroExists = () => document.querySelector("#typed-roles") !== null;
+
   // Wrapper to prevent duplicates on view transitions
   const ensureTypedHandlers = () => {
+    // Only set up handlers if Hero exists
+    if (!heroExists()) return;
+
     // Remove existing handlers if present
     if (startTypedAnimationHandler) {
       document.removeEventListener("astro:page-load", startTypedAnimationHandler);
@@ -161,9 +166,11 @@ const roles = [
     document.addEventListener("astro:before-preparation", cleanupTypedAnimationHandler);
   };
 
-  // Run on initial page load
-  startTypedAnimation();
-  ensureTypedHandlers();
+  // Run on initial page load only if Hero exists
+  if (heroExists()) {
+    startTypedAnimation();
+    ensureTypedHandlers();
+  }
 </script>
 
 <style lang="scss">
