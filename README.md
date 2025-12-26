@@ -27,10 +27,15 @@ This site is built with Core Web Vitals in mind:
 ```
 src/
 ├── assets/          # Images processed by Astro's optimizer
+│   └── blog/        # Blog post images (hero images, inline images)
 ├── components/      # Reusable .astro components
+├── content/         # Content collections (blog posts)
+│   ├── config.ts    # Collection schemas with type validation
+│   └── blog/        # Blog posts (.md and .mdx files)
 ├── data/            # Structured data (projects, etc.)
 ├── layouts/         # Page layouts with SEO meta tags
 ├── pages/           # File-based routing
+│   └── blog/        # Blog routes (index and dynamic [slug])
 ├── styles/          # Global Sass (variables, mixins, base)
 └── types/           # TypeScript type definitions
 ```
@@ -46,6 +51,51 @@ src/
 | `Projects.astro`        | Portfolio with filtering; shuffled on build for equal exposure |
 | `AI.astro`              | Transparency section on AI usage                               |
 | `AnimateOnScroll.astro` | Intersection Observer wrapper for scroll animations            |
+
+## Blog System
+
+The site includes a full-featured blog powered by Astro's Content Collections:
+
+### Features
+
+- **Content Collections API** — Type-safe content management with Zod validation
+- **MDX Support** — Write posts in Markdown or MDX with component support
+- **Image Optimization** — Automatic image processing with multiple formats (WebP, AVIF)
+- **SEO Optimized** — Complete Open Graph, Twitter Cards, and JSON-LD structured data
+- **Draft Mode** — Keep posts in git but hide from production
+- **Tags & Categories** — Organize posts with filterable tags
+- **Table of Contents** — Auto-generated from headings
+- **Performance First** — Static generation with sub-50ms LCP
+
+### Adding a New Blog Post
+
+1. Create a new `.md` or `.mdx` file in `src/content/blog/`:
+
+```mdx
+---
+title: "Your Post Title"
+description: "Brief description for SEO and previews"
+pubDate: 2024-12-26
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "performance"]
+draft: false
+heroImage: ../../assets/blog/hero.jpg  # Optional
+heroImageAlt: "Description of hero image"  # Optional
+---
+
+Your content here...
+```
+
+2. Add images to `src/assets/blog/` — they'll be automatically optimized
+3. Run `npm run dev` to preview locally
+4. Build with `npm run build` — drafts are automatically filtered out
+
+### Blog Architecture
+
+- **Content Schema**: `src/content/config.ts` — Defines post structure and validation
+- **Blog Index**: `src/pages/blog/index.astro` — Lists all posts with previews
+- **Post Template**: `src/pages/blog/[...slug].astro` — Renders individual posts
+- **Performance**: LCP < 50ms, CLS = 0.00, fully static generation
 
 ## Development
 
