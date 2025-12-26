@@ -38,27 +38,33 @@ It was Laravel 5.8 with the full production setup: Nova admin for post creation,
 
 That stack wasn't wrong. It showed I could build and operate a real Laravel app. But PHP moves fast. The ecosystem aged, dependencies needed updates, and the whole thing felt complex for what it did. By 2025, the intention changed. I don't need database migrations and queue workers for a portfolio. I need a fast, low-maintenance place to write and showcase projects.
 
+<Figure
+  src="https://images.unsplash.com/photo-1766329710745-21f110fa2d62?w=1200&q=80"
+  alt="The Flaming Star Nebula in the constellation Auriga, showing bright star AE Aurigae surrounded by red energized gas and blue reflected dust creating a flame-like appearance"
+  caption="The Flaming Star Nebula, 1500 light years away. Photo by [Steve Busch](https://unsplash.com/@sdbusch77) on [Unsplash](https://unsplash.com/photos/9r8PNpVhzcg)"
+/>
+
 ## Why Astro
 
 I didn't come to Astro through careful evaluation. I found https://justfuckinguseastro.com/, which is blunt and annoyingly correct.
 
 The argument is simple: if you're building a content site and defaulting to an SPA, you're optimizing for developer convenience over user experience. A website should behave like a website. HTML first. JavaScript only where it earns its keep.
 
-That aligned with something I care about: **shipping less matters for climate impact**. Smaller payloads mean less energy transferring, parsing, and executing code. It's small on one site, but defaults matter. If I'm building portfolios or content sites, I want the lightest option that works.
+That aligned with what I care about: **performance**. Smaller payloads mean faster loads. Less parsing, less executing, less waiting. And as a bonus, shipping less is better for the climate too. If I'm building portfolios or content sites, I want the lightest option that works.
 
 Once I started prototyping, Astro fit how I wanted to build:
 
 **Zero JavaScript by default.** Anything interactive has to justify itself with a `client:` directive. That keeps the baseline honest.
 
-**Content Collections with Zod validation.** Type-checked frontmatter means missing fields get caught at build time, not production.
+**Content Collections with validation.** Type-checked frontmatter means missing fields get caught at build time, not production.
 
-**Scoped components with SASS tokens.** The design system lives in one place. Less drift, fewer surprises.
+**Scoped components with SASS.** The design system lives in one place. Less drift, fewer surprises.
 
 **Cloudflare Pages deployment.** I wanted to ship via Cloudflare Workers/Pages, and Astro makes that trivial. They're good friends. It couldn't have been easier.
 
 **Image optimization out of the box.** Astro handles responsive srcsets, format conversion (AVIF, WebP), and optimization automatically. I don't think about it.
 
-There was also a practical accelerant: AI help works well here.
+There was also a practical accelerant: AI works well here.
 
 Astro sits in the JavaScript ecosystem, but the output is boring (in the best way): HTML + CSS with clearly scoped components. That makes it easy to ask an AI for changes and get back something I can review quickly.
 
@@ -90,7 +96,7 @@ I love the new workflow. No database. Content lives in Markdown files in git, an
 
 **Frontmatter enforces types.** The content collection schema catches missing fields at build time. Strict adherence to structure without manual validation.
 
-**Images stay consistent.** When I need a visual, I use the `<Figure />` component with proper alt text. Astro handles the responsive srcsets, format optimization (AVIF, WebP), and sizing automatically. I love it.
+**Images stay consistent.** When I need a visual, I use the built-in `<Picture />` component with proper alt text. Astro handles the responsive srcsets, format optimization (AVIF, WebP), and sizing automatically. I love it.
 
 **MDX for flexibility.** I can embed components when I need them (demos, diagrams) without reaching for a full SPA.
 
@@ -100,6 +106,6 @@ No Nova admin. No database queries. Just files in version control. Publishing fe
 
 Don't forget to ship basic HTML. You don't need any of the fancy stuff. Most of what we build doesn't need client-side JavaScript. It doesn't need hydration. It doesn't need a runtime.
 
-Right tool for the right job. Astro is the right tool for content sites. It gets out of your way and lets you build what matters.
+Right tool for the right job. Astro is the right tool for portfolio sites. It gets out of your way and lets you build what matters.
 
 Thanks to the Astro contributors and makers for building something this good.

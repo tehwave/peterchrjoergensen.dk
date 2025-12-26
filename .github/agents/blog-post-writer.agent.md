@@ -287,6 +287,18 @@ heroImageCaption: "Photo by [Photographer Name](https://unsplash.com/@username) 
 />
 ```
 
+### Getting Photographer Credit
+
+The Unsplash API doesn't always return photographer info. **When author credit is missing, fetch the photo page to get it.**
+
+1. Construct the photo URL: `https://unsplash.com/photos/{photo_id}` (e.g., `https://unsplash.com/photos/9r8PNpVhzcg`)
+2. Use the web fetch tool to retrieve the page
+3. Extract the photographer's name and username from the page
+4. Add proper credit in the caption
+
+**Never skip attribution.** Unsplash requires photographer credit. If you can't find the author, don't use the image.
+```
+
 ### Unsplash URL Best Practices
 
 1. **Add size parameters** — Append `?w=1600&q=80` for hero images, `?w=1200&q=80` for content
