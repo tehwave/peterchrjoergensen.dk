@@ -11,6 +11,7 @@ import "../styles/global.scss";
 import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
 import { ViewTransitions } from "astro:transitions";
+import type { TransitionAnimation } from "astro:transitions";
 import textureSource from "../assets/black-paper.png";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -35,6 +36,46 @@ const {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(image, Astro.site);
+
+// Custom view transition: fade out down → fade in up
+const customFadeAnimation = {
+  forwards: {
+    old: [
+      {
+        name: "fadeOutDown",
+        duration: "0.3s",
+        easing: "ease-in",
+        fillMode: "forwards",
+      } as TransitionAnimation,
+    ],
+    new: [
+      {
+        name: "fadeInUp",
+        duration: "0.4s",
+        easing: "ease-out",
+        fillMode: "backwards",
+      } as TransitionAnimation,
+    ],
+  },
+  backwards: {
+    old: [
+      {
+        name: "fadeOutDown",
+        duration: "0.3s",
+        easing: "ease-in",
+        fillMode: "forwards",
+      } as TransitionAnimation,
+    ],
+    new: [
+      {
+        name: "fadeInUp",
+        duration: "0.4s",
+        easing: "ease-out",
+        fillMode: "backwards",
+      } as TransitionAnimation,
+    ],
+  },
+};
 ---
 
 <!doctype html>
@@ -201,7 +242,9 @@ const socialImageURL = new URL(image, Astro.site);
     </style>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <Header />
-    <slot />
+    <div transition:animate={customFadeAnimation}>
+      <slot />
+    </div>
     <Footer />
   </body>
 </html>

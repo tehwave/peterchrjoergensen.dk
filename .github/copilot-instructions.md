@@ -68,10 +68,17 @@ const data = await fetch("...").then((r) => r.json());
 ---
 
 <!-- Component Template (HTML output) -->
-<div>{data.title}</div>
+<div class="component">
+  <h1>{data.title}</h1>
+</div>
 
-<style>
-  /* Scoped styles (only affect this component) */
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .component {
+    color: $color-text-primary;
+  }
 </style>
 ```
 
@@ -95,9 +102,14 @@ const data = await fetch("...").then((r) => r.json());
 
 ### Styling Best Practices
 
-- **Scoped styles by default** — Astro automatically scopes `<style>` to the component
+- **Always use scoped SASS** — Every component must have `<style lang="scss">`
+- **Import design tokens**: Always `@use "../styles/variables" as *;` and `@use "../styles/mixins" as *;`
+- **BEM naming**: `.component`, `.component__element`, `.component--modifier`
+- **Automatic scoping** — Styles only affect the current component, never leak
+- **Use design tokens** from `_variables.scss` — never hardcode colors, spacing, or breakpoints
+- **Use mixins** from `_mixins.scss` — `@include respond-to(md)`, `@include container`, etc.
 - Low-specificity selectors like `h1 {}` are safe — they get scoped automatically
-- Use `<style is:global>` **sparingly** for truly global styles
+- Use `<style is:global>` **never** — global styles belong in `src/styles/global.scss`
 - Use `:global()` selector to style child components: `article :global(h1) { }`
 - Use `class:list` for conditional classes: `<div class:list={["base", { active: isActive }]}>`
 
