@@ -19,7 +19,27 @@
     "cloudflare-builds": {
       "command": "npx",
       "args": ["mcp-remote", "https://builds.mcp.cloudflare.com/mcp"]
+    },
+    "unsplash": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "./../unsplash-mcp-server/server.py"
+      ],
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "${input:UNSPLASH_ACCESS_KEY}"
+      }
     }
   },
-  "inputs": []
+  "inputs": [
+    {
+      "id": "UNSPLASH_ACCESS_KEY",
+      "description": "Unsplash API Access Key",
+      "type": "promptString"
+    }
+  ]
 }

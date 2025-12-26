@@ -305,6 +305,64 @@ const structuredData = {
 	<AuthorBio />
 </Layout>
 
+<script>
+	/**
+	 * Simple parallax effect for blog post hero image
+	 * Adapted from Hero.astro but without 3D tilt complexity
+	 */
+	function initParallax() {
+		const hero = document.querySelector(".blog-post__hero") as HTMLElement;
+		
+		// Early return if hero image doesn't exist on this page
+		if (!hero) return;
+
+		// Respect user's motion preferences (WCAG 2.3.3)
+		const prefersReducedMotion = window.matchMedia(
+			"(prefers-reduced-motion: reduce)",
+		).matches;
+
+		if (prefersReducedMotion) return;
+
+		function handleParallax() {
+			const scrollY = window.scrollY;
+			const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+			// Only apply parallax while hero is visible
+			if (scrollY < heroBottom) {
+				// Subtle parallax - reduced on mobile for better performance
+				const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+				const parallaxFactor = isMobile ? 0.015 : 0.05;
+				const parallaxOffset = scrollY * parallaxFactor;
+				// Reverse parallax - image moves up as you scroll down
+				hero.style.transform = `translateY(-${parallaxOffset}px)`;
+			}
+		}
+
+		// Attach scroll listener with passive flag for better performance
+		window.addEventListener("scroll", handleParallax, { passive: true });
+
+		// Cleanup function for view transitions
+		const cleanup = () => {
+			window.removeEventListener("scroll", handleParallax);
+			// Reset transform on cleanup
+			if (hero) {
+				hero.style.transform = "";
+			}
+		};
+
+		// Register cleanup before navigation
+		document.addEventListener("astro:before-preparation", cleanup, {
+			once: true,
+		});
+	}
+
+	// Run on initial page load
+	initParallax();
+
+	// Re-initialize after view transitions
+	document.addEventListener("astro:page-load", initParallax);
+</script>
+
 <style lang="scss">
 	@use "../../styles/variables" as *;
 	@use "../../styles/mixins" as *;
@@ -426,6 +484,12 @@ const structuredData = {
 		aspect-ratio: 21 / 9;
 		overflow: hidden;
 		border-radius: 24px;
+		will-change: transform;
+
+		// Only apply transition if user hasn't requested reduced motion
+		@media (prefers-reduced-motion: no-preference) {
+			transition: transform 0.1s ease-out;
+		}
 
 		@include respond-to(lg) {
 			aspect-ratio: 16 / 9;
