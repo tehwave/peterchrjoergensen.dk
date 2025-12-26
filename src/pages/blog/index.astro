@@ -111,7 +111,7 @@ const collectionSchema = {
           <p class="journal__empty">No posts yet. Check back soon!</p>
         ) : (
           <div class="journal__list">
-            {postsWithReadingTime.map((post, index) => (
+            {postsWithReadingTime.map((post) => (
               <AnimateOnScroll animation="fade-up">
                 <BlogPostCard
                   title={post.data.title}

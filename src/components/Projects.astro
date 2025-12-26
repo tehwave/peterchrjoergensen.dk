@@ -64,7 +64,7 @@ const categories = [
     </div>
     <div class="projects__grid" id="projects-grid">
       {
-        randomizedProjects.map((project, index) => (
+        randomizedProjects.map((project) => (
           <div class:list={["projects__item"]} data-category={project.category}>
             <AnimateOnScroll>
               <ProjectCard
