@@ -65,15 +65,15 @@ public/              # Static files served as-is (favicon, robots.txt)
 This site uses a strict CSP configured in `public/_headers`:
 
 ```
-Content-Security-Policy: 
-  default-src 'self'; 
-  script-src 'self' 'unsafe-inline' data: https://cdn.usefathom.com https://static.cloudflareinsights.com https://analytics.ahrefs.com; 
-  style-src 'self' 'unsafe-inline'; 
-  img-src 'self' data: https:; 
-  font-src 'self'; 
-  connect-src 'self' https://cdn.usefathom.com https://cloudflareinsights.com; 
-  frame-ancestors 'none'; 
-  base-uri 'self'; 
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' data: https://cdn.usefathom.com https://static.cloudflareinsights.com https://analytics.ahrefs.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https:;
+  font-src 'self';
+  connect-src 'self' https://cdn.usefathom.com https://cloudflareinsights.com;
+  frame-ancestors 'none';
+  base-uri 'self';
   form-action 'self'
 ```
 
