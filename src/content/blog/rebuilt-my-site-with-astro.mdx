@@ -6,7 +6,8 @@ author: "Peter Chr. Jørgensen"
 tags: ["astro", "portfolio", "performance", "dx"]
 heroImage: "https://images.unsplash.com/photo-1537183673931-f890242dbaef?w=1600&q=80"
 heroImageAlt: "Space Gray laptop showing Mars against a starry night sky, lit by a desk lamp"
-heroImageCaption: "Photo by [Andras Vas](https://unsplash.com/@andrasvasas) on [Unsplash](https://unsplash.com/photos/a-photo-of-mars-on-a-space-gray-macbook-pro-screen-Fzffxyt4ACM)"
+heroImageCaption: "Photo by [Tomáš Stanislavský
+](https://unsplash.com/@tomstanislavsky) on [Unsplash](https://unsplash.com/photos/a-photo-of-mars-on-a-space-gray-macbook-pro-screen-Fzffxyt4ACM)"
 ---
 
 import Figure from '../../components/Figure.astro';
@@ -71,7 +72,7 @@ I treated this like a small product launch with tight scope:
 2. **Define tokens first.** Colors, spacing, and typography went into SASS variables and mixins before building any layouts.
 3. **Build the layout shell.** Header, footer, and layout components in Astro with zero client code. Slots everywhere.
 4. **Move content into collections.** All posts now live in `src/content/blog/` with schema validation. Missing fields get caught at build time.
-5. **Hydrate intentionally.** The only hydrated component at launch was a scroll animation. Everything else stayed server-rendered HTML.
+5. **Hydrate intentionally.** The Hero component uses client-side JavaScript for the typed role animation. Everything else stayed server-rendered HTML.
 
 ## Patterns that stuck
 
@@ -107,7 +108,7 @@ const posts = await getCollection('blog');
 
 I don't chase Lighthouse scores, but the delta was obvious:
 
-The homepage ships almost no JavaScript. Only the scroll animation hydrates. Everything else is static HTML and CSS.
+The homepage ships minimal JavaScript. The Hero component uses client-side code for the typed role animation. Everything else is static HTML and CSS.
 
 LCP stays under a second without hero-image gymnastics. CLS is effectively zero because nothing waits on client scripts to settle.
 
