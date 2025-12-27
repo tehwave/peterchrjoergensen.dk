@@ -16,7 +16,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
 // Generate optimized texture images at build time
-const textureWebP = await getImage({ src: textureSource, format: "webp", quality: "low" });
+const textureWebP = await getImage({ src: textureSource, format: "webp" });
 const textureFallback = await getImage({ src: textureSource, format: "png" });
 
 interface Props {
