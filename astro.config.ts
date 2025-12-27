@@ -20,13 +20,17 @@ export default defineConfig({
       // Customize sitemap entries with frontmatter data
       serialize: (item) => serializeSitemap(item, ChangeFreqEnum),
     }),
-    inline(), // Inline critical CSS for faster FCP
+    inline({
+      Beasties: {
+        pruneSource: true,
+      }
+    }), // Inline critical CSS for faster FCP
     compress({
       CSS: true,
       HTML: true,
       Image: {
         sharp: {
-          webp: { quality: 70 },
+          webp: { quality: 50 },
           avif: { quality: 25 },
         },
       },
