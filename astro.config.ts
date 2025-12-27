@@ -35,7 +35,7 @@ export default defineConfig({
     }),
     vitePwa({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "robots.txt"],
+      includeAssets: ["robots.txt"],
       manifest: {
         name: "Peter Chr. Jørgensen",
         short_name: "PCJ",
