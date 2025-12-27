@@ -35,10 +35,8 @@ const hasLink = link && link !== "#";
           alt={alt}
           class="project-card__image"
           loading="lazy"
-          width={480}
-          height={300}
-          inferSize={true}
-          densities={[1, 2]}
+          widths={[400, 600, 800]}
+          sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
         />
       ) : (
         <div class="project-card__placeholder">
