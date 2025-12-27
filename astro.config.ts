@@ -24,7 +24,12 @@ export default defineConfig({
     compress({
       CSS: true,
       HTML: true,
-      Image: true,
+      Image: {
+        sharp: {
+          webp: { quality: 70 },
+          avif: { quality: 25 },
+        },
+      },
       JavaScript: true,
       SVG: true,
     }),
