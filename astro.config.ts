@@ -21,10 +21,11 @@ export default defineConfig({
       serialize: (item) => serializeSitemap(item, ChangeFreqEnum),
     }),
     inline({
+      // Inline critical CSS for faster FCP
       Beasties: {
         pruneSource: true,
       }
-    }), // Inline critical CSS for faster FCP
+    }),
     compress({
       CSS: true,
       HTML: true,
