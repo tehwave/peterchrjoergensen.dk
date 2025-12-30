@@ -1,0 +1,62 @@
+---
+title: "Example Project"
+description: "A demonstration of how to create a project with a full case study page using MDX."
+category: "web"
+tags: ["Astro", "MDX", "TypeScript"]
+externalUrl: "https://example.com"
+ogDescription: "Learn how to create project case studies with MDX in this portfolio"
+# Note: This is a template/example. Delete this file and create your own project MDX files.
+---
+
+## Project Overview
+
+This is an example project page to demonstrate the MDX-based project system. When you create MDX files in `src/content/projects/`, they automatically:
+
+1. Get their own dedicated page at `/projects/[slug]`
+2. Appear as clickable cards on the homepage with an arrow icon
+3. Include full SEO optimization with Open Graph and JSON-LD
+4. Support hero images and rich content
+
+## Key Features
+
+- **Full MDX support** — Use all MDX features including components
+- **SEO optimized** — Meta tags, Open Graph, Twitter Cards, structured data
+- **Performance friendly** — Images optimized at build time
+- **Responsive** — Beautiful on all devices
+
+## Implementation Details
+
+The project system merges two data sources:
+
+1. **Simple projects** (`src/data/projects.ts`) — Display as cards with external links
+2. **MDX projects** (`src/content/projects/`) — Get dedicated pages
+
+### Code Example
+
+```typescript
+// Example of how projects are merged
+const allProjects = [
+  ...normalizedMdxProjects,
+  ...simpleProjects.map((p) => ({ ...p, hasPage: false })),
+];
+```
+
+## Results
+
+This hybrid approach lets you:
+
+- Keep simple projects lightweight (just frontmatter)
+- Expand selected projects with full case studies
+- Maintain consistent card design across both types
+- Optimize for performance and SEO
+
+## Next Steps
+
+To create your own project page:
+
+1. Create a new `.mdx` file in `src/content/projects/`
+2. Add frontmatter with required fields
+3. Write your case study content
+4. Build and deploy!
+
+The project will automatically appear on the homepage with a clickable card linking to its dedicated page.

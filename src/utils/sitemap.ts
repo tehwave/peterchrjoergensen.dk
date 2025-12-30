@@ -69,6 +69,10 @@ export async function serializeSitemap(
       item.changefreq = changeFreqEnum.MONTHLY;
       item.priority = 0.8;
     }
+  } else if (urlPath.startsWith("projects/")) {
+    // Project pages - medium priority, changes rarely
+    item.changefreq = changeFreqEnum.MONTHLY;
+    item.priority = 0.7;
   } else if (urlPath === "") {
     // Homepage - high priority, changes occasionally
     item.changefreq = changeFreqEnum.MONTHLY;

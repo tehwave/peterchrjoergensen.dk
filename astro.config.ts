@@ -6,6 +6,9 @@ import vitePwa from "@vite-pwa/astro";
 import mdx from "@astrojs/mdx";
 import { serializeSitemap } from "./src/utils/sitemap";
 
+// Enable image compression only when explicitly enabled via env var
+const compressImages = process.env.COMPRESS_IMAGES === "true";
+
 // https://astro.build/config
 export default defineConfig({
   // Production URL for sitemap and canonical URLs
@@ -24,17 +27,19 @@ export default defineConfig({
       // Inline critical CSS for faster FCP
       Beasties: {
         pruneSource: true,
-      }
+      },
     }),
     compress({
       CSS: true,
       HTML: true,
-      Image: {
-        sharp: {
-          webp: { quality: 50 },
-          avif: { quality: 25 },
-        },
-      },
+      Image: compressImages
+        ? {
+            sharp: {
+              webp: { quality: 50 },
+              avif: { quality: 25 },
+            },
+          }
+        : false,
       JavaScript: true,
       SVG: true,
     }),

@@ -127,12 +127,59 @@ const data = await fetch("...").then((r) => r.json());
 - `index.astro` → `/`
 - `about.astro` → `/about`
 - `blog/[slug].astro` → dynamic route `/blog/:slug`
+- `projects/[...slug].astro` → dynamic route `/projects/:slug` for MDX project pages
+
+**Internal link conventions:**
+
+- Always include trailing slashes on internal links: `href="/about/"`, `href="/"`
+- Fragment identifiers don't need trailing slash before `#`: `href="/#projects"`, `href="/about/#contact"`
+- This ensures consistency with Astro's default trailing slash behavior
+
+### Projects System
+
+This site uses a **hybrid projects system** that merges two data sources:
+
+1. **Simple projects** (`src/data/projects.ts`) — Array of project objects with frontmatter
+   - Display as cards on homepage
+   - External links only (no dedicated pages)
+   - Quick to add for portfolio items
+
+2. **MDX projects** (`src/content/projects/`) — Full MDX case studies
+   - Each MDX file gets a dedicated page at `/projects/[slug]`
+   - Display as cards with an arrow icon indicating a page exists
+   - Full SEO optimization (Open Graph, Twitter Cards, JSON-LD)
+   - Hero images, rich content, and MDX component support
+
+**Projects display logic:**
+
+- MDX projects with content → card with arrow → links to `/projects/[slug]`
+- Simple projects → card with external link icon → opens external URL
+- Both types use the same `ProjectCard` component for consistency
+
+**To add a project:**
+
+- **Simple project**: Add to `src/data/projects.ts` array
+- **Featured project**: Create MDX file in `src/content/projects/`
 
 ### Styling Best Practices
 
 - **Always use scoped SASS** — Every component must have `<style lang="scss">`
 - **Import design tokens**: Always `@use "../styles/variables" as *;` and `@use "../styles/mixins" as *;`
 - **BEM naming**: `.component`, `.component__element`, `.component--modifier`
+- **Nest BEM elements efficiently**: Use `&__element` under the block for better organization:
+  ```scss
+  .component {
+    padding: $space-lg;
+
+    &__title {
+      font-size: $font-size-xl;
+    }
+
+    &__description {
+      color: $color-text-secondary;
+    }
+  }
+  ```
 - **Automatic scoping** — Styles only affect the current component, never leak
 - **Use design tokens** from `_variables.scss` — never hardcode colors, spacing, or breakpoints
 - **Use mixins** from `_mixins.scss` — `@include respond-to(md)`, `@include container`, etc.

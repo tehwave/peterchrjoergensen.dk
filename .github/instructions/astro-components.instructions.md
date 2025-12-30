@@ -118,9 +118,50 @@ Use `:global()` to pierce scoped styles when styling child component markup:
 - `@include section-label` — Uppercase accent labels
 - `@include section-heading` — Large section titles
 
+### BEM Nesting Pattern
+
+**Always nest BEM elements under the block using the `&` parent selector:**
+
+```scss
+// ✅ GOOD — All elements nested under the block
+.project-page {
+  padding-top: $header-height;
+
+  &__header {
+    max-width: $max-width;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $space-md;
+  }
+}
+
+// ❌ BAD — Separate top-level selectors
+.project-page {
+  padding-top: $header-height;
+}
+
+.project-page__header {
+  max-width: $max-width;
+}
+```
+
+**Benefits:**
+
+- Single point of control for the component
+- Easy to scan and maintain
+- Clear visual hierarchy
+- Prevents selector duplication
+
 ### Clean CSS Patterns
 
 - **Keep specificity low** — single class selectors when possible
+- **Nest all BEM elements under the block** — use `&__element` pattern
 - **Avoid nesting beyond 3 levels** — flatter is better
 - **Use logical property names**: `margin-inline`, `padding-block`
 - **Group related properties**: layout → box model → typography → visual

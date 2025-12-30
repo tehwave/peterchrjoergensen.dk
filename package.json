@@ -6,8 +6,8 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro check && astro build",
-    "preview": "astro preview",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name=peterchrjoergensen",
+    "preview": "COMPRESS_IMAGES=true npm run build && astro preview",
+    "deploy": "COMPRESS_IMAGES=true npm run build && wrangler pages deploy dist --project-name=peterchrjoergensen",
     "format": "prettier --write .",
     "astro": "astro"
   },
