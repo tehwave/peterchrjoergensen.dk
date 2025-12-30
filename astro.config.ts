@@ -71,12 +71,12 @@ export default defineConfig({
         globPatterns: ["**/*.{css,js,html,svg,png,ico,txt,woff2}"],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            urlPattern: /\/_astro\/.*\.woff2$/,
             handler: "CacheFirst",
             options: {
-              cacheName: "google-fonts-cache",
+              cacheName: "fontsource-fonts-cache",
               expiration: {
-                maxEntries: 10,
+                maxEntries: 30,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
               cacheableResponse: {
@@ -104,8 +104,8 @@ export default defineConfig({
   build: {
     // Generate clean URLs without .html extension
     format: "directory",
-    // Inline small stylesheets for faster initial render
-    inlineStylesheets: "auto",
+    // Inline all stylesheets for faster initial render
+    inlineStylesheets: "always",
   },
 
   // Compress HTML output
@@ -123,7 +123,7 @@ export default defineConfig({
         name: "Inter",
         cssVariable: "--font-inter",
         provider: fontProviders.fontsource(),
-        weights: [400, 500, 600, 700],
+        weights: [400, 600, 700],
         styles: ["normal"],
         subsets: ["latin"],
         fallbacks: [

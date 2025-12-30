@@ -88,6 +88,7 @@
     position: absolute;
     inset: 0;
     background-image: image-set(
+      var(--texture-avif) type("image/avif"),
       var(--texture-webp) type("image/webp"),
       var(--texture-fallback) type("image/png")
     );
