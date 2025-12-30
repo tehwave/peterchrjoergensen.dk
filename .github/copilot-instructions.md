@@ -130,6 +130,7 @@ const data = await fetch("...").then((r) => r.json());
 - `projects/[...slug].astro` → dynamic route `/projects/:slug` for MDX project pages
 
 **Internal link conventions:**
+
 - Always include trailing slashes on internal links: `href="/about/"`, `href="/"`
 - Fragment identifiers don't need trailing slash before `#`: `href="/#projects"`, `href="/about/#contact"`
 - This ensures consistency with Astro's default trailing slash behavior
@@ -150,11 +151,13 @@ This site uses a **hybrid projects system** that merges two data sources:
    - Hero images, rich content, and MDX component support
 
 **Projects display logic:**
+
 - MDX projects with content → card with arrow → links to `/projects/[slug]`
 - Simple projects → card with external link icon → opens external URL
 - Both types use the same `ProjectCard` component for consistency
 
 **To add a project:**
+
 - **Simple project**: Add to `src/data/projects.ts` array
 - **Featured project**: Create MDX file in `src/content/projects/`
 
@@ -167,11 +170,11 @@ This site uses a **hybrid projects system** that merges two data sources:
   ```scss
   .component {
     padding: $space-lg;
-    
+
     &__title {
       font-size: $font-size-xl;
     }
-    
+
     &__description {
       color: $color-text-secondary;
     }

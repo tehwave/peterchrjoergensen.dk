@@ -27,7 +27,7 @@ export default defineConfig({
       // Inline critical CSS for faster FCP
       Beasties: {
         pruneSource: true,
-      }
+      },
     }),
     compress({
       CSS: true,
@@ -38,7 +38,7 @@ export default defineConfig({
               webp: { quality: 50 },
               avif: { quality: 25 },
             },
-        }
+          }
         : false,
       JavaScript: true,
       SVG: true,

@@ -152,6 +152,7 @@ Use `:global()` to pierce scoped styles when styling child component markup:
 ```
 
 **Benefits:**
+
 - Single point of control for the component
 - Easy to scan and maintain
 - Clear visual hierarchy
