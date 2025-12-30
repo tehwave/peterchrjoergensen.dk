@@ -1,0 +1,575 @@
+---
+/**
+ * Dynamic Project Page
+ *
+ * Renders individual project case studies with full SEO optimization.
+ * Only projects in src/content/projects/ with MDX body content get pages.
+ *
+ * Features:
+ * - Full Open Graph and Twitter Card meta tags
+ * - JSON-LD structured data (CreativeWork schema)
+ * - Hero image support with optimization
+ * - Tag display for technologies used
+ * - Optional external project link
+ *
+ * The [...slug] pattern creates a catch-all route for each project.
+ */
+import { getCollection, type CollectionEntry, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { Picture } from "astro:assets";
+import SkillTag from "../../components/SkillTag.astro";
+import { fadeAnimation } from "../../utils/transitions";
+import { parseInlineMarkdown } from "../../utils/markdown";
+
+/**
+ * Generate static paths for all projects at build time
+ *
+ * Astro calls this function during the build process to create
+ * a static HTML file for each project with MDX content.
+ */
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+type Props = {
+  project: CollectionEntry<"projects">;
+};
+
+const { project } = Astro.props;
+
+// Render the MDX content into HTML
+const { Content } = await render(project);
+
+// Generate canonical URL for SEO
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// Extract frontmatter data from the project
+const {
+  title,
+  description,
+  category,
+  tags,
+  externalUrl,
+  heroImage,
+  heroImageAlt,
+  heroImageCaption,
+  ogDescription,
+} = project.data;
+
+// Use ogDescription if provided, otherwise fall back to description
+const socialDescription = ogDescription || description;
+
+/**
+ * Generate JSON-LD structured data for search engines
+ *
+ * Uses CreativeWork schema for project case studies
+ *
+ * @see https://schema.org/CreativeWork
+ * @see https://schema.org/BreadcrumbList
+ */
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": canonicalURL + "#project",
+      name: title,
+      description: description,
+      url: canonicalURL.toString(),
+      author: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: "Peter Chr. Jørgensen",
+      },
+      creator: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: "Peter Chr. Jørgensen",
+      },
+      inLanguage: "en-US",
+      keywords: tags?.join(", ") || "",
+      genre: category,
+      ...(heroImage && {
+        image: {
+          "@type": "ImageObject",
+          url: new URL(heroImage.src, Astro.site).toString(),
+          width: heroImage.width,
+          height: heroImage.height,
+        },
+        thumbnailUrl: new URL(heroImage.src, Astro.site).toString(),
+      }),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://peterchrjoergensen.dk",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Projects",
+          item: "https://peterchrjoergensen.dk/#projects",
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: title,
+          item: canonicalURL.toString(),
+        },
+      ],
+    },
+  ],
+};
+---
+
+<Layout
+  title={`${title} | Peter Chr. Jørgensen`}
+  description={socialDescription}
+>
+  <Fragment slot="head">
+    <!-- 
+			Social Media Meta Tags
+			These control how the project appears when shared on social platforms
+		-->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={socialDescription} />
+    {
+      heroImage && (
+        <meta
+          property="og:image"
+          content={new URL(heroImage.src, Astro.site)}
+        />
+      )
+    }
+
+    <!-- Twitter -->
+    <meta
+      property="twitter:card"
+      content={heroImage ? "summary_large_image" : "summary"}
+    />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={socialDescription} />
+    {
+      heroImage && (
+        <meta
+          property="twitter:image"
+          content={new URL(heroImage.src, Astro.site)}
+        />
+      )
+    }
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Structured data -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
+  </Fragment>
+
+  <article class="project-page" transition:animate={fadeAnimation}>
+    <div class="project-page__header-container">
+      <header class="project-page__header">
+        <div class="project-page__meta-header">
+          <a href="/#projects" class="project-page__back-link"
+            >← Back to Projects</a
+          >
+        </div>
+
+        <h1>{title}</h1>
+
+        <p class="project-page__description">{description}</p>
+
+        <div class="project-page__meta">
+          <span class="project-page__category" data-category={category}>
+            {category.charAt(0).toUpperCase() + category.slice(1)}
+          </span>
+          {
+            externalUrl && (
+              <a
+                href={externalUrl}
+                class="project-page__external-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Visit Project
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
+            )
+          }
+        </div>
+
+        {
+          tags && tags.length > 0 && (
+            <div
+              class="project-page__tags"
+              role="list"
+              aria-label="Technologies used"
+            >
+              {tags.map((tag: string) => (
+                <SkillTag label={tag} />
+              ))}
+            </div>
+          )
+        }
+      </header>
+    </div>
+
+    {
+      heroImage && (
+        <figure class="project-page__hero-figure">
+          <div class="project-page__hero">
+            <Picture
+              src={heroImage}
+              alt={heroImageAlt || title}
+              formats={["avif", "webp"]}
+              widths={[800, 1200, 1600, 2400]}
+              sizes="100vw"
+              loading="eager"
+              fetchpriority="high"
+              inferSize={true}
+            />
+          </div>
+          {heroImageCaption && (
+            <figcaption
+              class="project-page__hero-caption"
+              set:html={parseInlineMarkdown(heroImageCaption)}
+            />
+          )}
+        </figure>
+      )
+    }
+
+    <div class="project-page__content">
+      <div class="project-page__prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .project-page {
+    width: 100%;
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $space-xl;
+
+    @include respond-to(md) {
+      padding: 0 $space-lg;
+    }
+
+    &__header-container {
+      padding: $space-4xl 0 $space-2xl;
+
+      @include respond-to(md) {
+        padding: $space-3xl 0 $space-xl;
+      }
+    }
+
+    &__header {
+      max-width: calc($max-width-text * 1.4);
+      margin: 0 auto;
+    }
+
+    &__meta-header {
+      margin-bottom: $space-lg;
+    }
+
+    &__back-link {
+      color: $color-text-muted;
+      text-decoration: none;
+      font-size: $font-size-sm;
+      @include transition(color, 0.2s);
+      display: inline-flex;
+      align-items: center;
+      gap: $space-xs;
+
+      &:hover,
+      &:focus {
+        color: $color-orange;
+      }
+    }
+
+    h1 {
+      font-size: 4.5rem;
+      font-weight: $font-weight-bold;
+      line-height: 1.1;
+      color: $color-text-primary;
+      margin-bottom: $space-xl;
+
+      @include respond-to(md) {
+        font-size: $font-size-3xl;
+      }
+    }
+
+    &__description {
+      font-size: $font-size-xl;
+      line-height: 1.6;
+      color: $color-text-muted;
+      margin-bottom: $space-lg;
+
+      @include respond-to(md) {
+        font-size: $font-size-lg;
+      }
+    }
+
+    &__meta {
+      display: flex;
+      align-items: center;
+      gap: $space-lg;
+      flex-wrap: wrap;
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      margin-bottom: $space-lg;
+      padding-bottom: $space-lg;
+      border-bottom: 1px solid $color-border;
+    }
+
+    &__category {
+      padding: $space-xs $space-md;
+      border-radius: 20px;
+      background: $color-cream;
+      color: $color-text-dark;
+      font-weight: $font-weight-semibold;
+      text-transform: capitalize;
+
+      &[data-category="web"] {
+        background: rgba(59, 130, 246, 0.1);
+        color: rgb(59, 130, 246);
+      }
+
+      &[data-category="games"] {
+        background: rgba(168, 85, 247, 0.1);
+        color: rgb(168, 85, 247);
+      }
+
+      &[data-category="creative"] {
+        background: rgba(236, 72, 153, 0.1);
+        color: rgb(236, 72, 153);
+      }
+    }
+
+    &__external-link {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-xs;
+      color: $color-orange;
+      text-decoration: none;
+      font-weight: $font-weight-semibold;
+      @include transition(all, 0.2s);
+
+      &:hover,
+      &:focus {
+        color: $color-orange-dark;
+        gap: $space-sm;
+      }
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    &__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-xs;
+    }
+
+    &__hero-figure {
+      margin: 0 0 $space-3xl;
+      width: 100%;
+    }
+
+    &__hero {
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      background: $color-cream;
+
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    }
+
+    &__hero-caption {
+      margin-top: $space-lg;
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      text-align: center;
+      line-height: 1.6;
+
+      :global(a) {
+        color: $color-orange;
+        text-decoration: none;
+        @include transition(color, 0.2s);
+
+        &:hover,
+        &:focus {
+          color: $color-orange-dark;
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &__content {
+      max-width: calc($max-width-text * 1.4);
+      margin: 0 auto;
+      padding-bottom: $space-4xl;
+    }
+
+    &__prose {
+      max-width: $max-width-text;
+      margin: 0 auto;
+      font-size: $font-size-lg;
+      line-height: 1.75;
+      color: $color-text-primary;
+
+      @include respond-to(md) {
+        font-size: $font-size-base;
+      }
+
+      // Typography
+      :global(h2),
+      :global(h3),
+      :global(h4) {
+        font-weight: $font-weight-bold;
+        line-height: 1.3;
+        color: $color-text-primary;
+      }
+
+      :global(h2) {
+        font-size: $font-size-2xl;
+        margin-top: $space-4xl;
+        margin-bottom: $space-lg;
+
+        @include respond-to(md) {
+          font-size: $font-size-xl;
+          margin-top: $space-3xl;
+        }
+      }
+
+      :global(h3) {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        margin-top: $space-3xl;
+        margin-bottom: $space-md;
+
+        @include respond-to(md) {
+          font-size: $font-size-lg;
+          margin-top: $space-2xl;
+        }
+      }
+
+      :global(h4) {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        margin-top: $space-2xl;
+        margin-bottom: $space-sm;
+      }
+
+      :global(p) {
+        margin-bottom: $space-xl;
+      }
+
+      // Links
+      :global(a) {
+        color: $color-orange;
+        text-decoration: underline;
+        @include transition(opacity, 0.2s);
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+
+      // Lists
+      :global(ul),
+      :global(ol) {
+        margin-bottom: $space-xl;
+        padding-left: $space-2xl;
+      }
+
+      :global(li) {
+        margin-bottom: $space-sm;
+      }
+
+      // Code blocks
+      :global(code) {
+        font-family:
+          ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
+          monospace;
+        font-size: 0.9em;
+        background: $color-cream;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+      }
+
+      :global(pre) {
+        background: $color-cream;
+        padding: $space-lg;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin-bottom: $space-xl;
+
+        :global(code) {
+          background: none;
+          padding: 0;
+        }
+      }
+
+      // Blockquotes
+      :global(blockquote) {
+        border-left: 4px solid $color-orange;
+        padding-left: $space-lg;
+        margin: $space-2xl 0;
+        font-style: italic;
+        color: $color-text-muted;
+      }
+
+      // Images
+      :global(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: $space-2xl 0;
+      }
+    }
+  }
+</style>

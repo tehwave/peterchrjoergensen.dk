@@ -2,17 +2,43 @@
 /**
  * Project portfolio with category filtering.
  *
- * Projects are shuffled on each build to give equal visibility over time —
- * no single project is always "first". Client-side filtering with ARIA tabs
- * pattern for accessibility. Animation stagger creates visual flow.
+ * Displays projects from two sources:
+ * - Featured MDX projects (src/content/projects/) with dedicated pages
+ * - Simple projects (src/data/projects.ts) with external links
+ *
+ * Projects are shuffled on build for equal visibility.
  */
 import ProjectCard from "./ProjectCard.astro";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
-import { projects } from "../data/projects";
+import { projects as simpleProjects } from "../data/projects";
+import { getCollection } from "astro:content";
 
 type Props = Record<string, never>;
 
-// Fisher-Yates: unbiased shuffling so all projects get equal exposure
+// Get featured projects (MDX with dedicated pages)
+const featuredProjects = await getCollection("projects");
+
+// Merge both sources: featured MDX projects + simple data projects
+const allProjects = [
+  // Featured projects with internal pages
+  ...featuredProjects.map((p) => ({
+    title: p.data.title,
+    description: p.data.description,
+    alt: p.data.heroImageAlt || p.data.title,
+    tags: p.data.tags,
+    image: undefined, // Use placeholder for now
+    link: p.id,
+    category: p.data.category,
+    hasPage: true,
+  })),
+  // Simple projects with external links
+  ...simpleProjects.map((p) => ({
+    ...p,
+    hasPage: false,
+  })),
+];
+
+// Fisher-Yates shuffle for equal visibility
 function shuffle<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -22,7 +48,7 @@ function shuffle<T>(array: T[]): T[] {
   return shuffled;
 }
 
-const randomizedProjects = shuffle(projects);
+const randomizedProjects = shuffle(allProjects);
 
 const categories = [
   { id: "all", label: "All" },
@@ -74,6 +100,7 @@ const categories = [
                 tags={project.tags}
                 image={project.image}
                 link={project.link}
+                hasPage={project.hasPage}
               />
             </AnimateOnScroll>
           </div>

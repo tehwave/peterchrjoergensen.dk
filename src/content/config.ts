@@ -35,9 +35,25 @@ const blog = defineCollection({
 });
 
 /**
- * Export all content collections
+ * Featured projects collection — MDX case studies with dedicated pages
  *
- * Each collection must be exported here to be recognized by Astro.
- * Add new collections (e.g., "projects", "notes") as needed.
+ * For select projects that deserve full case study treatment.
+ * Each MDX file gets a dynamic route at /projects/[slug].
  */
-export const collections = { blog };
+const projectsFeatured = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      category: z.enum(["web", "games", "creative"]),
+      tags: z.array(z.string()).optional(),
+      externalUrl: z.string().optional(),
+      heroImage: image().optional(),
+      heroImageAlt: z.string().optional(),
+      heroImageCaption: z.string().optional(),
+      ogDescription: z.string().optional(),
+    }),
+});
+
+export const collections = { blog, projects: projectsFeatured };

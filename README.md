@@ -33,15 +33,18 @@ This site is built with Core Web Vitals in mind:
 ```
 src/
 ├── assets/          # Images processed by Astro's optimizer
-│   └── blog/        # Blog post images (hero images, inline images)
+│   ├── blog/        # Blog post images (hero images, inline images)
+│   └── projects/    # Project thumbnails and case study images
 ├── components/      # Reusable .astro components
-├── content/         # Content collections (blog posts)
+├── content/         # Content collections (blog, featured projects)
 │   ├── config.ts    # Collection schemas with type validation
-│   └── blog/        # Blog posts (.md and .mdx files)
-├── data/            # Structured data (projects, etc.)
+│   ├── blog/        # Blog posts (.md and .mdx files)
+│   └── projects/    # Featured project case studies (.mdx files)
+├── data/            # Structured data (simple projects without pages)
 ├── layouts/         # Page layouts with SEO meta tags
 ├── pages/           # File-based routing
-│   └── blog/        # Blog routes (index and dynamic [slug])
+│   ├── blog/        # Blog routes (index and dynamic [slug])
+│   └── projects/    # Project case study routes (dynamic [slug])
 ├── styles/          # Global Sass (variables, mixins, base)
 └── types/           # TypeScript type definitions
 ```
@@ -58,6 +61,41 @@ src/
 | `Blog.astro`            | Latest blog posts section with cards (3 most recent)           |
 | `AI.astro`              | Transparency section on AI usage                               |
 | `AnimateOnScroll.astro` | Intersection Observer wrapper for scroll animations            |
+
+## Projects
+
+Projects are displayed from two sources for flexibility:
+
+- **Featured projects** (`src/content/projects/`) — MDX files with full case study pages at `/projects/[slug]`
+- **Simple projects** (`src/data/projects.ts`) — Cards with external links (no dedicated pages)
+
+### Adding a Featured Project
+
+Create `src/content/projects/project-name.mdx`:
+
+```mdx
+---
+title: "Project Name"
+description: "Short description for project card"
+category: "web" # or "games" or "creative"
+tags: ["React", "TypeScript"]
+externalUrl: "https://example.com" # Optional
+heroImage: ../../assets/projects/project-name/hero.jpg # Optional
+heroImageAlt: "Hero image description"
+ogDescription: "Custom social sharing description" # Optional
+---
+
+## Overview
+
+Your full case study content here...
+```
+
+Featured projects get:
+
+- Dedicated page at `/projects/[slug]`
+- Full SEO (Open Graph, JSON-LD)
+- Clickable project card with arrow icon
+- Optional hero images and rich MDX content
 
 ## Blog System
 
