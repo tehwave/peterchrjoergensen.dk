@@ -279,31 +279,101 @@ const structuredData = {
   </article>
 </Layout>
 
+<script>
+  /**
+   * Simple parallax effect for project hero image
+   * Adapted from blog post parallax effect
+   */
+  function initParallax() {
+    const hero = document.querySelector(".project-page__hero") as HTMLElement;
+
+    // Early return if hero image doesn't exist on this page
+    if (!hero) return;
+
+    // Respect user's motion preferences (WCAG 2.3.3)
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion) return;
+
+    function handleParallax() {
+      const scrollY = window.scrollY;
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+      // Only apply parallax while hero is visible
+      if (scrollY < heroBottom) {
+        // Subtle parallax - reduced on mobile for better performance
+        const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+        const parallaxFactor = isMobile ? 0.015 : 0.05;
+        const parallaxOffset = scrollY * parallaxFactor;
+        // Reverse parallax - image moves up as you scroll down
+        hero.style.transform = `translateY(-${parallaxOffset}px)`;
+      }
+    }
+
+    // Attach scroll listener with passive flag for better performance
+    window.addEventListener("scroll", handleParallax, { passive: true });
+
+    // Cleanup function for view transitions
+    const cleanup = () => {
+      window.removeEventListener("scroll", handleParallax);
+      // Reset transform on cleanup
+      if (hero) {
+        hero.style.transform = "";
+      }
+    };
+
+    // Register cleanup before navigation
+    document.addEventListener("astro:before-preparation", cleanup, {
+      once: true,
+    });
+  }
+
+  // Run on initial page load
+  initParallax();
+
+  // Re-initialize after view transitions
+  document.addEventListener("astro:page-load", initParallax);
+</script>
+
 <style lang="scss">
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
   .project-page {
-    width: 100%;
-    max-width: $max-width;
-    margin: 0 auto;
-    padding: 0 $space-xl;
+    padding-top: $header-height;
 
     @include respond-to(md) {
-      padding: 0 $space-lg;
+      padding-top: calc($header-height - 20px);
     }
 
     &__header-container {
-      padding: $space-4xl 0 $space-2xl;
+      width: 100%;
+      max-width: $max-width;
+      margin: 0 auto;
+      padding: $space-4xl $space-xl $space-3xl;
 
       @include respond-to(md) {
-        padding: $space-3xl 0 $space-xl;
+        padding: $space-3xl $space-lg $space-2xl;
       }
     }
 
     &__header {
       max-width: calc($max-width-text * 1.4);
       margin: 0 auto;
+
+      h1 {
+        font-size: 4.5rem;
+        font-weight: $font-weight-bold;
+        line-height: 1.1;
+        margin: 0 0 $space-xl 0;
+        color: $color-text-primary;
+
+        @include respond-to(md) {
+          font-size: $font-size-3xl;
+        }
+      }
     }
 
     &__meta-header {
@@ -311,37 +381,27 @@ const structuredData = {
     }
 
     &__back-link {
-      color: $color-text-muted;
-      text-decoration: none;
+      display: block;
+      color: $color-orange;
       font-size: $font-size-sm;
-      @include transition(color, 0.2s);
-      display: inline-flex;
-      align-items: center;
-      gap: $space-xs;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: $space-md;
+      text-decoration: none;
+      @include transition(opacity);
+      @include focus-visible;
 
-      &:hover,
-      &:focus {
-        color: $color-orange;
-      }
-    }
-
-    h1 {
-      font-size: 4.5rem;
-      font-weight: $font-weight-bold;
-      line-height: 1.1;
-      color: $color-text-primary;
-      margin-bottom: $space-xl;
-
-      @include respond-to(md) {
-        font-size: $font-size-3xl;
+      &:hover {
+        opacity: 0.7;
       }
     }
 
     &__description {
       font-size: $font-size-xl;
-      line-height: 1.6;
-      color: $color-text-muted;
-      margin-bottom: $space-lg;
+      line-height: 1.5;
+      color: $color-text-secondary;
+      margin: 0 0 $space-2xl 0;
 
       @include respond-to(md) {
         font-size: $font-size-lg;
@@ -350,14 +410,20 @@ const structuredData = {
 
     &__meta {
       display: flex;
-      align-items: center;
-      gap: $space-lg;
       flex-wrap: wrap;
+      gap: $space-md;
       font-size: $font-size-sm;
-      color: $color-text-muted;
-      margin-bottom: $space-lg;
-      padding-bottom: $space-lg;
-      border-bottom: 1px solid $color-border;
+      color: $color-text-secondary;
+      align-items: center;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 1px;
+        background: $color-border;
+        margin-bottom: $space-sm;
+      }
     }
 
     &__category {
@@ -408,50 +474,70 @@ const structuredData = {
       display: flex;
       flex-wrap: wrap;
       gap: $space-xs;
+      margin-top: $space-lg;
     }
 
     &__hero-figure {
-      margin: 0 0 $space-3xl;
       width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 $space-xl;
+
+      @include respond-to(md) {
+        padding: 0 $space-lg;
+      }
     }
 
     &__hero {
       width: 100%;
-      border-radius: 8px;
+      aspect-ratio: 21 / 9;
       overflow: hidden;
-      background: $color-cream;
+      border-radius: 24px;
+      will-change: transform;
 
-      img {
+      @media (prefers-reduced-motion: no-preference) {
+        transition: transform 0.1s ease-out;
+      }
+
+      @include respond-to(lg) {
+        aspect-ratio: 16 / 9;
+      }
+
+      @include respond-to(md) {
+        aspect-ratio: 3 / 2;
+        border-radius: 16px;
+      }
+
+      :global(img) {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: cover;
         display: block;
       }
     }
 
     &__hero-caption {
-      margin-top: $space-lg;
+      max-width: $max-width;
+      margin: 0 auto;
+      padding: $space-sm $space-xl 0;
       font-size: $font-size-sm;
       color: $color-text-muted;
       text-align: center;
-      line-height: 1.6;
+      font-style: italic;
 
-      :global(a) {
-        color: $color-orange;
-        text-decoration: none;
-        @include transition(color, 0.2s);
-
-        &:hover,
-        &:focus {
-          color: $color-orange-dark;
-          text-decoration: underline;
-        }
+      @include respond-to(md) {
+        padding: $space-xs $space-lg 0;
       }
     }
 
     &__content {
-      max-width: calc($max-width-text * 1.4);
+      max-width: $max-width;
       margin: 0 auto;
-      padding-bottom: $space-4xl;
+      padding: $space-4xl $space-xl;
+
+      @include respond-to(md) {
+        padding: $space-3xl $space-lg;
+      }
     }
 
     &__prose {
@@ -510,9 +596,9 @@ const structuredData = {
 
       // Links
       :global(a) {
-        color: $color-orange;
+        color: $color-accent;
         text-decoration: underline;
-        @include transition(opacity, 0.2s);
+        @include transition(opacity);
 
         &:hover {
           opacity: 0.7;
@@ -530,45 +616,94 @@ const structuredData = {
         margin-bottom: $space-sm;
       }
 
-      // Code blocks
+      // Code
       :global(code) {
-        font-family:
-          ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
-          monospace;
-        font-size: 0.9em;
         background: $color-cream;
-        padding: 0.2em 0.4em;
+        padding: 0.125rem 0.375rem;
         border-radius: 4px;
+        font-size: 0.9em;
+        font-family: ui-monospace, "Courier New", monospace;
+        color: $color-text-primary;
+        font-weight: 600;
       }
 
       :global(pre) {
-        background: $color-cream;
-        padding: $space-lg;
-        border-radius: 8px;
+        background: $color-code-bg;
+        padding: $space-xl;
+        border-radius: 16px;
         overflow-x: auto;
-        margin-bottom: $space-xl;
+        margin: $space-2xl 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        @include respond-to(md) {
+          padding: $space-lg;
+          border-radius: 12px;
+        }
 
         :global(code) {
           background: none;
           padding: 0;
+          border-radius: 0;
+          color: $color-code-text;
+          line-height: 1.6;
         }
       }
 
       // Blockquotes
       :global(blockquote) {
-        border-left: 4px solid $color-orange;
-        padding-left: $space-lg;
+        border-left: 4px solid $color-accent;
+        padding-left: $space-xl;
         margin: $space-2xl 0;
         font-style: italic;
-        color: $color-text-muted;
+        color: $color-text-secondary;
       }
 
-      // Images
+      // Images and figures - wider than text content
+      :global(img),
+      :global(figure) {
+        max-width: 120ch;
+        margin-block: $space-3xl;
+
+        @media (min-width: 1600px) {
+          width: calc(100% + 16rem);
+          margin-inline: -8rem;
+        }
+
+        @media (min-width: 1200px) and (max-width: 1599px) {
+          width: calc(100% + 8rem);
+          margin-inline: -4rem;
+        }
+
+        @include respond-to(lg) {
+          width: 100%;
+          margin-inline: 0;
+          margin-block: $space-2xl;
+        }
+      }
+
       :global(img) {
-        max-width: 100%;
         height: auto;
-        border-radius: 8px;
-        margin: $space-2xl 0;
+        display: block;
+        border-radius: 24px;
+
+        @include respond-to(md) {
+          border-radius: 16px;
+        }
+      }
+
+      :global(figcaption) {
+        max-width: $max-width;
+        margin: 0 auto;
+        padding: $space-lg $space-xl 0;
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        text-align: center;
+        font-style: italic;
+
+        @include respond-to(md) {
+          padding: $space-md $space-lg 0;
+        }
       }
     }
   }
