@@ -1,5 +1,5 @@
 ---
-name: Instructions Architect
+name: Instructor
 description: Expert at creating and optimizing GitHub Copilot custom instructions files (copilot-instructions.md, .instructions.md, and AGENTS.md) to improve AI code generation quality and consistency.
 tools: ["read", "edit", "search", "astro-docs/*", "agent"]
 model: Claude Sonnet 4.5 (copilot)

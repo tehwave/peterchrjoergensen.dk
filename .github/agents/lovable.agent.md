@@ -1,5 +1,5 @@
 ---
-name: Lovable Prompt Expert
+name: Lovable
 description: Expert in crafting high-quality prompts for lovable.dev - the AI-powered full-stack web app builder. Specializes in prompt engineering patterns, component-based development, design buzzwords, and best practices for getting consistent, polished UI results.
 tools:
   ["read", "search", "web", "ms-vscode.vscode-websearchforcopilot/websearch"]

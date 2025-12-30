@@ -1,5 +1,5 @@
 ---
-name: SEO Expert
+name: SEO Specialist
 description: Search engine optimization specialist for portfolio websites. Audits meta tags, structured data, Core Web Vitals, and content optimization with focus on personal branding and developer visibility.
 tools: ["read", "edit", "search", "execute", "web", "agent"]
 model: Claude Sonnet 4.5 (copilot)

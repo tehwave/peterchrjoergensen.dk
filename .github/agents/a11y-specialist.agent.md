@@ -1,5 +1,5 @@
 ---
-name: a11y Expert
+name: a11y Specialist
 description: Web accessibility specialist that audits, edits, and optimizes Astro websites for WCAG compliance and inclusive design
 tools: ["read", "edit", "search", "execute", "web", "agent"]
 model: Claude Sonnet 4.5 (copilot)
