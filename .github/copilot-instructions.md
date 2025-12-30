@@ -129,6 +129,11 @@ const data = await fetch("...").then((r) => r.json());
 - `blog/[slug].astro` → dynamic route `/blog/:slug`
 - `projects/[...slug].astro` → dynamic route `/projects/:slug` for MDX project pages
 
+**Internal link conventions:**
+- Always include trailing slashes on internal links: `href="/about/"`, `href="/"`
+- Fragment identifiers don't need trailing slash before `#`: `href="/#projects"`, `href="/about/#contact"`
+- This ensures consistency with Astro's default trailing slash behavior
+
 ### Projects System
 
 This site uses a **hybrid projects system** that merges two data sources:
