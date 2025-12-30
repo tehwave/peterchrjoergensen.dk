@@ -22,7 +22,6 @@
     "@vite-pwa/astro": "^1.2.0",
     "astro": "^5.16.6",
     "astro-seo-schema": "^5.1.0",
-    "typed.js": "^2.1.0",
     "typescript": "^5.9.3",
     "vite-plugin-pwa": "^1.2.0"
   },

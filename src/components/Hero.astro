@@ -100,7 +100,8 @@ const roles = [
     }
 
     try {
-      const { default: Typed } = await import("typed.js");
+      // @ts-expect-error - CDN import not recognized by TypeScript module resolution
+      const { default: Typed } = await import("https://cdn.jsdelivr.net/npm/typed.js@2.1.0/+esm");
 
       // Cleanup existing instances
       if (typedInstance) {
