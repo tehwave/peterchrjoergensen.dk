@@ -49,6 +49,8 @@ const projectsFeatured = defineCollection({
       category: z.enum(["web", "games", "creative"]),
       tags: z.array(z.string()).optional(),
       externalUrl: z.string().optional(),
+      publishedDate: z.coerce.date().optional(),
+      updatedDate: z.coerce.date().optional(),
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
       heroImageCaption: z.string().optional(),

@@ -42,7 +42,11 @@ const linkUrl = isInternal ? `/projects/${link}` : link;
 
 {
   isInternal && hasLink ? (
-    <a href={linkUrl} class="project-card project-card--clickable">
+    <a
+      href={linkUrl}
+      class="project-card project-card--clickable"
+      aria-label={`View ${title} case study`}
+    >
       <div class="project-card__image-wrapper">
         {image ? (
           <Picture
@@ -56,7 +60,7 @@ const linkUrl = isInternal ? `/projects/${link}` : link;
             sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
           />
         ) : (
-          <div class="project-card__placeholder">
+          <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
           </div>
         )}
@@ -105,7 +109,7 @@ const linkUrl = isInternal ? `/projects/${link}` : link;
             sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
           />
         ) : (
-          <div class="project-card__placeholder">
+          <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
           </div>
         )}
@@ -187,6 +191,7 @@ const linkUrl = isInternal ? `/projects/${link}` : link;
     // Clickable card state (for internal pages)
     &--clickable {
       cursor: pointer;
+      @include focus-visible;
 
       &:hover {
         .project-card__title {
