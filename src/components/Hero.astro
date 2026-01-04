@@ -39,14 +39,15 @@ const roles = [
             {roles.map((role) => <p>{role}</p>)}
           </div>
           <p>
-            I'm <strong>Peter</strong> —{" "}
+            I'm <strong>Peter</strong>
+            <span> —{" "}</span>
+            <br class="mobile-break" />
             <strong class="hero__role-wrapper">
               <span id="typed-roles" aria-live="polite" aria-atomic="true"
               ></span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
-          <p>Always building for someone, not just something.</p>
         </div>
       </div>
       <div class="hero__image-wrapper">
@@ -492,6 +493,13 @@ const roles = [
         @media (min-width: 480px) {
           white-space: nowrap;
           overflow: visible;
+        }
+      }
+
+      .mobile-break {
+        // Hide line break on larger screens
+        @media (min-width: 480px) {
+          display: none;
         }
       }
 
