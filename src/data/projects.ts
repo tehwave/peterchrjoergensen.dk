@@ -35,8 +35,7 @@ export const projects: Project[] = [
   // === WEB DEVELOPMENT ===
   {
     title: "Janchart",
-    description:
-      "I built the website in Laravel, Bootstrap and jQuery for this chartering, shipping, and shipowners company.",
+    description: "I built the website in Laravel, Bootstrap and jQuery for this chartering, shipping, and shipowners company.",
     alt: "Screenshot of the Janchart shipping company website homepage",
     tags: ["Laravel", "Bootstrap", "jQuery"],
     image: janchartImg,
@@ -45,8 +44,7 @@ export const projects: Project[] = [
   },
   {
     title: "Grundfos Safety",
-    description:
-      "A gamified quiz web application made in Vue.js with legacy browser support, teaching safety protocols at Grundfos.",
+    description: "A gamified quiz web application made in Vue.js with legacy browser support, teaching safety protocols at Grundfos.",
     alt: "Screenshot of the Grundfos Safety quiz application interface",
     tags: ["Vue.js", "JavaScript", "Gamification"],
     image: grundfosImg,
@@ -55,8 +53,7 @@ export const projects: Project[] = [
   },
   {
     title: "gm48.net",
-    description:
-      "The home of a game jam community I've run since 2013. Built with Laravel — over 48 jams hosted and thousands of games submitted.",
+    description: "The home of a game jam community I've run since 2013. Built with Laravel — over 48 jams hosted and thousands of games submitted.",
     alt: "Screenshot of gm48.net game jam website homepage",
     tags: ["Laravel", "PHP", "MySQL"],
     image: gm48Img,
@@ -65,8 +62,7 @@ export const projects: Project[] = [
   },
   {
     title: "This Website",
-    description:
-      "Built with Astro, TypeScript and SCSS — with AI assistance for component structure and styling decisions.",
+    description: "Built with Astro, TypeScript and SCSS — with AI assistance for component structure and styling decisions.",
     alt: "Screenshot of my personal portfolio website",
     tags: ["Astro", "TypeScript", "SCSS"],
     image: websiteImg,
@@ -77,8 +73,7 @@ export const projects: Project[] = [
   // === CLIENT PROJECTS ===
   {
     title: "Solgt.com",
-    description:
-      "Tech lead for Denmark's leading car sales platform. Full-stack development across WordPress and Laravel.",
+    description: "Tech lead for Denmark's leading car sales platform. Full-stack development across WordPress and Laravel.",
     alt: "Screenshot of Solgt.com car sales platform homepage",
     tags: ["Laravel", "WordPress", "WooCommerce"],
     image: solgtImg,
@@ -87,8 +82,7 @@ export const projects: Project[] = [
   },
   {
     title: "VillaVilla",
-    description:
-      "Senior web developer and tech lead for a luxury vacation rental company. Full-stack WordPress and Laravel.",
+    description: "Senior web developer and tech lead for a luxury vacation rental company. Full-stack WordPress and Laravel.",
     alt: "Screenshot of VillaVilla luxury vacation rental website",
     tags: ["Laravel", "WordPress", "WooCommerce"],
     image: villavillaImg,
@@ -97,8 +91,7 @@ export const projects: Project[] = [
   },
   {
     title: "DM Greenkeeping",
-    description:
-      "Built the Laravel CRM and quote system that now supports this multi-million lawn care business.",
+    description: "Built the Laravel CRM and quote system that now supports this multi-million lawn care business.",
     alt: "Screenshot of DM Greenkeeping lawn care service website",
     tags: ["Laravel", "CRM", "MySQL"],
     image: dmgreenkeepingImg,
@@ -107,8 +100,7 @@ export const projects: Project[] = [
   },
   {
     title: "Restudy",
-    description:
-      "Learning CMS platform with WordPress frontend and Laravel backend. Denmark's largest video education portal.",
+    description: "Learning CMS platform with WordPress frontend and Laravel backend. Denmark's largest video education portal.",
     alt: "Screenshot of Restudy video education platform",
     tags: ["Laravel", "WordPress", "LMS"],
     image: restudyImg,
@@ -117,8 +109,7 @@ export const projects: Project[] = [
   },
   {
     title: "Kirppu",
-    description:
-      "Denmark's largest secondhand chain. AI-powered image analysis for product categorization.",
+    description: "Denmark's largest secondhand chain. AI-powered image analysis for product categorization.",
     alt: "Screenshot of Kirppu secondhand marketplace website",
     tags: ["WordPress", "AI", "WooCommerce"],
     image: kirppuImg,
@@ -127,8 +118,7 @@ export const projects: Project[] = [
   },
   {
     title: "SkiOutlet",
-    description:
-      "WordPress webshop with thousands of SKUs imported from Microsoft NAV. Denmark's largest ski outlet.",
+    description: "WordPress webshop with thousands of SKUs imported from Microsoft NAV. Denmark's largest ski outlet.",
     alt: "Screenshot of SkiOutlet ski equipment webshop",
     tags: ["WordPress", "WooCommerce", "CRM"],
     image: skioutletImg,
@@ -137,8 +127,7 @@ export const projects: Project[] = [
   },
   {
     title: "Slagter Lampe",
-    description:
-      "WordPress webshop for a traditional family butcher since 1939. Famous for their award-winning sausages.",
+    description: "WordPress webshop for a traditional family butcher since 1939. Famous for their award-winning sausages.",
     alt: "Screenshot of Slagter Lampe butcher webshop",
     tags: ["WordPress", "WooCommerce", "PHP"],
     image: slagterlampeImg,
@@ -147,8 +136,7 @@ export const projects: Project[] = [
   },
   {
     title: "AutoProff",
-    description:
-      "Laravel developer support for this B2B car trading platform operating in 12 European markets.",
+    description: "Laravel developer support for this B2B car trading platform operating in 12 European markets.",
     alt: "Screenshot of AutoProff B2B car trading platform",
     tags: ["Laravel", "CRM", "MySQL"],
     image: autoproffImg,
@@ -157,8 +145,7 @@ export const projects: Project[] = [
   },
   {
     title: "Planet Huse",
-    description:
-      "WordPress website for a summer house builder with 37+ years of experience.",
+    description: "WordPress website for a summer house builder with 37+ years of experience.",
     alt: "Screenshot of Planet Huse summer house builder website",
     tags: ["WordPress", "PHP"],
     image: planetHuseImg,
@@ -176,8 +163,7 @@ export const projects: Project[] = [
   },
   {
     title: "Forsia",
-    description:
-      "Drupal to WordPress migration for this Danish insurance company (formerly Sønderjysk Forsikring).",
+    description: "Drupal to WordPress migration for this Danish insurance company (formerly Sønderjysk Forsikring).",
     alt: "Screenshot of Forsia insurance company website",
     tags: ["WordPress", "Migration", "Drupal"],
     image: forsiaImg,
@@ -186,8 +172,7 @@ export const projects: Project[] = [
   },
   {
     title: "Autocentralen",
-    description:
-      "WordPress maintenance and support for a major Danish car dealer with multiple locations.",
+    description: "WordPress maintenance and support for a major Danish car dealer with multiple locations.",
     alt: "Screenshot of Autocentralen car dealer website",
     tags: ["WordPress", "PHP"],
     image: autocentralenImg,
@@ -196,8 +181,7 @@ export const projects: Project[] = [
   },
   {
     title: "Renell",
-    description:
-      "WordPress support for a Swan-certified cleaning company with 700+ employees since 1987.",
+    description: "WordPress support for a Swan-certified cleaning company with 700+ employees since 1987.",
     alt: "Screenshot of Renell cleaning company website",
     tags: ["WordPress", "PHP"],
     image: renellImg,
@@ -206,8 +190,7 @@ export const projects: Project[] = [
   },
   {
     title: "Hørning Parket",
-    description:
-      "WordPress support for a 90-year-old premium flooring manufacturer targeting architects.",
+    description: "WordPress support for a 90-year-old premium flooring manufacturer targeting architects.",
     alt: "Screenshot of Hørning Floor parquet flooring website",
     tags: ["WordPress", "PHP"],
     image: horningfloorImg,
@@ -218,8 +201,7 @@ export const projects: Project[] = [
   // === GAME DEVELOPMENT ===
   {
     title: "FIRKANT",
-    description:
-      "A fast-paced procedural platformer I made in GameMaker. Tight controls, instant restarts, and that 'one more try' feeling.",
+    description: "A fast-paced procedural platformer I made in GameMaker. Tight controls, instant restarts, and that 'one more try' feeling.",
     alt: "Screenshot of FIRKANT platformer game showing colorful pixel graphics",
     tags: ["GameMaker", "Game Design", "Procedural"],
     image: firkantImg,
@@ -228,8 +210,7 @@ export const projects: Project[] = [
   },
   {
     title: "Mord Ombord",
-    description:
-      "A murder mystery VR game for Google Cardboard. Heavy optimization work to hit 60fps on budget Android phones.",
+    description: "A murder mystery VR game for Google Cardboard. Heavy optimization work to hit 60fps on budget Android phones.",
     alt: "Screenshot of Mord Ombord VR murder mystery game",
     tags: ["Unity3D", "C#", "VR"],
     image: mordombordImg,
@@ -238,8 +219,7 @@ export const projects: Project[] = [
   },
   {
     title: "Western World",
-    description:
-      "A Unity3D environment exploring the Maya-to-Unity asset pipeline. Dusty saloons and tumbleweeds included.",
+    description: "A Unity3D environment exploring the Maya-to-Unity asset pipeline. Dusty saloons and tumbleweeds included.",
     alt: "Screenshot of Western World 3D environment in Unity",
     tags: ["Unity3D", "Maya", "3D Art"],
     image: westernImg,
@@ -248,8 +228,7 @@ export const projects: Project[] = [
   },
   {
     title: "Odense Golfklub",
-    description:
-      "A Unity3D mobile app with 360° course imagery and 3D flyovers. Built for club members to preview holes before playing.",
+    description: "A Unity3D mobile app with 360° course imagery and 3D flyovers. Built for club members to preview holes before playing.",
     alt: "Screenshot of Odense Golfklub mobile app showing 3D golf course",
     tags: ["Unity3D", "3D", "Mobile"],
     image: odensegolfklubImg,
@@ -257,8 +236,7 @@ export const projects: Project[] = [
   },
   {
     title: "Torpedo Trump",
-    description:
-      "A satirical game jam entry that placed 3rd at EAL Game Jam 2016. Made as a political spoof.",
+    description: "A satirical game jam entry that placed 3rd at EAL Game Jam 2016. Made as a political spoof.",
     alt: "Screenshot of Torpedo Trump game showing glitchy presidential imagery",
     tags: ["GameMaker", "Game Design"],
     image: torpedoTrumpImg,

@@ -22,9 +22,7 @@ export async function lastModifiedBlogPost(slug: string): Promise<Date | null> {
 
     // Extract pubDate and updatedDate from frontmatter using regex
     // Prefer updatedDate if available, otherwise use pubDate
-    const updatedDateMatch = content.match(
-      /^updatedDate:\s*(\d{4}-\d{2}-\d{2})/m,
-    );
+    const updatedDateMatch = content.match(/^updatedDate:\s*(\d{4}-\d{2}-\d{2})/m);
     const pubDateMatch = content.match(/^pubDate:\s*(\d{4}-\d{2}-\d{2})/m);
 
     if (updatedDateMatch) {
@@ -49,10 +47,7 @@ export async function lastModifiedBlogPost(slug: string): Promise<Date | null> {
  * @param changeFreqEnum - Enum for valid changefreq values
  * @returns The customized sitemap item
  */
-export async function serializeSitemap(
-  item: SitemapItem,
-  changeFreqEnum: any,
-): Promise<SitemapItem> {
+export async function serializeSitemap(item: SitemapItem, changeFreqEnum: any): Promise<SitemapItem> {
   // Extract slug from URL (remove domain and trailing slash)
   const urlPath = item.url.replace("https://peterchrjoergensen.dk/", "");
 

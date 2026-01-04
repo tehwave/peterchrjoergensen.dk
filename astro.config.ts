@@ -126,12 +126,7 @@ export default defineConfig({
         weights: [400, 600, 700],
         styles: ["normal"],
         subsets: ["latin"],
-        fallbacks: [
-          "system-ui",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "sans-serif",
-        ],
+        fallbacks: ["system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       {
         name: "Caveat",

@@ -1,5 +1,7 @@
 {
   "plugins": ["prettier-plugin-astro"],
+  "printWidth": 200,
+  "proseWrap": "never",
   "overrides": [
     {
       "files": "*.astro",

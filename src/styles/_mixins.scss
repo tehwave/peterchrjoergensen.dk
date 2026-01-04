@@ -87,11 +87,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: image-set(
-      var(--texture-avif) type("image/avif"),
-      var(--texture-webp) type("image/webp"),
-      var(--texture-fallback) type("image/png")
-    );
+    background-image: image-set(var(--texture-avif) type("image/avif"), var(--texture-webp) type("image/webp"), var(--texture-fallback) type("image/png"));
     background-repeat: repeat;
     opacity: $opacity;
     pointer-events: none;

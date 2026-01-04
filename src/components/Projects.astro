@@ -66,22 +66,10 @@ const categories = [
           Projects I've built<br />over the years
         </h2>
       </div>
-      <div
-        class="projects__filters"
-        role="group"
-        aria-label="Filter projects by category"
-      >
+      <div class="projects__filters" role="group" aria-label="Filter projects by category">
         {
           categories.map((cat) => (
-            <button
-              class:list={[
-                "projects__filter",
-                { "projects__filter--active": cat.id === "all" },
-              ]}
-              data-filter={cat.id}
-              type="button"
-              aria-pressed={cat.id === "all" ? "true" : "false"}
-            >
+            <button class:list={["projects__filter", { "projects__filter--active": cat.id === "all" }]} data-filter={cat.id} type="button" aria-pressed={cat.id === "all" ? "true" : "false"}>
               {cat.label}
             </button>
           ))
@@ -93,15 +81,7 @@ const categories = [
         randomizedProjects.map((project) => (
           <div class:list={["projects__item"]} data-category={project.category}>
             <AnimateOnScroll>
-              <ProjectCard
-                title={project.title}
-                description={project.description}
-                alt={project.alt}
-                tags={project.tags}
-                image={project.image}
-                link={project.link}
-                hasPage={project.hasPage}
-              />
+              <ProjectCard title={project.title} description={project.description} alt={project.alt} tags={project.tags} image={project.image} link={project.link} hasPage={project.hasPage} />
             </AnimateOnScroll>
           </div>
         ))
@@ -112,10 +92,8 @@ const categories = [
 
 <script>
   function initFilters() {
-    const filterButtons =
-      document.querySelectorAll<HTMLButtonElement>(".projects__filter");
-    const projectItems =
-      document.querySelectorAll<HTMLElement>(".projects__item");
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>(".projects__filter");
+    const projectItems = document.querySelectorAll<HTMLElement>(".projects__item");
 
     filterButtons.forEach((button) => {
       button.addEventListener("click", () => {

@@ -8,10 +8,7 @@
  * @param wordsPerMinute - Average reading speed (default: 200)
  * @returns Reading time in minutes (minimum 1)
  */
-export function getReadingTime(
-  text: string,
-  wordsPerMinute: number = 200,
-): number {
+export function getReadingTime(text: string, wordsPerMinute: number = 200): number {
   const words = text.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / wordsPerMinute));
 }

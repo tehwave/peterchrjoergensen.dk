@@ -85,10 +85,7 @@ type Props = Record<string, never>;
         const sectionTop = el.offsetTop;
         const sectionHeight = el.offsetHeight;
 
-        if (
-          scrollPosition >= sectionTop &&
-          scrollPosition < sectionTop + sectionHeight
-        ) {
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
           currentSection = el.getAttribute("id") || "";
         }
       });
@@ -128,10 +125,7 @@ type Props = Record<string, never>;
       document.removeEventListener("astro:page-load", headerInitHandler);
     }
     if (headerCleanupHandler) {
-      document.removeEventListener(
-        "astro:before-preparation",
-        headerCleanupHandler,
-      );
+      document.removeEventListener("astro:before-preparation", headerCleanupHandler);
     }
 
     // Wrapper that manages cleanup
@@ -172,11 +166,7 @@ type Props = Record<string, never>;
     background-color: transparent;
     padding: $space-lg 0;
     border-radius: $space-lg $space-lg 0 0;
-    @include transition(
-      transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      background-color 0.3s,
-      border-radius 0.3s
-    );
+    @include transition(transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, border-radius 0.3s);
 
     @include respond-to(md) {
       top: $space-sm;

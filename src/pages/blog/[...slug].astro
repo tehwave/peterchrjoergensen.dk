@@ -33,13 +33,10 @@ import { parseInlineMarkdown } from "../../utils/markdown";
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
   // Sort posts by date (newest first)
-  const sortedPosts = posts.sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-  );
+  const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
   return sortedPosts.map((post, index) => {
-    const prevPost =
-      index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+    const prevPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
     const nextPost = index > 0 ? sortedPosts[index - 1] : null;
 
     return {
@@ -73,17 +70,7 @@ const wordCount = getWordCount(post.body ?? "");
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Extract frontmatter data from the post
-const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-  author,
-  tags,
-  heroImage,
-  heroImageAlt,
-  heroImageCaption,
-} = post.data;
+const { title, description, pubDate, updatedDate, author, tags, heroImage, heroImageAlt, heroImageCaption } = post.data;
 
 /**
  * Generate JSON-LD structured data for search engines
@@ -174,42 +161,18 @@ const structuredData = {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {
-      heroImage && (
-        <meta
-          property="og:image"
-          content={new URL(heroImage.src, Astro.site)}
-        />
-      )
-    }
+    {heroImage && <meta property="og:image" content={new URL(heroImage.src, Astro.site)} />}
 
     <!-- Twitter -->
-    <meta
-      property="twitter:card"
-      content={heroImage ? "summary_large_image" : "summary"}
-    />
+    <meta property="twitter:card" content={heroImage ? "summary_large_image" : "summary"} />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    {
-      heroImage && (
-        <meta
-          property="twitter:image"
-          content={new URL(heroImage.src, Astro.site)}
-        />
-      )
-    }
+    {heroImage && <meta property="twitter:image" content={new URL(heroImage.src, Astro.site)} />}
 
     <!-- Article metadata -->
     <meta property="article:published_time" content={pubDate.toISOString()} />
-    {
-      updatedDate && (
-        <meta
-          property="article:modified_time"
-          content={updatedDate.toISOString()}
-        />
-      )
-    }
+    {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
     <meta property="article:author" content={author} />
     {tags?.map((tag) => <meta property="article:tag" content={tag} />)}
 
@@ -217,11 +180,7 @@ const structuredData = {
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Structured data -->
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(structuredData)}
-    />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </Fragment>
 
   <article class="blog-post" transition:animate={fadeAnimation}>
@@ -267,23 +226,9 @@ const structuredData = {
       heroImage && (
         <figure class="blog-post__hero-figure">
           <div class="blog-post__hero">
-            <Picture
-              src={heroImage}
-              alt={heroImageAlt || title}
-              formats={["avif", "webp"]}
-              widths={[800, 1200, 1600, 2400]}
-              sizes="100vw"
-              loading="eager"
-              fetchpriority="high"
-              inferSize={true}
-            />
+            <Picture src={heroImage} alt={heroImageAlt || title} formats={["avif", "webp"]} widths={[800, 1200, 1600, 2400]} sizes="100vw" loading="eager" fetchpriority="high" inferSize={true} />
           </div>
-          {heroImageCaption && (
-            <figcaption
-              class="blog-post__hero-caption"
-              set:html={parseInlineMarkdown(heroImageCaption)}
-            />
-          )}
+          {heroImageCaption && <figcaption class="blog-post__hero-caption" set:html={parseInlineMarkdown(heroImageCaption)} />}
         </figure>
       )
     }
@@ -310,9 +255,7 @@ const structuredData = {
     if (!hero) return;
 
     // Respect user's motion preferences (WCAG 2.3.3)
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) return;
 

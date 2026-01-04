@@ -35,24 +35,10 @@ interface Props {
   as?: "div" | "section" | "article" | "aside" | "span";
 }
 
-const {
-  delay = 0,
-  animation = "fade-up",
-  threshold = 0.1,
-  class: className = "",
-  as: Tag = "div",
-}: Props = Astro.props;
+const { delay = 0, animation = "fade-up", threshold = 0.1, class: className = "", as: Tag = "div" }: Props = Astro.props;
 ---
 
-<Tag
-  class:list={[
-    "animate-on-scroll",
-    `animate-on-scroll--${animation}`,
-    className,
-  ]}
-  data-aos-threshold={threshold}
-  style={delay > 0 ? `--aos-delay: ${delay}s` : undefined}
->
+<Tag class:list={["animate-on-scroll", `animate-on-scroll--${animation}`, className]} data-aos-threshold={threshold} style={delay > 0 ? `--aos-delay: ${delay}s` : undefined}>
   <slot />
 </Tag>
 
@@ -105,8 +91,7 @@ const {
 
         &.is-visible {
           opacity: 1;
-          transition: opacity var(--duration-slow, 0.6s)
-            var(--ease-out, ease-out);
+          transition: opacity var(--duration-slow, 0.6s) var(--ease-out, ease-out);
           transition-delay: var(--aos-delay, 0s);
         }
       }
@@ -181,16 +166,12 @@ const {
       return;
     }
 
-    const elements = document.querySelectorAll(
-      ".animate-on-scroll:not(.is-visible)",
-    );
+    const elements = document.querySelectorAll(".animate-on-scroll:not(.is-visible)");
 
     if (!elements.length) return;
 
     // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
       elements.forEach((el) => el.classList.add("is-visible"));

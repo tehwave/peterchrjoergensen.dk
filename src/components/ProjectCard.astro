@@ -22,15 +22,7 @@ interface Props {
   animationDelay?: number;
 }
 
-const {
-  title,
-  description,
-  alt,
-  tags = [],
-  image,
-  link,
-  hasPage = false,
-} = Astro.props;
+const { title, description, alt, tags = [], image, link, hasPage = false } = Astro.props;
 
 // "#" is used in data to indicate "no link yet" — treat as missing
 const hasLink = link && link !== "#";
@@ -42,11 +34,7 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
 
 {
   isInternal && hasLink ? (
-    <a
-      href={linkUrl}
-      class="project-card project-card--clickable"
-      aria-label={`View ${title} case study`}
-    >
+    <a href={linkUrl} class="project-card project-card--clickable" aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
           <Picture
@@ -117,23 +105,9 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       <div class="project-card__content">
         <h3 class="project-card__title">
           {hasLink ? (
-            <a
-              href={linkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="project-card__external-link"
-            >
+            <a href={linkUrl} target="_blank" rel="noopener noreferrer" class="project-card__external-link">
               {title}
-              <svg
-                class="project-card__external-icon"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
+              <svg class="project-card__external-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M7 17L17 7M17 7H7M17 7V17" />
               </svg>
             </a>
@@ -180,11 +154,7 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       }
 
       .project-card__placeholder {
-        background: linear-gradient(
-          135deg,
-          color.adjust($color-blue, $lightness: 5%) 0%,
-          $color-blue-dark 100%
-        );
+        background: linear-gradient(135deg, color.adjust($color-blue, $lightness: 5%) 0%, $color-blue-dark 100%);
       }
     }
 
@@ -233,11 +203,7 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(
-        135deg,
-        $color-blue 0%,
-        $color-blue-dark 100%
-      );
+      background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
       @include transition(background, 0.3s);
 
       span {

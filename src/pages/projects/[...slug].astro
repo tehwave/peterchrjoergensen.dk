@@ -49,17 +49,7 @@ const { Content } = await render(project);
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Extract frontmatter data from the project
-const {
-  title,
-  description,
-  category,
-  tags,
-  externalUrl,
-  heroImage,
-  heroImageAlt,
-  heroImageCaption,
-  ogDescription,
-} = project.data;
+const { title, description, category, tags, externalUrl, heroImage, heroImageAlt, heroImageCaption, ogDescription } = project.data;
 
 // Use ogDescription if provided, otherwise fall back to description
 const socialDescription = ogDescription || description;
@@ -131,10 +121,7 @@ const structuredData = {
 };
 ---
 
-<Layout
-  title={`${title} | Peter Chr. Jørgensen`}
-  description={socialDescription}
->
+<Layout title={`${title} | Peter Chr. Jørgensen`} description={socialDescription}>
   <Fragment slot="head">
     <!-- 
 			Social Media Meta Tags
@@ -146,50 +133,27 @@ const structuredData = {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={socialDescription} />
-    {
-      heroImage && (
-        <meta
-          property="og:image"
-          content={new URL(heroImage.src, Astro.site)}
-        />
-      )
-    }
+    {heroImage && <meta property="og:image" content={new URL(heroImage.src, Astro.site)} />}
 
     <!-- Twitter -->
-    <meta
-      property="twitter:card"
-      content={heroImage ? "summary_large_image" : "summary"}
-    />
+    <meta property="twitter:card" content={heroImage ? "summary_large_image" : "summary"} />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={socialDescription} />
-    {
-      heroImage && (
-        <meta
-          property="twitter:image"
-          content={new URL(heroImage.src, Astro.site)}
-        />
-      )
-    }
+    {heroImage && <meta property="twitter:image" content={new URL(heroImage.src, Astro.site)} />}
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Structured data -->
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(structuredData)}
-    />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </Fragment>
 
   <article class="project-page" transition:animate={fadeAnimation}>
     <div class="project-page__header-container">
       <header class="project-page__header">
         <div class="project-page__meta-header">
-          <a href="/#projects" class="project-page__back-link"
-            >← Back to Projects</a
-          >
+          <a href="/#projects" class="project-page__back-link">← Back to Projects</a>
         </div>
 
         <h1>{title}</h1>
@@ -202,12 +166,7 @@ const structuredData = {
           </span>
           {
             externalUrl && (
-              <a
-                href={externalUrl}
-                class="project-page__external-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={externalUrl} class="project-page__external-link" target="_blank" rel="noopener noreferrer">
                 Visit Project
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -232,11 +191,7 @@ const structuredData = {
 
         {
           tags && tags.length > 0 && (
-            <div
-              class="project-page__tags"
-              role="list"
-              aria-label="Technologies used"
-            >
+            <div class="project-page__tags" role="list" aria-label="Technologies used">
               {tags.map((tag: string) => (
                 <SkillTag label={tag} />
               ))}
@@ -250,23 +205,9 @@ const structuredData = {
       heroImage && (
         <figure class="project-page__hero-figure">
           <div class="project-page__hero">
-            <Picture
-              src={heroImage}
-              alt={heroImageAlt || title}
-              formats={["avif", "webp"]}
-              widths={[800, 1200, 1600, 2400]}
-              sizes="100vw"
-              loading="eager"
-              fetchpriority="high"
-              inferSize={true}
-            />
+            <Picture src={heroImage} alt={heroImageAlt || title} formats={["avif", "webp"]} widths={[800, 1200, 1600, 2400]} sizes="100vw" loading="eager" fetchpriority="high" inferSize={true} />
           </div>
-          {heroImageCaption && (
-            <figcaption
-              class="project-page__hero-caption"
-              set:html={parseInlineMarkdown(heroImageCaption)}
-            />
-          )}
+          {heroImageCaption && <figcaption class="project-page__hero-caption" set:html={parseInlineMarkdown(heroImageCaption)} />}
         </figure>
       )
     }
@@ -291,9 +232,7 @@ const structuredData = {
     if (!hero) return;
 
     // Respect user's motion preferences (WCAG 2.3.3)
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) return;
 

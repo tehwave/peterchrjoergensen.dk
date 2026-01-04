@@ -3,32 +3,20 @@ import { Picture } from "astro:assets";
 import authorImage from "../assets/author-bio.png";
 
 const name = "Peter Chr. Jørgensen";
-const bio =
-  "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
+const bio = "I'm a Danish developer building fast, accessible websites. I also make games in Unity and experiment with AI tools to speed up workflows and explore new ideas.";
 ---
 
-<section
-  class="author-bio"
-  itemscope
-  itemtype="https://schema.org/Person"
-  itemid="https://peterchrjoergensen.dk/#person"
->
+<section class="author-bio" itemscope itemtype="https://schema.org/Person" itemid="https://peterchrjoergensen.dk/#person">
   <div class="author-bio__container">
-    <Picture
-      src={authorImage}
-      alt={`Photo of ${name}`}
-      formats={["avif", "webp"]}
-      widths={[80, 160]}
-      sizes="80px"
-      class="author-bio__image"
-      loading="lazy"
-      inferSize={true}
-      itemprop="image"
-    />
+    <Picture src={authorImage} alt={`Photo of ${name}`} formats={["avif", "webp"]} widths={[80, 160]} sizes="80px" class="author-bio__image" loading="lazy" inferSize={true} itemprop="image" />
     <div class="author-bio__content">
       <span class="author-bio__label">Written by</span>
-      <h3 class="author-bio__name" itemprop="name">{name}</h3>
-      <p class="author-bio__text" itemprop="description">{bio}</p>
+      <h3 class="author-bio__name" itemprop="name">
+        {name}
+      </h3>
+      <p class="author-bio__text" itemprop="description">
+        {bio}
+      </p>
     </div>
   </div>
 </section>

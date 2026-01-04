@@ -26,16 +26,7 @@ interface Props {
   heroImageAlt?: string;
 }
 
-const {
-  title,
-  description,
-  pubDate,
-  readingTime,
-  tags = [],
-  href,
-  heroImage,
-  heroImageAlt = "",
-} = Astro.props;
+const { title, description, pubDate, readingTime, tags = [], href, heroImage, heroImageAlt = "" } = Astro.props;
 
 // Format publication date
 const formattedDate = pubDate.toLocaleDateString("en-US", {
@@ -49,15 +40,7 @@ const formattedDate = pubDate.toLocaleDateString("en-US", {
   {
     heroImage && (
       <a href={href} class="blog-post-card__image-link">
-        <Picture
-          src={heroImage}
-          formats={["avif", "webp"]}
-          alt={heroImageAlt}
-          widths={[400, 600, 800]}
-          sizes="(min-width: 768px) 400px, 100vw"
-          inferSize={true}
-          class="blog-post-card__image"
-        />
+        <Picture src={heroImage} formats={["avif", "webp"]} alt={heroImageAlt} widths={[400, 600, 800]} sizes="(min-width: 768px) 400px, 100vw" inferSize={true} class="blog-post-card__image" />
       </a>
     )
   }
@@ -70,10 +53,7 @@ const formattedDate = pubDate.toLocaleDateString("en-US", {
         readingTime && (
           <>
             <span class="blog-post-card__separator" aria-hidden="true" />
-            <span
-              class="blog-post-card__reading-time"
-              aria-label={`${readingTime} minute read`}
-            >
+            <span class="blog-post-card__reading-time" aria-label={`${readingTime} minute read`}>
               {readingTime} min read
             </span>
           </>

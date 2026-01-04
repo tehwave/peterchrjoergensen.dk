@@ -43,25 +43,14 @@ const roles = [
             <span> —{" "}</span>
             <br class="mobile-break" />
             <strong class="hero__role-wrapper">
-              <span id="typed-roles" aria-live="polite" aria-atomic="true"
-              ></span>
+              <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
         </div>
       </div>
       <div class="hero__image-wrapper">
-        <Picture
-          src={profileImage}
-          formats={["avif", "webp"]}
-          alt="Peter Chr. Jørgensen"
-          class="hero__image"
-          width={250}
-          height={250}
-          loading="eager"
-          fetchpriority="high"
-          densities={[1, 2]}
-        />
+        <Picture src={profileImage} formats={["avif", "webp"]} alt="Peter Chr. Jørgensen" class="hero__image" width={250} height={250} loading="eager" fetchpriority="high" densities={[1, 2]} />
       </div>
     </div>
   </section>
@@ -83,17 +72,13 @@ const roles = [
 
   async function initTypedAnimation() {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
-    const stringsElement = document.querySelector(
-      "#typed-strings",
-    ) as HTMLElement;
+    const stringsElement = document.querySelector("#typed-strings") as HTMLElement;
     const heroElement = document.querySelector(".hero") as HTMLElement;
 
     if (!typedElement || !stringsElement || !heroElement) return;
 
     // Respect reduced motion preference
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
       typedElement.textContent = "Web Developer";
@@ -102,8 +87,7 @@ const roles = [
 
     try {
       // @ts-expect-error - CDN import not recognized by TypeScript module resolution
-      const { default: Typed } =
-        await import("https://cdn.jsdelivr.net/npm/typed.js@2.1.0/+esm");
+      const { default: Typed } = await import("https://cdn.jsdelivr.net/npm/typed.js@2.1.0/+esm");
 
       // Cleanup existing instances
       if (typedInstance) {
@@ -132,9 +116,7 @@ const roles = [
         (entries) => {
           entries.forEach((entry) => {
             if (typedInstance) {
-              entry.isIntersecting
-                ? typedInstance.start()
-                : typedInstance.stop();
+              entry.isIntersecting ? typedInstance.start() : typedInstance.stop();
             }
           });
         },
@@ -184,9 +166,7 @@ const roles = [
     let targetRotateY = 0;
     let animationId: number | null = null;
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function lerp(start: number, end: number, factor: number): number {
       return start + (end - start) * factor;
@@ -196,9 +176,7 @@ const roles = [
       currentRotateX = lerp(currentRotateX, targetRotateX, 0.1);
       currentRotateY = lerp(currentRotateY, targetRotateY, 0.1);
 
-      const parallaxY = parseFloat(
-        tiltElement.style.getPropertyValue("--parallax-y") || "0",
-      );
+      const parallaxY = parseFloat(tiltElement.style.getPropertyValue("--parallax-y") || "0");
       const shadowX = -currentRotateY * 8;
       const shadowY = currentRotateX * 8 + 20;
       const sheenOffset = 50 + currentRotateY * 8 - currentRotateX * 5;
@@ -214,10 +192,7 @@ const roles = [
         ${shadowX * 1.5}px ${shadowY + 15}px 70px -10px rgba(0, 0, 0, 0.25)
       `;
 
-      if (
-        Math.abs(currentRotateX - targetRotateX) > 0.01 ||
-        Math.abs(currentRotateY - targetRotateY) > 0.01
-      ) {
+      if (Math.abs(currentRotateX - targetRotateX) > 0.01 || Math.abs(currentRotateY - targetRotateY) > 0.01) {
         animationId = requestAnimationFrame(animate);
       } else {
         animationId = null;

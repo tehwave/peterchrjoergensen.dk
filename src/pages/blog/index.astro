@@ -23,9 +23,7 @@ type Props = Record<string, never>;
 const posts = await getCollection("blog");
 
 // Sort posts by publication date, newest first
-const sortedPosts = posts.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Prepare posts with reading time
 const postsWithReadingTime = sortedPosts.map((post) => ({
@@ -35,8 +33,7 @@ const postsWithReadingTime = sortedPosts.map((post) => ({
 
 // SEO metadata
 const title = "The Journal";
-const description =
-  "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
+const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
 
 // Structured data for blog listing page
 const collectionSchema = {
@@ -90,11 +87,7 @@ const collectionSchema = {
 <Layout title={title} description={description}>
   <Fragment slot="head">
     <!-- Structured data for blog collection -->
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(collectionSchema)}
-    />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
   </Fragment>
   <div class="journal" transition:animate={fadeAnimation}>
     <div class="journal__container">
@@ -113,14 +106,7 @@ const collectionSchema = {
           <div class="journal__list">
             {postsWithReadingTime.map((post) => (
               <AnimateOnScroll animation="fade-up">
-                <BlogPostCard
-                  title={post.data.title}
-                  description={post.data.description}
-                  pubDate={post.data.pubDate}
-                  readingTime={post.readingTime}
-                  tags={post.data.tags}
-                  href={`/blog/${post.id}/`}
-                />
+                <BlogPostCard title={post.data.title} description={post.data.description} pubDate={post.data.pubDate} readingTime={post.readingTime} tags={post.data.tags} href={`/blog/${post.id}/`} />
               </AnimateOnScroll>
             ))}
           </div>
