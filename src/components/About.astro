@@ -61,122 +61,135 @@ const skills = [
         </p>
         <p class="about__text">
           I've been building things on the internet since I was a teenager. I've
-          run
-          <strong>gm48</strong> — a game jam community — since 2013, helping hundreds
-          of developers bring their ideas to life. I've optimized VR games for budget
-          phones, architected complex web applications, and shipped projects that
-          real people depend on every day.
+          run <a
+            href="https://gm48.net/"
+            target="_blank"
+            rel="me noopener"
+            class="about__link"
+            ><strong>the gm(48)</strong> — a GameMaker game jam</a> since 2013,
+            helping hundreds of developers bring their ideas to life. I've optimized
+            VR games for budget phones, architected complex web applications, and
+            shipped projects that real people depend on every day.
+          <p class="about__text">
+            The technical stuff? I've got it. But the part I care about most is
+            what happens on the other side of the screen — when someone uses
+            what I've made and <em>feels</em> something.
+          </p>
+          <div class="about__skills">
+            {
+              skills.map((skill) => (
+                <AnimateOnScroll>
+                  <SkillTag label={skill} />
+                </AnimateOnScroll>
+              ))
+            }
+          </div>
         </p>
-        <p class="about__text">
-          The technical stuff? I've got it. But the part I care about most is
-          what happens on the other side of the screen — when someone uses what
-          I've made and <em>feels</em> something.
-        </p>
-        <div class="about__skills">
-          {
-            skills.map((skill) => (
-              <AnimateOnScroll>
-                <SkillTag label={skill} />
-              </AnimateOnScroll>
-            ))
-          }
-        </div>
       </div>
     </div>
   </div>
-</section>
 
-<style lang="scss">
-  @use "../styles/variables" as *;
-  @use "../styles/mixins" as *;
+  <style lang="scss">
+    @use "../styles/variables" as *;
+    @use "../styles/mixins" as *;
 
-  .about {
-    position: relative;
-    padding: $space-4xl $space-xl;
-
-    @include respond-to(md) {
-      padding: $space-3xl $space-lg;
-    }
-
-    &__container {
+    .about {
       position: relative;
-      z-index: 1;
-      max-width: $max-width;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: $space-4xl;
-
-      @include respond-to(lg) {
-        grid-template-columns: 1fr;
-        gap: $space-2xl;
-      }
-    }
-
-    &__left {
-      display: flex;
-      flex-direction: column;
-      gap: $space-lg;
-    }
-
-    &__label {
-      color: $color-orange;
-      font-size: $font-size-sm;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    &__heading {
-      font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
-      color: $color-text-dark;
-      line-height: 1.2;
-    }
-
-    &__right {
-      display: flex;
-      align-items: center;
-    }
-
-    &__content {
-      border-left: 3px solid $color-orange;
-      padding-left: $space-xl;
-
-      @include respond-to(lg) {
-        border-left: none;
-        border-top: 3px solid $color-orange;
-        padding-left: 0;
-        padding-top: $space-lg;
-      }
-    }
-
-    &__subheading {
-      font-size: $font-size-xl;
-      color: $color-text-dark;
-      margin-bottom: $space-lg;
+      padding: $space-4xl $space-xl;
 
       @include respond-to(md) {
-        font-size: $font-size-lg;
+        padding: $space-3xl $space-lg;
       }
-    }
 
-    &__text {
-      font-size: $font-size-base;
-      color: $color-text-muted;
-      line-height: 1.8;
-      margin-bottom: $space-lg;
+      &__container {
+        position: relative;
+        z-index: 1;
+        max-width: $max-width;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: $space-4xl;
 
-      strong {
-        color: $color-text-dark;
+        @include respond-to(lg) {
+          grid-template-columns: 1fr;
+          gap: $space-2xl;
+        }
+      }
+
+      &__left {
+        display: flex;
+        flex-direction: column;
+        gap: $space-lg;
+      }
+
+      &__label {
+        color: $color-orange;
+        font-size: $font-size-sm;
         font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      &__heading {
+        font-size: clamp($font-size-2xl, 4vw, $font-size-3xl);
+        color: $color-text-dark;
+        line-height: 1.2;
+      }
+
+      &__right {
+        display: flex;
+        align-items: center;
+      }
+
+      &__content {
+        border-left: 3px solid $color-orange;
+        padding-left: $space-xl;
+
+        @include respond-to(lg) {
+          border-left: none;
+          border-top: 3px solid $color-orange;
+          padding-left: 0;
+          padding-top: $space-lg;
+        }
+      }
+
+      &__subheading {
+        font-size: $font-size-xl;
+        color: $color-text-dark;
+        margin-bottom: $space-lg;
+
+        @include respond-to(md) {
+          font-size: $font-size-lg;
+        }
+      }
+
+      &__text {
+        font-size: $font-size-base;
+        color: $color-text-muted;
+        line-height: 1.8;
+        margin-bottom: $space-lg;
+
+        strong {
+          color: $color-text-dark;
+          font-weight: 600;
+        }
+      }
+
+      &__skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-md;
+        margin-top: $space-xl;
+      }
+
+      &__link {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
-
-    &__skills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: $space-md;
-      margin-top: $space-xl;
-    }
-  }
-</style>
+  </style>
+</section>
