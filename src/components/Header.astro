@@ -21,133 +21,140 @@ type Props = Record<string, never>;
 </header>
 
 <script>
-  function initHeader() {
-    const header = document.querySelector(".header");
-    const hero = document.querySelector("#hero") as HTMLElement | null;
-    const navLinks = document.querySelectorAll(".header__nav-link");
-    const sections = document.querySelectorAll("section[id], footer[id]");
+  class HeaderManager {
+    private header: HTMLElement | null;
+    private hero: HTMLElement | null;
+    private navLinks: NodeListOf<Element>;
+    private sections: NodeListOf<Element>;
+    private isHomepage: boolean;
+    private wasScrolled = false;
+    private isAnimatingOut = false;
 
-    // Detect if we're on homepage (has hero) or other pages (blog, etc.)
-    const isHomepage = hero !== null;
+    constructor() {
+      this.header = document.querySelector(".header");
+      this.hero = document.querySelector("#hero");
+      this.navLinks = document.querySelectorAll(".header__nav-link");
+      this.sections = document.querySelectorAll("section[id], footer[id]");
+      this.isHomepage = this.hero !== null;
 
-    // State machine to prevent animation interruption when scrolling rapidly
-    let wasScrolled = false;
-    let isAnimatingOut = false;
-    let isInitialLoad = true;
-
-    function updateActiveLink() {
-      if (!header) return;
-
-      // On non-homepage pages, show solid background immediately and skip scroll logic
-      if (!isHomepage) {
-        // Use no-animation class on initial load to prevent slide-down effect
-        if (isInitialLoad) {
-          header.classList.add("scrolled-no-animation");
-          isInitialLoad = false;
-        } else {
-          header.classList.add("scrolled");
-        }
-        return;
+      // Immediately clean up classes on non-homepage to prevent animations
+      if (!this.isHomepage && this.header) {
+        this.header.classList.remove("scrolled", "scrolled-exit");
+        this.header.classList.add("scrolled-no-animation");
       }
+    }
 
-      // Homepage-only scroll behavior (requires hero element)
-      if (!hero) return;
+    private handleScrolledState(): void {
+      if (!this.header || !this.hero || !this.isHomepage) return;
 
-      const heroBottom = hero.offsetTop + hero.offsetHeight;
+      const heroBottom = this.hero.offsetTop + this.hero.offsetHeight;
       const isScrolledPastHero = window.scrollY > heroBottom;
 
-      // Apply solid background only after hero is fully offscreen
-      if (isScrolledPastHero && !isAnimatingOut) {
-        header.classList.remove("scrolled-exit");
-        header.classList.add("scrolled");
-        wasScrolled = true;
-      } else if (!isScrolledPastHero && wasScrolled && !isAnimatingOut) {
-        // Trigger exit animation
-        isAnimatingOut = true;
-        header.classList.add("scrolled-exit");
-
-        // After animation completes, remove classes
-        setTimeout(() => {
-          header.classList.remove("scrolled", "scrolled-exit");
-          wasScrolled = false;
-          isAnimatingOut = false;
-        }, 300);
+      if (isScrolledPastHero && !this.isAnimatingOut) {
+        this.showScrolledHeader();
+      } else if (!isScrolledPastHero && this.wasScrolled && !this.isAnimatingOut) {
+        this.hideScrolledHeader();
       }
+    }
 
-      // Highlight nav link when section is 1/3 into viewport (feels more natural
-      // than waiting until section hits the very top of the screen)
-      // Only works on homepage where sections exist
-      let currentSection = "";
+    private showScrolledHeader(): void {
+      if (!this.header) return;
+      this.header.classList.remove("scrolled-exit");
+      this.header.classList.add("scrolled");
+      this.wasScrolled = true;
+    }
+
+    private hideScrolledHeader(): void {
+      if (!this.header) return;
+      this.isAnimatingOut = true;
+      this.header.classList.add("scrolled-exit");
+
+      setTimeout(() => {
+        this.header?.classList.remove("scrolled", "scrolled-exit");
+        this.wasScrolled = false;
+        this.isAnimatingOut = false;
+      }, 300);
+    }
+
+    private handleNonHomepageState(): void {
+      if (!this.header || this.isHomepage) return;
+
+      // Always use no-animation class for non-homepage pages to prevent fade-in on view transitions
+      this.header.classList.remove("scrolled", "scrolled-exit");
+      this.header.classList.add("scrolled-no-animation");
+
+      // Add shadow only if scrolled down
+      this.updateShadow();
+    }
+
+    private updateShadow(): void {
+      if (!this.header) return;
+
+      // Add shadow if scrolled more than 20px from top
+      const shouldHaveShadow = window.scrollY > 20;
+      this.header.classList.toggle("has-shadow", shouldHaveShadow);
+    }
+
+    private updateActiveLink(): void {
+      const currentSection = this.getCurrentSection();
+
+      this.navLinks.forEach((link) => {
+        const href = link.getAttribute("href");
+        const isActive = href === `#${currentSection}` || href === `/#${currentSection}`;
+        link.classList.toggle("active", isActive);
+      });
+    }
+
+    private getCurrentSection(): string {
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
-      sections.forEach((section) => {
+      for (const section of Array.from(this.sections)) {
         const el = section as HTMLElement;
         const sectionTop = el.offsetTop;
         const sectionHeight = el.offsetHeight;
 
         if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-          currentSection = el.getAttribute("id") || "";
+          return el.getAttribute("id") || "";
         }
-      });
-
-      navLinks.forEach((link) => {
-        link.classList.remove("active");
-        const href = link.getAttribute("href");
-        // Match both #section and /#section formats
-        if (href === `#${currentSection}` || href === `/#${currentSection}`) {
-          link.classList.add("active");
-        }
-      });
-    }
-
-    if (header) {
-      window.addEventListener("scroll", updateActiveLink);
-      // Run on page load
-      updateActiveLink();
-    }
-
-    // Return cleanup function
-    return () => {
-      if (header) {
-        window.removeEventListener("scroll", updateActiveLink);
       }
+
+      return "";
+    }
+
+    private handleScroll = (): void => {
+      if (!this.header) return;
+
+      this.handleNonHomepageState();
+      this.handleScrolledState();
+      this.updateActiveLink();
+      this.updateShadow();
     };
+
+    public init(): () => void {
+      if (this.header) {
+        window.addEventListener("scroll", this.handleScroll);
+        // Use requestAnimationFrame to avoid triggering on initial load
+        requestAnimationFrame(() => this.handleScroll());
+      }
+
+      return () => {
+        window.removeEventListener("scroll", this.handleScroll);
+      };
+    }
   }
 
-  // Store handlers to prevent duplicates
-  let headerCleanup: (() => void) | null = null;
-  let headerInitHandler: (() => void) | null = null;
-  let headerCleanupHandler: (() => void) | null = null;
+  let cleanup: (() => void) | null = null;
 
-  const ensureHeaderHandlers = () => {
-    // Remove existing
-    if (headerInitHandler) {
-      document.removeEventListener("astro:page-load", headerInitHandler);
-    }
-    if (headerCleanupHandler) {
-      document.removeEventListener("astro:before-preparation", headerCleanupHandler);
-    }
+  function initHeader() {
+    cleanup?.();
+    const manager = new HeaderManager();
+    cleanup = manager.init();
+  }
 
-    // Wrapper that manages cleanup
-    headerInitHandler = () => {
-      if (headerCleanup) headerCleanup();
-      headerCleanup = initHeader();
-    };
-
-    headerCleanupHandler = () => {
-      if (headerCleanup) {
-        headerCleanup();
-        headerCleanup = null;
-      }
-    };
-
-    document.addEventListener("astro:page-load", headerInitHandler);
-    document.addEventListener("astro:before-preparation", headerCleanupHandler);
-  };
-
-  // Run on initial page load
-  headerCleanup = initHeader();
-  ensureHeaderHandlers();
+  // Initialize on page load and transitions
+  initHeader();
+  document.addEventListener("astro:page-load", initHeader);
+  document.addEventListener("astro:before-preparation", () => cleanup?.());
 </script>
 
 <style lang="scss">
@@ -166,7 +173,11 @@ type Props = Record<string, never>;
     background-color: transparent;
     padding: $space-lg 0;
     border-radius: $space-lg $space-lg 0 0;
-    @include transition(transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, border-radius 0.3s);
+    transition:
+      transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.3s,
+      border-radius 0.3s,
+      box-shadow 0.3s;
 
     @include respond-to(md) {
       top: $space-sm;
@@ -175,12 +186,13 @@ type Props = Record<string, never>;
       border-radius: $space-md $space-md 0 0;
     }
 
-    &.scrolled {
+    // Shared styles for scrolled states
+    &.scrolled,
+    &.scrolled-no-animation {
       position: fixed;
       top: $space-md;
       left: 50%;
       transform: translateX(-50%);
-      animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       background-color: rgba($color-blue, 0.95);
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
       backdrop-filter: blur(10px);
@@ -192,45 +204,20 @@ type Props = Record<string, never>;
     }
 
     &.scrolled-no-animation {
-      position: fixed;
-      top: $space-md;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba($color-blue, 0.95);
-      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-      backdrop-filter: blur(10px);
-      border-radius: 50px;
-      animation: none;
+      transition: box-shadow 0.3s;
+    }
 
-      @include respond-to(md) {
-        top: $space-sm;
-      }
+    // Add shadow only when scrolled down (not at top)
+    &.has-shadow {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    &.scrolled {
+      animation: slide-in-down 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     &.scrolled-exit {
-      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes slideDown {
-      from {
-        transform: translateX(-50%) translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(-50%) translateY(-100%);
-        opacity: 0;
-      }
+      animation: slide-out-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     &__container {
@@ -318,6 +305,38 @@ type Props = Record<string, never>;
       @include respond-to(md) {
         font-size: $font-size-xs;
       }
+    }
+
+    // Hide header when game is playing
+    &--hidden {
+      animation: slide-out-up 0.4s ease-out forwards !important;
+    }
+
+    // Show header with fade-in-down animation
+    &--showing {
+      animation: slide-in-down 0.4s ease-out forwards !important;
+    }
+  }
+
+  @keyframes slide-out-up {
+    from {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-in-down {
+    from {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
   }
 </style>

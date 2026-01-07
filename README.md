@@ -69,9 +69,17 @@ Projects are displayed from two sources for flexibility:
 - **Featured projects** (`src/content/projects/`) — MDX files with full case study pages at `/projects/[slug]`
 - **Simple projects** (`src/data/projects.ts`) — Cards with external links (no dedicated pages)
 
-### Adding a Featured Project
+**Important:** These sources are mutually exclusive. A project should exist in ONE place only:
 
-Create `src/content/projects/project-name.mdx`:
+- Want a dedicated page? → Create MDX in `src/content/projects/`
+- External link only? → Add to `src/data/projects.ts`
+
+The `Projects.astro` component automatically merges both sources at build time.
+
+### Adding a Featured Project (with dedicated page)
+
+1. Save your project image to `src/assets/projects/project-name.png`
+2. Create `src/content/projects/project-name.mdx`:
 
 ```mdx
 ---
@@ -79,8 +87,8 @@ title: "Project Name"
 description: "Short description for project card"
 category: "web" # or "games" or "creative"
 tags: ["React", "TypeScript"]
-externalUrl: "https://example.com" # Optional
-heroImage: ../../assets/projects/project-name/hero.jpg # Optional
+externalUrl: "https://example.com" # Optional external link
+heroImage: ../../assets/projects/project-name.png # UNQUOTED path required
 heroImageAlt: "Hero image description"
 ogDescription: "Custom social sharing description" # Optional
 ---
@@ -90,12 +98,33 @@ ogDescription: "Custom social sharing description" # Optional
 Your full case study content here...
 ```
 
+**Critical:** The `heroImage` path must be **unquoted** for Astro's `image()` schema to work. Quoted paths will cause the collection to fail silently.
+
+✅ `heroImage: ../../assets/projects/hero.png`  
+❌ `heroImage: "../../assets/projects/hero.png"`
+
 Featured projects get:
 
 - Dedicated page at `/projects/[slug]`
 - Full SEO (Open Graph, JSON-LD)
-- Clickable project card with arrow icon
-- Optional hero images and rich MDX content
+- Clickable project card with arrow icon (auto-detected)
+- Hero image displayed on card and case study page
+
+### Adding a Simple Project (external link only)
+
+Add to `src/data/projects.ts` — do NOT also create an MDX file:
+
+```typescript
+{
+  title: "Project Name",
+  description: "Brief description of what you built.",
+  alt: "Screenshot of Project Name showing main visual",
+  tags: ["Laravel", "PHP"],
+  image: projectImg, // Import at top of file
+  link: "https://example.com",
+  category: "web",
+}
+```
 
 ## Blog System
 

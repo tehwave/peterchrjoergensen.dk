@@ -1,0 +1,2473 @@
+---
+/**
+ * BrickBreaker Game Component
+ *
+ * A playable brick breaker game where bricks are generated from GitHub
+ * contribution graphs. Each contribution day becomes a brick with strength
+ * based on the contribution level.
+ *
+ * @example
+ * <BrickBreaker profiles={["tehwave", "peterchrjoergensen"]} />
+ */
+import { fetchMultipleContributions, CONTRIBUTION_LEVEL_HITS } from "../utils/github";
+
+interface Props {
+  /** GitHub usernames to fetch contributions for */
+  profiles?: [string, string];
+  /** Optional heading text. If not provided, no header section is rendered */
+  heading?: string;
+  /** Optional subtitle text. If not provided, no header section is rendered */
+  subtitle?: string;
+}
+
+const { profiles = ["tehwave", "peterchrjoergensen"], heading, subtitle } = Astro.props;
+
+// Fetch contribution data at build time
+const contributionData = await fetchMultipleContributions(profiles);
+
+// Prepare brick data for the game
+interface BrickData {
+  weekIndex: number;
+  dayIndex: number;
+  color: string;
+  hits: number;
+  contributionCount: number;
+  date: string;
+  username: string;
+}
+
+/**
+ * Contribution Aggregation Strategy
+ *
+ * WHY: We combine contributions from both profiles (tehwave + peterchrjoergensen)
+ * to create a unified game board. This is because they're the same person (me),
+ * just different GitHub accounts.
+ *
+ * LOGIC: For each date (weekIndex-dayIndex), we sum up all contributions
+ * from all profiles. This creates stronger bricks on days with more combined
+ * activity, making the game reflect total productivity across both accounts.
+ */
+// Aggregate contributions by date to combine both profiles
+const contributionMap = new Map<
+  string,
+  {
+    weekIndex: number;
+    dayIndex: number;
+    contributionCount: number;
+    date: string;
+    usernames: string[];
+  }
+>();
+
+contributionData.forEach((userData) => {
+  userData.calendar.weeks.forEach((week, weekIndex) => {
+    week.contributionDays.forEach((day, dayIndex) => {
+      if (day.contributionCount > 0) {
+        const key = `${weekIndex}-${dayIndex}`;
+        const existing = contributionMap.get(key);
+
+        if (existing) {
+          existing.contributionCount += day.contributionCount;
+          existing.usernames.push(userData.username);
+        } else {
+          contributionMap.set(key, {
+            weekIndex,
+            dayIndex,
+            contributionCount: day.contributionCount,
+            date: day.date,
+            usernames: [userData.username],
+          });
+        }
+      }
+    });
+  });
+});
+
+/**
+ * Brick Generation from GitHub Contributions
+ *
+ * WHY: Each contribution day becomes a brick in the game. The more contributions,
+ * the harder the brick (more hits required to break).
+ *
+ * COLOR SYSTEM: We use GitHub's exact contribution graph colors:
+ * - #9be9a8 (light green) = 1-3 contributions = 1 hit
+ * - #40c463 (medium green) = 4-6 contributions = 2 hits
+ * - #30a14e (dark green) = 7-9 contributions = 3 hits
+ * - #216e39 (darkest green) = 10+ contributions = 4 hits
+ *
+ * SPECIAL CASE: Today's date gets orange (#ec8305) to stand out visually,
+ * helping players orient themselves in the timeline.
+ *
+ * WHY QUARTILES: This mirrors GitHub's contribution intensity visualization,
+ * making the game feel like a natural extension of the contribution graph.
+ */
+const bricks: BrickData[] = [];
+const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+contributionMap.forEach((contribution) => {
+  // Map combined contribution counts to GitHub's quartile system
+  // These thresholds create balanced gameplay: mix of easy and hard bricks
+  let contributionLevel: keyof typeof CONTRIBUTION_LEVEL_HITS;
+  let color: string;
+
+  if (contribution.contributionCount >= 10) {
+    contributionLevel = "FOURTH_QUARTILE";
+    color = "#216e39";
+  } else if (contribution.contributionCount >= 7) {
+    contributionLevel = "THIRD_QUARTILE";
+    color = "#30a14e";
+  } else if (contribution.contributionCount >= 4) {
+    contributionLevel = "SECOND_QUARTILE";
+    color = "#40c463";
+  } else {
+    contributionLevel = "FIRST_QUARTILE";
+    color = "#9be9a8";
+  }
+
+  const hits = CONTRIBUTION_LEVEL_HITS[contributionLevel];
+
+  // Special orange brick for today's date
+  const isToday = contribution.date === today;
+
+  bricks.push({
+    weekIndex: contribution.weekIndex,
+    dayIndex: contribution.dayIndex,
+    color: isToday ? "#ec8305" : color, // Orange accent for today
+    hits,
+    contributionCount: contribution.contributionCount,
+    date: contribution.date,
+    username: contribution.usernames.join(" + "),
+  });
+});
+
+// Calculate totals for display
+const totalContributions = contributionData.reduce((sum, d) => sum + d.calendar.totalContributions, 0);
+
+// Set default heading and subtitle if not provided
+const finalHeading = heading ?? "My GitHub Contributions";
+const finalSubtitle =
+  subtitle ??
+  `Play this brick breaker built from <a href="https://github.com/tehwave" target="_blank" rel="noopener me">my ${totalContributions.toLocaleString()} GitHub contributions</a> — each brick represents a day of building.`;
+---
+
+<div class="brick-breaker" id="brick-breaker" data-bricks={JSON.stringify(bricks)} data-profiles={JSON.stringify(profiles)}>
+  {
+    (finalHeading || finalSubtitle) && (
+      <div class="brick-breaker__header">
+        {finalHeading && <h2 class="brick-breaker__title">{finalHeading}</h2>}
+        {finalSubtitle && <p class="brick-breaker__subtitle" set:html={finalSubtitle} />}
+        <div class="brick-breaker__sr-only" role="alert">
+          Accessibility notice: This game requires mouse or touch input and contains animations. It may not be fully accessible to all users.
+        </div>
+      </div>
+    )
+  }
+
+  <div class="brick-breaker__game-container">
+    <canvas id="game-canvas" class="brick-breaker__canvas" aria-label="Brick breaker game canvas showing GitHub contribution bricks. Use mouse or touch to control paddle."></canvas>
+
+    <button class="brick-breaker__circle-play" id="game-circle-play-btn" type="button" aria-label="Start game">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+        <path d="M8 5v14l11-7z"></path>
+      </svg>
+    </button>
+
+    <div class="brick-breaker__overlay" id="game-overlay">
+      <div class="brick-breaker__overlay-content">
+        <h3 class="brick-breaker__overlay-title" id="overlay-title">Ready to Play?</h3>
+        <p class="brick-breaker__overlay-text" id="overlay-text">Break bricks made from GitHub contributions</p>
+        <button class="brick-breaker__button" id="game-start-btn" type="button"> Start Game </button>
+      </div>
+    </div>
+
+    <div class="brick-breaker__rotate-message" id="rotate-message">
+      <div class="brick-breaker__rotate-content">
+        <svg class="brick-breaker__rotate-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="4" width="12" height="16" rx="2" stroke="currentColor" stroke-width="2"></rect>
+          <path d="M9 10L12 7L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M9 14L12 17L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <h3 class="brick-breaker__rotate-title">Please Rotate Your Device</h3>
+        <p class="brick-breaker__rotate-text">This game works best in landscape mode</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="brick-breaker__controls">
+    <div class="brick-breaker__stats">
+      <span class="brick-breaker__stat">
+        Score: <strong id="score-display" aria-live="polite" aria-atomic="true">0</strong>
+      </span>
+      <span class="brick-breaker__stat">
+        Lives: <span id="lives-display" aria-live="assertive" aria-atomic="true">❤️❤️❤️</span>
+      </span>
+      <span class="brick-breaker__stat">
+        Bricks: <strong id="bricks-display" aria-live="polite" aria-atomic="true">{bricks.length}</strong>
+      </span>
+    </div>
+    <div class="brick-breaker__actions">
+      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-pause-btn" type="button" disabled> Pause </button>
+      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-reset-btn" type="button"> Reset </button>
+      <a href="/projects/github-brick-breaker/" class="brick-breaker__button brick-breaker__button--secondary">How It's Made</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  // ============================================================================
+  // BRICK BREAKER GAME ENGINE
+  // ============================================================================
+
+  // Read data from container element
+  const gameContainer = document.getElementById("brick-breaker");
+  if (!gameContainer) throw new Error("Game container not found");
+
+  const bricksData = JSON.parse(gameContainer.dataset.bricks || "[]");
+  const profileNames = JSON.parse(gameContainer.dataset.profiles || "[]");
+
+  // ============================================================================
+  // TYPE DEFINITIONS
+  // ============================================================================
+
+  /** @enum {string} */
+  const GameState = {
+    IDLE: "idle",
+    PLAYING: "playing",
+    PAUSED: "paused",
+    WON: "won",
+    LOST: "lost",
+  };
+
+  /** @typedef {'idle' | 'playing' | 'paused' | 'won' | 'lost'} GameStateType */
+
+  // ============================================================================
+  // ORIENTATION & VIEWPORT STATE
+  // ============================================================================
+
+  /**
+   * Orientation Detection for Mobile Devices
+   *
+   * WHY: The game requires landscape mode on small devices (phones) to provide
+   * enough horizontal space for paddle movement and proper gameplay experience.
+   *
+   * THRESHOLDS:
+   * - Height < 500px: Typical phone in landscape (e.g., iPhone 12: 390px)
+   * - Width < 640px: Matches $breakpoint-sm, ensures narrow devices are caught
+   *
+   * LOGIC:
+   * - Small device = height < 500px OR width < 640px
+   * - Show rotation message when: small device AND portrait orientation
+   * - Pause game automatically when rotation message appears
+   * - Resume when rotated to landscape
+   */
+
+  let requiresRotation = false;
+  let rotateMessage = null;
+
+  /**
+   * @typedef {Object} Paddle
+   * @property {number} x - X position
+   * @property {number} y - Y position
+   * @property {number} width - Paddle width
+   * @property {number} height - Paddle height
+   * @property {number} targetX - Target X position for smooth movement
+   * @property {number} velocityX - Current velocity
+   * @property {number} wobble - Wobble offset for visual effect
+   * @property {number} wobbleVelocity - Wobble velocity
+   * @property {number} skew - Skew amount for visual effect
+   */
+
+  /**
+   * @typedef {Object} Ball
+   * @property {number} x - X position
+   * @property {number} y - Y position
+   * @property {number} dx - X velocity
+   * @property {number} dy - Y velocity
+   * @property {number} radius - Ball radius
+   */
+
+  /**
+   * @typedef {Object} Brick
+   * @property {number} weekIndex - Week in the year (0-52)
+   * @property {number} dayIndex - Day of week (0=Sunday, 6=Saturday)
+   * @property {string} color - Brick color (GitHub contribution color)
+   * @property {number} hits - Total hits required to break
+   * @property {number} currentHits - Remaining hits
+   * @property {number} contributionCount - GitHub contributions count
+   * @property {string} date - ISO date string (YYYY-MM-DD)
+   * @property {string} username - GitHub username(s)
+   * @property {number} x - X position on canvas
+   * @property {number} y - Y position on canvas
+   * @property {number} width - Brick width
+   * @property {number} height - Brick height
+   * @property {boolean} active - Whether brick is still active
+   */
+
+  /**
+   * @typedef {Object} BallTrailPoint
+   * @property {number} x - X position
+   * @property {number} y - Y position
+   */
+
+  /**
+   * @typedef {Object} FireParticle
+   * @property {number} x - X position
+   * @property {number} y - Y position
+   * @property {number} vx - X velocity
+   * @property {number} vy - Y velocity
+   * @property {number} life - Remaining life (0-1)
+   * @property {number} size - Particle size
+   */
+
+  /**
+   * @typedef {Object} SandCell
+   * @property {string} color - Cell color
+   * @property {number} vx - X velocity
+   * @property {number} vy - Y velocity
+   * @property {number} age - Cell age in frames
+   */
+
+  /**
+   * @typedef {Object} MonthLabel
+   * @property {string} month - Month name
+   * @property {number} startWeek - Starting week index
+   * @property {number} endWeek - Ending week index
+   */
+
+  // ============================================================================
+  // CONFIGURATION
+  // ============================================================================
+
+  /**
+   * Game Configuration Constants
+   *
+   * WHY THESE VALUES:
+   *
+   * PADDLE (120x14px):
+   * - Width: Large enough to provide fair hitbox but requires skill
+   * - Height: 14px keeps paddle slim and elegant
+   * - Speed: 8px/frame allows quick repositioning without feeling twitchy
+   * - Color: Orange (#ec8305) matches site's accent color and stands out
+   * - Radius: 7px = half the height, creates pill shape
+   *
+   * BALL (8px radius, speed 5):
+   * - Radius: Large enough to see clearly but small for challenge
+   * - Speed: 5px/frame is baseline - fast enough to be exciting, slow enough to track
+   * - Speed increment: 0.15 per brick creates gradual difficulty curve
+   * - Color: Blue (#0969da) contrasts well with orange paddle and green bricks
+   *
+   * BRICKS:
+   * - Padding: 3px matches GitHub's contribution graph spacing
+   * - Radius: 2px for subtle rounding (GitHub's style)
+   * - Border: Ultra-subtle (rgba(27,31,35,0.06)) mimics GitHub exactly
+   *
+   * LABELS:
+   * - Black (#000000) for maximum readability (not gray)
+   * - Bold 12px system font matches GitHub's UI
+   * - Offset: 50px horizontal, 35px vertical provides comfortable label space
+   * - Padding: 20px horizontal, 10px top prevents edge crowding
+   *
+   * CANVAS:
+   * - Min 320px: Smallest usable phone screen
+   * - Max 1000px: Prevents bricks from becoming comically large on desktop
+   * - Height 400px: Balances vertical space without excessive scrolling
+   *
+   * LIVES:
+   * - 3 lives is arcade standard (fair but challenging)
+   * - Losing life resets ball position (punishment but not game over)
+   * - Fire particles at 1 life create dramatic tension
+   */
+  const CONFIG = {
+    // Paddle
+    paddleWidth: 120,
+    paddleHeight: 14,
+    paddleSpeed: 8,
+    paddleColor: "#ec8305",
+    paddleRadius: 7,
+
+    // Ball
+    ballRadius: 8,
+    ballSpeed: 5,
+    ballColor: "#0969da",
+    ballSpeedIncrement: 0.15, // Speed up over time
+
+    // Bricks
+    brickPadding: 3,
+    brickRadius: 2, // Subtle corner radius like GitHub
+    brickBorderColor: "rgba(27, 31, 35, 0.06)", // GitHub's subtle border
+
+    // Labels
+    labelColor: "#000000", // Black for better visibility
+    labelFont: "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    labelOffsetX: 50, // Space for weekday labels (increased for padding)
+    labelOffsetY: 35, // Space for month labels (increased for padding)
+    canvasPaddingX: 20, // Horizontal padding
+    canvasPaddingTop: 10, // Top padding
+
+    // Game
+    lives: 3,
+    canvasMinWidth: 320,
+    canvasMaxWidth: 1000,
+    canvasHeight: 400, // Total canvas height
+    paddleSpace: 80, // Space reserved for paddle at bottom
+    countdownSeconds: 3, // Countdown duration before ball release
+    countdownInterval: 1000, // Milliseconds between countdown ticks
+
+    // Physics
+    paddleSmoothingFactor: 0.15, // Lerp factor for paddle movement
+    wobbleSpringForce: 0.3, // Spring force for wobble effect
+    wobbleDamping: 0.85, // Damping for wobble oscillation
+    skewSmoothingFactor: 0.2, // Lerp factor for skew
+    skewMultiplier: 0.08, // Skew amount based on velocity
+
+    // Particles
+    fireParticleChance: 0.7, // Probability of spawning fire particle per frame
+    fireParticleLifeDecay: 0.03, // Life decay per frame
+    sandVelocityDamping: 0.8, // Velocity damping for sand particles
+    sandExplosionFrames: 5, // Frames to apply initial velocity
+
+    // Visual effects
+    trailMaxLength: 8, // Maximum ball trail length
+    ballElongationSpeed: 1.5, // Speed multiplier for elongation effect
+    ballElongationFactor: 0.8, // Elongation amount
+    ballElongationMax: 2, // Maximum elongation (in radii)
+    ballMaxSpeed: 12, // Maximum ball speed
+
+    // Scoring
+    brickDestroyMultiplier: 10, // Points per hit required
+    brickDamagePoints: 5, // Points for damaging brick
+  };
+
+  // ============================================================================
+  // GAME STATE
+  // ============================================================================
+
+  /** @type {HTMLCanvasElement | null} */
+  let canvas = null;
+  /** @type {CanvasRenderingContext2D | null} */
+  let ctx = null;
+  /** @type {GameStateType} */
+  let gameState = GameState.IDLE;
+  let score = 0;
+  let lives = CONFIG.lives;
+  /** @type {number | null} */
+  let animationFrameId = null;
+  /** @type {number | null} */
+  let countdownTimer = null;
+  let countdownValue = 0;
+  let ballAttached = true; // Ball attached to paddle during countdown
+
+  /** @type {Paddle} */
+  let paddle = {
+    x: 0,
+    y: 0,
+    width: CONFIG.paddleWidth,
+    height: CONFIG.paddleHeight,
+    targetX: 0,
+    velocityX: 0,
+    wobble: 0,
+    wobbleVelocity: 0,
+    skew: 0, // Smoothed skew for rendering
+  };
+
+  /** @type {Ball} */
+  let ball = { x: 0, y: 0, dx: 0, dy: 0, radius: CONFIG.ballRadius };
+
+  /** @type {Brick[]} */
+  let bricks = [];
+
+  /** @type {BallTrailPoint[]} */
+  let ballTrail = []; // Track ball positions for motion trail
+
+  /** @type {FireParticle[]} */
+  let fireParticles = []; // Fire particles for paddle when 1 life left
+
+  /** @type {(SandCell | null)[][]} */
+  let sandGrid = []; // 2D grid for cellular automaton sand
+
+  let cellSize = 4; // Size of each grid cell
+
+  // Input state
+  /** @type {number | null} */
+  let mouseX = null;
+
+  // Brick dimensions (calculated based on canvas size)
+  let brickWidth = 0;
+  let brickHeight = 0;
+  let brickOffsetX = 0;
+  let brickOffsetY = 0;
+  let numWeeks = 0;
+  let numDays = 7;
+  /** @type {MonthLabel[]} */
+  let monthLabels = []; // {month: string, startWeek: number, endWeek: number}
+
+  // DOM elements
+  /** @type {HTMLElement | null} */
+  let overlay = null;
+  /** @type {HTMLElement | null} */
+  let overlayTitle = null;
+  /** @type {HTMLElement | null} */
+  let overlayText = null;
+  /** @type {HTMLButtonElement | null} */
+  let circlePlayBtn = null;
+  /** @type {HTMLButtonElement | null} */
+  let startBtn = null;
+  /** @type {HTMLButtonElement | null} */
+  let pauseBtn = null;
+  /** @type {HTMLButtonElement | null} */
+  let resetBtn = null;
+  /** @type {HTMLElement | null} */
+  let scoreDisplay = null;
+  /** @type {HTMLElement | null} */
+  let livesDisplay = null;
+  /** @type {HTMLElement | null} */
+  let bricksDisplay = null;
+
+  // Store debounced handler for cleanup
+  /** @type {(() => void) | null} */
+  let handleResize = null;
+
+  // Intersection observer for viewport visibility
+  /** @type {IntersectionObserver | null} */
+  let intersectionObserver = null;
+
+  // Initialization guard
+  let isInitialized = false;
+
+  /**
+   * GitHub Contribution Data Structure
+   *
+   * Each brick represents a day with GitHub contributions:
+   * {
+   *   weekIndex: number,         // Week in the year (0-52)
+   *   dayIndex: number,          // Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+   *   color: string,             // GitHub contribution color (#9be9a8, #40c463, #30a14e, #216e39)
+   *   hits: number,              // Number of hits to break brick (1-4 based on contribution level)
+   *   contributionCount: number, // Actual GitHub contributions that day
+   *   date: string,              // ISO date (YYYY-MM-DD)
+   *   username: string           // GitHub username (tehwave or peterchrjoergensen)
+   * }
+   *
+   * Example:
+   * { weekIndex: 10, dayIndex: 1, color: "#30a14e", hits: 3, contributionCount: 18, date: "2025-03-17", username: "tehwave" }
+   */
+
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getBallSpeed() {
+    return Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  }
+
+  function isDirectionChange(prevVelocity, newVelocity) {
+    return Math.sign(newVelocity) !== Math.sign(prevVelocity) && Math.abs(newVelocity) > 1;
+  }
+
+  function isValidGridPosition(gridX, gridY) {
+    return gridY >= 0 && gridY < sandGrid.length && gridX >= 0 && gridX < sandGrid[0].length;
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  function showOverlay(title, text, buttonText) {
+    overlayTitle.textContent = title;
+    overlayText.textContent = text;
+    startBtn.textContent = buttonText;
+    overlay.classList.add("is-visible");
+    if (circlePlayBtn) circlePlayBtn.style.display = "none";
+  }
+
+  function hideOverlay() {
+    overlay.classList.remove("is-visible");
+    if (circlePlayBtn) {
+      circlePlayBtn.style.display = gameState === GameState.IDLE ? "flex" : "none";
+    }
+  }
+
+  function updateUI() {
+    scoreDisplay.textContent = score.toLocaleString();
+    livesDisplay.textContent = "❤️".repeat(lives);
+    bricksDisplay.textContent = bricks.filter((b) => b.active).length;
+  }
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
+  /**
+   * Initialize the game
+   * Sets up canvas, DOM references, and event listeners
+   */
+  function initGame() {
+    // Prevent duplicate initialization
+    if (isInitialized) {
+      cleanup();
+    }
+
+    canvas = document.getElementById("game-canvas");
+    if (!canvas) return; // Canvas not found
+
+    ctx = canvas.getContext("2d");
+    if (!ctx) return; // Context not available
+
+    overlay = document.getElementById("game-overlay");
+    overlayTitle = document.getElementById("overlay-title");
+    overlayText = document.getElementById("overlay-text");
+    circlePlayBtn = document.getElementById("game-circle-play-btn");
+    startBtn = document.getElementById("game-start-btn");
+    pauseBtn = document.getElementById("game-pause-btn");
+    resetBtn = document.getElementById("game-reset-btn");
+    scoreDisplay = document.getElementById("score-display");
+    livesDisplay = document.getElementById("lives-display");
+    bricksDisplay = document.getElementById("bricks-display");
+
+    // Create debounced resize handler
+    handleResize = debounce(resizeCanvasHandler, 100);
+
+    // Set up canvas size
+    resizeCanvas();
+
+    // Create bricks from contribution data
+    createBricks();
+
+    // Set up event listeners
+    setupEventListeners();
+
+    // Setup orientation detection for mobile devices
+    setupOrientationDetection();
+
+    // Initial UI state
+    if (pauseBtn) pauseBtn.disabled = true;
+    if (resetBtn) resetBtn.disabled = true;
+
+    // Initial render
+    render();
+
+    isInitialized = true;
+  }
+
+  /**
+   * Canvas Sizing Strategy
+   *
+   * WHY RESPONSIVE: The canvas adapts to container width (320px-1000px range)
+   * to work on mobile, tablet, and desktop without horizontal scrolling.
+   *
+   * WHY SQUARE BRICKS: GitHub's contribution graph uses square cells.
+   * We maintain this 1:1 aspect ratio for visual consistency and familiarity.
+   *
+   * CALCULATION ORDER:
+   * 1. Determine canvas width (responsive, with min/max constraints)
+   * 2. Calculate brick width to fit all weeks horizontally
+   * 3. Set brick height = brick width (square)
+   * 4. Calculate how many rows (days) fit vertically
+   *
+   * WHY THIS ORDER: Width is constrained by container, so we calculate
+   * horizontal first, then derive vertical dimensions from that.
+   *
+   * LABEL SPACE: We reserve space on top (month names) and left (weekday names)
+   * to match GitHub's graph layout. This means the actual game grid is smaller
+   * than the canvas, but the labels provide context and orientation.
+   */
+  function resizeCanvas() {
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth;
+
+    // Constrain canvas width for optimal gameplay across devices
+    // Min 320px: Works on small phones
+    // Max 1000px: Prevents bricks from becoming too large on desktop
+    const width = Math.min(Math.max(containerWidth, CONFIG.canvasMinWidth), CONFIG.canvasMaxWidth);
+
+    // Find the maximum week index to determine horizontal span
+    numWeeks = Math.max(...bricksData.map((b) => b.weekIndex)) + 1;
+
+    // Calculate brick width: divide available horizontal space by number of weeks
+    // Subtract: label space (50px) + padding (40px total) + brick gaps
+    const availableWidth = width - CONFIG.labelOffsetX - CONFIG.canvasPaddingX * 2 - CONFIG.brickPadding * 2;
+    brickWidth = Math.floor(availableWidth / numWeeks) - CONFIG.brickPadding;
+    brickHeight = brickWidth; // Square bricks like GitHub's contribution graph
+
+    // Calculate vertical rows (days of week) to fill canvas nicely
+    // WHY 80px paddle space: Enough room for paddle movement without crowding bricks
+    // WHY responsive height: Adapts to viewport height, especially on phones in landscape
+    const paddleSpace = 80;
+    const viewportHeight = window.innerHeight;
+    // Use smaller canvas height on low-height screens (phones in landscape)
+    const availableHeight = viewportHeight < 500 ? Math.max(viewportHeight * 0.7, 280) : 400;
+    const gridHeightWithLabels = availableHeight - CONFIG.labelOffsetY - CONFIG.canvasPaddingTop - paddleSpace;
+    numDays = Math.floor(gridHeightWithLabels / (brickHeight + CONFIG.brickPadding));
+
+    // Calculate actual grid dimensions based on calculated rows
+    const gridWidth = numWeeks * (brickWidth + CONFIG.brickPadding) + CONFIG.brickPadding;
+    const gridHeight = numDays * (brickHeight + CONFIG.brickPadding) + CONFIG.brickPadding;
+
+    // Canvas height: labels + grid + space for paddle
+    const height = CONFIG.labelOffsetY + CONFIG.canvasPaddingTop + gridHeight + paddleSpace;
+
+    // Set canvas size
+    canvas.width = width;
+    canvas.height = height;
+
+    // Initialize sand grid for cellular automaton
+    const sandGridWidth = Math.floor(width / cellSize);
+    const sandGridHeight = Math.floor(height / cellSize);
+    // Only initialize if not already initialized, preserve existing sand
+    if (sandGrid.length === 0) {
+      sandGrid = Array(sandGridHeight)
+        .fill(null)
+        .map(() => Array(sandGridWidth).fill(null));
+    } else {
+      // Resize if needed
+      if (sandGrid.length !== sandGridHeight || sandGrid[0].length !== sandGridWidth) {
+        sandGrid = Array(sandGridHeight)
+          .fill(null)
+          .map(() => Array(sandGridWidth).fill(null));
+      }
+    }
+
+    // Calculate offsets for labels
+    brickOffsetX = CONFIG.labelOffsetX + CONFIG.canvasPaddingX + Math.floor((width - CONFIG.labelOffsetX - CONFIG.canvasPaddingX * 2 - gridWidth) / 2) + CONFIG.brickPadding;
+    brickOffsetY = CONFIG.labelOffsetY + CONFIG.canvasPaddingTop;
+
+    // Position paddle
+    paddle.x = (width - paddle.width) / 2;
+    paddle.y = height - 40;
+
+    // Reset ball position if not playing
+    if (gameState !== GameState.PLAYING) {
+      resetBall();
+    }
+
+    // Update brick positions
+    updateBrickPositions();
+  }
+
+  /**
+   * Create brick objects from contribution data
+   * @returns {void}
+   */
+  function createBricks() {
+    bricks = bricksData.map((data) => ({
+      ...data,
+      x: 0,
+      y: 0,
+      width: brickWidth,
+      height: brickHeight,
+      currentHits: data.hits,
+      active: true,
+    }));
+    updateBrickPositions();
+    calculateMonthLabels();
+  }
+
+  /**
+   * Calculate month labels from brick dates
+   * @returns {void}
+   */
+  function calculateMonthLabels() {
+    // Group bricks by month
+    const monthMap = new Map();
+
+    bricksData.forEach((brick) => {
+      const date = new Date(brick.date);
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      const monthName = date.toLocaleString("en", { month: "short" });
+
+      if (!monthMap.has(monthKey)) {
+        monthMap.set(monthKey, {
+          month: monthName,
+          startWeek: brick.weekIndex,
+          endWeek: brick.weekIndex,
+        });
+      } else {
+        const entry = monthMap.get(monthKey);
+        entry.endWeek = Math.max(entry.endWeek, brick.weekIndex);
+      }
+    });
+
+    // Convert to array and sort by week
+    monthLabels = Array.from(monthMap.values()).sort((a, b) => a.startWeek - b.startWeek);
+  }
+
+  /**
+   * Update brick positions based on current canvas dimensions
+   * @returns {void}
+   */
+  function updateBrickPositions() {
+    bricks.forEach((brick) => {
+      brick.width = brickWidth;
+      brick.height = brickHeight;
+      brick.x = brickOffsetX + brick.weekIndex * (brickWidth + CONFIG.brickPadding);
+      brick.y = brickOffsetY + brick.dayIndex * (brickHeight + CONFIG.brickPadding);
+    });
+  }
+
+  /**
+   * Reset paddle to center position
+   * @returns {void}
+   */
+  function resetPaddle() {
+    paddle.x = (canvas.width - paddle.width) / 2;
+  }
+
+  /**
+   * Reset ball to starting position above paddle
+   * @returns {void}
+   */
+  function resetBall() {
+    ballAttached = true;
+    ball.x = canvas.width / 2;
+    ball.y = paddle.y - ball.radius - 10;
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Slightly random upward angle
+    ball.dx = Math.cos(angle) * CONFIG.ballSpeed;
+    ball.dy = Math.sin(angle) * CONFIG.ballSpeed;
+  }
+
+  /**
+   * Reset game to initial state
+   * @returns {void}
+   */
+  function resetGame() {
+    score = 0;
+    lives = CONFIG.lives;
+    gameState = GameState.IDLE;
+
+    createBricks();
+    resetPaddle();
+    resetBall();
+
+    // Clear sand grid on full reset
+    if (sandGrid.length > 0) {
+      for (let y = 0; y < sandGrid.length; y++) {
+        sandGrid[y].fill(null);
+      }
+    }
+
+    updateUI();
+    hideOverlay();
+    if (circlePlayBtn) circlePlayBtn.style.display = "flex";
+    showNavbar();
+    pauseBtn.disabled = true;
+    if (resetBtn) resetBtn.disabled = true;
+
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+
+    render();
+  }
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+
+  /**
+   * Set up all event listeners for game controls
+   * @returns {void}
+   */
+  function setupEventListeners() {
+    // Mouse/Touch
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+
+    // Buttons
+    circlePlayBtn.addEventListener("click", startGame);
+    startBtn.addEventListener("click", startGame);
+    pauseBtn.addEventListener("click", togglePause);
+    resetBtn.addEventListener("click", resetGame);
+
+    // Resize
+    window.addEventListener("resize", handleResize);
+
+    // Visibility change (pause when tab hidden)
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // View Transitions
+    document.addEventListener("astro:before-swap", cleanup);
+
+    // Set up intersection observer for viewport visibility
+    if ("IntersectionObserver" in window) {
+      intersectionObserver = new IntersectionObserver(handleIntersectionChange, {
+        threshold: 0.1, // Trigger when 10% of canvas is visible/hidden
+      });
+      intersectionObserver.observe(canvas);
+    }
+  }
+
+  /**
+   * Handle mouse movement for paddle control
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
+  function handleMouseMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    // Account for canvas scaling (CSS vs internal resolution)
+    const scaleX = canvas.width / rect.width;
+    mouseX = (e.clientX - rect.left) * scaleX;
+  }
+
+  /**
+   * Handle touch movement for paddle control
+   * @param {TouchEvent} e - Touch event
+   * @returns {void}
+   */
+  function handleTouchMove(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    // Account for canvas scaling (CSS vs internal resolution)
+    const scaleX = canvas.width / rect.width;
+    mouseX = (touch.clientX - rect.left) * scaleX;
+  }
+
+  /**
+   * Handle touch start (start game if idle)
+   * @param {TouchEvent} _e - Touch event
+   * @returns {void}
+   */
+  function handleTouchStart(_e) {
+    if (gameState === GameState.IDLE) {
+      startGame();
+    }
+  }
+
+  /**
+   * Debounced resize handler
+   * @returns {void}
+   */
+  function resizeCanvasHandler() {
+    resizeCanvas();
+    if (gameState !== GameState.PLAYING) {
+      render();
+    }
+    // Also check orientation when resizing
+    updateRotationState();
+  }
+
+  /**
+   * Handle page visibility change (auto-pause)
+   * @returns {void}
+   */
+  function handleVisibilityChange() {
+    if (document.hidden && gameState === GameState.PLAYING) {
+      pauseGame();
+    }
+  }
+
+  /**
+   * Handle intersection change (auto-pause when out of view)
+   * @param {IntersectionObserverEntry[]} entries
+   * @returns {void}
+   */
+  function handleIntersectionChange(entries) {
+    entries.forEach((entry) => {
+      // Pause if game is playing or counting down and element is out of view
+      if (!entry.isIntersecting && (gameState === GameState.PLAYING || (ballAttached && countdownTimer))) {
+        pauseGame();
+      }
+    });
+  }
+
+  // ============================================================================
+  // ORIENTATION DETECTION
+  // ============================================================================
+
+  /**
+   * Check if device is small enough to require landscape mode
+   */
+  function isSmallDevice() {
+    return window.innerHeight < 500 || window.innerWidth < 640;
+  }
+
+  /**
+   * Check if device is in portrait orientation
+   */
+  function isPortrait() {
+    // Use matchMedia as primary detection method (best browser support)
+    const portraitQuery = window.matchMedia("(orientation: portrait)");
+    if (portraitQuery.matches) return true;
+
+    // Fallback: compare dimensions
+    return window.innerHeight > window.innerWidth;
+  }
+
+  /**
+   * Check if rotation message should be displayed
+   */
+  function shouldShowRotateMessage() {
+    return isSmallDevice() && isPortrait();
+  }
+
+  /**
+   * Update rotation message visibility and game state
+   */
+  function updateRotationState() {
+    const needsRotation = shouldShowRotateMessage();
+
+    if (needsRotation && !requiresRotation) {
+      // Just entered portrait on small device
+      requiresRotation = true;
+      if (rotateMessage) {
+        rotateMessage.classList.add("is-visible");
+      }
+      // Pause game if playing
+      if (gameState === GameState.PLAYING) {
+        pauseGame();
+      }
+    } else if (!needsRotation && requiresRotation) {
+      // Just rotated to landscape or screen got bigger
+      requiresRotation = false;
+      if (rotateMessage) {
+        rotateMessage.classList.remove("is-visible");
+      }
+    }
+  }
+
+  /**
+   * Handle orientation change events
+   */
+  function handleOrientationChange() {
+    updateRotationState();
+  }
+
+  /**
+   * Setup orientation detection listeners
+   */
+  function setupOrientationDetection() {
+    rotateMessage = document.getElementById("rotate-message");
+
+    // Initial check
+    updateRotationState();
+
+    // Listen for orientation changes via matchMedia
+    const portraitQuery = window.matchMedia("(orientation: portrait)");
+    portraitQuery.addEventListener("change", handleOrientationChange);
+
+    // Also listen to resize events (catches all orientation changes + window resizing)
+    // Note: This is handled by the existing handleResize, so we don't need another listener
+  }
+
+  /**
+   * Cleanup orientation detection listeners
+   */
+  function cleanupOrientationDetection() {
+    const portraitQuery = window.matchMedia("(orientation: portrait)");
+    portraitQuery.removeEventListener("change", handleOrientationChange);
+  }
+
+  // ============================================================================
+  // NAVBAR CONTROL
+  // ============================================================================
+
+  /**
+   * Hide navbar when game starts playing
+   */
+  function hideNavbar() {
+    const header = document.querySelector(".header");
+    if (header) {
+      header.classList.add("header--hidden");
+    }
+  }
+
+  /**
+   * Show navbar when game ends or is reset
+   */
+  function showNavbar() {
+    const header = document.querySelector(".header");
+    if (header) {
+      // Only animate if navbar is currently hidden
+      if (header.classList.contains("header--hidden")) {
+        header.classList.remove("header--hidden");
+        header.classList.add("header--showing");
+
+        // Remove showing class after animation completes
+        setTimeout(() => {
+          header.classList.remove("header--showing");
+        }, 400);
+      }
+    }
+  }
+
+  /**
+   * Clean up event listeners and resources
+   * @returns {void}
+   */
+  function cleanup() {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+
+    if (countdownTimer) {
+      clearTimeout(countdownTimer);
+      countdownTimer = null;
+    }
+
+    // Remove document listeners
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    document.removeEventListener("astro:before-swap", cleanup);
+
+    // Remove canvas listeners
+    if (canvas) {
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+    }
+
+    // Remove button listeners
+    if (startBtn) startBtn.removeEventListener("click", startGame);
+    if (pauseBtn) pauseBtn.removeEventListener("click", togglePause);
+    if (resetBtn) resetBtn.removeEventListener("click", resetGame);
+
+    // Remove window listeners
+    window.removeEventListener("resize", handleResize);
+
+    // Clean up orientation detection
+    cleanupOrientationDetection();
+
+    // Clean up intersection observer
+    if (intersectionObserver) {
+      intersectionObserver.disconnect();
+      intersectionObserver = null;
+    }
+  }
+
+  // ============================================================================
+  // GAME CONTROLS
+  // ============================================================================
+
+  /**
+   * Start countdown before releasing ball
+   * @returns {void}
+   */
+  function startCountdown() {
+    countdownValue = CONFIG.countdownSeconds;
+    ballAttached = true;
+
+    const tick = () => {
+      if (countdownValue > 0) {
+        countdownValue--;
+        if (countdownValue > 0) {
+          countdownTimer = setTimeout(tick, CONFIG.countdownInterval);
+        } else {
+          // Countdown finished - release the ball!
+          ballAttached = false;
+          countdownTimer = null;
+        }
+      }
+    };
+
+    countdownTimer = setTimeout(tick, CONFIG.countdownInterval);
+  }
+
+  /**
+   * Start the game
+   * @returns {void}
+   */
+  function startGame() {
+    // If game is over, reset first
+    if (gameState === GameState.WON || gameState === GameState.LOST) {
+      resetGame();
+      // After reset, render the centered state, then return
+      // User will need to click start again (the button is now "Start Game")
+      return;
+    }
+
+    if (gameState === GameState.PLAYING) return;
+    resetPaddle();
+    resetBall();
+
+    // Render once to show centered positions before starting game loop
+    render();
+
+    gameState = GameState.PLAYING;
+    hideOverlay();
+    if (circlePlayBtn) circlePlayBtn.style.display = "none";
+    hideNavbar();
+    pauseBtn.disabled = false;
+    resetBtn.disabled = false;
+    pauseBtn.textContent = "Pause";
+
+    // Start countdown before releasing ball
+    startCountdown();
+
+    if (!animationFrameId) {
+      gameLoop();
+    }
+  }
+
+  /**
+   * Pause the game
+   * @returns {void}
+   */
+  function pauseGame() {
+    if (gameState !== GameState.PLAYING) return;
+
+    gameState = GameState.PAUSED;
+    showNavbar();
+    pauseBtn.textContent = "Resume";
+    showOverlay("Paused", "Your princess is in another castle... but this game is waiting!", "Resume");
+  }
+
+  /**
+   * Resume the game from pause
+   * @returns {void}
+   */
+  function resumeGame() {
+    if (gameState !== GameState.PAUSED) return;
+
+    gameState = GameState.PLAYING;
+    hideOverlay();
+    hideNavbar();
+    pauseBtn.textContent = "Pause";
+
+    if (!animationFrameId) {
+      gameLoop();
+    }
+  }
+
+  /**
+   * Toggle between pause and play
+   * @returns {void}
+   */
+  function togglePause() {
+    if (gameState === GameState.PLAYING) {
+      pauseGame();
+    } else if (gameState === GameState.PAUSED) {
+      resumeGame();
+    }
+  }
+
+  /**
+   * End the game
+   * @param {boolean} won - Whether the player won
+   * @returns {void}
+   */
+  function gameOver(won) {
+    gameState = won ? GameState.WON : GameState.LOST;
+    showNavbar();
+    pauseBtn.disabled = true;
+    resetBtn.disabled = false;
+
+    if (won) {
+      showOverlay("🎉 You Won!", `Cleared all bricks with ${score.toLocaleString()} points!`, "Play Again");
+    } else {
+      showOverlay("Game Over", `Final score: ${score.toLocaleString()}`, "Try Again");
+    }
+  }
+
+  // ============================================================================
+  // GAME LOOP
+  // ============================================================================
+
+  function gameLoop() {
+    if (gameState !== GameState.PLAYING) {
+      animationFrameId = null;
+      return;
+    }
+
+    update();
+    render();
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function update() {
+    updatePaddle();
+    updateBall();
+    updateParticles();
+    updateSandGrid();
+    checkCollisions();
+    checkWinCondition();
+  }
+
+  // ============================================================================
+  // PADDLE PHYSICS
+  // ============================================================================
+
+  /**
+   * Update paddle position and physics
+   *
+   * WHY LERPING (smoothingFactor): Instead of instant movement, we interpolate
+   * toward the target. This creates smooth, natural motion and prevents
+   * jittery movement when following the mouse.
+   *
+   * WOBBLE EFFECT: When paddle changes direction suddenly, it "wobbles" like gelatin.
+   * This adds personality and makes the paddle feel physical, not robotic.
+   * Uses spring physics: Acceleration = -position * springForce, with damping.
+   *
+   * SKEW EFFECT (Squash & Stretch): Animation principle from traditional animation.
+   * Fast-moving objects appear elongated in direction of motion.
+   */
+  function updatePaddle() {
+    const prevVelocity = paddle.velocityX;
+    const targetX = calculatePaddleTargetX();
+
+    paddle.targetX = clamp(targetX, 0, canvas.width - paddle.width);
+
+    const newVelocity = (paddle.targetX - paddle.x) * CONFIG.paddleSmoothingFactor;
+
+    if (isDirectionChange(prevVelocity, newVelocity)) {
+      paddle.wobbleVelocity = newVelocity * 0.3;
+    }
+
+    paddle.velocityX = newVelocity;
+    paddle.x = clamp(paddle.x + paddle.velocityX, 0, canvas.width - paddle.width);
+
+    updatePaddleWobbleAndSkew();
+  }
+
+  function calculatePaddleTargetX() {
+    let targetX = paddle.targetX;
+
+    if (mouseX !== null) targetX = mouseX - paddle.width / 2;
+
+    return targetX;
+  }
+
+  function updatePaddleWobbleAndSkew() {
+    paddle.wobbleVelocity += -paddle.wobble * CONFIG.wobbleSpringForce;
+    paddle.wobbleVelocity *= CONFIG.wobbleDamping;
+    paddle.wobble += paddle.wobbleVelocity;
+
+    const targetSkew = paddle.velocityX * CONFIG.skewMultiplier;
+    paddle.skew += (targetSkew - paddle.skew) * CONFIG.skewSmoothingFactor;
+  }
+
+  // ============================================================================
+  // BALL PHYSICS
+  // ============================================================================
+
+  function updateBall() {
+    // Keep ball attached to paddle during countdown
+    if (ballAttached) {
+      ball.x = paddle.x + paddle.width / 2;
+      ball.y = paddle.y - ball.radius - 10;
+      return;
+    }
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    updateBallTrail();
+    handleWallCollisions();
+    handleBallFall();
+  }
+
+  /**
+   * Update ball motion trail for visual feedback
+   *
+   * WHY: Fast-moving balls are hard to track visually. The trail creates
+   * motion blur effect that helps eyes follow the ball and makes speed
+   * increases feel more impactful.
+   *
+   * DYNAMIC LENGTH: Trail length = ball speed (capped at trailMaxLength)
+   * - Faster ball = longer trail = stronger visual emphasis on speed
+   * - Slower ball = shorter trail = less visual clutter
+   */
+  function updateBallTrail() {
+    ballTrail.push({ x: ball.x, y: ball.y });
+    const speed = getBallSpeed();
+    const maxTrailLength = Math.min(Math.floor(speed), CONFIG.trailMaxLength);
+
+    while (ballTrail.length > maxTrailLength) {
+      ballTrail.shift();
+    }
+  }
+
+  function handleWallCollisions() {
+    if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+      ball.dx = -ball.dx;
+      ball.x = clamp(ball.x, ball.radius, canvas.width - ball.radius);
+    }
+
+    if (ball.y - ball.radius <= 0) {
+      ball.dy = -ball.dy;
+      ball.y = ball.radius;
+    }
+  }
+
+  function handleBallFall() {
+    if (ball.y > canvas.height) {
+      lives--;
+      updateUI();
+
+      if (lives <= 0) {
+        gameOver(false);
+      } else {
+        resetBall();
+        ballTrail = [];
+        // Start countdown before next life
+        startCountdown();
+      }
+    }
+  }
+
+  // ============================================================================
+  // PARTICLE SYSTEMS
+  // ============================================================================
+
+  /**
+   * Update all particle systems
+   */
+  function updateParticles() {
+    spawnFireParticles();
+    updateFireParticles();
+  }
+
+  /**
+   * Spawn fire particles when at critical health (1 life)
+   *
+   * WHY: Dramatic visual feedback creates tension and urgency without UI elements.
+   *
+   * SPAWN RATE: fireParticleChance per frame (~42 particles/second at 60fps)
+   * WHY: High frequency creates dense fire effect without tanking performance
+   *
+   * VELOCITY RANGES:
+   * - vy: -0.8 to -1.6 (upward, flames rise)
+   * - vx: -0.15 to +0.15 (slight horizontal spread)
+   * WHY: Upward bias mimics real fire physics, horizontal adds natural variation
+   */
+  function spawnFireParticles() {
+    if (lives === 1 && Math.random() < CONFIG.fireParticleChance) {
+      fireParticles.push({
+        x: paddle.x + Math.random() * paddle.width,
+        y: paddle.y,
+        vy: -0.8 - Math.random() * 0.8,
+        vx: (Math.random() - 0.5) * 0.3,
+        life: 1.0,
+        size: 4 + Math.random() * 10,
+      });
+    }
+  }
+
+  function updateFireParticles() {
+    fireParticles.forEach((p) => {
+      p.y += p.vy;
+      p.x += p.vx;
+      p.life -= CONFIG.fireParticleLifeDecay;
+    });
+    fireParticles = fireParticles.filter((p) => p.life > 0);
+  }
+
+  /**
+   * Update cellular automaton sand simulation
+   *
+   * WHY BOTTOM-TO-TOP: We process from bottom row upward to prevent
+   * particles from moving multiple times in one frame (would make sand
+   * fall too fast and look unnatural).
+   *
+   * TWO-PHASE PHYSICS:
+   * - Phase 1: Explosion (first N frames) - particles have velocity from explosion
+   * - Phase 2: Settling - simple cellular automaton rules (fall down, spread diagonally)
+   *
+   * PERFORMANCE: Grid-based approach means O(grid_cells) not O(particles²)
+   * This allows hundreds of particles without collision checks.
+   */
+  function updateSandGrid() {
+    for (let y = sandGrid.length - 2; y >= 0; y--) {
+      for (let x = 0; x < sandGrid[y].length; x++) {
+        const cell = sandGrid[y][x];
+        if (cell === null) continue;
+
+        cell.age++;
+
+        if (applyExplosionPhysics(cell, x, y)) continue;
+        applySandFallRules(cell, x, y);
+      }
+    }
+  }
+
+  function applyExplosionPhysics(cell, x, y) {
+    if (cell.age >= CONFIG.sandExplosionFrames || (Math.abs(cell.vx) <= 0.1 && Math.abs(cell.vy) <= 0.1)) {
+      return false;
+    }
+
+    const newX = clamp(x + Math.round(cell.vx), 0, sandGrid[0].length - 1);
+    const newY = clamp(y + Math.round(cell.vy), 0, sandGrid.length - 1);
+
+    if (sandGrid[newY][newX] === null) {
+      sandGrid[y][x] = null;
+      sandGrid[newY][newX] = cell;
+      cell.vx *= CONFIG.sandVelocityDamping;
+      cell.vy *= CONFIG.sandVelocityDamping;
+      return true;
+    }
+
+    return false;
+  }
+
+  function applySandFallRules(cell, x, y) {
+    if (sandGrid[y + 1][x] === null) {
+      sandGrid[y][x] = null;
+      sandGrid[y + 1][x] = cell;
+      return;
+    }
+
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    if (x + dir >= 0 && x + dir < sandGrid[y].length && sandGrid[y + 1][x + dir] === null) {
+      sandGrid[y][x] = null;
+      sandGrid[y + 1][x + dir] = cell;
+    }
+  }
+
+  /**
+   * Create radial particle explosion from brick
+   *
+   * WHY TWO SIZES: Full brick destruction (12) creates bigger explosion
+   * than partial damage (5). This visual scaling reinforces game feedback.
+   *
+   * RADIAL DISTRIBUTION:
+   * - Particles evenly distributed in circle (360° / particleCount)
+   * - Random offset (+0.8 radians) prevents rigid spoke pattern
+   * - WHY: Even distribution ensures consistent explosion appearance
+   *
+   * VELOCITY: Trigonometry converts angle+speed (polar) to x/y components (cartesian)
+   * This gives us the velocity vector for each particle.
+   */
+  function createBrickExplosion(centerX, centerY, color, particleCount) {
+    const baseCount = particleCount === 12 ? 20 : 10;
+    const particleColor = color === "#9be9a8" ? "#70d480" : color;
+
+    for (let i = 0; i < baseCount; i++) {
+      const angle = (Math.PI * 2 * i) / baseCount + Math.random() * 0.8;
+      const speed = 1 + Math.random() * 2;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+
+      const x = centerX + vx * 3;
+      const y = centerY + vy * 3;
+      const gridX = Math.floor(x / cellSize);
+      const gridY = Math.floor(y / cellSize);
+
+      if (isValidGridPosition(gridX, gridY) && sandGrid[gridY][gridX] === null) {
+        sandGrid[gridY][gridX] = { color: particleColor, vx, vy, age: 0 };
+      }
+    }
+  }
+
+  // ============================================================================
+  // COLLISION DETECTION
+  // ============================================================================
+
+  function checkCollisions() {
+    checkPaddleCollision();
+    checkBrickCollisions();
+  }
+
+  /**
+   * Check and handle paddle collision
+   *
+   * WHY DYNAMIC ANGLE: Ball bounces at different angles depending on
+   * where it hits the paddle. This gives players control over ball direction.
+   *
+   * MATH BREAKDOWN:
+   * 1. hitPos = (ball.x - paddle.x) / paddle.width → Maps to 0-1 range
+   * 2. hitPos - 0.5 → Centers the range (-0.5 to +0.5, 0 = center)
+   * 3. (hitPos - 0.5) * PI * 0.7 → Converts to angle offset
+   * 4. -PI/2 + offset → Final angle (-135° to -45°)
+   *
+   * RESULT:
+   * - Hit left   → -135° (up and left)
+   * - Hit center → -90° (straight up)
+   * - Hit right  → -45° (up and right)
+   *
+   * SPEED PRESERVATION: We maintain ball speed, only changing direction.
+   */
+  function checkPaddleCollision() {
+    if (!isCollidingWithPaddle()) return;
+
+    const hitPos = (ball.x - paddle.x) / paddle.width;
+    const angle = -Math.PI / 2 + (hitPos - 0.5) * Math.PI * 0.7;
+    const speed = getBallSpeed();
+
+    ball.dx = Math.cos(angle) * speed;
+    ball.dy = Math.sin(angle) * speed;
+
+    if (ball.dy > 0) ball.dy = -ball.dy;
+    ball.y = paddle.y - ball.radius;
+  }
+
+  /**
+   * Check and handle brick collisions
+   *
+   * DETECTION: AABB (Axis-Aligned Bounding Box) collision
+   * - Check if ball's bounding box overlaps brick's bounding box
+   * - Fast and accurate for rectangular objects
+   */
+  function checkBrickCollisions() {
+    for (const brick of bricks) {
+      if (!brick.active) continue;
+      if (!isCollidingWithBrick(brick)) continue;
+
+      handleBrickHit(brick);
+      bounceBallOffBrick(brick);
+      increaseBallSpeed();
+      updateUI();
+      break;
+    }
+  }
+
+  /**
+   * Handle brick hit - decrement hits and award points
+   *
+   * SCORING SYSTEM:
+   * - Destroy: (brick.hits * brickDestroyMultiplier) + contributionCount
+   *   - Harder bricks worth more base points (4 hits = 40 points)
+   *   - Bonus points equal to actual GitHub contributions
+   *   - WHY: Rewards both difficulty and reflects real contribution value
+   * - Damage: brickDamagePoints
+   *   - Small reward for chipping away at tough bricks
+   */
+  function handleBrickHit(brick) {
+    brick.currentHits--;
+
+    if (brick.currentHits <= 0) {
+      brick.active = false;
+      score += brick.hits * CONFIG.brickDestroyMultiplier + brick.contributionCount;
+      createBrickExplosion(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, 12);
+    } else {
+      score += CONFIG.brickDamagePoints;
+      createBrickExplosion(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, 5);
+    }
+  }
+
+  /**
+   * Determine bounce direction based on collision side
+   *
+   * Problem: Ball hit brick, but which side? This determines bounce direction.
+   *
+   * Solution: Calculate overlap distance on each side:
+   * - overlapLeft/Right = horizontal penetration
+   * - overlapTop/Bottom = vertical penetration
+   *
+   * Compare minimum X overlap vs minimum Y overlap:
+   * - If X overlap smaller → hit left or right → flip dx (horizontal)
+   * - If Y overlap smaller → hit top or bottom → flip dy (vertical)
+   *
+   * WHY THIS WORKS: The side with smallest overlap is where ball
+   * made contact (it penetrated least from that direction).
+   */
+  function bounceBallOffBrick(brick) {
+    const overlapLeft = ball.x + ball.radius - brick.x;
+    const overlapRight = brick.x + brick.width - (ball.x - ball.radius);
+    const overlapTop = ball.y + ball.radius - brick.y;
+    const overlapBottom = brick.y + brick.height - (ball.y - ball.radius);
+
+    const minOverlapX = Math.min(overlapLeft, overlapRight);
+    const minOverlapY = Math.min(overlapTop, overlapBottom);
+
+    if (minOverlapX < minOverlapY) {
+      ball.dx = -ball.dx;
+    } else {
+      ball.dy = -ball.dy;
+    }
+  }
+
+  /**
+   * Progressively increase ball speed after hitting brick
+   *
+   * SPEED PROGRESSION:
+   * - Add ballSpeedIncrement per brick hit
+   * - Cap at ballMaxSpeed to prevent unplayable speeds
+   * - WHY: Creates escalating difficulty as game progresses
+   * - Multiply both dx and dy by ratio to maintain direction
+   */
+  function increaseBallSpeed() {
+    const speed = getBallSpeed();
+    const newSpeed = Math.min(speed + CONFIG.ballSpeedIncrement, CONFIG.ballMaxSpeed);
+    const ratio = newSpeed / speed;
+    ball.dx *= ratio;
+    ball.dy *= ratio;
+  }
+
+  function checkWinCondition() {
+    const activeBricks = bricks.filter((b) => b.active).length;
+    if (activeBricks === 0) {
+      gameOver(true);
+    }
+  }
+
+  function isCollidingWithPaddle() {
+    return ball.y + ball.radius >= paddle.y && ball.y - ball.radius <= paddle.y + paddle.height && ball.x >= paddle.x && ball.x <= paddle.x + paddle.width;
+  }
+
+  function isCollidingWithBrick(brick) {
+    return ball.x + ball.radius > brick.x && ball.x - ball.radius < brick.x + brick.width && ball.y + ball.radius > brick.y && ball.y - ball.radius < brick.y + brick.height;
+  }
+
+  // ============================================================================
+  // RENDERING
+  // ============================================================================
+
+  function render() {
+    // Clear canvas completely (no background)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dim entire canvas when countdown active or overlay visible
+    const overlayVisible = overlay && overlay.classList.contains("is-visible");
+
+    if (ballAttached || overlayVisible) {
+      ctx.globalAlpha = 0.5;
+    } else {
+      ctx.globalAlpha = 1.0;
+    }
+
+    // Draw labels
+    drawMonthLabels();
+    drawWeekdayLabels();
+
+    // Draw brick particles (behind bricks)
+    drawBrickParticles();
+
+    // Draw bricks
+    drawBricks();
+
+    // Draw paddle
+    drawPaddle();
+
+    // Draw ball
+    drawBall();
+
+    // Draw countdown overlay if active
+    drawCountdown();
+  }
+
+  function drawMonthLabels() {
+    ctx.fillStyle = CONFIG.labelColor;
+    ctx.font = CONFIG.labelFont;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    monthLabels.forEach((label) => {
+      const x = brickOffsetX + label.startWeek * (brickWidth + CONFIG.brickPadding);
+      const y = CONFIG.canvasPaddingTop + 10;
+      ctx.fillText(label.month, x, y);
+    });
+  }
+
+  function drawWeekdayLabels() {
+    ctx.fillStyle = CONFIG.labelColor;
+    ctx.font = CONFIG.labelFont;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    // GitHub uses: Sunday=0, Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6
+    const weekdays = ["", "Mon", "", "Wed", "", "Fri", ""];
+    weekdays.forEach((day, index) => {
+      if (day) {
+        const x = CONFIG.labelOffsetX + CONFIG.canvasPaddingX - 5;
+        const y = CONFIG.labelOffsetY + CONFIG.canvasPaddingTop + index * (brickHeight + CONFIG.brickPadding) + brickHeight / 2;
+        ctx.fillText(day, x, y);
+      }
+    });
+  }
+
+  function drawBricks() {
+    // Draw grid lines
+    ctx.strokeStyle = "rgba(27, 31, 35, 0.1)";
+    ctx.lineWidth = 1;
+
+    // Draw vertical lines
+    for (let week = 0; week <= numWeeks; week++) {
+      const x = brickOffsetX + week * (brickWidth + CONFIG.brickPadding) - CONFIG.brickPadding / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, brickOffsetY - CONFIG.brickPadding / 2);
+      ctx.lineTo(x, brickOffsetY + numDays * (brickHeight + CONFIG.brickPadding) - CONFIG.brickPadding / 2);
+      ctx.stroke();
+    }
+
+    // Draw horizontal lines
+    for (let day = 0; day <= numDays; day++) {
+      const y = brickOffsetY + day * (brickHeight + CONFIG.brickPadding) - CONFIG.brickPadding / 2;
+      ctx.beginPath();
+      ctx.moveTo(brickOffsetX - CONFIG.brickPadding / 2, y);
+      ctx.lineTo(brickOffsetX + numWeeks * (brickWidth + CONFIG.brickPadding) - CONFIG.brickPadding / 2, y);
+      ctx.stroke();
+    }
+
+    // Then draw active contribution bricks on top
+    for (const brick of bricks) {
+      if (!brick.active) continue;
+
+      // Check if this is today's special brick (orange)
+      const isTodayBrick = brick.color === "#ec8305";
+
+      let fillColor;
+      if (isTodayBrick) {
+        // Today's brick stays orange, but gets slightly darker as it loses hits
+        const opacity = brick.currentHits / brick.hits;
+        fillColor = `rgba(236, 131, 5, ${0.7 + opacity * 0.3})`;
+      } else {
+        // Show GitHub contribution colors based on remaining hits
+        // As brick loses life, it degrades through the contribution levels
+        if (brick.currentHits >= 4) {
+          fillColor = "#216e39"; // Darkest green (10+ contributions)
+        } else if (brick.currentHits === 3) {
+          fillColor = "#30a14e"; // Dark green (7-9 contributions)
+        } else if (brick.currentHits === 2) {
+          fillColor = "#40c463"; // Medium green (4-6 contributions)
+        } else {
+          fillColor = "#9be9a8"; // Light green (1-3 contributions)
+        }
+      }
+
+      // Draw brick with GitHub-style subtle border
+      ctx.fillStyle = fillColor;
+      roundRect(ctx, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
+      ctx.fill();
+
+      // Add subtle border like GitHub
+      ctx.strokeStyle = CONFIG.brickBorderColor;
+      ctx.lineWidth = 1;
+      roundRect(ctx, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
+      ctx.stroke();
+    }
+  }
+
+  /**
+   * Paddle Rendering with Squash & Stretch
+   *
+   * FIRE PARTICLES (1 life remaining):
+   * - Renders flame-shaped triangles above paddle
+   * - Color: HSL hue randomized (15-45 = orange to red spectrum)
+   * - WHY HSL: Allows hue variation while maintaining saturation/lightness
+   * - Opacity tied to particle.life (fades out as particles age)
+   *
+   * SQUASH & STRETCH DEFORMATION:
+   *
+   * CONCEPT: When paddle moves, it deforms like a rubber object.
+   * - Moving left: Left side compresses (shorter), right stretches (taller)
+   * - Moving right: Right side compresses (shorter), left stretches (taller)
+   *
+   * WHY: Traditional animation principle - conveys motion, mass, and elasticity.
+   * Makes paddle feel physical and responsive, not rigid.
+   *
+   * MATH:
+   * - squashStretch = paddle.skew * 2 (amplify effect for visibility)
+   * - leftHeight = normalHeight + squashStretch
+   * - rightHeight = normalHeight - squashStretch
+   *
+   * This creates a trapezoid: taller on one side, shorter on the other.
+   * Direction depends on velocity sign (left = positive skew, right = negative).
+   *
+   * TRAPEZOID RENDERING:
+   * Instead of simple rectangle, we draw custom shape with rounded corners:
+   * 1. Calculate top/bottom Y positions for each side (different heights)
+   * 2. Draw path connecting corners with arcTo() for rounding
+   * 3. Result: Rounded trapezoid that leans in direction of movement
+   *
+   * GRADIENT HIGHLIGHT:
+   * - Top: White (30% opacity) = simulated light source
+   * - Bottom: Black (20% opacity) = shadow
+   * - Adds depth and makes paddle feel 3D
+   */
+  function drawPaddle() {
+    // Draw fire particles when 1 life left
+    if (lives === 1) {
+      fireParticles.forEach((p) => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.beginPath();
+        // Draw pointed flame shape (triangle)
+        ctx.moveTo(0, -p.size);
+        ctx.lineTo(-p.size * 0.5, p.size * 0.3);
+        ctx.lineTo(p.size * 0.5, p.size * 0.3);
+        ctx.closePath();
+        const hue = 15 + Math.random() * 30; // Orange to red
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${p.life * 0.45})`;
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Apply squash/stretch based on velocity direction with smoothing
+    // Moving left: left side compressed (shorter), right side stretched (taller)
+    // Moving right: right side compressed (shorter), left side stretched (taller)
+    const squashStretch = paddle.skew * 2; // Scale factor for visual effect
+
+    // Calculate trapezoid vertices (flipped so compression is on movement side)
+    const leftHeight = paddle.height + squashStretch;
+    const rightHeight = paddle.height - squashStretch;
+
+    const radius = CONFIG.paddleRadius;
+
+    ctx.save();
+    ctx.fillStyle = CONFIG.paddleColor;
+
+    // Draw rounded trapezoid shape
+    ctx.beginPath();
+
+    // Top edge with rounded corners
+    const topLeft = paddle.y + (paddle.height - leftHeight) / 2;
+    const topRight = paddle.y + (paddle.height - rightHeight) / 2;
+
+    ctx.moveTo(paddle.x + radius, topLeft);
+    ctx.lineTo(paddle.x + paddle.width - radius, topRight);
+    ctx.arcTo(paddle.x + paddle.width, topRight, paddle.x + paddle.width, topRight + radius, radius);
+
+    // Right edge
+    const bottomRight = paddle.y + paddle.height - (paddle.height - rightHeight) / 2;
+    ctx.lineTo(paddle.x + paddle.width, bottomRight - radius);
+    ctx.arcTo(paddle.x + paddle.width, bottomRight, paddle.x + paddle.width - radius, bottomRight, radius);
+
+    // Bottom edge
+    const bottomLeft = paddle.y + paddle.height - (paddle.height - leftHeight) / 2;
+    ctx.lineTo(paddle.x + radius, bottomLeft);
+    ctx.arcTo(paddle.x, bottomLeft, paddle.x, bottomLeft - radius, radius);
+
+    // Left edge
+    ctx.lineTo(paddle.x, topLeft + radius);
+    ctx.arcTo(paddle.x, topLeft, paddle.x + radius, topLeft, radius);
+
+    ctx.closePath();
+    ctx.fill();
+
+    // Gradient highlight
+    const gradient = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.height);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.3)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0.2)");
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  /**
+   * Sand Particle Rendering with Color Blending
+   *
+   * WHY COLOR LERPING: Instead of hard edges between different colored
+   * particles (green shades), we blend neighboring colors to create smooth
+   * gradients. This makes the sand look more organic and less pixelated.
+   *
+   * BLENDING ALGORITHM:
+   * 1. For each particle, check all 8 surrounding cells (neighbors)
+   * 2. Collect colors of any occupied neighbors
+   * 3. Blend current color (70%) with neighbor average (30%)
+   *
+   * WHY 70/30 SPLIT:
+   * - 70% base: Particles keep their identity (recognizable brick color)
+   * - 30% neighbors: Subtle blending creates smooth transitions
+   * - Too much blending (50/50) would muddy colors into gray
+   * - Too little (90/10) wouldn't smooth enough
+   *
+   * COLOR MATH:
+   * - Parse hex #RRGGBB into separate R, G, B values (0-255)
+   * - Weight base color: R * 0.7, G * 0.7, B * 0.7
+   * - Add neighbor contribution: each neighbor gets (0.3 / neighborCount)
+   * - Convert back to hex: round(R).toString(16).padStart(2, '0')
+   *
+   * OVERLAP RENDERING:
+   * - Draw cells with 1px overlap (cellSize + 1, offset by -0.5)
+   * - WHY: Eliminates gaps between cells that can appear due to sub-pixel
+   *   positioning and anti-aliasing. Creates seamless sand appearance.
+   */
+  function drawBrickParticles() {
+    // Render sand grid with color blending for smooth appearance
+    for (let y = 0; y < sandGrid.length; y++) {
+      for (let x = 0; x < sandGrid[y].length; x++) {
+        const cell = sandGrid[y][x];
+        if (cell !== null) {
+          // Collect neighboring particle colors (8 surrounding cells)
+          const neighbors = [];
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dy === 0 && dx === 0) continue; // Skip center (self)
+              const ny = y + dy;
+              const nx = x + dx;
+              // Check bounds and if neighbor exists
+              if (ny >= 0 && ny < sandGrid.length && nx >= 0 && nx < sandGrid[ny].length) {
+                const neighbor = sandGrid[ny][nx];
+                if (neighbor !== null) {
+                  neighbors.push(neighbor.color);
+                }
+              }
+            }
+          }
+
+          // Blend colors with neighbors
+          let finalColor = cell.color;
+          if (neighbors.length > 0) {
+            // Parse base color from hex (#RRGGBB) to RGB components
+            const baseR = parseInt(cell.color.slice(1, 3), 16);
+            const baseG = parseInt(cell.color.slice(3, 5), 16);
+            const baseB = parseInt(cell.color.slice(5, 7), 16);
+
+            // Average with neighbors (70% base, 30% neighbors)
+            let r = baseR * 0.7;
+            let g = baseG * 0.7;
+            let b = baseB * 0.7;
+
+            const weight = 0.3 / neighbors.length;
+            neighbors.forEach((color) => {
+              r += parseInt(color.slice(1, 3), 16) * weight;
+              g += parseInt(color.slice(3, 5), 16) * weight;
+              b += parseInt(color.slice(5, 7), 16) * weight;
+            });
+
+            finalColor = `#${Math.round(r).toString(16).padStart(2, "0")}${Math.round(g).toString(16).padStart(2, "0")}${Math.round(b).toString(16).padStart(2, "0")}`;
+          }
+
+          ctx.fillStyle = finalColor;
+          // Draw with slight overlap for smoothness
+          ctx.fillRect(x * cellSize - 0.5, y * cellSize - 0.5, cellSize + 1, cellSize + 1);
+        }
+      }
+    }
+  }
+
+  /**
+   * Ball Rendering with Motion Effects
+   *
+   * MOTION TRAIL:
+   * - Faded copies of ball at previous positions
+   * - Opacity increases toward current position (0 to 0.5)
+   * - Size increases toward current position (50% to 100%)
+   * - Only shown when ball exceeds base speed
+   *
+   * WHY: Creates motion blur effect that emphasizes speed and makes
+   * fast-moving ball easier to track visually.
+   *
+   * ELONGATION EFFECT (Squash & Stretch):
+   * Triggered when speed > 1.5x base speed
+   *
+   * CALCULATION:
+   * 1. angle = atan2(dy, dx)
+   *    - atan2 returns angle of velocity vector (-π to π)
+   *    - Example: dx=1, dy=0 → angle=0° (pointing right)
+   *    - Example: dx=0, dy=1 → angle=90° (pointing down)
+   *
+   * 2. elongation = speed * 0.8 (capped at 2x radius)
+   *    - Faster ball → longer stretch
+   *    - Cap prevents ridiculous elongation at high speeds
+   *
+   * 3. Rotate canvas to angle
+   *    - Now we can draw elongated ellipse horizontally
+   *    - It will appear rotated in direction of movement
+   *
+   * 4. Draw ellipse(x: 0, y: 0, radiusX: radius + elongation, radiusY: radius)
+   *    - radiusX: Stretched in direction of motion
+   *    - radiusY: Normal radius (perpendicular to motion)
+   *    - Result: Egg-shaped ball pointing in movement direction
+   *
+   * WHY: Classic animation principle (squash & stretch) makes motion
+   * feel more dynamic and helps convey speed visually.
+   */
+  function drawBall() {
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
+    // Draw motion trail when ball is fast
+    if (ballTrail.length > 1 && speed > CONFIG.ballSpeed) {
+      ballTrail.forEach((pos, i) => {
+        // Fade in toward current position
+        const opacity = (i / ballTrail.length) * 0.5;
+        // Grow in size toward current position
+        const size = ball.radius * (0.5 + (i / ballTrail.length) * 0.5);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(9, 105, 218, ${opacity})`;
+        ctx.fill();
+      });
+    }
+
+    // Elongate ball when moving fast (squash & stretch)
+    if (speed > CONFIG.ballSpeed * 1.5) {
+      // Calculate direction of movement
+      const angle = Math.atan2(ball.dy, ball.dx);
+      // Calculate elongation amount (proportional to speed)
+      const elongation = Math.min(speed * 0.8, ball.radius * 2);
+
+      // Use canvas transform to rotate for elongation
+      ctx.save();
+      ctx.translate(ball.x, ball.y); // Move origin to ball position
+      ctx.rotate(angle); // Rotate to movement direction
+
+      // Draw elongated ellipse pointing in direction of movement
+      ctx.beginPath();
+      ctx.ellipse(0, 0, ball.radius + elongation, ball.radius, 0, 0, Math.PI * 2);
+      ctx.fillStyle = CONFIG.ballColor;
+      ctx.fill();
+
+      // Highlight on elongated ball
+      ctx.beginPath();
+      ctx.ellipse(elongation / 4, 0, ball.radius * 0.3, ball.radius * 0.25, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fill();
+      ctx.restore();
+    } else {
+      // Normal ball
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = CONFIG.ballColor;
+      ctx.fill();
+
+      // Highlight
+      ctx.beginPath();
+      ctx.arc(ball.x - 2, ball.y - 2, ball.radius * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fill();
+    }
+  }
+
+  /**
+   * Draw Countdown Display
+   *
+   * Shows a semi-transparent countdown number (3, 2, 1) or "GO!" text
+   * centered on the canvas before the ball is released.
+   *
+   * WHY VISUAL COUNTDOWN:
+   * - Gives player time to prepare and adjust paddle position
+   * - Creates anticipation and clear game rhythm
+   * - Visual indicator is clearer than just waiting silently
+   *
+   * DESIGN:
+   * - Large bold text (80px) for maximum visibility
+   * - Semi-transparent background for overlay effect
+   * - Countdown numbers (3, 2, 1) then "GO!"
+   * - Orange accent color matches site theme
+   */
+  function drawCountdown() {
+    if (!ballAttached || countdownValue === 0) return;
+
+    // Countdown text (canvas is already dimmed via globalAlpha)
+    ctx.save();
+    // Reset alpha for text so it's fully visible
+    ctx.globalAlpha = 1.0;
+    ctx.font = "bold 80px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const displayText = countdownValue > 0 ? countdownValue.toString() : "GO!";
+
+    // Draw text
+    ctx.fillStyle = CONFIG.paddleColor; // Orange accent color
+    ctx.fillText(displayText, canvas.width / 2, canvas.height / 2);
+
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // UTILITIES
+  // ============================================================================
+
+  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
+  // Initialize when DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initGame);
+  } else {
+    initGame();
+  }
+
+  // Re-initialize on View Transitions navigation
+  document.addEventListener("astro:page-load", () => {
+    if (document.getElementById("game-canvas")) {
+      initGame();
+    }
+  });
+</script>
+
+<style lang="scss">
+  @use "sass:color";
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .brick-breaker {
+    @include container;
+    padding-block: $space-2xl;
+
+    &__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    &__header {
+      text-align: center;
+      margin-bottom: $space-xl;
+    }
+
+    &__title {
+      @include section-heading;
+      margin-bottom: $space-sm;
+    }
+
+    &__subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-lg;
+    }
+
+    &__game-container {
+      position: relative;
+      background: transparent;
+      border: 1px solid rgba(27, 31, 35, 0.15);
+      border-radius: 6px;
+    }
+
+    &__canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+
+      &.is-visible {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &__overlay-content {
+      text-align: center;
+      color: $color-text-primary;
+      padding: $space-xl;
+    }
+
+    &__overlay-title {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $space-md;
+      color: $color-text-primary;
+    }
+
+    &__overlay-text {
+      font-size: $font-size-lg;
+      margin-bottom: $space-xl;
+      color: $color-text-secondary;
+    }
+
+    &__rotate-message {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+
+      &.is-visible {
+        display: flex;
+      }
+    }
+
+    &__rotate-content {
+      text-align: center;
+      color: $color-text-primary;
+      padding: $space-xl;
+    }
+
+    &__rotate-icon {
+      color: $color-accent;
+      margin-bottom: $space-md;
+      animation: rotate-pulse 2s ease-in-out infinite;
+
+      @include reduced-motion {
+        animation: none;
+      }
+    }
+
+    &__rotate-title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $space-sm;
+      color: $color-text-primary;
+    }
+
+    &__rotate-text {
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+    }
+
+    &__controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: $space-lg;
+      gap: $space-md;
+      flex-wrap: wrap;
+    }
+
+    &__stats {
+      display: flex;
+      gap: $space-lg;
+      flex-wrap: wrap;
+    }
+
+    &__stat {
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+
+      strong {
+        color: $color-text-primary;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      gap: $space-sm;
+    }
+
+    &__button {
+      padding: $space-sm $space-lg;
+      border: 1px solid $color-border;
+      border-radius: 100px;
+      background-color: $color-blue-dark;
+      border-color: $color-blue-dark;
+      color: $color-white;
+      font-family: inherit;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+      @include transition(all, 0.2s);
+      @include focus-visible;
+
+      &:hover:not(:disabled) {
+        background-color: color.adjust($color-blue-dark, $lightness: 5%);
+        border-color: color.adjust($color-blue-dark, $lightness: 5%);
+        color: $color-white;
+        transform: translateY(-2px);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &--secondary {
+        border: 1px solid $color-border;
+        border-radius: 100px;
+        background-color: $color-white;
+        color: $color-text-dark;
+
+        &:hover:not(:disabled) {
+          background-color: $color-white;
+          border-color: $color-orange;
+          color: $color-orange;
+        }
+      }
+    }
+
+    @include respond-to(md) {
+      &__controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      &__stats {
+        justify-content: center;
+      }
+
+      &__actions {
+        justify-content: center;
+      }
+    }
+
+    @include reduced-motion {
+      &__overlay {
+        transition: none;
+      }
+
+      &__button {
+        transition: none;
+
+        &:hover:not(:disabled) {
+          transform: none;
+        }
+      }
+    }
+
+    &__circle-play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: $color-accent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      @include transition(all, 0.3s);
+      z-index: 10;
+
+      svg {
+        margin-left: 4px; // Optical centering for play icon
+      }
+
+      &:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+
+      &:active {
+        transform: translate(-50%, -50%) scale(0.95);
+      }
+    }
+  }
+
+  @keyframes rotate-pulse {
+    0%,
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
+    25% {
+      transform: rotate(-10deg) scale(1.05);
+    }
+    75% {
+      transform: rotate(10deg) scale(1.05);
+    }
+  }
+</style>

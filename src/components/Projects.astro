@@ -26,7 +26,7 @@ const allProjects = [
     description: p.data.description,
     alt: p.data.heroImageAlt || p.data.title,
     tags: p.data.tags,
-    image: undefined, // Use placeholder for now
+    image: p.data.heroImage,
     link: p.id,
     category: p.data.category,
     hasPage: true,

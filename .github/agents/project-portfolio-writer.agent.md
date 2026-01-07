@@ -21,7 +21,25 @@ You write and refine project entries for Peter Chr. Jørgensen's portfolio. Your
 
 ## Understanding the Portfolio Structure
 
-Projects are stored in `src/data/projects.ts` as an array of `Project` objects. Each project needs:
+Projects come from **two mutually exclusive sources**:
+
+### 1. Featured Projects (MDX with dedicated pages)
+
+Location: `src/content/projects/*.mdx`
+
+For projects that deserve a full case study page. These are automatically:
+- Picked up by Astro's content collection
+- Given a dedicated page at `/projects/[slug]`
+- Displayed with an arrow icon on the project card
+- Merged into the projects grid by `Projects.astro`
+
+**Do NOT also add these to `projects.ts`** — that causes duplicates.
+
+### 2. Simple Projects (external links only)
+
+Location: `src/data/projects.ts`
+
+For projects that only need a card linking externally. No dedicated page.
 
 ```typescript
 interface Project {
@@ -40,6 +58,14 @@ interface Project {
 - **web** — Websites, web apps, SaaS, client work
 - **games** — Game development, game jams, interactive experiences
 - **creative** — 3D work, experiments, art projects
+
+### Critical: Choosing the Right Source
+
+| Want this? | Use this source |
+|------------|----------------|
+| Dedicated case study page | MDX in `src/content/projects/` |
+| External link only | Entry in `src/data/projects.ts` |
+| Both (bad idea) | Pick ONE. MDX preferred for featured work. |
 
 ## Peter's Voice
 
@@ -174,21 +200,70 @@ import projectnameImg from "../assets/projects/projectname.png";
 
 ## Adding a New Project
 
-### Step 1: Prepare the Image
+### Decision: MDX or Simple?
 
-Download/create the project image and save to `src/assets/projects/`.
+First, decide which type:
 
-### Step 2: Add the Import
+- **Featured project with case study?** → Create MDX file (see below)
+- **Simple card with external link?** → Add to `projects.ts` (see "Adding a Simple Project")
 
-At the top of `src/data/projects.ts`, add:
+### Adding a Featured Project (MDX)
+
+#### Step 1: Prepare the Image
+
+Save project image to `src/assets/projects/project-name.png`
+
+#### Step 2: Create the MDX File
+
+Create `src/content/projects/project-name.mdx`:
+
+```mdx
+---
+title: "Project Name"
+description: "Concise description. What I built, how, and what's notable."
+category: "web"
+tags: ["Tech1", "Tech2", "Skill"]
+externalUrl: "https://project-url.com"
+heroImage: ../../assets/projects/project-name.png
+heroImageAlt: "Screenshot of Project Name showing main visual"
+ogDescription: "Description for social sharing"
+---
+
+## Overview
+
+Full case study content...
+```
+
+**CRITICAL: heroImage path must be UNQUOTED**
+
+✅ `heroImage: ../../assets/projects/hero.png`  
+❌ `heroImage: "../../assets/projects/hero.png"`
+
+Quoted paths break Astro's `image()` schema silently — the collection appears empty.
+
+#### Step 3: Verify
+
+- [ ] MDX file created in `src/content/projects/`
+- [ ] heroImage path is UNQUOTED
+- [ ] Image exists at the specified path
+- [ ] NOT also added to `projects.ts` (would cause duplicate)
+- [ ] Dev server shows no collection errors
+
+### Adding a Simple Project (projects.ts)
+
+#### Step 1: Prepare the Image
+
+Save to `src/assets/projects/`.
+
+#### Step 2: Add the Import
+
+At the top of `src/data/projects.ts`:
 
 ```typescript
 import newProjectImg from "../assets/projects/newproject.png";
 ```
 
-### Step 3: Add the Project Object
-
-Add to the `projects` array, grouped with similar category projects:
+#### Step 3: Add the Project Object
 
 ```typescript
 {
@@ -202,9 +277,7 @@ Add to the `projects` array, grouped with similar category projects:
 },
 ```
 
-### Step 4: Verify
-
-Check that:
+#### Step 4: Verify
 
 - [ ] Image imports correctly
 - [ ] Description is 2-3 sentences max
@@ -212,6 +285,7 @@ Check that:
 - [ ] Tags are relevant and properly cased
 - [ ] Category is correct
 - [ ] Link works (if provided)
+- [ ] NOT also created as MDX (would cause duplicate)
 
 ## Editing Existing Projects
 

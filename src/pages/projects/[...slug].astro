@@ -621,6 +621,27 @@ const structuredData = {
         }
       }
 
+      // Brick breaker game - full width breakout
+      :global(.brick-breaker) {
+        max-width: 120ch;
+        margin-block: 0;
+
+        @media (min-width: 1600px) {
+          width: calc(100% + 16rem);
+          margin-inline: -8rem;
+        }
+
+        @media (min-width: 1200px) and (max-width: 1599px) {
+          width: calc(100% + 8rem);
+          margin-inline: -4rem;
+        }
+
+        @include respond-to(lg) {
+          width: 100%;
+          margin-inline: 0;
+        }
+      }
+
       :global(img) {
         height: auto;
         display: block;
