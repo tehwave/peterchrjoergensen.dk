@@ -25,13 +25,15 @@ jobs:
           node-version: '24'
           cache: 'npm'
       
-      - name: Cache Astro build artifacts
+      - name: Cache build artifacts
         uses: actions/cache@v4
         with:
-          path: ./node_modules/.astro
-          key: astro-cache-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            ./node_modules/.astro
+            ./node_modules/.vite
+          key: build-cache-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            astro-cache-
+            build-cache-
       
       - name: Install dependencies
         run: npm ci
