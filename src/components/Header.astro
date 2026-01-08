@@ -90,9 +90,16 @@ type Props = Record<string, never>;
     private updateShadow(): void {
       if (!this.header) return;
 
-      // Add shadow if scrolled more than 20px from top
-      const shouldHaveShadow = window.scrollY > 20;
-      this.header.classList.toggle("has-shadow", shouldHaveShadow);
+      // On homepage, only add shadow after scrolling past hero
+      if (this.isHomepage && this.hero) {
+        const heroBottom = this.hero.offsetTop + this.hero.offsetHeight;
+        const shouldHaveShadow = window.scrollY > heroBottom;
+        this.header.classList.toggle("has-shadow", shouldHaveShadow);
+      } else {
+        // On non-homepage pages, add shadow if scrolled more than 20px from top
+        const shouldHaveShadow = window.scrollY > 20;
+        this.header.classList.toggle("has-shadow", shouldHaveShadow);
+      }
     }
 
     private updateActiveLink(): void {
