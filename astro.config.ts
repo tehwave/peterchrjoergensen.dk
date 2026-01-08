@@ -11,6 +11,9 @@ const compressImages = process.env.COMPRESS_IMAGES === "true";
 
 // https://astro.build/config
 export default defineConfig({
+  // Cache directory for image optimization across builds
+  cacheDir: "./cache",
+
   // Production URL for sitemap and canonical URLs
   site: "https://peterchrjoergensen.dk",
 
