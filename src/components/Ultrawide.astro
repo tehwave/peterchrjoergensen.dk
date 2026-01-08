@@ -1,0 +1,53 @@
+---
+/**
+ * Ultrawide Component
+ *
+ * Wrapper that makes content extra wide, breaking out significantly beyond prose width.
+ * Larger breakout than Wide component - use for hero images, full-bleed content, or visual showcases.
+ *
+ * Use for content that needs maximum visual impact and horizontal space.
+ *
+ * @example
+ * ```mdx
+ * import Ultrawide from '../../components/Ultrawide.astro';
+ * import { Picture } from 'astro:assets';
+ * import hero from '../../assets/hero.jpg';
+ *
+ * <Ultrawide>
+ *   <Picture src={hero} formats={["avif", "webp"]} alt="Hero image" />
+ * </Ultrawide>
+ * ```
+ */
+
+type Props = Record<string, never>;
+---
+
+<div class="ultrawide">
+  <slot />
+</div>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .ultrawide {
+    max-width: 120ch;
+    margin-block: $space-3xl;
+
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      width: calc(100% + 16rem);
+      margin-inline: -8rem;
+    }
+
+    @media (min-width: 1600px) {
+      width: calc(100% + 32rem);
+      margin-inline: -16rem;
+    }
+
+    @include respond-to(lg) {
+      width: 100%;
+      margin-inline: 0;
+      margin-block: $space-2xl;
+    }
+  }
+</style>

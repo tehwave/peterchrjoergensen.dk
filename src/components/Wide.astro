@@ -1,0 +1,53 @@
+---
+/**
+ * Wide Component
+ *
+ * Wrapper that makes content wider than the standard prose width.
+ * Expands content from the standard 65ch prose width to a larger breakout.
+ *
+ * Use for images, figures, or any content that benefits from extra horizontal space.
+ *
+ * @example
+ * ```mdx
+ * import Wide from '../../components/Wide.astro';
+ * import Figure from '../../components/Figure.astro';
+ * import photo from '../../assets/photo.jpg';
+ *
+ * <Wide>
+ *   <Figure src={photo} alt="Description" caption="Caption text" />
+ * </Wide>
+ * ```
+ */
+
+type Props = Record<string, never>;
+---
+
+<div class="wide">
+  <slot />
+</div>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .wide {
+    max-width: 120ch;
+    margin-block: $space-3xl;
+
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      width: calc(100% + 8rem);
+      margin-inline: -4rem;
+    }
+
+    @media (min-width: 1600px) {
+      width: calc(100% + 16rem);
+      margin-inline: -8rem;
+    }
+
+    @include respond-to(lg) {
+      width: 100%;
+      margin-inline: 0;
+      margin-block: $space-2xl;
+    }
+  }
+</style>

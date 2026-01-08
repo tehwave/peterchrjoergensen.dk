@@ -9,6 +9,8 @@ heroImageAlt: "Screenshot of GitHub Brick Breaker game showing contribution grap
 ogDescription: "I turned my daily GitHub contributions into a playable brick breaker game with motion trails and particle effects. Built in one evening with AI."
 ---
 
+import Wide from "../../components/Wide.astro";
+import Ultrawide from "../../components/Ultrawide.astro";
 import Figure from "../../components/Figure.astro";
 import BrickBreaker from "../../components/BrickBreaker.astro";
 import sandFail from "../../assets/projects/brick-breaker-sand-fail.png";
@@ -31,7 +33,10 @@ Each day with contributions becomes a brick. The color and strength match GitHub
 
 The game fetches contribution data from both my GitHub accounts (`tehwave` and `peterchrjoergensen`) and merges them. If I made 3 contributions on one account and 5 on the other, that day becomes a single brick worth 8 contributions — harder to break, worth more points. The aggregation happens at build time, so the game loads instantly without API calls.
 
-<Figure src={firstPrototype} alt="Early prototype of the brick breaker game showing basic green bricks and paddle" caption="The first working prototype — basic collisions working, no effects yet." />
+<Wide>
+  <Figure src={firstPrototype} alt="Early prototype of the brick breaker game showing basic green bricks and paddle" caption="The first working prototype — basic collisions working, no effects yet." />
+</Wide>
+
 
 ## The technical stack
 
@@ -174,11 +179,14 @@ if (sandGrid[y + 1][x] === null) {
 
 Processing bottom-to-top prevents particles from moving multiple times per frame. The grid approach is O(cells) instead of O(n²) for collision checks — hundreds of particles with zero performance hit.
 
-<Figure
-  src={sandFail}
-  alt="Screenshot showing broken sand physics with particles growing upward like grass instead of falling"
-  caption="Before I figured out cellular automaton — particles were growing upward like grass instead of falling. The perils of vibe coding."
-/>
+<Wide>
+  <Figure
+    src={sandFail}
+    alt="Screenshot showing broken sand physics with particles growing upward like grass instead of falling"
+    caption="Before I figured out cellular automaton — particles were growing upward like grass instead of falling. The perils of vibe coding."
+  />
+</Wide>
+
 
 For visual smoothness, neighboring particles blend colors (70% self, 30% neighbors). This creates soft gradients instead of harsh pixel edges.
 
@@ -295,4 +303,6 @@ If you spot something broken, have ideas for improvements, or just want to see h
 
 Try to clear all your bricks without losing three lives.
 
-<BrickBreaker heading="" subtitle="" />
+<Ultrawide>
+  <BrickBreaker heading="" subtitle="" />
+</Ultrawide>

@@ -598,51 +598,23 @@ const structuredData = {
         color: $color-text-secondary;
       }
 
-      // Images and figures - wider than text content
+      // Images and figures
       :global(img),
       :global(figure) {
-        max-width: 120ch;
         margin-block: $space-3xl;
 
-        @media (min-width: 1600px) {
-          width: calc(100% + 16rem);
-          margin-inline: -8rem;
-        }
-
-        @media (min-width: 1200px) and (max-width: 1599px) {
-          width: calc(100% + 8rem);
-          margin-inline: -4rem;
-        }
-
         @include respond-to(lg) {
-          width: 100%;
-          margin-inline: 0;
           margin-block: $space-2xl;
         }
       }
 
-      // Brick breaker game - full width breakout
+      // Brick breaker game - use Ultrawide component instead
       :global(.brick-breaker) {
-        max-width: 120ch;
         margin-block: 0;
-
-        @media (min-width: 1600px) {
-          width: calc(100% + 16rem);
-          margin-inline: -8rem;
-        }
-
-        @media (min-width: 1200px) and (max-width: 1599px) {
-          width: calc(100% + 8rem);
-          margin-inline: -4rem;
-        }
-
-        @include respond-to(lg) {
-          width: 100%;
-          margin-inline: 0;
-        }
       }
 
       :global(img) {
+        width: 100%;
         height: auto;
         display: block;
         border-radius: 24px;
