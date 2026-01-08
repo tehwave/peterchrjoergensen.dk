@@ -190,6 +190,20 @@ Processing bottom-to-top prevents particles from moving multiple times per frame
 
 For visual smoothness, neighboring particles blend colors (70% self, 30% neighbors). This creates soft gradients instead of harsh pixel edges.
 
+### Extra visual particles (sparkles)
+
+On top of the sand, I added small visual-only particles that fade out and never become part of the grid. They spawn on brick hits, fall with gravity, and disappear quickly — just enough sparkle to sell impact without clutter. They’re tiny (2px radius) with an alpha fade, so you feel the hit without losing clarity in the playfield.
+
+## Scoring and progression
+
+### High score tracking
+
+I track the best score locally and update it on both win and loss. It’s just `localStorage` with a single key (`brick-breaker-high-score`), loaded at startup and written when you beat your previous best. The UI updates via `aria-live` so screen readers announce changes, and the overlay calls out “New High Score!” when you earn it.
+
+### Power‑up: today’s brick
+
+GitHub shows today’s square — I make it an orange accent (one hit) that triggers a short power‑up when you break it. For 10 seconds scores are doubled (×2), and the canvas gets a subtle animated chromatic aberration border — red/green/blue strokes offset with sine waves so it feels alive without being noisy.
+
 ## Responsive design decisions
 
 The game adapts to screen size. Canvas width is constrained to 320-1000px. Brick size scales proportionally — they're always square, like GitHub's graph.
