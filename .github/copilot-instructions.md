@@ -397,6 +397,6 @@ Additional tone guardrails:
 
 Before committing, always:
 
-1. Run `npm run build` to ensure no build errors
+1. Run `npm run check` to validate TypeScript and catch errors
 2. Run `npx prettier --check .` for formatting
 3. For normal testing, use the running `npm run dev` server (no need to run `npm run preview`)
