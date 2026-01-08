@@ -6,6 +6,10 @@ on:
     - cron: '0 16 * * *'
   workflow_dispatch: # Allow manual trigger
 
+concurrency:
+  group: cloudflare-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
