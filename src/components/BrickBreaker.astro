@@ -214,7 +214,6 @@ const finalSubtitle =
 </div>
 
 <script>
-  // @ts-nocheck
   // ============================================================================
   // BRICK BREAKER GAME ENGINE
   // ============================================================================
@@ -224,7 +223,6 @@ const finalSubtitle =
   if (!gameContainer) throw new Error("Game container not found");
 
   const bricksData = JSON.parse(gameContainer.dataset.bricks || "[]");
-  const profileNames = JSON.parse(gameContainer.dataset.profiles || "[]");
 
   // ============================================================================
   // TYPE DEFINITIONS
@@ -237,9 +235,76 @@ const finalSubtitle =
     PAUSED: "paused",
     WON: "won",
     LOST: "lost",
-  };
+  } as const;
 
-  /** @typedef {'idle' | 'playing' | 'paused' | 'won' | 'lost'} GameStateType */
+  type GameStateType = 'idle' | 'playing' | 'paused' | 'won' | 'lost';
+
+  // ============================================================================
+  // TYPESCRIPT INTERFACES
+  // ============================================================================
+
+  interface Paddle {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    targetX: number;
+    velocityX: number;
+    wobble: number;
+    wobbleVelocity: number;
+    skew: number;
+  }
+
+  interface Ball {
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    radius: number;
+  }
+
+  interface Brick {
+    weekIndex: number;
+    dayIndex: number;
+    color: string;
+    hits: number;
+    currentHits: number;
+    contributionCount: number;
+    date: string;
+    username: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    active: boolean;
+  }
+
+  interface BallTrailPoint {
+    x: number;
+    y: number;
+  }
+
+  interface FireParticle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    size: number;
+  }
+
+  interface SandCell {
+    color: string;
+    vx: number;
+    vy: number;
+    age: number;
+  }
+
+  interface MonthLabel {
+    month: string;
+    startWeek: number;
+    endWeek: number;
+  }
 
   // ============================================================================
   // ORIENTATION & VIEWPORT STATE
@@ -262,78 +327,8 @@ const finalSubtitle =
    * - Resume when rotated to landscape
    */
 
-  let requiresRotation = false;
-  let rotateMessage = null;
-
-  /**
-   * @typedef {Object} Paddle
-   * @property {number} x - X position
-   * @property {number} y - Y position
-   * @property {number} width - Paddle width
-   * @property {number} height - Paddle height
-   * @property {number} targetX - Target X position for smooth movement
-   * @property {number} velocityX - Current velocity
-   * @property {number} wobble - Wobble offset for visual effect
-   * @property {number} wobbleVelocity - Wobble velocity
-   * @property {number} skew - Skew amount for visual effect
-   */
-
-  /**
-   * @typedef {Object} Ball
-   * @property {number} x - X position
-   * @property {number} y - Y position
-   * @property {number} dx - X velocity
-   * @property {number} dy - Y velocity
-   * @property {number} radius - Ball radius
-   */
-
-  /**
-   * @typedef {Object} Brick
-   * @property {number} weekIndex - Week in the year (0-52)
-   * @property {number} dayIndex - Day of week (0=Sunday, 6=Saturday)
-   * @property {string} color - Brick color (GitHub contribution color)
-   * @property {number} hits - Total hits required to break
-   * @property {number} currentHits - Remaining hits
-   * @property {number} contributionCount - GitHub contributions count
-   * @property {string} date - ISO date string (YYYY-MM-DD)
-   * @property {string} username - GitHub username(s)
-   * @property {number} x - X position on canvas
-   * @property {number} y - Y position on canvas
-   * @property {number} width - Brick width
-   * @property {number} height - Brick height
-   * @property {boolean} active - Whether brick is still active
-   */
-
-  /**
-   * @typedef {Object} BallTrailPoint
-   * @property {number} x - X position
-   * @property {number} y - Y position
-   */
-
-  /**
-   * @typedef {Object} FireParticle
-   * @property {number} x - X position
-   * @property {number} y - Y position
-   * @property {number} vx - X velocity
-   * @property {number} vy - Y velocity
-   * @property {number} life - Remaining life (0-1)
-   * @property {number} size - Particle size
-   */
-
-  /**
-   * @typedef {Object} SandCell
-   * @property {string} color - Cell color
-   * @property {number} vx - X velocity
-   * @property {number} vy - Y velocity
-   * @property {number} age - Cell age in frames
-   */
-
-  /**
-   * @typedef {Object} MonthLabel
-   * @property {string} month - Month name
-   * @property {number} startWeek - Starting week index
-   * @property {number} endWeek - Ending week index
-   */
+  let requiresRotation: boolean = false;
+  let rotateMessage: HTMLElement | null = null;
 
   // ============================================================================
   // CONFIGURATION
@@ -443,23 +438,17 @@ const finalSubtitle =
   // GAME STATE
   // ============================================================================
 
-  /** @type {HTMLCanvasElement | null} */
-  let canvas = null;
-  /** @type {CanvasRenderingContext2D | null} */
-  let ctx = null;
-  /** @type {GameStateType} */
-  let gameState = GameState.IDLE;
-  let score = 0;
-  let lives = CONFIG.lives;
-  /** @type {number | null} */
-  let animationFrameId = null;
-  /** @type {number | null} */
-  let countdownTimer = null;
-  let countdownValue = 0;
-  let ballAttached = true; // Ball attached to paddle during countdown
+  let canvas: HTMLCanvasElement | null = null;
+  let ctx: CanvasRenderingContext2D | null = null;
+  let gameState: GameStateType = GameState.IDLE;
+  let score: number = 0;
+  let lives: number = CONFIG.lives;
+  let animationFrameId: number | null = null;
+  let countdownTimer: NodeJS.Timeout | null = null;
+  let countdownValue: number = 0;
+  let ballAttached: boolean = true; // Ball attached to paddle during countdown
 
-  /** @type {Paddle} */
-  let paddle = {
+  let paddle: Paddle = {
     x: 0,
     y: 0,
     width: CONFIG.paddleWidth,
@@ -471,69 +460,50 @@ const finalSubtitle =
     skew: 0, // Smoothed skew for rendering
   };
 
-  /** @type {Ball} */
-  let ball = { x: 0, y: 0, dx: 0, dy: 0, radius: CONFIG.ballRadius };
+  let ball: Ball = { x: 0, y: 0, dx: 0, dy: 0, radius: CONFIG.ballRadius };
 
-  /** @type {Brick[]} */
-  let bricks = [];
+  let bricks: Brick[] = [];
 
-  /** @type {BallTrailPoint[]} */
-  let ballTrail = []; // Track ball positions for motion trail
+  let ballTrail: BallTrailPoint[] = []; // Track ball positions for motion trail
 
-  /** @type {FireParticle[]} */
-  let fireParticles = []; // Fire particles for paddle when 1 life left
+  let fireParticles: FireParticle[] = []; // Fire particles for paddle when 1 life left
 
-  /** @type {(SandCell | null)[][]} */
-  let sandGrid = []; // 2D grid for cellular automaton sand
+  let sandGrid: (SandCell | null)[][] = []; // 2D grid for cellular automaton sand
 
-  let cellSize = 4; // Size of each grid cell
+  let cellSize: number = 4; // Size of each grid cell
 
   // Input state
-  /** @type {number | null} */
-  let mouseX = null;
+  let mouseX: number | null = null;
 
   // Brick dimensions (calculated based on canvas size)
-  let brickWidth = 0;
-  let brickHeight = 0;
-  let brickOffsetX = 0;
-  let brickOffsetY = 0;
-  let numWeeks = 0;
-  let numDays = 7;
-  /** @type {MonthLabel[]} */
-  let monthLabels = []; // {month: string, startWeek: number, endWeek: number}
+  let brickWidth: number = 0;
+  let brickHeight: number = 0;
+  let brickOffsetX: number = 0;
+  let brickOffsetY: number = 0;
+  let numWeeks: number = 0;
+  let numDays: number = 7;
+  let monthLabels: MonthLabel[] = []; // {month: string, startWeek: number, endWeek: number}
 
   // DOM elements
-  /** @type {HTMLElement | null} */
-  let overlay = null;
-  /** @type {HTMLElement | null} */
-  let overlayTitle = null;
-  /** @type {HTMLElement | null} */
-  let overlayText = null;
-  /** @type {HTMLButtonElement | null} */
-  let circlePlayBtn = null;
-  /** @type {HTMLButtonElement | null} */
-  let startBtn = null;
-  /** @type {HTMLButtonElement | null} */
-  let pauseBtn = null;
-  /** @type {HTMLButtonElement | null} */
-  let resetBtn = null;
-  /** @type {HTMLElement | null} */
-  let scoreDisplay = null;
-  /** @type {HTMLElement | null} */
-  let livesDisplay = null;
-  /** @type {HTMLElement | null} */
-  let bricksDisplay = null;
+  let overlay: HTMLElement | null = null;
+  let overlayTitle: HTMLElement | null = null;
+  let overlayText: HTMLElement | null = null;
+  let circlePlayBtn: HTMLButtonElement | null = null;
+  let startBtn: HTMLButtonElement | null = null;
+  let pauseBtn: HTMLButtonElement | null = null;
+  let resetBtn: HTMLButtonElement | null = null;
+  let scoreDisplay: HTMLElement | null = null;
+  let livesDisplay: HTMLElement | null = null;
+  let bricksDisplay: HTMLElement | null = null;
 
   // Store debounced handler for cleanup
-  /** @type {(() => void) | null} */
-  let handleResize = null;
+  let handleResize: ((this: Window, ev: UIEvent) => void) | null = null;
 
   // Intersection observer for viewport visibility
-  /** @type {IntersectionObserver | null} */
-  let intersectionObserver = null;
+  let intersectionObserver: IntersectionObserver | null = null;
 
   // Initialization guard
-  let isInitialized = false;
+  let isInitialized: boolean = false;
 
   /**
    * GitHub Contribution Data Structure
@@ -557,49 +527,49 @@ const finalSubtitle =
   // UTILITY FUNCTIONS
   // ============================================================================
 
-  function clamp(value, min, max) {
+  function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
   }
 
-  function getBallSpeed() {
+  function getBallSpeed(): number {
     return Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
   }
 
-  function isDirectionChange(prevVelocity, newVelocity) {
+  function isDirectionChange(prevVelocity: number, newVelocity: number): boolean {
     return Math.sign(newVelocity) !== Math.sign(prevVelocity) && Math.abs(newVelocity) > 1;
   }
 
-  function isValidGridPosition(gridX, gridY) {
+  function isValidGridPosition(gridX: number, gridY: number): boolean {
     return gridY >= 0 && gridY < sandGrid.length && gridX >= 0 && gridX < sandGrid[0].length;
   }
 
-  function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-      clearTimeout(timeout);
+  function debounce(func: Function, wait: number): (...args: any[]) => void {
+    let timeout: NodeJS.Timeout | null = null;
+    return function (this: any, ...args: any[]) {
+      if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
     };
   }
 
-  function showOverlay(title, text, buttonText) {
-    overlayTitle.textContent = title;
-    overlayText.textContent = text;
-    startBtn.textContent = buttonText;
-    overlay.classList.add("is-visible");
+  function showOverlay(title: string, text: string, buttonText: string): void {
+    if (overlayTitle) overlayTitle.textContent = title;
+    if (overlayText) overlayText.textContent = text;
+    if (startBtn) startBtn.textContent = buttonText;
+    if (overlay) overlay.classList.add("is-visible");
     if (circlePlayBtn) circlePlayBtn.style.display = "none";
   }
 
-  function hideOverlay() {
-    overlay.classList.remove("is-visible");
+  function hideOverlay(): void {
+    if (overlay) overlay.classList.remove("is-visible");
     if (circlePlayBtn) {
       circlePlayBtn.style.display = gameState === GameState.IDLE ? "flex" : "none";
     }
   }
 
-  function updateUI() {
-    scoreDisplay.textContent = score.toLocaleString();
-    livesDisplay.textContent = "❤️".repeat(lives);
-    bricksDisplay.textContent = bricks.filter((b) => b.active).length;
+  function updateUI(): void {
+    if (scoreDisplay) scoreDisplay.textContent = score.toLocaleString();
+    if (livesDisplay) livesDisplay.textContent = "❤️".repeat(lives);
+    if (bricksDisplay) bricksDisplay.textContent = bricks.filter((b) => b.active).length.toString();
   }
 
   // ============================================================================
@@ -610,13 +580,13 @@ const finalSubtitle =
    * Initialize the game
    * Sets up canvas, DOM references, and event listeners
    */
-  function initGame() {
+  function initGame(): void {
     // Prevent duplicate initialization
     if (isInitialized) {
       cleanup();
     }
 
-    canvas = document.getElementById("game-canvas");
+    canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
     if (!canvas) return; // Canvas not found
 
     ctx = canvas.getContext("2d");
@@ -625,10 +595,10 @@ const finalSubtitle =
     overlay = document.getElementById("game-overlay");
     overlayTitle = document.getElementById("overlay-title");
     overlayText = document.getElementById("overlay-text");
-    circlePlayBtn = document.getElementById("game-circle-play-btn");
-    startBtn = document.getElementById("game-start-btn");
-    pauseBtn = document.getElementById("game-pause-btn");
-    resetBtn = document.getElementById("game-reset-btn");
+    circlePlayBtn = document.getElementById("game-circle-play-btn") as HTMLButtonElement;
+    startBtn = document.getElementById("game-start-btn") as HTMLButtonElement;
+    pauseBtn = document.getElementById("game-pause-btn") as HTMLButtonElement;
+    resetBtn = document.getElementById("game-reset-btn") as HTMLButtonElement;
     scoreDisplay = document.getElementById("score-display");
     livesDisplay = document.getElementById("lives-display");
     bricksDisplay = document.getElementById("bricks-display");
@@ -680,8 +650,9 @@ const finalSubtitle =
    * to match GitHub's graph layout. This means the actual game grid is smaller
    * than the canvas, but the labels provide context and orientation.
    */
-  function resizeCanvas() {
-    const container = canvas.parentElement;
+  function resizeCanvas(): void {
+    const container = canvas?.parentElement;
+    if (!container) return;
     const containerWidth = container.clientWidth;
 
     // Constrain canvas width for optimal gameplay across devices
@@ -690,7 +661,7 @@ const finalSubtitle =
     const width = Math.min(Math.max(containerWidth, CONFIG.canvasMinWidth), CONFIG.canvasMaxWidth);
 
     // Find the maximum week index to determine horizontal span
-    numWeeks = Math.max(...bricksData.map((b) => b.weekIndex)) + 1;
+    numWeeks = Math.max(...bricksData.map((b: Brick) => b.weekIndex)) + 1;
 
     // Calculate brick width: divide available horizontal space by number of weeks
     // Subtract: label space (50px) + padding (40px total) + brick gaps
@@ -716,8 +687,8 @@ const finalSubtitle =
     const height = CONFIG.labelOffsetY + CONFIG.canvasPaddingTop + gridHeight + paddleSpace;
 
     // Set canvas size
-    canvas.width = width;
-    canvas.height = height;
+    canvas!.width = width;
+    canvas!.height = height;
 
     // Initialize sand grid for cellular automaton
     const sandGridWidth = Math.floor(width / cellSize);
@@ -757,8 +728,8 @@ const finalSubtitle =
    * Create brick objects from contribution data
    * @returns {void}
    */
-  function createBricks() {
-    bricks = bricksData.map((data) => ({
+  function createBricks(): void {
+    bricks = bricksData.map((data: any) => ({
       ...data,
       x: 0,
       y: 0,
@@ -775,11 +746,11 @@ const finalSubtitle =
    * Calculate month labels from brick dates
    * @returns {void}
    */
-  function calculateMonthLabels() {
+  function calculateMonthLabels(): void {
     // Group bricks by month
     const monthMap = new Map();
 
-    bricksData.forEach((brick) => {
+    bricksData.forEach((brick: any) => {
       const date = new Date(brick.date);
       const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
       const monthName = date.toLocaleString("en", { month: "short" });
@@ -797,14 +768,14 @@ const finalSubtitle =
     });
 
     // Convert to array and sort by week
-    monthLabels = Array.from(monthMap.values()).sort((a, b) => a.startWeek - b.startWeek);
+    monthLabels = Array.from(monthMap.values()).sort((a: MonthLabel, b: MonthLabel) => a.startWeek - b.startWeek);
   }
 
   /**
    * Update brick positions based on current canvas dimensions
    * @returns {void}
    */
-  function updateBrickPositions() {
+  function updateBrickPositions(): void {
     bricks.forEach((brick) => {
       brick.width = brickWidth;
       brick.height = brickHeight;
@@ -817,17 +788,19 @@ const finalSubtitle =
    * Reset paddle to center position
    * @returns {void}
    */
-  function resetPaddle() {
-    paddle.x = (canvas.width - paddle.width) / 2;
+  function resetPaddle(): void {
+    if (canvas) {
+      paddle.x = (canvas.width - paddle.width) / 2;
+    }
   }
 
   /**
    * Reset ball to starting position above paddle
    * @returns {void}
    */
-  function resetBall() {
+  function resetBall(): void {
     ballAttached = true;
-    ball.x = canvas.width / 2;
+    ball.x = canvas ? canvas.width / 2 : 0;
     ball.y = paddle.y - ball.radius - 10;
     const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Slightly random upward angle
     ball.dx = Math.cos(angle) * CONFIG.ballSpeed;
@@ -838,7 +811,7 @@ const finalSubtitle =
    * Reset game to initial state
    * @returns {void}
    */
-  function resetGame() {
+  function resetGame(): void {
     score = 0;
     lives = CONFIG.lives;
     gameState = GameState.IDLE;
@@ -858,7 +831,7 @@ const finalSubtitle =
     hideOverlay();
     if (circlePlayBtn) circlePlayBtn.style.display = "flex";
     showNavbar();
-    pauseBtn.disabled = true;
+    pauseBtn!.disabled = true;
     if (resetBtn) resetBtn.disabled = true;
 
     if (animationFrameId) {
@@ -877,20 +850,22 @@ const finalSubtitle =
    * Set up all event listeners for game controls
    * @returns {void}
    */
-  function setupEventListeners() {
+  function setupEventListeners(): void {
     // Mouse/Touch
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas!.addEventListener("mousemove", handleMouseMove);
+    canvas!.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas!.addEventListener("touchstart", handleTouchStart, { passive: false });
 
     // Buttons
-    circlePlayBtn.addEventListener("click", startGame);
-    startBtn.addEventListener("click", startGame);
-    pauseBtn.addEventListener("click", togglePause);
-    resetBtn.addEventListener("click", resetGame);
+    circlePlayBtn!.addEventListener("click", startGame);
+    startBtn!.addEventListener("click", startGame);
+    pauseBtn!.addEventListener("click", togglePause);
+    resetBtn!.addEventListener("click", resetGame);
 
     // Resize
-    window.addEventListener("resize", handleResize);
+    if (handleResize) {
+      window.addEventListener("resize", handleResize);
+    }
 
     // Visibility change (pause when tab hidden)
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -900,10 +875,10 @@ const finalSubtitle =
 
     // Set up intersection observer for viewport visibility
     if ("IntersectionObserver" in window) {
-      intersectionObserver = new IntersectionObserver(handleIntersectionChange, {
+      intersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => handleIntersectionChange(entries), {
         threshold: 0.1, // Trigger when 10% of canvas is visible/hidden
       });
-      intersectionObserver.observe(canvas);
+      intersectionObserver.observe(canvas!);
     }
   }
 
@@ -912,10 +887,10 @@ const finalSubtitle =
    * @param {MouseEvent} e - Mouse event
    * @returns {void}
    */
-  function handleMouseMove(e) {
-    const rect = canvas.getBoundingClientRect();
+  function handleMouseMove(e: MouseEvent): void {
+    const rect = canvas!.getBoundingClientRect();
     // Account for canvas scaling (CSS vs internal resolution)
-    const scaleX = canvas.width / rect.width;
+    const scaleX = canvas!.width / rect.width;
     mouseX = (e.clientX - rect.left) * scaleX;
   }
 
@@ -924,12 +899,12 @@ const finalSubtitle =
    * @param {TouchEvent} e - Touch event
    * @returns {void}
    */
-  function handleTouchMove(e) {
+  function handleTouchMove(e: TouchEvent): void {
     e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvas!.getBoundingClientRect();
     const touch = e.touches[0];
     // Account for canvas scaling (CSS vs internal resolution)
-    const scaleX = canvas.width / rect.width;
+    const scaleX = canvas!.width / rect.width;
     mouseX = (touch.clientX - rect.left) * scaleX;
   }
 
@@ -938,7 +913,7 @@ const finalSubtitle =
    * @param {TouchEvent} _e - Touch event
    * @returns {void}
    */
-  function handleTouchStart(_e) {
+  function handleTouchStart(_e: TouchEvent): void {
     if (gameState === GameState.IDLE) {
       startGame();
     }
@@ -948,7 +923,7 @@ const finalSubtitle =
    * Debounced resize handler
    * @returns {void}
    */
-  function resizeCanvasHandler() {
+  function resizeCanvasHandler(): void {
     resizeCanvas();
     if (gameState !== GameState.PLAYING) {
       render();
@@ -961,7 +936,7 @@ const finalSubtitle =
    * Handle page visibility change (auto-pause)
    * @returns {void}
    */
-  function handleVisibilityChange() {
+  function handleVisibilityChange(): void {
     if (document.hidden && gameState === GameState.PLAYING) {
       pauseGame();
     }
@@ -972,7 +947,7 @@ const finalSubtitle =
    * @param {IntersectionObserverEntry[]} entries
    * @returns {void}
    */
-  function handleIntersectionChange(entries) {
+  function handleIntersectionChange(entries: IntersectionObserverEntry[]): void {
     entries.forEach((entry) => {
       // Pause if game is playing or counting down and element is out of view
       if (!entry.isIntersecting && (gameState === GameState.PLAYING || (ballAttached && countdownTimer))) {
@@ -986,19 +961,19 @@ const finalSubtitle =
   // ============================================================================
 
   // Store orientation query for cleanup
-  let orientationQuery = null;
+  let orientationQuery: MediaQueryList | null = null;
 
   /**
    * Check if device is small enough to require landscape mode
    */
-  function isSmallDevice() {
+  function isSmallDevice(): boolean {
     return window.innerHeight < 500 || window.innerWidth < 640;
   }
 
   /**
    * Check if device is in portrait orientation
    */
-  function isPortrait() {
+  function isPortrait(): boolean {
     // Use matchMedia as primary detection method (best browser support)
     const portraitQuery = window.matchMedia("(orientation: portrait)");
     if (portraitQuery.matches) return true;
@@ -1010,14 +985,14 @@ const finalSubtitle =
   /**
    * Check if rotation message should be displayed
    */
-  function shouldShowRotateMessage() {
+  function shouldShowRotateMessage(): boolean {
     return isSmallDevice() && isPortrait();
   }
 
   /**
    * Update rotation message visibility and game state
    */
-  function updateRotationState() {
+  function updateRotationState(): void {
     if (!rotateMessage) {
       rotateMessage = document.getElementById("rotate-message");
       if (!rotateMessage) return; // Element not found
@@ -1043,7 +1018,7 @@ const finalSubtitle =
   /**
    * Handle orientation change events
    */
-  function handleOrientationChange() {
+  function handleOrientationChange(): void {
     // Small delay to ensure dimensions are updated
     setTimeout(() => {
       updateRotationState();
@@ -1053,7 +1028,7 @@ const finalSubtitle =
   /**
    * Setup orientation detection listeners
    */
-  function setupOrientationDetection() {
+  function setupOrientationDetection(): void {
     rotateMessage = document.getElementById("rotate-message");
     if (!rotateMessage) {
       console.warn("Rotate message element not found");
@@ -1071,7 +1046,7 @@ const finalSubtitle =
   /**
    * Cleanup orientation detection listeners
    */
-  function cleanupOrientationDetection() {
+  function cleanupOrientationDetection(): void {
     if (orientationQuery) {
       orientationQuery.removeEventListener("change", handleOrientationChange);
       orientationQuery = null;
@@ -1085,7 +1060,7 @@ const finalSubtitle =
   /**
    * Hide navbar when game starts playing
    */
-  function hideNavbar() {
+  function hideNavbar(): void {
     const header = document.querySelector(".header");
     if (header) {
       header.classList.add("header--hidden");
@@ -1095,7 +1070,7 @@ const finalSubtitle =
   /**
    * Show navbar when game ends or is reset
    */
-  function showNavbar() {
+  function showNavbar(): void {
     const header = document.querySelector(".header");
     if (header) {
       // Only animate if navbar is currently hidden
@@ -1115,7 +1090,7 @@ const finalSubtitle =
    * Clean up event listeners and resources
    * @returns {void}
    */
-  function cleanup() {
+  function cleanup(): void {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = null;
@@ -1143,7 +1118,9 @@ const finalSubtitle =
     if (resetBtn) resetBtn.removeEventListener("click", resetGame);
 
     // Remove window listeners
-    window.removeEventListener("resize", handleResize);
+    if (handleResize) {
+      window.removeEventListener("resize", handleResize);
+    }
 
     // Clean up orientation detection
     cleanupOrientationDetection();
@@ -1163,7 +1140,7 @@ const finalSubtitle =
    * Start countdown before releasing ball
    * @returns {void}
    */
-  function startCountdown() {
+  function startCountdown(): void {
     countdownValue = CONFIG.countdownSeconds;
     ballAttached = true;
 
@@ -1187,7 +1164,7 @@ const finalSubtitle =
    * Start the game
    * @returns {void}
    */
-  function startGame() {
+  function startGame(): void {
     // If game is over, reset first
     if (gameState === GameState.WON || gameState === GameState.LOST) {
       resetGame();
@@ -1207,9 +1184,9 @@ const finalSubtitle =
     hideOverlay();
     if (circlePlayBtn) circlePlayBtn.style.display = "none";
     hideNavbar();
-    pauseBtn.disabled = false;
-    resetBtn.disabled = false;
-    pauseBtn.textContent = "Pause";
+    pauseBtn!.disabled = false;
+    resetBtn!.disabled = false;
+    pauseBtn!.textContent = "Pause";
 
     // Start countdown before releasing ball
     startCountdown();
@@ -1223,12 +1200,12 @@ const finalSubtitle =
    * Pause the game
    * @returns {void}
    */
-  function pauseGame() {
+  function pauseGame(): void {
     if (gameState !== GameState.PLAYING) return;
 
     gameState = GameState.PAUSED;
     showNavbar();
-    pauseBtn.textContent = "Resume";
+    pauseBtn!.textContent = "Resume";
     showOverlay("Paused", "Your princess is in another castle... but this game is waiting!", "Resume");
   }
 
@@ -1236,13 +1213,13 @@ const finalSubtitle =
    * Resume the game from pause
    * @returns {void}
    */
-  function resumeGame() {
+  function resumeGame(): void {
     if (gameState !== GameState.PAUSED) return;
 
     gameState = GameState.PLAYING;
     hideOverlay();
     hideNavbar();
-    pauseBtn.textContent = "Pause";
+    pauseBtn!.textContent = "Pause";
 
     if (!animationFrameId) {
       gameLoop();
@@ -1253,7 +1230,7 @@ const finalSubtitle =
    * Toggle between pause and play
    * @returns {void}
    */
-  function togglePause() {
+  function togglePause(): void {
     if (gameState === GameState.PLAYING) {
       pauseGame();
     } else if (gameState === GameState.PAUSED) {
@@ -1266,11 +1243,11 @@ const finalSubtitle =
    * @param {boolean} won - Whether the player won
    * @returns {void}
    */
-  function gameOver(won) {
+  function gameOver(won: boolean): void {
     gameState = won ? GameState.WON : GameState.LOST;
     showNavbar();
-    pauseBtn.disabled = true;
-    resetBtn.disabled = false;
+    pauseBtn!.disabled = true;
+    resetBtn!.disabled = false;
 
     if (won) {
       showOverlay("🎉 You Won!", `Cleared all bricks with ${score.toLocaleString()} points!`, "Play Again");
@@ -1283,7 +1260,7 @@ const finalSubtitle =
   // GAME LOOP
   // ============================================================================
 
-  function gameLoop() {
+  function gameLoop(): void {
     if (gameState !== GameState.PLAYING) {
       animationFrameId = null;
       return;
@@ -1295,7 +1272,7 @@ const finalSubtitle =
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function update() {
+  function update(): void {
     updatePaddle();
     updateBall();
     updateParticles();
@@ -1322,11 +1299,11 @@ const finalSubtitle =
    * SKEW EFFECT (Squash & Stretch): Animation principle from traditional animation.
    * Fast-moving objects appear elongated in direction of motion.
    */
-  function updatePaddle() {
+  function updatePaddle(): void {
     const prevVelocity = paddle.velocityX;
     const targetX = calculatePaddleTargetX();
 
-    paddle.targetX = clamp(targetX, 0, canvas.width - paddle.width);
+    paddle.targetX = clamp(targetX, 0, canvas!.width - paddle.width);
 
     const newVelocity = (paddle.targetX - paddle.x) * CONFIG.paddleSmoothingFactor;
 
@@ -1335,12 +1312,12 @@ const finalSubtitle =
     }
 
     paddle.velocityX = newVelocity;
-    paddle.x = clamp(paddle.x + paddle.velocityX, 0, canvas.width - paddle.width);
+    paddle.x = clamp(paddle.x + paddle.velocityX, 0, canvas!.width - paddle.width);
 
     updatePaddleWobbleAndSkew();
   }
 
-  function calculatePaddleTargetX() {
+  function calculatePaddleTargetX(): number {
     let targetX = paddle.targetX;
 
     if (mouseX !== null) targetX = mouseX - paddle.width / 2;
@@ -1348,7 +1325,7 @@ const finalSubtitle =
     return targetX;
   }
 
-  function updatePaddleWobbleAndSkew() {
+  function updatePaddleWobbleAndSkew(): void {
     paddle.wobbleVelocity += -paddle.wobble * CONFIG.wobbleSpringForce;
     paddle.wobbleVelocity *= CONFIG.wobbleDamping;
     paddle.wobble += paddle.wobbleVelocity;
@@ -1361,7 +1338,7 @@ const finalSubtitle =
   // BALL PHYSICS
   // ============================================================================
 
-  function updateBall() {
+  function updateBall(): void {
     // Keep ball attached to paddle during countdown
     if (ballAttached) {
       ball.x = paddle.x + paddle.width / 2;
@@ -1388,7 +1365,7 @@ const finalSubtitle =
    * - Faster ball = longer trail = stronger visual emphasis on speed
    * - Slower ball = shorter trail = less visual clutter
    */
-  function updateBallTrail() {
+  function updateBallTrail(): void {
     ballTrail.push({ x: ball.x, y: ball.y });
     const speed = getBallSpeed();
     const maxTrailLength = Math.min(Math.floor(speed), CONFIG.trailMaxLength);
@@ -1398,10 +1375,10 @@ const finalSubtitle =
     }
   }
 
-  function handleWallCollisions() {
-    if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+  function handleWallCollisions(): void {
+    if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= (canvas?.width ?? 0)) {
       ball.dx = -ball.dx;
-      ball.x = clamp(ball.x, ball.radius, canvas.width - ball.radius);
+      ball.x = clamp(ball.x, ball.radius, (canvas?.width ?? ball.radius) - ball.radius);
     }
 
     if (ball.y - ball.radius <= 0) {
@@ -1410,8 +1387,8 @@ const finalSubtitle =
     }
   }
 
-  function handleBallFall() {
-    if (ball.y > canvas.height) {
+  function handleBallFall(): void {
+    if (ball.y > (canvas?.height ?? 0)) {
       lives--;
       updateUI();
 
@@ -1451,7 +1428,7 @@ const finalSubtitle =
    * - vx: -0.15 to +0.15 (slight horizontal spread)
    * WHY: Upward bias mimics real fire physics, horizontal adds natural variation
    */
-  function spawnFireParticles() {
+  function spawnFireParticles(): void {
     if (lives === 1 && Math.random() < CONFIG.fireParticleChance) {
       fireParticles.push({
         x: paddle.x + Math.random() * paddle.width,
@@ -1464,7 +1441,7 @@ const finalSubtitle =
     }
   }
 
-  function updateFireParticles() {
+  function updateFireParticles(): void {
     fireParticles.forEach((p) => {
       p.y += p.vy;
       p.x += p.vx;
@@ -1487,7 +1464,7 @@ const finalSubtitle =
    * PERFORMANCE: Grid-based approach means O(grid_cells) not O(particles²)
    * This allows hundreds of particles without collision checks.
    */
-  function updateSandGrid() {
+  function updateSandGrid(): void {
     for (let y = sandGrid.length - 2; y >= 0; y--) {
       for (let x = 0; x < sandGrid[y].length; x++) {
         const cell = sandGrid[y][x];
@@ -1501,7 +1478,7 @@ const finalSubtitle =
     }
   }
 
-  function applyExplosionPhysics(cell, x, y) {
+  function applyExplosionPhysics(cell: SandCell, x: number, y: number): boolean {
     if (cell.age >= CONFIG.sandExplosionFrames || (Math.abs(cell.vx) <= 0.1 && Math.abs(cell.vy) <= 0.1)) {
       return false;
     }
@@ -1520,7 +1497,7 @@ const finalSubtitle =
     return false;
   }
 
-  function applySandFallRules(cell, x, y) {
+  function applySandFallRules(cell: SandCell, x: number, y: number): void {
     if (sandGrid[y + 1][x] === null) {
       sandGrid[y][x] = null;
       sandGrid[y + 1][x] = cell;
@@ -1548,7 +1525,7 @@ const finalSubtitle =
    * VELOCITY: Trigonometry converts angle+speed (polar) to x/y components (cartesian)
    * This gives us the velocity vector for each particle.
    */
-  function createBrickExplosion(centerX, centerY, color, particleCount) {
+  function createBrickExplosion(centerX: number, centerY: number, color: string, particleCount: number): void {
     const baseCount = particleCount === 12 ? 20 : 10;
     const particleColor = color === "#9be9a8" ? "#70d480" : color;
 
@@ -1573,7 +1550,7 @@ const finalSubtitle =
   // COLLISION DETECTION
   // ============================================================================
 
-  function checkCollisions() {
+  function checkCollisions(): void {
     checkPaddleCollision();
     checkBrickCollisions();
   }
@@ -1597,7 +1574,7 @@ const finalSubtitle =
    *
    * SPEED PRESERVATION: We maintain ball speed, only changing direction.
    */
-  function checkPaddleCollision() {
+  function checkPaddleCollision(): void {
     if (!isCollidingWithPaddle()) return;
 
     const hitPos = (ball.x - paddle.x) / paddle.width;
@@ -1618,7 +1595,7 @@ const finalSubtitle =
    * - Check if ball's bounding box overlaps brick's bounding box
    * - Fast and accurate for rectangular objects
    */
-  function checkBrickCollisions() {
+  function checkBrickCollisions(): void {
     for (const brick of bricks) {
       if (!brick.active) continue;
       if (!isCollidingWithBrick(brick)) continue;
@@ -1642,7 +1619,7 @@ const finalSubtitle =
    * - Damage: brickDamagePoints
    *   - Small reward for chipping away at tough bricks
    */
-  function handleBrickHit(brick) {
+  function handleBrickHit(brick: Brick): void {
     brick.currentHits--;
 
     if (brick.currentHits <= 0) {
@@ -1671,7 +1648,7 @@ const finalSubtitle =
    * WHY THIS WORKS: The side with smallest overlap is where ball
    * made contact (it penetrated least from that direction).
    */
-  function bounceBallOffBrick(brick) {
+  function bounceBallOffBrick(brick: Brick): void {
     const overlapLeft = ball.x + ball.radius - brick.x;
     const overlapRight = brick.x + brick.width - (ball.x - ball.radius);
     const overlapTop = ball.y + ball.radius - brick.y;
@@ -1696,7 +1673,7 @@ const finalSubtitle =
    * - WHY: Creates escalating difficulty as game progresses
    * - Multiply both dx and dy by ratio to maintain direction
    */
-  function increaseBallSpeed() {
+  function increaseBallSpeed(): void {
     const speed = getBallSpeed();
     const newSpeed = Math.min(speed + CONFIG.ballSpeedIncrement, CONFIG.ballMaxSpeed);
     const ratio = newSpeed / speed;
@@ -1704,18 +1681,18 @@ const finalSubtitle =
     ball.dy *= ratio;
   }
 
-  function checkWinCondition() {
+  function checkWinCondition(): void {
     const activeBricks = bricks.filter((b) => b.active).length;
     if (activeBricks === 0) {
       gameOver(true);
     }
   }
 
-  function isCollidingWithPaddle() {
+  function isCollidingWithPaddle(): boolean {
     return ball.y + ball.radius >= paddle.y && ball.y - ball.radius <= paddle.y + paddle.height && ball.x >= paddle.x && ball.x <= paddle.x + paddle.width;
   }
 
-  function isCollidingWithBrick(brick) {
+  function isCollidingWithBrick(brick: Brick): boolean {
     return ball.x + ball.radius > brick.x && ball.x - ball.radius < brick.x + brick.width && ball.y + ball.radius > brick.y && ball.y - ball.radius < brick.y + brick.height;
   }
 
@@ -1723,17 +1700,17 @@ const finalSubtitle =
   // RENDERING
   // ============================================================================
 
-  function render() {
+  function render(): void {
     // Clear canvas completely (no background)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
     // Dim entire canvas when countdown active or overlay visible
     const overlayVisible = overlay && overlay.classList.contains("is-visible");
 
     if (ballAttached || overlayVisible) {
-      ctx.globalAlpha = 0.5;
+      ctx!.globalAlpha = 0.5;
     } else {
-      ctx.globalAlpha = 1.0;
+      ctx!.globalAlpha = 1.0;
     }
 
     // Draw labels
@@ -1756,24 +1733,24 @@ const finalSubtitle =
     drawCountdown();
   }
 
-  function drawMonthLabels() {
-    ctx.fillStyle = CONFIG.labelColor;
-    ctx.font = CONFIG.labelFont;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+  function drawMonthLabels(): void {
+    ctx!.fillStyle = CONFIG.labelColor;
+    ctx!.font = CONFIG.labelFont;
+    ctx!.textAlign = "left";
+    ctx!.textBaseline = "middle";
 
     monthLabels.forEach((label) => {
       const x = brickOffsetX + label.startWeek * (brickWidth + CONFIG.brickPadding);
       const y = CONFIG.canvasPaddingTop + 10;
-      ctx.fillText(label.month, x, y);
+      ctx!.fillText(label.month, x, y);
     });
   }
 
-  function drawWeekdayLabels() {
-    ctx.fillStyle = CONFIG.labelColor;
-    ctx.font = CONFIG.labelFont;
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
+  function drawWeekdayLabels(): void {
+    ctx!.fillStyle = CONFIG.labelColor;
+    ctx!.font = CONFIG.labelFont;
+    ctx!.textAlign = "right";
+    ctx!.textBaseline = "middle";
 
     // GitHub uses: Sunday=0, Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6
     const weekdays = ["", "Mon", "", "Wed", "", "Fri", ""];
@@ -1781,32 +1758,32 @@ const finalSubtitle =
       if (day) {
         const x = CONFIG.labelOffsetX + CONFIG.canvasPaddingX - 5;
         const y = CONFIG.labelOffsetY + CONFIG.canvasPaddingTop + index * (brickHeight + CONFIG.brickPadding) + brickHeight / 2;
-        ctx.fillText(day, x, y);
+        ctx!.fillText(day, x, y);
       }
     });
   }
 
-  function drawBricks() {
+  function drawBricks(): void {
     // Draw grid lines
-    ctx.strokeStyle = "rgba(27, 31, 35, 0.1)";
-    ctx.lineWidth = 1;
+    ctx!.strokeStyle = "rgba(27, 31, 35, 0.1)";
+    ctx!.lineWidth = 1;
 
     // Draw vertical lines
     for (let week = 0; week <= numWeeks; week++) {
       const x = brickOffsetX + week * (brickWidth + CONFIG.brickPadding) - CONFIG.brickPadding / 2;
-      ctx.beginPath();
-      ctx.moveTo(x, brickOffsetY - CONFIG.brickPadding / 2);
-      ctx.lineTo(x, brickOffsetY + numDays * (brickHeight + CONFIG.brickPadding) - CONFIG.brickPadding / 2);
-      ctx.stroke();
+      ctx!.beginPath();
+      ctx!.moveTo(x, brickOffsetY - CONFIG.brickPadding / 2);
+      ctx!.lineTo(x, brickOffsetY + numDays * (brickHeight + CONFIG.brickPadding) - CONFIG.brickPadding / 2);
+      ctx!.stroke();
     }
 
     // Draw horizontal lines
     for (let day = 0; day <= numDays; day++) {
       const y = brickOffsetY + day * (brickHeight + CONFIG.brickPadding) - CONFIG.brickPadding / 2;
-      ctx.beginPath();
-      ctx.moveTo(brickOffsetX - CONFIG.brickPadding / 2, y);
-      ctx.lineTo(brickOffsetX + numWeeks * (brickWidth + CONFIG.brickPadding) - CONFIG.brickPadding / 2, y);
-      ctx.stroke();
+      ctx!.beginPath();
+      ctx!.moveTo(brickOffsetX - CONFIG.brickPadding / 2, y);
+      ctx!.lineTo(brickOffsetX + numWeeks * (brickWidth + CONFIG.brickPadding) - CONFIG.brickPadding / 2, y);
+      ctx!.stroke();
     }
 
     // Then draw active contribution bricks on top
@@ -1836,15 +1813,15 @@ const finalSubtitle =
       }
 
       // Draw brick with GitHub-style subtle border
-      ctx.fillStyle = fillColor;
-      roundRect(ctx, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
-      ctx.fill();
+      ctx!.fillStyle = fillColor;
+      roundRect(ctx!, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
+      ctx!.fill();
 
       // Add subtle border like GitHub
-      ctx.strokeStyle = CONFIG.brickBorderColor;
-      ctx.lineWidth = 1;
-      roundRect(ctx, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
-      ctx.stroke();
+      ctx!.strokeStyle = CONFIG.brickBorderColor;
+      ctx!.lineWidth = 1;
+      roundRect(ctx!, brick.x, brick.y, brick.width, brick.height, CONFIG.brickRadius);
+      ctx!.stroke();
     }
   }
 
@@ -1885,22 +1862,22 @@ const finalSubtitle =
    * - Bottom: Black (20% opacity) = shadow
    * - Adds depth and makes paddle feel 3D
    */
-  function drawPaddle() {
+  function drawPaddle(): void {
     // Draw fire particles when 1 life left
     if (lives === 1) {
       fireParticles.forEach((p) => {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.beginPath();
+        ctx!.save();
+        ctx!.translate(p.x, p.y);
+        ctx!.beginPath();
         // Draw pointed flame shape (triangle)
-        ctx.moveTo(0, -p.size);
-        ctx.lineTo(-p.size * 0.5, p.size * 0.3);
-        ctx.lineTo(p.size * 0.5, p.size * 0.3);
-        ctx.closePath();
+        ctx!.moveTo(0, -p.size);
+        ctx!.lineTo(-p.size * 0.5, p.size * 0.3);
+        ctx!.lineTo(p.size * 0.5, p.size * 0.3);
+        ctx!.closePath();
         const hue = 15 + Math.random() * 30; // Orange to red
-        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${p.life * 0.45})`;
-        ctx.fill();
-        ctx.restore();
+        ctx!.fillStyle = `hsla(${hue}, 100%, 60%, ${p.life * 0.45})`;
+        ctx!.fill();
+        ctx!.restore();
       });
     }
 
@@ -1915,45 +1892,45 @@ const finalSubtitle =
 
     const radius = CONFIG.paddleRadius;
 
-    ctx.save();
-    ctx.fillStyle = CONFIG.paddleColor;
+    ctx!.save();
+    ctx!.fillStyle = CONFIG.paddleColor;
 
     // Draw rounded trapezoid shape
-    ctx.beginPath();
+    ctx!.beginPath();
 
     // Top edge with rounded corners
     const topLeft = paddle.y + (paddle.height - leftHeight) / 2;
     const topRight = paddle.y + (paddle.height - rightHeight) / 2;
 
-    ctx.moveTo(paddle.x + radius, topLeft);
-    ctx.lineTo(paddle.x + paddle.width - radius, topRight);
-    ctx.arcTo(paddle.x + paddle.width, topRight, paddle.x + paddle.width, topRight + radius, radius);
+    ctx!.moveTo(paddle.x + radius, topLeft);
+    ctx!.lineTo(paddle.x + paddle.width - radius, topRight);
+    ctx!.arcTo(paddle.x + paddle.width, topRight, paddle.x + paddle.width, topRight + radius, radius);
 
     // Right edge
     const bottomRight = paddle.y + paddle.height - (paddle.height - rightHeight) / 2;
-    ctx.lineTo(paddle.x + paddle.width, bottomRight - radius);
-    ctx.arcTo(paddle.x + paddle.width, bottomRight, paddle.x + paddle.width - radius, bottomRight, radius);
+    ctx!.lineTo(paddle.x + paddle.width, bottomRight - radius);
+    ctx!.arcTo(paddle.x + paddle.width, bottomRight, paddle.x + paddle.width - radius, bottomRight, radius);
 
     // Bottom edge
     const bottomLeft = paddle.y + paddle.height - (paddle.height - leftHeight) / 2;
-    ctx.lineTo(paddle.x + radius, bottomLeft);
-    ctx.arcTo(paddle.x, bottomLeft, paddle.x, bottomLeft - radius, radius);
+    ctx!.lineTo(paddle.x + radius, bottomLeft);
+    ctx!.arcTo(paddle.x, bottomLeft, paddle.x, bottomLeft - radius, radius);
 
     // Left edge
-    ctx.lineTo(paddle.x, topLeft + radius);
-    ctx.arcTo(paddle.x, topLeft, paddle.x + radius, topLeft, radius);
+    ctx!.lineTo(paddle.x, topLeft + radius);
+    ctx!.arcTo(paddle.x, topLeft, paddle.x + radius, topLeft, radius);
 
-    ctx.closePath();
-    ctx.fill();
+    ctx!.closePath();
+    ctx!.fill();
 
     // Gradient highlight
-    const gradient = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.height);
+    const gradient = ctx!.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.height);
     gradient.addColorStop(0, "rgba(255, 255, 255, 0.3)");
     gradient.addColorStop(1, "rgba(0, 0, 0, 0.2)");
-    ctx.fillStyle = gradient;
-    ctx.fill();
+    ctx!.fillStyle = gradient;
+    ctx!.fill();
 
-    ctx.restore();
+    ctx!.restore();
   }
 
   /**
@@ -1985,7 +1962,7 @@ const finalSubtitle =
    * - WHY: Eliminates gaps between cells that can appear due to sub-pixel
    *   positioning and anti-aliasing. Creates seamless sand appearance.
    */
-  function drawBrickParticles() {
+  function drawBrickParticles(): void {
     // Render sand grid with color blending for smooth appearance
     for (let y = 0; y < sandGrid.length; y++) {
       for (let x = 0; x < sandGrid[y].length; x++) {
@@ -2031,9 +2008,9 @@ const finalSubtitle =
             finalColor = `#${Math.round(r).toString(16).padStart(2, "0")}${Math.round(g).toString(16).padStart(2, "0")}${Math.round(b).toString(16).padStart(2, "0")}`;
           }
 
-          ctx.fillStyle = finalColor;
+          ctx!.fillStyle = finalColor;
           // Draw with slight overlap for smoothness
-          ctx.fillRect(x * cellSize - 0.5, y * cellSize - 0.5, cellSize + 1, cellSize + 1);
+          ctx!.fillRect(x * cellSize - 0.5, y * cellSize - 0.5, cellSize + 1, cellSize + 1);
         }
       }
     }
@@ -2076,7 +2053,7 @@ const finalSubtitle =
    * WHY: Classic animation principle (squash & stretch) makes motion
    * feel more dynamic and helps convey speed visually.
    */
-  function drawBall() {
+  function drawBall(): void {
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
 
     // Draw motion trail when ball is fast
@@ -2086,10 +2063,10 @@ const finalSubtitle =
         const opacity = (i / ballTrail.length) * 0.5;
         // Grow in size toward current position
         const size = ball.radius * (0.5 + (i / ballTrail.length) * 0.5);
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(9, 105, 218, ${opacity})`;
-        ctx.fill();
+        ctx!.beginPath();
+        ctx!.arc(pos.x, pos.y, size, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(9, 105, 218, ${opacity})`;
+        ctx!.fill();
       });
     }
 
@@ -2101,34 +2078,34 @@ const finalSubtitle =
       const elongation = Math.min(speed * 0.8, ball.radius * 2);
 
       // Use canvas transform to rotate for elongation
-      ctx.save();
-      ctx.translate(ball.x, ball.y); // Move origin to ball position
-      ctx.rotate(angle); // Rotate to movement direction
+      ctx!.save();
+      ctx!.translate(ball.x, ball.y); // Move origin to ball position
+      ctx!.rotate(angle); // Rotate to movement direction
 
       // Draw elongated ellipse pointing in direction of movement
-      ctx.beginPath();
-      ctx.ellipse(0, 0, ball.radius + elongation, ball.radius, 0, 0, Math.PI * 2);
-      ctx.fillStyle = CONFIG.ballColor;
-      ctx.fill();
+      ctx!.beginPath();
+      ctx!.ellipse(0, 0, ball.radius + elongation, ball.radius, 0, 0, Math.PI * 2);
+      ctx!.fillStyle = CONFIG.ballColor;
+      ctx!.fill();
 
       // Highlight on elongated ball
-      ctx.beginPath();
-      ctx.ellipse(elongation / 4, 0, ball.radius * 0.3, ball.radius * 0.25, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      ctx.fill();
-      ctx.restore();
+      ctx!.beginPath();
+      ctx!.ellipse(elongation / 4, 0, ball.radius * 0.3, ball.radius * 0.25, 0, 0, Math.PI * 2);
+      ctx!.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx!.fill();
+      ctx!.restore();
     } else {
       // Normal ball
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = CONFIG.ballColor;
-      ctx.fill();
+      ctx!.beginPath();
+      ctx!.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx!.fillStyle = CONFIG.ballColor;
+      ctx!.fill();
 
       // Highlight
-      ctx.beginPath();
-      ctx.arc(ball.x - 2, ball.y - 2, ball.radius * 0.4, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      ctx.fill();
+      ctx!.beginPath();
+      ctx!.arc(ball.x - 2, ball.y - 2, ball.radius * 0.4, 0, Math.PI * 2);
+      ctx!.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx!.fill();
     }
   }
 
@@ -2149,31 +2126,31 @@ const finalSubtitle =
    * - Countdown numbers (3, 2, 1) then "GO!"
    * - Orange accent color matches site theme
    */
-  function drawCountdown() {
+  function drawCountdown(): void {
     if (!ballAttached || countdownValue === 0) return;
 
     // Countdown text (canvas is already dimmed via globalAlpha)
-    ctx.save();
+    ctx!.save();
     // Reset alpha for text so it's fully visible
-    ctx.globalAlpha = 1.0;
-    ctx.font = "bold 80px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx!.globalAlpha = 1.0;
+    ctx!.font = "bold 80px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx!.textAlign = "center";
+    ctx!.textBaseline = "middle";
 
     const displayText = countdownValue > 0 ? countdownValue.toString() : "GO!";
 
     // Draw text
-    ctx.fillStyle = CONFIG.paddleColor; // Orange accent color
-    ctx.fillText(displayText, canvas.width / 2, canvas.height / 2);
+    ctx!.fillStyle = CONFIG.paddleColor; // Orange accent color
+    ctx!.fillText(displayText, canvas!.width / 2, canvas!.height / 2);
 
-    ctx.restore();
+    ctx!.restore();
   }
 
   // ============================================================================
   // UTILITIES
   // ============================================================================
 
-  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+  function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number): void {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
