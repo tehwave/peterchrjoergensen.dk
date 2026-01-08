@@ -985,6 +985,9 @@ const finalSubtitle =
   // ORIENTATION DETECTION
   // ============================================================================
 
+  // Store orientation query for cleanup
+  let orientationQuery = null;
+
   /**
    * Check if device is small enough to require landscape mode
    */
@@ -1015,14 +1018,17 @@ const finalSubtitle =
    * Update rotation message visibility and game state
    */
   function updateRotationState() {
+    if (!rotateMessage) {
+      rotateMessage = document.getElementById("rotate-message");
+      if (!rotateMessage) return; // Element not found
+    }
+
     const needsRotation = shouldShowRotateMessage();
 
     if (needsRotation && !requiresRotation) {
       // Just entered portrait on small device
       requiresRotation = true;
-      if (rotateMessage) {
-        rotateMessage.classList.add("is-visible");
-      }
+      rotateMessage.classList.add("is-visible");
       // Pause game if playing
       if (gameState === GameState.PLAYING) {
         pauseGame();
@@ -1030,9 +1036,7 @@ const finalSubtitle =
     } else if (!needsRotation && requiresRotation) {
       // Just rotated to landscape or screen got bigger
       requiresRotation = false;
-      if (rotateMessage) {
-        rotateMessage.classList.remove("is-visible");
-      }
+      rotateMessage.classList.remove("is-visible");
     }
   }
 
@@ -1040,7 +1044,10 @@ const finalSubtitle =
    * Handle orientation change events
    */
   function handleOrientationChange() {
-    updateRotationState();
+    // Small delay to ensure dimensions are updated
+    setTimeout(() => {
+      updateRotationState();
+    }, 100);
   }
 
   /**
@@ -1048,24 +1055,43 @@ const finalSubtitle =
    */
   function setupOrientationDetection() {
     rotateMessage = document.getElementById("rotate-message");
+    if (!rotateMessage) {
+      console.warn("Rotate message element not found");
+      return;
+    }
 
     // Initial check
     updateRotationState();
 
     // Listen for orientation changes via matchMedia
-    const portraitQuery = window.matchMedia("(orientation: portrait)");
-    portraitQuery.addEventListener("change", handleOrientationChange);
+    orientationQuery = window.matchMedia("(orientation: portrait)");
 
-    // Also listen to resize events (catches all orientation changes + window resizing)
-    // Note: This is handled by the existing handleResize, so we don't need another listener
+    // Use addEventListener if supported, otherwise use deprecated addListener
+    if (orientationQuery.addEventListener) {
+      orientationQuery.addEventListener("change", handleOrientationChange);
+    } else if (orientationQuery.addListener) {
+      // Fallback for older browsers
+      orientationQuery.addListener(handleOrientationChange);
+    }
+
+    // Also listen to window resize as backup (catches all cases)
+    // This is already handled by handleResize, which calls updateRotationState
   }
 
   /**
    * Cleanup orientation detection listeners
    */
   function cleanupOrientationDetection() {
-    const portraitQuery = window.matchMedia("(orientation: portrait)");
-    portraitQuery.removeEventListener("change", handleOrientationChange);
+    if (orientationQuery) {
+      // Use removeEventListener if supported, otherwise use deprecated removeListener
+      if (orientationQuery.removeEventListener) {
+        orientationQuery.removeEventListener("change", handleOrientationChange);
+      } else if (orientationQuery.removeListener) {
+        // Fallback for older browsers
+        orientationQuery.removeListener(handleOrientationChange);
+      }
+      orientationQuery = null;
+    }
   }
 
   // ============================================================================
