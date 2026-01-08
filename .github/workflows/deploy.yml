@@ -39,7 +39,6 @@ jobs:
       - name: Build site
         run: npm run build
         env:
-          COMPRESS_IMAGES: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy to Cloudflare Pages
