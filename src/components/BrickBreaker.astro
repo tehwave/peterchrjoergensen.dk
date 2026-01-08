@@ -1065,17 +1065,7 @@ const finalSubtitle =
 
     // Listen for orientation changes via matchMedia
     orientationQuery = window.matchMedia("(orientation: portrait)");
-
-    // Use addEventListener if supported, otherwise use deprecated addListener
-    if (orientationQuery.addEventListener) {
-      orientationQuery.addEventListener("change", handleOrientationChange);
-    } else if (orientationQuery.addListener) {
-      // Fallback for older browsers
-      orientationQuery.addListener(handleOrientationChange);
-    }
-
-    // Also listen to window resize as backup (catches all cases)
-    // This is already handled by handleResize, which calls updateRotationState
+    orientationQuery.addEventListener("change", handleOrientationChange)
   }
 
   /**
@@ -1083,13 +1073,7 @@ const finalSubtitle =
    */
   function cleanupOrientationDetection() {
     if (orientationQuery) {
-      // Use removeEventListener if supported, otherwise use deprecated removeListener
-      if (orientationQuery.removeEventListener) {
-        orientationQuery.removeEventListener("change", handleOrientationChange);
-      } else if (orientationQuery.removeListener) {
-        // Fallback for older browsers
-        orientationQuery.removeListener(handleOrientationChange);
-      }
+      orientationQuery.removeEventListener("change", handleOrientationChange);
       orientationQuery = null;
     }
   }
