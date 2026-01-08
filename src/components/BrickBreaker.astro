@@ -126,14 +126,14 @@ contributionMap.forEach((contribution) => {
 
   const hits = CONTRIBUTION_LEVEL_HITS[contributionLevel];
 
-  // Special orange brick for today's date
+  // Special orange brick for today's date - always 1 hit for easy power-up activation
   const isToday = contribution.date === today;
 
   bricks.push({
     weekIndex: contribution.weekIndex,
     dayIndex: contribution.dayIndex,
     color: isToday ? "#ec8305" : color, // Orange accent for today
-    hits,
+    hits: isToday ? 1 : hits, // Today's brick only needs 1 hit
     contributionCount: contribution.contributionCount,
     date: contribution.date,
     username: contribution.usernames.join(" + "),
@@ -293,6 +293,24 @@ const finalSubtitle =
     size: number;
   }
 
+  interface BrickParticle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: string;
+    age: number;
+  }
+
+  interface VisualParticle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: string;
+    life: number;
+  }
+
   interface SandCell {
     color: string;
     vx: number;
@@ -432,6 +450,12 @@ const finalSubtitle =
     // Scoring
     brickDestroyMultiplier: 10, // Points per hit required
     brickDamagePoints: 5, // Points for damaging brick
+
+    // Power-up (Today's brick)
+    powerUpDuration: 10, // Duration in seconds
+    powerUpScoreMultiplier: 2, // 2x points during power-up
+    powerUpChromaticIntensity: 3, // Chromatic aberration offset in pixels
+    powerUpChromaticSpeed: 0.003, // Animation speed for aberration effect
   };
 
   // ============================================================================
@@ -447,6 +471,12 @@ const finalSubtitle =
   let countdownTimer: NodeJS.Timeout | null = null;
   let countdownValue: number = 0;
   let ballAttached: boolean = true; // Ball attached to paddle during countdown
+
+  // Power-up state (activated by destroying today's brick)
+  let powerUpActive: boolean = false;
+  let powerUpTimer: NodeJS.Timeout | null = null;
+  let powerUpTimeRemaining: number = 0;
+  let powerUpStartTime: number = 0; // For animation timing
 
   let paddle: Paddle = {
     x: 0,
@@ -467,6 +497,10 @@ const finalSubtitle =
   let ballTrail: BallTrailPoint[] = []; // Track ball positions for motion trail
 
   let fireParticles: FireParticle[] = []; // Fire particles for paddle when 1 life left
+
+  let brickParticles: BrickParticle[] = []; // Brick explosion particles before converting to sand
+
+  let visualParticles: VisualParticle[] = []; // Visual-only particles that fade out
 
   let sandGrid: (SandCell | null)[][] = []; // 2D grid for cellular automaton sand
 
@@ -567,7 +601,10 @@ const finalSubtitle =
   }
 
   function updateUI(): void {
-    if (scoreDisplay) scoreDisplay.textContent = score.toLocaleString();
+    if (scoreDisplay) {
+      const multiplierText = powerUpActive ? ` (×${CONFIG.powerUpScoreMultiplier})` : "";
+      scoreDisplay.textContent = score.toLocaleString() + multiplierText;
+    }
     if (livesDisplay) livesDisplay.textContent = "❤️".repeat(lives);
     if (bricksDisplay) bricksDisplay.textContent = bricks.filter((b) => b.active).length.toString();
   }
@@ -1101,6 +1138,11 @@ const finalSubtitle =
       countdownTimer = null;
     }
 
+    if (powerUpTimer) {
+      clearTimeout(powerUpTimer);
+      powerUpTimer = null;
+    }
+
     // Remove document listeners
     document.removeEventListener("visibilitychange", handleVisibilityChange);
     document.removeEventListener("astro:before-swap", cleanup);
@@ -1158,6 +1200,40 @@ const finalSubtitle =
     };
 
     countdownTimer = setTimeout(tick, CONFIG.countdownInterval);
+  }
+
+  /**
+   * Start power-up mode (activated by destroying today's brick)
+   * Doubles all points for 10 seconds with chromatic aberration effect
+   * @returns {void}
+   */
+  function startPowerUp(): void {
+    // Clear existing timer if already active (restart)
+    if (powerUpTimer) {
+      clearTimeout(powerUpTimer);
+    }
+
+    powerUpActive = true;
+    powerUpTimeRemaining = CONFIG.powerUpDuration;
+    powerUpStartTime = Date.now();
+
+    const tick = () => {
+      if (powerUpTimeRemaining > 0) {
+        powerUpTimeRemaining--;
+        updateUI(); // Update score display with multiplier
+        if (powerUpTimeRemaining > 0) {
+          powerUpTimer = setTimeout(tick, 1000);
+        } else {
+          // Power-up finished
+          powerUpActive = false;
+          powerUpTimer = null;
+          updateUI(); // Remove multiplier from display
+        }
+      }
+    };
+
+    updateUI(); // Show initial multiplier
+    powerUpTimer = setTimeout(tick, 1000);
   }
 
   /**
@@ -1413,6 +1489,8 @@ const finalSubtitle =
   function updateParticles() {
     spawnFireParticles();
     updateFireParticles();
+    updateBrickParticles();
+    updateVisualParticles();
   }
 
   /**
@@ -1448,6 +1526,61 @@ const finalSubtitle =
       p.life -= CONFIG.fireParticleLifeDecay;
     });
     fireParticles = fireParticles.filter((p) => p.life > 0);
+  }
+
+  /**
+   * Update brick explosion particles
+   *
+   * TRANSITION TO SAND: Particles convert to sand grid cells only after
+   * they've fallen below the brick grid area (just above the paddle).
+   * This allows particles to fall freely with velocity before becoming part
+   * of the cellular automaton sand simulation.
+   *
+   * THRESHOLD: Brick grid ends at (brickOffsetY + gridHeight).
+   * Particles below this convert to sand cells.
+   */
+  function updateBrickParticles(): void {
+    const gridBottom = brickOffsetY + (numDays * (brickHeight + CONFIG.brickPadding));
+
+    brickParticles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1; // Gravity
+      p.age++;
+
+      // Check if particle has fallen below the brick grid
+      if (p.y > gridBottom) {
+        const gridX = Math.floor(p.x / cellSize);
+        const gridY = Math.floor(p.y / cellSize);
+
+        // Convert to sand cell
+        if (isValidGridPosition(gridX, gridY) && sandGrid[gridY][gridX] === null) {
+          sandGrid[gridY][gridX] = { color: p.color, vx: p.vx, vy: p.vy, age: 0 };
+        }
+      }
+    });
+
+    // Remove particles that have either converted to sand or fallen off bottom
+    brickParticles = brickParticles.filter((p) => p.y <= canvas!.height);
+  }
+
+  /**
+   * Update visual particles that fade out and disappear
+   *
+   * Visual particles are cosmetic only - they fall with gravity,
+   * fade out, and don't become part of the sand simulation.
+   * Good for extra visual feedback without cluttering the sand.
+   */
+  function updateVisualParticles(): void {
+    visualParticles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1; // Gravity
+      p.life -= 0.02; // Fade out
+    });
+
+    // Remove faded particles
+    visualParticles = visualParticles.filter((p) => p.life > 0 && p.y <= canvas!.height);
   }
 
   /**
@@ -1514,35 +1647,59 @@ const finalSubtitle =
   /**
    * Create radial particle explosion from brick
    *
-   * WHY TWO SIZES: Full brick destruction (12) creates bigger explosion
-   * than partial damage (5). This visual scaling reinforces game feedback.
+   * TWO PARTICLE TYPES:
+   * 1. Sand particles (4 or 2): Heavy, fall to bottom, convert to sand grid
+   * 2. Visual particles (6 or 3): Light, fade out, purely cosmetic
    *
-   * RADIAL DISTRIBUTION:
-   * - Particles evenly distributed in circle (360° / particleCount)
-   * - Random offset (+0.8 radians) prevents rigid spoke pattern
-   * - WHY: Even distribution ensures consistent explosion appearance
+   * PARTICLES PHASE 1: Both types created with initial velocity
+   * and fall freely under gravity.
    *
-   * VELOCITY: Trigonometry converts angle+speed (polar) to x/y components (cartesian)
-   * This gives us the velocity vector for each particle.
+   * PARTICLES PHASE 2: Sand particles convert to cellular automaton
+   * grid once below the brick area. Visual particles simply fade away.
    */
   function createBrickExplosion(centerX: number, centerY: number, color: string, particleCount: number): void {
-    const baseCount = particleCount === 12 ? 20 : 10;
-    const particleColor = color === "#9be9a8" ? "#70d480" : color;
+    const sandCount = particleCount === 12 ? 4 : 2;
+    const visualCount = particleCount === 12 ? 6 : 3;
+    const particleColor = color === "#9be9a8" ? "#40c463" : color;
 
-    for (let i = 0; i < baseCount; i++) {
-      const angle = (Math.PI * 2 * i) / baseCount + Math.random() * 0.8;
+    // Spawn sand particles (will convert to cellular automaton)
+    for (let i = 0; i < sandCount; i++) {
+      const angle = (Math.PI * 2 * i) / sandCount + Math.random() * 0.8;
       const speed = 1 + Math.random() * 2;
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
 
       const x = centerX + vx * 3;
       const y = centerY + vy * 3;
-      const gridX = Math.floor(x / cellSize);
-      const gridY = Math.floor(y / cellSize);
 
-      if (isValidGridPosition(gridX, gridY) && sandGrid[gridY][gridX] === null) {
-        sandGrid[gridY][gridX] = { color: particleColor, vx, vy, age: 0 };
-      }
+      brickParticles.push({
+        x,
+        y,
+        vx,
+        vy,
+        color: particleColor,
+        age: 0,
+      });
+    }
+
+    // Spawn visual particles (fade out, don't become sand)
+    for (let i = 0; i < visualCount; i++) {
+      const angle = (Math.PI * 2 * i) / visualCount + Math.random() * 0.5;
+      const speed = 1.5 + Math.random() * 2.5;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+
+      const x = centerX + vx * 2;
+      const y = centerY + vy * 2;
+
+      visualParticles.push({
+        x,
+        y,
+        vx,
+        vy,
+        color: particleColor,
+        life: 1.0,
+      });
     }
   }
 
@@ -1622,12 +1779,23 @@ const finalSubtitle =
   function handleBrickHit(brick: Brick): void {
     brick.currentHits--;
 
+    // Apply power-up multiplier if active
+    const multiplier = powerUpActive ? CONFIG.powerUpScoreMultiplier : 1;
+
     if (brick.currentHits <= 0) {
       brick.active = false;
-      score += brick.hits * CONFIG.brickDestroyMultiplier + brick.contributionCount;
+      const baseScore = brick.hits * CONFIG.brickDestroyMultiplier + brick.contributionCount;
+      score += baseScore * multiplier;
+
+      // Check if this was today's brick (orange) - activate power-up!
+      const isTodayBrick = brick.color === "#ec8305";
+      if (isTodayBrick) {
+        startPowerUp();
+      }
+
       createBrickExplosion(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, 12);
     } else {
-      score += CONFIG.brickDamagePoints;
+      score += CONFIG.brickDamagePoints * multiplier;
       createBrickExplosion(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, 5);
     }
   }
@@ -1700,6 +1868,66 @@ const finalSubtitle =
   // RENDERING
   // ============================================================================
 
+  /**
+   * Draw animated chromatic aberration border effect during power-up
+   *
+   * CHROMATIC ABERRATION: Simulates RGB color channel separation seen in
+   * old cameras and as a stylized glitch effect in modern design.
+   *
+   * IMPLEMENTATION:
+   * - Draw 3 separate border rectangles (red, green, blue channels)
+   * - Offset each channel using animated sine wave pattern
+   * - Animation timing based on Date.now() for smooth continuous motion
+   * - Only active during power-up mode (10 seconds after destroying today's brick)
+   *
+   * VISUAL EFFECT:
+   * - Creates pulsing, shifting RGB "glow" around canvas edges
+   * - Intensity and offset vary with sine wave (natural oscillation)
+   * - Each color channel moves at slightly different phase for complexity
+   */
+  function drawChromaticAberration(): void {
+    if (!powerUpActive) return;
+
+    const time = (Date.now() - powerUpStartTime) * CONFIG.powerUpChromaticSpeed;
+    const intensity = CONFIG.powerUpChromaticIntensity;
+
+    ctx!.save();
+    ctx!.globalAlpha = 0.6; // Semi-transparent for overlay effect
+    ctx!.lineWidth = 3;
+
+    // Red channel - offset with sine wave
+    const redOffset = Math.sin(time) * intensity;
+    ctx!.strokeStyle = "#ff0000";
+    ctx!.strokeRect(
+      redOffset,
+      redOffset,
+      canvas!.width - redOffset * 2,
+      canvas!.height - redOffset * 2
+    );
+
+    // Green channel - offset with phase shift
+    const greenOffset = Math.sin(time + Math.PI * 0.66) * intensity;
+    ctx!.strokeStyle = "#00ff00";
+    ctx!.strokeRect(
+      greenOffset,
+      greenOffset,
+      canvas!.width - greenOffset * 2,
+      canvas!.height - greenOffset * 2
+    );
+
+    // Blue channel - offset with different phase
+    const blueOffset = Math.sin(time + Math.PI * 1.33) * intensity;
+    ctx!.strokeStyle = "#0000ff";
+    ctx!.strokeRect(
+      blueOffset,
+      blueOffset,
+      canvas!.width - blueOffset * 2,
+      canvas!.height - blueOffset * 2
+    );
+
+    ctx!.restore();
+  }
+
   function render(): void {
     // Clear canvas completely (no background)
     ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
@@ -1728,6 +1956,9 @@ const finalSubtitle =
 
     // Draw ball
     drawBall();
+
+    // Draw chromatic aberration effect when power-up active
+    drawChromaticAberration();
 
     // Draw countdown overlay if active
     drawCountdown();
@@ -1963,7 +2194,25 @@ const finalSubtitle =
    *   positioning and anti-aliasing. Creates seamless sand appearance.
    */
   function drawBrickParticles(): void {
-    // Render sand grid with color blending for smooth appearance
+    // First, render falling brick particles
+    brickParticles.forEach((p) => {
+      ctx!.fillStyle = p.color;
+      ctx!.beginPath();
+      ctx!.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+      ctx!.fill();
+    });
+
+    // Render visual particles (fade out)
+    visualParticles.forEach((p) => {
+      ctx!.fillStyle = p.color;
+      ctx!.globalAlpha = p.life * 0.6; // Fade effect
+      ctx!.beginPath();
+      ctx!.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx!.fill();
+      ctx!.globalAlpha = 1.0; // Reset alpha
+    });
+
+    // Then render sand grid with color blending for smooth appearance
     for (let y = 0; y < sandGrid.length; y++) {
       for (let x = 0; x < sandGrid[y].length; x++) {
         const cell = sandGrid[y][x];
@@ -2106,6 +2355,42 @@ const finalSubtitle =
       ctx!.arc(ball.x - 2, ball.y - 2, ball.radius * 0.4, 0, Math.PI * 2);
       ctx!.fillStyle = "rgba(255, 255, 255, 0.5)";
       ctx!.fill();
+    }
+
+    // Draw chromatic aberration effect on ball during power-up (drawn on top)
+    if (powerUpActive) {
+      const time = (Date.now() - powerUpStartTime) * CONFIG.powerUpChromaticSpeed;
+      const offset = CONFIG.powerUpChromaticIntensity;
+
+      // Draw RGB offset circles for chromatic aberration
+      ctx!.save();
+      ctx!.globalAlpha = 0.6;
+
+      // Red channel
+      const redOffsetX = Math.sin(time) * offset;
+      const redOffsetY = Math.cos(time) * offset;
+      ctx!.beginPath();
+      ctx!.arc(ball.x + redOffsetX, ball.y + redOffsetY, ball.radius, 0, Math.PI * 2);
+      ctx!.fillStyle = "#ff0000";
+      ctx!.fill();
+
+      // Green channel
+      const greenOffsetX = Math.sin(time + Math.PI * 0.66) * offset;
+      const greenOffsetY = Math.cos(time + Math.PI * 0.66) * offset;
+      ctx!.beginPath();
+      ctx!.arc(ball.x + greenOffsetX, ball.y + greenOffsetY, ball.radius, 0, Math.PI * 2);
+      ctx!.fillStyle = "#00ff00";
+      ctx!.fill();
+
+      // Blue channel
+      const blueOffsetX = Math.sin(time + Math.PI * 1.33) * offset;
+      const blueOffsetY = Math.cos(time + Math.PI * 1.33) * offset;
+      ctx!.beginPath();
+      ctx!.arc(ball.x + blueOffsetX, ball.y + blueOffsetY, ball.radius, 0, Math.PI * 2);
+      ctx!.fillStyle = "#0000ff";
+      ctx!.fill();
+
+      ctx!.restore();
     }
   }
 
