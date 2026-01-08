@@ -18,9 +18,9 @@ import firstPrototype from "../../assets/projects/brick-breaker-first-prototype.
 
 ## The idea
 
-I saw someone on Reddit who'd turned their GitHub contribution graph into a brick breaker game. I thought it was brilliant — a perfect marriage of the two things I love: games and web development.
+I saw someone on Reddit who'd turned their GitHub contribution graph into a brick breaker game. I thought it was brilliant. Games and web development, two things I love, smashed together.
 
-I build every single day. That green graph is a year of work compressed into squares. Turning it into something playable felt right. More than that, it felt _meaningful_. Each brick is a day I showed up. Breaking them isn't just satisfying — it's destroying evidence of my own commitment in the most fun way possible.
+I build every single day. That green graph is a year of work compressed into squares. Turning it into something playable felt right. More than that, it felt _meaningful_. Each brick is a day I showed up. Breaking them isn't just satisfying. It's destroying evidence of my own commitment in the most fun way possible.
 
 ## How it works
 
@@ -138,7 +138,7 @@ The paddle also skews (squash & stretch) based on velocity. Moving left compress
 
 ### Fire particles on last life
 
-When you're down to one heart, the paddle catches fire. Orange-to-red triangular particles spawn and rise. No HUD warning needed — the fire _is_ the warning.
+When you're down to one heart, the paddle catches fire. Orange-to-red triangular particles spawn and rise. No HUD warning needed. The fire _is_ the warning.
 
 ```javascript
 if (lives === 1) {
@@ -220,7 +220,7 @@ A small device is anything under 500px viewport height or 640px width. Portrait 
 
 ## Building it with AI
 
-I made this in one Wednesday evening. I wrote almost no code by hand — instead, I pair-programmed with Claude Sonnet 4.5 through GitHub Copilot in VS Code.
+I made this in one Wednesday evening. I wrote almost no code by hand. Instead, I pair-programmed with Claude Sonnet 4.5 through GitHub Copilot in VS Code.
 
 My workflow:
 
@@ -229,13 +229,13 @@ My workflow:
 3. **Test and give feedback** — "The trail is too long, feels laggy. Make it shorter and fade faster"
 4. **Iterate** — Repeat until it feels right
 
-The AI handled the Canvas API details, the math for collision detection, the particle systems. I focused on game feel — testing, adjusting constants, rejecting approaches that looked wrong.
+The AI handled the Canvas API details, the math for collision detection, the particle systems. I focused on game feel: testing, adjusting constants, rejecting approaches that looked wrong.
 
 Some things required multiple attempts. The paddle wobble took a few iterations to get the spring physics feeling bouncy but not jittery. The sand simulation needed tweaking to look natural instead of mechanical.
 
 After getting the core mechanics working, I asked my [custom Documentator agent](https://github.com/tehwave/peterchrjoergensen.dk/blob/master/.github/agents/documentator.agent.md) to go through and explain _why_ each decision was made. The paddle collision angle math has a full breakdown. The sand grid explains why we process bottom-to-top. The wobble spring physics are annotated with the reasoning.
 
-The result is ~2,400 lines I can actually maintain, because I understand every line even though I didn't type most of them — and future me will thank past me for those explanations.
+The result is ~2,400 lines I can actually maintain, because I understand every line even though I didn't type most of them. Future me will thank past me for those explanations.
 
 ## Performance optimizations
 
@@ -285,7 +285,7 @@ Instead, I wait 100ms after the last resize event before recalculating. Smooth d
 
 The falling sand uses a grid-based cellular automaton instead of individual particle objects with physics. Each cell is either empty or contains sand. Processing the grid is O(cells) — just iterate once per frame.
 
-Individual particles would be O(n²) for collision checks (every particle against every other particle). With hundreds of particles from brick explosions, that's thousands of checks per frame. The grid approach handles it trivially.
+Individual particles would be O(n²) for collision checks. Every particle against every other particle. With hundreds of particles from brick explosions, that's thousands of checks per frame. The grid approach handles it trivially.
 
 ### Build-time data fetching
 
@@ -311,7 +311,7 @@ But it works. And it shows something real: I show up and build every day. Now yo
 
 The entire game lives in [one Astro component on GitHub](https://github.com/tehwave/peterchrjoergensen.dk/blob/master/src/components/BrickBreaker.astro). All 2,400 lines of canvas rendering, physics, and particle effects.
 
-If you spot something broken, have ideas for improvements, or just want to see how the cellular automaton works — dig in. Feedback welcome.
+If you spot something broken, have ideas for improvements, or just want to see how the cellular automaton works, dig in. Feedback welcome.
 
 ## Play it
 
