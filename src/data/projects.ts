@@ -26,6 +26,9 @@ import autocentralenImg from "../assets/projects/autocentralen.png";
 import renellImg from "../assets/projects/renell.png";
 import horningfloorImg from "../assets/projects/horningfloor.png";
 import restudyImg from "../assets/projects/restudy.png";
+import bsiImg from "../assets/projects/bsi.png";
+import cctravelImg from "../assets/projects/cctravel.png";
+import dinbilpartnerImg from "../assets/projects/dinbilpartner.png";
 
 /**
  * Portfolio projects displayed on the homepage.
@@ -90,6 +93,15 @@ export const projects: Project[] = [
     category: "web",
   },
   {
+    title: "C&C Travel",
+    description: "Laravel admin system with AI integrations for a 35-year-old travel agency specializing in tailor-made trips. WordPress frontend with custom booking flow.",
+    alt: "Screenshot of C&C Travel custom travel agency website",
+    tags: ["Laravel", "WordPress", "AI"],
+    image: cctravelImg,
+    link: "https://cctravel.dk",
+    category: "web",
+  },
+  {
     title: "DM Greenkeeping",
     description: "Built the Laravel CRM and quote system that now supports this multi-million lawn care business.",
     alt: "Screenshot of DM Greenkeeping lawn care service website",
@@ -109,9 +121,9 @@ export const projects: Project[] = [
   },
   {
     title: "Kirppu",
-    description: "Denmark's largest secondhand chain. AI-powered image analysis for product categorization.",
+    description: "Denmark's largest secondhand chain with 34 stores. AI-powered image analysis and Algolia search for their WordPress platform.",
     alt: "Screenshot of Kirppu secondhand marketplace website",
-    tags: ["WordPress", "AI", "WooCommerce"],
+    tags: ["WordPress", "AI", "Algolia"],
     image: kirppuImg,
     link: "https://kirppu.dk",
     category: "web",
@@ -141,6 +153,15 @@ export const projects: Project[] = [
     tags: ["Laravel", "CRM", "MySQL"],
     image: autoproffImg,
     link: "https://www.autoproff.dk",
+    category: "web",
+  },
+  {
+    title: "Din Bilpartner",
+    description: "WordPress and Laravel development for Denmark's oldest independent car workshop chain. Built API integrations and the exclusive Express membership club.",
+    alt: "Screenshot of Din Bilpartner car workshop website homepage",
+    tags: ["WordPress", "Laravel", "API"],
+    image: dinbilpartnerImg,
+    link: "https://dinbilpartner.dk",
     category: "web",
   },
   {
@@ -195,6 +216,15 @@ export const projects: Project[] = [
     tags: ["WordPress", "PHP"],
     image: horningfloorImg,
     link: "https://www.horningfloor.dk",
+    category: "web",
+  },
+  {
+    title: "BSI Marine Equipment Group",
+    description: "WordPress website for a marine equipment group with 9 specialized brands serving sailboats and super yachts worldwide.",
+    alt: "Screenshot of BSI Marine Equipment Group website",
+    tags: ["WordPress", "PHP"],
+    image: bsiImg,
+    link: "https://bsidk.com",
     category: "web",
   },
 
