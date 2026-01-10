@@ -34,9 +34,12 @@ Each day with contributions becomes a brick. The color and strength match GitHub
 The game fetches contribution data from both my GitHub accounts (`tehwave` and `peterchrjoergensen`) and merges them. If I made 3 contributions on one account and 5 on the other, that day becomes a single brick worth 8 contributions — harder to break, worth more points. The aggregation happens at build time, so the game loads instantly without API calls.
 
 <Wide>
-  <Figure src={firstPrototype} alt="Early prototype of the brick breaker game showing basic green bricks and paddle" caption="The first working prototype — basic collisions working, no effects yet." />
+  <Figure
+    src={firstPrototype}
+    alt="Early prototype of the brick breaker game showing basic green bricks and paddle"
+    caption="The first working prototype — basic collisions working, no effects yet."
+  />
 </Wide>
-
 
 ## The technical stack
 
@@ -186,7 +189,6 @@ Processing bottom-to-top prevents particles from moving multiple times per frame
     caption="Before I figured out cellular automaton — particles were growing upward like grass instead of falling. The perils of vibe coding."
   />
 </Wide>
-
 
 For visual smoothness, neighboring particles blend colors (70% self, 30% neighbors). This creates soft gradients instead of harsh pixel edges.
 
