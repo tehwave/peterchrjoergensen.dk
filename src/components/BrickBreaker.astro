@@ -1300,6 +1300,8 @@ const finalSubtitle =
     // Render once to show centered positions before starting game loop
     render();
 
+    window.trackEvent?.("BrickBreaker: Game Started");
+
     gameState = GameState.PLAYING;
     hideOverlay();
     if (circlePlayBtn) circlePlayBtn.style.display = "none";

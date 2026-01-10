@@ -1,0 +1,101 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Page not found" description="No page found at this address.">
+  <section class="not-found">
+    <div class="not-found__container">
+      <h1 class="not-found__title">No page found at this address.</h1>
+      <p class="not-found__description">The link might be outdated or mistyped. Head back home or read the blog instead.</p>
+      <div class="not-found__actions">
+        <a class="not-found__link not-found__link--primary" href="/">Back to home</a>
+        <a class="not-found__link not-found__link--secondary" href="/blog/">Read the blog</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline type="module">
+    window.trackEvent?.(`404: ${window.location.pathname}`);
+  </script>
+</Layout>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .not-found {
+    padding: calc(#{$header-height} + #{$space-3xl}) 0 $space-3xl;
+    min-height: calc(100vh - #{$header-height});
+    display: grid;
+    align-content: center;
+    background: $color-bg;
+
+    @include respond-to(md) {
+      padding: calc(#{$header-height} + #{$space-2xl}) 0 $space-3xl;
+    }
+
+    &__container {
+      @include container;
+      display: grid;
+      gap: $space-lg;
+      max-width: $max-width-text;
+      align-content: center;
+    }
+
+    &__title {
+      @include section-heading;
+      font-size: $font-size-4xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      line-height: $leading-snug;
+      letter-spacing: $tracking-tight;
+      margin: 0 0 $space-xs;
+    }
+
+    &__description {
+      margin: 0 0 $space-md;
+      color: $color-text-secondary;
+      font-size: $font-size-lg;
+      line-height: $leading-relaxed;
+      max-width: 52ch;
+    }
+
+    &__actions {
+      display: flex;
+      gap: $space-md;
+      flex-wrap: wrap;
+    }
+
+    &__link {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-sm;
+      padding: $space-sm $space-lg;
+      border-radius: 999px;
+      font-weight: $font-weight-semibold;
+      text-decoration: none;
+      font-size: $font-size-base;
+      @include transition(transform, var(--duration-fast), var(--ease-out));
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 3px;
+      }
+
+      &--primary {
+        background: $color-orange;
+        color: $color-white;
+      }
+
+      &--secondary {
+        background: $color-bg-alt;
+        color: $color-text-primary;
+        border: 1px solid $color-border;
+      }
+    }
+  }
+</style>

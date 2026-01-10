@@ -193,5 +193,23 @@ const socialImageURL = new URL(image, Astro.site);
       <slot />
     </main>
     <Footer />
+    <script>
+      import "../utils/analytics";
+    </script>
+    <script is:inline type="module">
+      const handleExternalLinkClick = (event) => {
+        if (event.defaultPrevented) return;
+
+        const anchor = event.target instanceof Element ? event.target.closest("a[target='_blank']") : null;
+        if (!(anchor instanceof HTMLAnchorElement) || !anchor.href) return;
+
+        const url = new URL(anchor.href, window.location.href);
+        if (url.origin === window.location.origin) return;
+
+        window.trackEvent?.(`External Link: ${url.hostname}`);
+      };
+
+      document.body.addEventListener("click", handleExternalLinkClick, { passive: true });
+    </script>
   </body>
 </html>
