@@ -240,7 +240,7 @@ const finalSubtitle =
     LOST: "lost",
   } as const;
 
-  type GameStateType = 'idle' | 'playing' | 'paused' | 'won' | 'lost';
+  type GameStateType = "idle" | "playing" | "paused" | "won" | "lost";
 
   // ============================================================================
   // TYPESCRIPT INTERFACES
@@ -1121,7 +1121,7 @@ const finalSubtitle =
 
     // Listen for orientation changes via matchMedia
     orientationQuery = window.matchMedia("(orientation: portrait)");
-    orientationQuery.addEventListener("change", handleOrientationChange)
+    orientationQuery.addEventListener("change", handleOrientationChange);
   }
 
   /**
@@ -1603,7 +1603,7 @@ const finalSubtitle =
    * Particles below this convert to sand cells.
    */
   function updateBrickParticles(): void {
-    const gridBottom = brickOffsetY + (numDays * (brickHeight + CONFIG.brickPadding));
+    const gridBottom = brickOffsetY + numDays * (brickHeight + CONFIG.brickPadding);
 
     brickParticles.forEach((p) => {
       p.x += p.vx;
@@ -1961,32 +1961,17 @@ const finalSubtitle =
     // Red channel - offset with sine wave
     const redOffset = Math.sin(time) * intensity;
     ctx!.strokeStyle = "#ff0000";
-    ctx!.strokeRect(
-      redOffset,
-      redOffset,
-      canvas!.width - redOffset * 2,
-      canvas!.height - redOffset * 2
-    );
+    ctx!.strokeRect(redOffset, redOffset, canvas!.width - redOffset * 2, canvas!.height - redOffset * 2);
 
     // Green channel - offset with phase shift
     const greenOffset = Math.sin(time + Math.PI * 0.66) * intensity;
     ctx!.strokeStyle = "#00ff00";
-    ctx!.strokeRect(
-      greenOffset,
-      greenOffset,
-      canvas!.width - greenOffset * 2,
-      canvas!.height - greenOffset * 2
-    );
+    ctx!.strokeRect(greenOffset, greenOffset, canvas!.width - greenOffset * 2, canvas!.height - greenOffset * 2);
 
     // Blue channel - offset with different phase
     const blueOffset = Math.sin(time + Math.PI * 1.33) * intensity;
     ctx!.strokeStyle = "#0000ff";
-    ctx!.strokeRect(
-      blueOffset,
-      blueOffset,
-      canvas!.width - blueOffset * 2,
-      canvas!.height - blueOffset * 2
-    );
+    ctx!.strokeRect(blueOffset, blueOffset, canvas!.width - blueOffset * 2, canvas!.height - blueOffset * 2);
 
     ctx!.restore();
   }
