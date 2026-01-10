@@ -6,9 +6,6 @@ import vitePwa from "@vite-pwa/astro";
 import mdx from "@astrojs/mdx";
 import { serializeSitemap } from "./src/utils/sitemap";
 
-// Enable image compression only when explicitly enabled via env var
-const compressImages = process.env.COMPRESS_IMAGES === "true";
-
 // https://astro.build/config
 export default defineConfig({
   // Cache directory for image optimization across builds
@@ -35,14 +32,7 @@ export default defineConfig({
     compress({
       CSS: true,
       HTML: true,
-      Image: compressImages
-        ? {
-            sharp: {
-              webp: { quality: 50 },
-              avif: { quality: 25 },
-            },
-          }
-        : false,
+      Image: false,
       JavaScript: true,
       SVG: true,
     }),
