@@ -241,6 +241,28 @@ const structuredData = {
   </article>
 
   <AuthorBio />
+
+  <section class="blog-post__comments">
+    <div class="blog-post__comments-container">
+      <script
+        src="https://giscus.app/client.js"
+        data-repo="tehwave/peterchrjoergensen.dk"
+        data-repo-id="MDEwOlJlcG9zaXRvcnk5NjI0MTM2Mw=="
+        data-category="Blog Post Comments"
+        data-category-id="DIC_kwDOBbyG084C09L1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async
+      ></script>
+    </div>
+  </section>
 </Layout>
 
 <script>
@@ -628,5 +650,21 @@ const structuredData = {
         padding: $space-md $space-lg 0;
       }
     }
+  }
+
+  // Comments section
+  .blog-post__comments {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $space-xl $space-4xl;
+
+    @include respond-to(md) {
+      padding: 0 $space-lg $space-3xl;
+    }
+  }
+
+  .blog-post__comments-container {
+    max-width: $max-width-text;
+    margin: 0 auto;
   }
 </style>
