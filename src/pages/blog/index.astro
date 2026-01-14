@@ -31,6 +31,9 @@ const postsWithReadingTime = sortedPosts.map((post) => ({
   readingTime: getReadingTime(post.body ?? ""),
 }));
 
+// Split into featured (latest) and remaining posts
+const [featuredPost, ...remainingPosts] = postsWithReadingTime;
+
 // SEO metadata
 const title = "The Journal";
 const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
@@ -103,12 +106,44 @@ const collectionSchema = {
         postsWithReadingTime.length === 0 ? (
           <p class="journal__empty">No posts yet. Check back soon!</p>
         ) : (
-          <div class="journal__list">
-            {postsWithReadingTime.map((post) => (
-              <AnimateOnScroll animation="fade-up">
-                <BlogPostCard title={post.data.title} description={post.data.description} pubDate={post.data.pubDate} readingTime={post.readingTime} tags={post.data.tags} href={`/blog/${post.id}/`} />
-              </AnimateOnScroll>
-            ))}
+          <div class="journal__grid">
+            {/* Featured Post - Latest */}
+            {featuredPost && (
+              <div class="journal__featured">
+                <AnimateOnScroll animation="fade-up">
+                  <BlogPostCard
+                    title={featuredPost.data.title}
+                    description={featuredPost.data.description}
+                    pubDate={featuredPost.data.pubDate}
+                    readingTime={featuredPost.readingTime}
+                    tags={featuredPost.data.tags}
+                    href={`/blog/${featuredPost.id}/`}
+                    heroImage={featuredPost.data.heroImage}
+                    heroImageAlt={featuredPost.data.heroImageAlt}
+                  />
+                </AnimateOnScroll>
+              </div>
+            )}
+
+            {/* Remaining Posts */}
+            {remainingPosts.length > 0 && (
+              <div class="journal__list">
+                {remainingPosts.map((post) => (
+                  <AnimateOnScroll animation="fade-up">
+                    <BlogPostCard
+                      title={post.data.title}
+                      description={post.data.description}
+                      pubDate={post.data.pubDate}
+                      readingTime={post.readingTime}
+                      tags={post.data.tags}
+                      href={`/blog/${post.id}/`}
+                      heroImage={post.data.heroImage}
+                      heroImageAlt={post.data.heroImageAlt}
+                    />
+                  </AnimateOnScroll>
+                ))}
+              </div>
+            )}
           </div>
         )
       }
@@ -190,13 +225,33 @@ const collectionSchema = {
       padding: $space-3xl 0;
     }
 
-    &__list {
+    &__grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: $space-2xl;
+      grid-template-columns: 2fr 1fr;
+      gap: $space-3xl;
+      align-items: start;
 
       @include respond-to(md) {
         grid-template-columns: 1fr;
+        gap: $space-2xl;
+      }
+    }
+
+    &__featured {
+      position: sticky;
+      top: calc($header-height + $space-2xl);
+
+      @include respond-to(md) {
+        position: static;
+      }
+    }
+
+    &__list {
+      display: flex;
+      flex-direction: column;
+      gap: $space-2xl;
+
+      @include respond-to(md) {
         gap: $space-xl;
       }
     }
