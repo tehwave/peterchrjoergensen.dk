@@ -1,6 +1,6 @@
 ---
 /**
- * Blog Index Page — "The Journal"
+ * Blog Index Page
  *
  * Newspaper-style blog listing with minimal design:
  * - Single-column centered layout
@@ -35,8 +35,8 @@ const postsWithReadingTime = sortedPosts.map((post) => ({
 const [featuredPost, ...remainingPosts] = postsWithReadingTime;
 
 // SEO metadata
-const title = "The Journal";
-const description = "I write about web development, performance optimization, and building with Astro. Technical articles and thoughts on modern web development.";
+const title = "Blog";
+const description = "What I've learned building for the web. Performance optimization, frontend architecture, tooling trade-offs, and the details that make production code actually work.";
 
 // Structured data for blog listing page
 const collectionSchema = {
@@ -97,7 +97,7 @@ const collectionSchema = {
       <header class="journal__header">
         <div class="journal__header-left">
           <span class="journal__label">MY WRITING</span>
-          <h1 class="journal__title">The Journal</h1>
+          <h1 class="journal__title">Blog</h1>
         </div>
         <p class="journal__tagline">{description}</p>
       </header>
