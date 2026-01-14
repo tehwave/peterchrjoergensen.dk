@@ -13,7 +13,7 @@ type Props = Record<string, never>;
 
 // Get all blog posts, sorted by date (newest first)
 const allPosts = await getCollection("blog");
-const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()).slice(0, 3);
 ---
 
 <section class="blog" id="blog">
