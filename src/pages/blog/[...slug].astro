@@ -243,29 +243,43 @@ const structuredData = {
   <AuthorBio />
 
   <section class="blog-post__comments">
-    <div class="blog-post__comments-container">
-      <script
-        src="https://giscus.app/client.js"
-        data-repo="tehwave/peterchrjoergensen.dk"
-        data-repo-id="MDEwOlJlcG9zaXRvcnk5NjI0MTM2Mw=="
-        data-category="Blog Post Comments"
-        data-category-id="DIC_kwDOBbyG084C09L1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="light"
-        data-lang="en"
-        data-loading="lazy"
-        crossorigin="anonymous"
-        async
-      ></script>
-    </div>
+    <div class="blog-post__giscus" id="giscus"></div>
   </section>
 </Layout>
 
 <script>
+  /**
+   * Initialize Giscus comments system
+   * Handles both initial load and re-initialization on view transitions
+   */
+  function initGiscus() {
+    const container = document.getElementById("giscus");
+    if (!container) return;
+
+    // Clear existing giscus iframe if it exists
+    container.innerHTML = "";
+
+    // Create and configure giscus script
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.setAttribute("data-repo", "tehwave/peterchrjoergensen.dk");
+    script.setAttribute("data-repo-id", "MDEwOlJlcG9zaXRvcnk5NjI0MTM2Mw==");
+    script.setAttribute("data-category", "Blog Post Comments");
+    script.setAttribute("data-category-id", "DIC_kwDOBbyG084C09L1");
+    script.setAttribute("data-mapping", "pathname");
+    script.setAttribute("data-strict", "0");
+    script.setAttribute("data-reactions-enabled", "1");
+    script.setAttribute("data-emit-metadata", "0");
+    script.setAttribute("data-input-position", "top");
+    script.setAttribute("data-theme", "light");
+    script.setAttribute("data-lang", "en");
+    script.setAttribute("data-loading", "lazy");
+    script.setAttribute("crossorigin", "anonymous");
+    script.async = true;
+
+    container.appendChild(script);
+  }
+
   /**
    * Simple parallax effect for blog post hero image
    * Adapted from Hero.astro but without 3D tilt complexity
@@ -315,10 +329,14 @@ const structuredData = {
   }
 
   // Run on initial page load
+  initGiscus();
   initParallax();
 
   // Re-initialize after view transitions
-  document.addEventListener("astro:page-load", initParallax);
+  document.addEventListener("astro:page-load", () => {
+    initGiscus();
+    initParallax();
+  });
 </script>
 
 <style lang="scss">
@@ -663,7 +681,7 @@ const structuredData = {
     }
   }
 
-  .blog-post__comments-container {
+  .blog-post__giscus {
     max-width: $max-width-text;
     margin: 0 auto;
   }
