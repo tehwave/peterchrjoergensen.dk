@@ -1,11 +1,11 @@
 # Astro Project — Copilot Instructions
 
-## Project Overview
-
+<project>
+<overview>
 Personal website built with Astro 5.x — a modern static site generator that delivers zero-JavaScript by default with optional hydration for interactive components.
+</overview>
 
-## Astro Documentation
-
+<astroDocumentation>
 When you need to look up Astro APIs, patterns, or best practices, use the `search_astro_docs` tool to search the official Astro documentation. This is especially helpful for:
 
 - Component syntax and directives
@@ -14,16 +14,18 @@ When you need to look up Astro APIs, patterns, or best practices, use the `searc
 - View transitions and routing
 - Integration configurations
 - Any Astro-specific features or APIs
+</astroDocumentation>
+</project>
 
-## Tech Stack
-
+<techStack>
 - **Framework:** Astro 5.16+
 - **Language:** TypeScript (strict mode)
 - **Formatting:** Prettier with `prettier-plugin-astro`
 - **Build Output:** Static HTML (SSG)
+</techStack>
 
-## Build & Development
-
+<development>
+<commands>
 ```bash
 # Install dependencies
 npm install
@@ -40,28 +42,32 @@ npm run preview
 # Format code
 npx prettier --write .
 ```
+</commands>
 
-**Important:** NEVER run `npm run dev` - the user is always running it. NEVER run `npm run preview` or `killall node` commands unless specifically testing production builds with Chrome DevTools.
+<criticalRules>
+- NEVER run `npm run dev` - the user is always running it
+- NEVER run `npm run preview` or `killall node` unless specifically testing production builds with Chrome DevTools
+</criticalRules>
+</development>
 
-## Project Structure
-
+<architecture>
+<directoryStructure>
 ```
 src/
 ├── assets/          # Static assets (images, SVGs) — processed by Astro
 ├── components/      # Reusable .astro components
 ├── layouts/         # Page layouts with <slot /> for content
-├── pages/           # File-based routing (each file = a route)
+├── pages/           # File-based routing (each file = a route) — REQUIRED
 public/              # Static files served as-is (favicon, robots.txt)
 ├── _headers         # Cloudflare Pages headers (CSP, security)
 ├── _redirects       # Cloudflare Pages redirects
 ```
 
-**Important:** `src/pages/` is the **only required directory** in Astro. Without it, your site has no routes.
+**Critical:** `src/pages/` is the **only required directory** in Astro. Without it, your site has no routes.
+</directoryStructure>
 
-## Security & Headers
-
-### Content Security Policy (CSP)
-
+<security>
+<contentSecurityPolicy>
 This site uses a strict CSP configured in `public/_headers`:
 
 ```
@@ -83,9 +89,12 @@ Content-Security-Policy:
 2. If the script makes network requests, add domains to `connect-src`
 3. Test CSP violations in browser DevTools Console
 4. Redeploy to Cloudflare Pages for changes to take effect
+</contentSecurityPolicy>
+</security>
+</architecture>
 
-## Astro Component Anatomy
-
+<conventions>
+<componentAnatomy>
 Every `.astro` file has two parts:
 
 ```astro
@@ -109,107 +118,109 @@ const data = await fetch("...").then((r) => r.json());
   }
 </style>
 ```
+</componentAnatomy>
 
-## Coding Conventions
-
-### Components
-
+<components>
 - Use `.astro` extension for Astro components
 - Place reusable components in `src/components/`
 - Place page layouts in `src/layouts/`
 - Use `<slot />` in layouts to render child content
 - Use named slots for complex layouts: `<slot name="header" />`
 - Import assets from `src/assets/` — Astro optimizes them automatically
+</components>
 
-### Pages & Routing
-
+<routing>
+<fileBasedRouting>
 - Every file in `src/pages/` becomes a route
 - `index.astro` → `/`
 - `about.astro` → `/about`
 - `blog/[slug].astro` → dynamic route `/blog/:slug`
 - `projects/[...slug].astro` → dynamic route `/projects/:slug` for MDX project pages
+</fileBasedRouting>
 
-**Internal link conventions:**
-
+<linkConventions>
 - Always include trailing slashes on internal links: `href="/about/"`, `href="/"`
 - Fragment identifiers don't need trailing slash before `#`: `href="/#projects"`, `href="/about/#contact"`
 - This ensures consistency with Astro's default trailing slash behavior
+</linkConventions>
+</routing>
 
-### Projects System
-
+<projectsSystem>
 This site uses a **hybrid projects system** that merges two data sources:
 
-1. **Simple projects** (`src/data/projects.ts`) — Array of project objects with frontmatter
-   - Display as cards on homepage
-   - External links only (no dedicated pages)
-   - Quick to add for portfolio items
+**Two Types:**
+1. **Simple projects** (`src/data/projects.ts`) — External links only, no dedicated pages
+2. **MDX projects** (`src/content/projects/`) — Full case studies with dedicated pages at `/projects/[slug]`
 
-2. **MDX projects** (`src/content/projects/`) — Full MDX case studies
-   - Each MDX file gets a dedicated page at `/projects/[slug]`
-   - Display as cards with an arrow icon indicating a page exists
-   - Full SEO optimization (Open Graph, Twitter Cards, JSON-LD)
-   - Hero images, rich content, and MDX component support
-
-**Projects display logic:**
-
-- MDX projects with content → card with arrow → links to `/projects/[slug]`
+**Display Logic:**
+- MDX projects → card with arrow → links to `/projects/[slug]`
 - Simple projects → card with external link icon → opens external URL
-- Both types use the same `ProjectCard` component for consistency
+- Both use the same `ProjectCard` component
 
-**To add a project:**
+**Adding Projects:**
+- External link only? → Add to `src/data/projects.ts`
+- Full case study page? → Create MDX in `src/content/projects/`
+- Never create both for the same project
+</projectsSystem>
 
-- **Simple project**: Add to `src/data/projects.ts` array
-- **Featured project**: Create MDX file in `src/content/projects/`
-
-### Styling Best Practices
-
+<styling>
+<rules>
 - **Always use scoped SASS** — Every component must have `<style lang="scss">`
 - **Import design tokens**: Always `@use "../styles/variables" as *;` and `@use "../styles/mixins" as *;`
 - **BEM naming**: `.component`, `.component__element`, `.component--modifier`
-- **Nest BEM elements efficiently**: Use `&__element` under the block for better organization:
-  ```scss
-  .component {
-    padding: $space-lg;
-
-    &__title {
-      font-size: $font-size-xl;
-    }
-
-    &__description {
-      color: $color-text-secondary;
-    }
-  }
-  ```
 - **Automatic scoping** — Styles only affect the current component, never leak
 - **Use design tokens** from `_variables.scss` — never hardcode colors, spacing, or breakpoints
 - **Use mixins** from `_mixins.scss` — `@include respond-to(md)`, `@include container`, etc.
+</rules>
+
+<patterns>
+**Nesting BEM efficiently:**
+```scss
+.component {
+  padding: $space-lg;
+
+  &__title {
+    font-size: $font-size-xl;
+  }
+
+  &__description {
+    color: $color-text-secondary;
+  }
+}
+```
+
+**Safe practices:**
 - Low-specificity selectors like `h1 {}` are safe — they get scoped automatically
-- Use `<style is:global>` **never** — global styles belong in `src/styles/global.scss`
 - Use `:global()` selector to style child components: `article :global(h1) { }`
 - Use `class:list` for conditional classes: `<div class:list={["base", { active: isActive }]}>`
 
-### Images & Assets
+**Forbidden:**
+- NEVER use `<style is:global>` — global styles belong in `src/styles/global.scss`
+</patterns>
+</styling>
 
-- **Always use `<Picture />` from `astro:assets`** for all image assets — it provides optimal responsive images with modern formats:
+<images>
+**Always use `<Picture />` from `astro:assets`** for all image assets:
 
-  ```astro
-  ---
-  import { Picture } from "astro:assets";
-  import photo from "../assets/photo.png";
-  ---
+```astro
+---
+import { Picture } from "astro:assets";
+import photo from "../assets/photo.png";
+---
 
-  <Picture src={photo} formats={["avif", "webp"]} alt="Photo description" />
-  ```
+<Picture src={photo} formats={["avif", "webp"]} alt="Photo description" />
+```
 
-- `<Picture />` automatically generates multiple formats (AVIF, WebP, fallback) and optimizes images at build time
+**Rules:**
+- `<Picture />` automatically generates multiple formats (AVIF, WebP, fallback) and optimizes at build time
 - Import images from `src/assets/` for automatic optimization
 - Always specify `formats={["avif", "webp"]}` for best performance
 - The `alt` attribute is **mandatory** — builds will fail without it
 - Use `<Image />` only when you don't need multiple formats or responsive srcsets
 - Place unprocessed files (favicon, robots.txt) in `public/`
+</images>
 
-### TypeScript
-
+<typescript>
 - Use strict TypeScript (configured via `astro/tsconfigs/strict`)
 - Always define `interface Props` for components that accept props:
   ```astro
@@ -223,11 +234,11 @@ This site uses a **hybrid projects system** that merges two data sources:
   ```
 - For components with no props: `type Props = Record<string, never>`
 - For components requiring children: `type Props = { children: any }`
+</typescript>
+</conventions>
 
-## Performance Best Practices
-
-### Streaming & Data Fetching
-
+<performance>
+<streaming>
 - **Move async data fetching into separate components** to enable HTML streaming
 - Components with `await` block the page — isolate them for parallel loading
 - Return Promises directly in templates for non-blocking rendering:
@@ -239,24 +250,24 @@ This site uses a **hybrid projects system** that merges two data sources:
 
   <p>{dataPromise}</p>
   ```
+</streaming>
 
-### Zero JavaScript by Default
+<javascript>
+Astro ships zero client-side JavaScript by default. Only add JS when needed with client directives.
+</javascript>
 
-Astro ships zero client-side JavaScript unless you explicitly add interactive components with client directives.
-
-### Client Directives (for interactivity)
-
+<clientDirectives>
 When using framework components (React, Vue, Svelte), hydrate with:
 
 - `client:load` — Hydrate immediately on page load
 - `client:idle` — Hydrate when browser is idle
 - `client:visible` — Hydrate when component is visible
 - `client:only="react"` — Skip server render, client-only
+</clientDirectives>
+</performance>
 
-## Key Features
-
-### Named Slots
-
+<features>
+<namedSlots>
 Use named slots for complex component composition:
 
 ```astro
@@ -276,9 +287,9 @@ Use named slots for complex component composition:
 ```
 
 Use `<Fragment slot="name">` to pass multiple elements to a named slot without a wrapper.
+</namedSlots>
 
-### View Transitions
-
+<viewTransitions>
 For SPA-like navigation with animations:
 
 ```astro
@@ -290,15 +301,132 @@ import { ViewTransitions } from "astro:transitions";
   <ViewTransitions />
 </head>
 ```
+</viewTransitions>
 
-### Content Collections
-
+<contentCollections>
 For blog posts, docs, or structured content, use content collections in `src/content/`.
+</contentCollections>
+</features>
 
-## Common Patterns
+<keyComponents>
+| Component               | Purpose                                                        |
+| ----------------------- | -------------------------------------------------------------- |
+| `Layout.astro`          | Base wrapper handling SEO, Open Graph, and structured data     |
+| `Hero.astro`            | Landing section with animated role rotation                    |
+| `Header.astro`          | Scroll-aware sticky navigation                                 |
+| `About.astro`           | Philosophy-first bio with skill tags                           |
+| `Projects.astro`        | Portfolio with filtering; shuffled on build for equal exposure |
+| `Blog.astro`            | Latest blog posts section with cards (3 most recent)           |
+| `AI.astro`              | Transparency section on AI usage                               |
+| `AnimateOnScroll.astro` | Intersection Observer wrapper for scroll animations            |
+</keyComponents>
 
-### Layout with Props
+<workflows>
+<addingProjects>
 
+**Two sources (mutually exclusive):**
+- **Featured projects** (`src/content/projects/`) — Full MDX case studies with pages
+- **Simple projects** (`src/data/projects.ts`) — External link cards only
+
+**Decision tree:**
+- Need dedicated page? → Create MDX in `src/content/projects/`
+- External link only? → Add to `src/data/projects.ts`
+- Never create both for the same project
+
+<featuredProject>
+**Steps:**
+1. Save image to `src/assets/projects/project-name.png`
+2. Create `src/content/projects/project-name.mdx`:
+
+```mdx
+---
+title: "Project Name"
+description: "Short description for project card"
+category: "web" # or "games" or "creative"
+tags: ["React", "TypeScript"]
+externalUrl: "https://example.com" # Optional
+heroImage: ../../assets/projects/project-name.png # UNQUOTED - critical!
+heroImageAlt: "Hero image description"
+ogDescription: "Custom social sharing description" # Optional
+---
+
+## Overview
+
+Your full case study content here...
+```
+
+**Critical:** `heroImage` path must be UNQUOTED for Astro's `image()` schema.
+
+✅ `heroImage: ../../assets/projects/hero.png`  
+❌ `heroImage: "../../assets/projects/hero.png"`
+
+**Result:** Dedicated page at `/projects/[slug]`, full SEO, clickable card with arrow icon
+</featuredProject>
+
+<simpleProject>
+Add to `src/data/projects.ts` — do NOT also create MDX file:
+
+```typescript
+{
+  title: "Project Name",
+  description: "Brief description of what you built.",
+  alt: "Screenshot of Project Name showing main visual",
+  tags: ["Laravel", "PHP"],
+  image: projectImg, // Import at top
+  link: "https://example.com",
+  category: "web",
+}
+```
+</simpleProject>
+</addingProjects>
+
+<blog>
+<features>
+- **Content Collections API** — Type-safe with Zod validation
+- **MDX Support** — Markdown or MDX with component support
+- **Image Optimization** — Multiple formats (WebP, AVIF) at build time
+- **SEO Optimized** — Open Graph, Twitter Cards, JSON-LD structured data
+- **Draft Mode** — Keep in git but hide from production
+- **Tags & Categories** — Organize with filterable tags
+- **Table of Contents** — Auto-generated from headings
+- **Performance** — LCP < 50ms, CLS = 0.00, fully static
+</features>
+
+<addingPost>
+**Steps:**
+1. Create `.md` or `.mdx` file in `src/content/blog/`:
+
+```mdx
+---
+title: "Your Post Title"
+description: "Brief description for SEO and previews"
+pubDate: 2024-12-26
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "performance"]
+draft: false
+heroImage: ../../assets/blog/hero.jpg # Optional
+heroImageAlt: "Description of hero image" # Optional
+---
+
+Your content here...
+```
+
+2. Add images to `src/assets/blog/` — auto-optimized
+3. Preview locally (dev server should be running)
+4. Build — drafts filtered out automatically
+</addingPost>
+
+<blogArchitecture>
+- **Schema**: `src/content/config.ts` — Post structure and validation
+- **Homepage Section**: `src/components/Blog.astro` — 3 latest posts
+- **Post Template**: `src/pages/blog/[...slug].astro` — Individual post rendering
+- **Sitemap**: Auto-included via `@astrojs/sitemap`
+</blogArchitecture>
+</blog>
+</workflows>
+
+<patterns>
+<layoutWithProps>
 ```astro
 ---
 // src/layouts/Layout.astro
@@ -323,8 +451,7 @@ const { title, description } = Astro.props;
 </html>
 ```
 
-### Using the Layout
-
+**Usage:**
 ```astro
 ---
 import Layout from "../layouts/Layout.astro";
@@ -334,56 +461,58 @@ import Layout from "../layouts/Layout.astro";
   <h1>Welcome</h1>
 </Layout>
 ```
+</layoutWithProps>
+</patterns>
 
-## Content & Tone of Voice
+<voice>
+<background>
+This is a **personal website**. All written content should reflect a consistent, authentic voice.
 
-This is a **personal website**, so all written content should reflect a consistent voice:
+**About the author:**
+- Senior web developer with 8 years professional experience (programming since age 14, now 32)
+- Led a department of 8 developers + 2 project leads for 6 years in a digital marketing agency
+- Shipped in PHP, Laravel, WordPress — from local businesses to multi-million dollar companies
+- Comfortable in legacy and greenfield codebases, teams from solo to 6+ developers
+- Deep knowledge of performance, DevOps/server ops, incident handling, and production trade-offs
+- Experience training developers, hiring/firing, working as developer, project lead, and designer
+</background>
 
-### Background Context (About Me)
-
-- I’m a **senior web developer** with **8 years** of professional experience (I’ve been programming since I was **14**; I’m **32** now)
-- For **6 of those 8 years**, I led a department ( **8 developers** + **2 project leads** ) in a digital marketing agency
-- I’ve shipped in **PHP**, **Laravel**, and **WordPress** across everything from local business websites to **multi‑million** businesses
-- I’m comfortable in both **legacy** and **greenfield** codebases, and on teams ranging from solo to ~6+ developers (including external collaborators)
-- I know **performance**, **DevOps/server ops**, and what it takes to run projects when things break (incident handling, trade-offs, and pragmatism)
-- I’ve trained developers, hired and fired, and worked as developer, project lead, and designer
-
-### Communication Level & Working Style
-
-**Treat me as a senior peer:**
-
-- Skip basics and "what is X" explanations — assume familiarity with modern web tooling, architectural patterns, and production realities
-- Focus on sharp edges, trade-offs, constraints, and decision-making heuristics
+<communicationLevel>
+**Treat the author as a senior peer:**
+- Skip basics and "what is X" explanations
+- Assume familiarity with modern web tooling, architectural patterns, production realities
+- Focus on sharp edges, trade-offs, constraints, decision-making heuristics
 - Prefer concrete specifics over generic best-practice lists
-- When suggesting approaches, explain the "why" (constraints, performance impact, maintainability trade-offs) not just the "what"
-- Default to practitioner-level specificity: real metrics, before/after comparisons, edge cases that actually happen
+- Explain the "why" (constraints, performance impact, maintainability) not just the "what"
+- Use practitioner-level specificity: real metrics, before/after comparisons, actual edge cases
+</communicationLevel>
 
-### Perspective
+<perspective>
+- Always use **first-person singular**: "I am", "I think", "I built"
+- Never use third-person ("Peter is...") or impersonal language
+</perspective>
 
-- Always use **first-person singular**: "I am", "I think", "I built", "My experience"
-- Never use third-person ("Peter is a developer...") or impersonal language
+<tone>
+**Characteristics:**
+- Calm and friendly — Approachable, not salesy or aggressive
+- Confident but humble — Demonstrate competence without arrogance
+- Specific and concrete — Real examples, avoid vague claims
+- Knowledgeable — Show depth, explain the "why" not just the "what"
 
-### Tone
+**Avoid:**
+- "Junior framing" and generic advice
+- Empty superlatives ("highly skilled", "extensive experience")
+- Let specifics (scope, constraints, outcomes) carry the credibility
+</tone>
 
-- **Calm and friendly** — Approachable, not salesy or aggressive
-- **Confident but humble** — Demonstrate competence without arrogance
-- **Specific and concrete** — Use real examples, avoid vague claims
-- **Knowledgeable** — Show depth of understanding, explain the "why" not just the "what"
+<writingStyle>
+- Short, clear sentences over complex ones
+- Direct — get to the point without unnecessary preamble
+- Technical terms used appropriately, never over-complicated
+- Sound like a real person in conversation, not a corporate brochure
+</writingStyle>
 
-Additional tone guardrails:
-
-- Avoid “junior framing” and generic advice; default to practitioner-level specificity and real trade-offs
-- Don’t describe me with empty superlatives (“highly skilled”); let specifics (scope, constraints, outcomes) carry the credibility
-
-### Writing Style
-
-- Prefer short, clear sentences over complex ones
-- Be direct — get to the point without unnecessary preamble
-- Use technical terms appropriately, but don't over-complicate
-- Sound like a real person having a conversation, not a corporate brochure
-
-### Examples
-
+<examples>
 ❌ "Peter is a highly skilled developer with extensive experience..."  
 ✅ "I'm a developer who loves building fast, accessible websites."
 
@@ -392,11 +521,13 @@ Additional tone guardrails:
 
 ❌ "Passionate about creating synergistic digital solutions."  
 ✅ "I enjoy solving tricky CSS problems and making sites feel snappy."
+</examples>
+</voice>
 
-## Validation
-
+<validation>
 Before committing, always:
 
 1. Run `npm run check` to validate TypeScript and catch errors
 2. Run `npx prettier --check .` for formatting
 3. For normal testing, use the running `npm run dev` server (no need to run `npm run preview`)
+</validation>
