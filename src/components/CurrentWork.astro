@@ -22,7 +22,7 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
 
         <div class="current-work__content">
             <AnimateOnScroll>
-                <a href="https://gm48.net" target="_blank" rel="noopener" class="current-work__card">
+                <a href="https://gm48.net" target="_blank" rel="noopener" class="current-work__card" aria-label="gm48.net - Game jam platform (opens in new window)">
                     <div class="current-work__image-wrapper">
                         <Picture
                             src={gm48Image}
@@ -34,10 +34,8 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
                             loading="lazy"
                         />
                     </div>
-                    <div class="
-                            current-work__details"
-                        >
-                            <h3 class="current-work__title">
+                    <div class="current-work__details">
+                        <h3 class="current-work__title">
                                 gm48.net
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +67,6 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
                             <div class="current-work__tech">
                                 {techStack.map((tech) => <SkillTag label={tech} />)}
                             </div>
-                        </Picture>
                     </div>
                 </a>
             </AnimateOnScroll>
@@ -117,6 +114,7 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
                 text-decoration: none;
                 color: inherit;
                 @include transition(border-color, 0.2s);
+                @include focus-visible;
 
                 &:hover {
                     border-color: $color-orange;
