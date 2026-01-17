@@ -1,0 +1,194 @@
+---
+/**
+ * "What I'm Working On Right Now" section.
+ *
+ * A focused spotlight on the current project, giving visitors
+ * a sense of what's actively being built. Includes image, description, and link.
+ */
+import { Picture } from "astro:assets";
+import AnimateOnScroll from "./AnimateOnScroll.astro";
+import SkillTag from "./SkillTag.astro";
+import gm48Image from "../assets/projects/gm48.png";
+
+type Props = Record<string, never>;
+
+const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js", "Livewire"];
+---
+
+<section class="current-work" id="current-work">
+    <div class="current-work__container">
+        <span class="current-work__label">My Current Project</span>
+        <h2 class="current-work__heading">What I'm working on right now</h2>
+
+        <div class="current-work__content">
+            <AnimateOnScroll>
+                <a href="https://gm48.net" target="_blank" rel="noopener" class="current-work__card">
+                    <div class="current-work__image-wrapper">
+                        <Picture
+                            src={gm48Image}
+                            formats={["avif", "webp"]}
+                            alt="gm48.net — GameMaker game jam platform"
+                            class="current-work__image"
+                            widths={[400, 600, 800]}
+                            sizes="(max-width: 768px) 100vw, 400px"
+                            loading="lazy"
+                        />
+                    </div>
+                    <div class="
+                            current-work__details"
+                        >
+                            <h3 class="current-work__title">
+                                gm48.net
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="current-work__icon"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M7 7h10v10"></path>
+                                    <path d="M7 17 17 7"></path>
+                                </svg>
+                            </h3>
+                            <div class="current-work__description">
+                                <p>
+                                    I organize the gm(48) — a quarterly 48-hour game jam for GameMaker developers that's been going since 2013. Four times a year, hundreds of developers from around
+                                    the world race against the clock to build games around a community-voted theme.
+                                </p>
+                                <p>
+                                    I rebuilt the platform from scratch in Laravel 5.1 back in 2015 and have kept it upgraded through Laravel 12. The current version handles everything: team
+                                    formation, game submissions, community ratings, leaderboards, and a decade's worth of jam archives. It's built to scale as the community grows.
+                                </p>
+                            </div>
+                            <div class="current-work__tech">
+                                {techStack.map((tech) => <SkillTag label={tech} />)}
+                            </div>
+                        </Picture>
+                    </div>
+                </a>
+            </AnimateOnScroll>
+        </div>
+    </div>
+
+    <style lang="scss">
+        @use "../styles/variables" as *;
+        @use "../styles/mixins" as *;
+
+        .current-work {
+            position: relative;
+            padding: $space-4xl $space-xl $space-2xl;
+
+            @include respond-to(md) {
+                padding: $space-3xl $space-lg $space-xl;
+            }
+
+            &__container {
+                position: relative;
+                z-index: 1;
+                max-width: $max-width;
+                margin: 0 auto;
+            }
+
+            &__label {
+                @include section-label;
+                display: block;
+                margin-bottom: $space-md;
+            }
+
+            &__heading {
+                @include section-heading;
+                margin-bottom: $space-2xl;
+            }
+
+            &__card {
+                display: grid;
+                grid-template-columns: 280px 1fr;
+                gap: $space-xl;
+                padding: $space-lg;
+                background: transparent;
+                border: 2px solid $color-border;
+                border-radius: 12px;
+                text-decoration: none;
+                color: inherit;
+                @include transition(border-color, 0.2s);
+
+                &:hover {
+                    border-color: $color-orange;
+                }
+
+                &:hover .current-work__icon {
+                    transform: translate(2px, -2px);
+                }
+
+                @include respond-to(md) {
+                    grid-template-columns: 1fr;
+                    gap: $space-lg;
+                }
+            }
+
+            &__image-wrapper {
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            &__image {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+            &__details {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: $space-sm;
+            }
+
+            &__title {
+                font-size: $font-size-xl;
+                font-weight: $font-weight-bold;
+                color: $color-text-dark;
+                display: flex;
+                align-items: center;
+                gap: $space-sm;
+            }
+
+            &__icon {
+                color: $color-orange;
+                @include transition(transform, 0.2s);
+            }
+
+            &__description {
+                font-size: $font-size-base;
+                color: $color-text-muted;
+                line-height: 1.7;
+
+                p {
+                    margin: 0 0 $space-md 0;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+
+                strong {
+                    color: $color-text-dark;
+                    font-weight: $font-weight-semibold;
+                }
+            }
+
+            &__tech {
+                display: flex;
+                flex-wrap: wrap;
+                gap: $space-sm;
+                margin-top: $space-md;
+            }
+        }
+    </style>
+</section>
