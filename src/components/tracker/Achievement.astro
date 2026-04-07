@@ -1,0 +1,23 @@
+---
+type Props = Record<string, never>;
+
+const {} = Astro.props;
+---
+
+<template id="achievement-template">
+  <div class="achievement-card achievement-card--locked" data-achievement-card>
+    <span class="achievement-card__icon" data-achievement-icon></span>
+    <p class="achievement-card__name" data-achievement-name></p>
+    <p class="achievement-card__desc" data-achievement-desc></p>
+    <span class="achievement-card__badge" data-achievement-badge hidden>✓</span>
+  </div>
+</template>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  :global(#achievement-template) {
+    display: none;
+  }
+</style>

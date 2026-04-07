@@ -1,0 +1,21 @@
+---
+type Props = Record<string, never>;
+
+const {} = Astro.props;
+---
+
+<template id="metric-template">
+  <div class="full-stat-card">
+    <span class="full-stat-card__value" data-metric-value></span>
+    <span class="full-stat-card__label" data-metric-label></span>
+  </div>
+</template>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  :global(#metric-template) {
+    display: none;
+  }
+</style>

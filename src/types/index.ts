@@ -24,3 +24,5 @@ export interface Project {
   /** Category for filtering projects */
   category: ProjectCategory;
 }
+
+export type { AppState, CompletedTask, GameState, Task, TaskType } from "./tracker";
