@@ -152,6 +152,35 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               <span class="stat-card__value" id="stat-streak">0</span>
               <span class="stat-card__label">Day streak</span>
               <span class="stat-card__icon">S</span>
+            </div>
+          </div>
+
+          <!-- Task Board -->
+          <div class="tracker__board">
+            <!-- Short-term section (2-column internally) -->
+            <section class="task-section task-section--short" aria-labelledby="section-short-title">
+              <div class="task-section__header">
+                <div>
+                  <h2 class="task-section__title" id="section-short-title">
+                    <span class="task-section__icon">W</span>
+                    This Week
+                  </h2>
+                  <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
+                </div>
+                <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
+              </div>
+              <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Short-term tasks">
+                <!-- tasks injected by JS -->
+                <div class="task-empty-state" data-type="short">
+                  <span class="task-empty-state__icon">W</span>
+                  <p>No weekly tasks yet. Add one!</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Medium and Long side-by-side -->
+            <div class="task-sections-row">
+              <!-- Medium-term section -->
               <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
                 <div class="task-section__header">
                   <div>
@@ -296,8 +325,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
         </header>
       </div>
-      <Footer />
 
+      <Footer />
       <style lang="scss">
         @use "../styles/variables" as *;
         @use "../styles/mixins" as *;
@@ -1855,6 +1884,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         let completedFilterType: TaskType | "all" = "all";
         let draggedTaskId: string | null = null;
         let unlockedAchievements = new Set<string>(JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]"));
+        const astroScopeAttributeName =
+          document
+            .querySelector(".tracker")
+            ?.getAttributeNames()
+            .find((name) => name.startsWith("data-astro-cid-")) ?? null;
 
         // ===========================================================
         // Gamification helpers
@@ -1958,6 +1992,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           unlocked: boolean;
         }
 
+        function applyAstroScope(root: Element): void {
+          if (!astroScopeAttributeName) return;
+          root.setAttribute(astroScopeAttributeName, "");
+          root.querySelectorAll("*").forEach((node) => {
+            node.setAttribute(astroScopeAttributeName, "");
+          });
+        }
+
         function showToast(opts: ToastOptions): void {
           const container = document.getElementById("toast-container")!;
           const toast = document.createElement("div");
@@ -1983,6 +2025,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
 
           toast.append(icon, body);
+          applyAstroScope(toast);
           container.appendChild(toast);
           const duration = opts.duration ?? 3500;
           setTimeout(() => {
@@ -2001,12 +2044,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         function renderTaskCard(task: Task): HTMLElement {
-          return new TaskCard(task, {
+          const card = new TaskCard(task, {
             getDraggedTaskId: () => draggedTaskId,
             setDraggedTaskId: (id) => {
               draggedTaskId = id;
             },
           }).render();
+          applyAstroScope(card);
+          return card;
         }
 
         function renderTasks(): void {
@@ -2024,6 +2069,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               const icons: Record<TaskType, string> = { short: "W", medium: "M", long: "Q" };
               const labels: Record<TaskType, string> = { short: "No weekly tasks yet. Add one!", medium: "No monthly tasks yet. Add one!", long: "No quarterly goals yet. Add one!" };
               empty.innerHTML = `<span class="task-empty-state__icon">${icons[type]}</span><p>${labels[type]}</p>`;
+              applyAstroScope(empty);
               container.appendChild(empty);
             } else {
               active.forEach((task) => {
@@ -2086,6 +2132,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">Delete</button>
           </div>
         `;
+              applyAstroScope(item);
               container.appendChild(item);
             });
           }
@@ -2112,6 +2159,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 renderCompleted();
               });
             }
+            applyAstroScope(btn);
             return btn;
           };
 
@@ -2158,6 +2206,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const h3 = document.createElement("h3");
           h3.textContent = "Achievements";
           h3.className = "full-stats__achievements-title";
+          applyAstroScope(h3);
           grid.appendChild(h3);
 
           ACHIEVEMENTS.forEach((ach) => {
@@ -2191,7 +2240,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           valueEl.textContent = String(data.value);
           labelEl.textContent = data.label;
 
-          return fragment.firstElementChild as HTMLElement | null;
+          const metricCard = fragment.firstElementChild as HTMLElement | null;
+          if (metricCard) applyAstroScope(metricCard);
+
+          return metricCard;
         }
 
         function createAchievementCard(data: AchievementRenderData): HTMLElement | null {
@@ -2218,6 +2270,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           } else {
             badgeEl.setAttribute("hidden", "true");
           }
+
+          applyAstroScope(card);
 
           return card;
         }
