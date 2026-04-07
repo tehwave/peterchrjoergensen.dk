@@ -104,7 +104,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         <header class="tracker__header">
           <div class="tracker__title-row">
             <div>
-              <h1 class="tracker__title">Productivity Tracker</h1>
+              <h1 class="tracker__title">Your Productivity Tracker</h1>
               <p class="tracker__subtitle" id="tip-text">Loading tip…</p>
             </div>
             <div class="tracker__toolbar">
@@ -1426,24 +1426,23 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
 
           if (particles) {
-            const particleCount = decay === "rotten" ? 12 : decay === "stale" ? 7 : 3;
-            const particleScopeAttributes = particles.getAttributeNames().filter((name) => name.startsWith("data-astro-cid-"));
-
             particles.hidden = false;
             particles.classList.remove("fire-particles--fresh", "fire-particles--stale", "fire-particles--rotten");
             particles.classList.add(`fire-particles--${decay}`);
 
-            particles.textContent = "";
-            for (let index = 0; index < particleCount; index += 1) {
-              const particle = document.createElement("span");
-              particle.className = "fire-particle";
-              particle.dataset.particleIndex = String(index);
-              particle.setAttribute("aria-hidden", "true");
-              particle.textContent = "🔥";
+            let canvas = particles.querySelector("[data-task-particles-canvas]");
+            if (!(canvas instanceof HTMLCanvasElement)) {
+              particles.textContent = "";
+              canvas = document.createElement("canvas");
+              canvas.className = "fire-particles__canvas";
+              canvas.setAttribute("data-task-particles-canvas", "");
+
+              const particleScopeAttributes = particles.getAttributeNames().filter((name) => name.startsWith("data-astro-cid-"));
               particleScopeAttributes.forEach((scopeAttribute) => {
-                particle.setAttribute(scopeAttribute, "");
+                canvas?.setAttribute(scopeAttribute, "");
               });
-              particles.appendChild(particle);
+
+              particles.appendChild(canvas);
             }
           }
 
