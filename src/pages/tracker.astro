@@ -1005,7 +1005,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         @media (min-width: #{$breakpoint-lg}) {
           display: grid;
           grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-          align-items: start;
+          align-items: stretch;
         }
       }
 
@@ -1014,6 +1014,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
         border-radius: $radius-xl;
         padding: $space-lg;
+        height: 100%;
         animation: panel-enter 0.65s var(--ease-out) both;
 
         @include respond-to(md) {
@@ -1022,16 +1023,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
 
       .completed-section {
-        background:
-          linear-gradient(180deg, rgba(247, 248, 250, 0.95) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
-        background-size:
-          100% 100%,
-          22px 22px,
-          22px 22px;
-        animation:
-          panel-enter 0.65s var(--ease-out) both,
-          grid-drift 24s linear infinite;
+        background: transparent;
+        border: 2px dotted $tracker-surface-stroke;
+        box-shadow: none;
       }
 
       .full-stats-section {
@@ -1603,7 +1597,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     </style>
 
     <script>
-      import { Task as TaskElement } from "../utils/tracker/taskElement";
+      import { TaskCard } from "../utils/tracker/taskCard";
 
       // ===========================================================
       // Types
@@ -2021,7 +2015,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
 
       function renderTaskCard(task: Task): HTMLElement {
-        return new TaskElement(task, {
+        return new TaskCard(task, {
           getDraggedTaskId: () => draggedTaskId,
           setDraggedTaskId: (id) => {
             draggedTaskId = id;

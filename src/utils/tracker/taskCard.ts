@@ -14,7 +14,7 @@ interface TaskRenderContext {
   setDraggedTaskId: (id: string | null) => void;
 }
 
-export class Task {
+export class TaskCard {
   private static readonly XP_VALUES: Record<TaskType, number> = {
     short: 10,
     medium: 25,
@@ -33,13 +33,13 @@ export class Task {
   ) {}
 
   private getXp(): number {
-    return Task.XP_VALUES[this.task.type];
+    return TaskCard.XP_VALUES[this.task.type];
   }
 
   private getDecayLevel(): DecayLevel {
     if (this.task.completedAt) return "fresh";
     const age = Date.now() - this.task.createdAt;
-    const thresholds = Task.DECAY_THRESHOLDS[this.task.type];
+    const thresholds = TaskCard.DECAY_THRESHOLDS[this.task.type];
     if (age >= thresholds.rotten) return "rotten";
     if (age >= thresholds.stale) return "stale";
     return "fresh";
@@ -48,7 +48,7 @@ export class Task {
   private getDecayProgress(): number {
     if (this.task.completedAt) return 0;
     const age = Date.now() - this.task.createdAt;
-    const thresholds = Task.DECAY_THRESHOLDS[this.task.type];
+    const thresholds = TaskCard.DECAY_THRESHOLDS[this.task.type];
     return Math.min(100, (age / thresholds.rotten) * 100);
   }
 
