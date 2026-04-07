@@ -11,257 +11,262 @@
  * - Google Calendar integration
  * - Statistics and positive reinforcement toasts
  */
-import TrackerLayout from "../layouts/TrackerLayout.astro";
+import "../styles/global.scss";
 ---
 
-<TrackerLayout
-  title="Productivity Tracker — Peter Chr. Jørgensen"
-  description="Personal productivity tracker and kanban board with gamification, visual task decay, and cross-device sync."
->
-  <div class="tracker">
-    <!-- ====================================================
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productivity Tracker — Peter Chr. Jørgensen</title>
+    <meta name="description" content="Personal productivity tracker and kanban board with gamification, visual task decay, and cross-device sync." />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="tracker-layout">
+    <main>
+      <div class="tracker">
+        <!-- ====================================================
          ABOVE THE FOLD: Stats + Task Board
          ==================================================== -->
 
-    <!-- Stats Bar -->
-    <header class="tracker__header">
-      <div class="tracker__title-row">
-        <div>
-          <h1 class="tracker__title">Productivity Tracker</h1>
-          <p class="tracker__subtitle" id="tip-text">Loading tip…</p>
-        </div>
-        <div class="tracker__toolbar">
-          <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
-            <span aria-hidden="true">＋</span> Add Task
-          </button>
-          <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
-          <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
-        </div>
-      </div>
-
-      <div class="stats-bar">
-        <!-- Level & XP -->
-        <div class="stat-card stat-card--level" id="level-card">
-          <div class="level-badge" id="level-badge">
-            <span class="level-badge__icon">●</span>
-            <span class="level-badge__label">Level</span>
-            <span class="level-badge__number" id="level-number">1</span>
-          </div>
-          <div class="xp-area">
-            <div class="xp-bar" role="progressbar" aria-label="XP progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-              <div class="xp-bar__fill" id="xp-bar-fill" style="width: 0%"></div>
-              <div class="xp-bar__shimmer"></div>
-            </div>
-            <div class="xp-text" id="xp-text">0 / 100 XP</div>
-          </div>
-          <div class="total-xp" id="total-xp">0 XP total</div>
-        </div>
-
-        <!-- Monthly stat -->
-        <div class="stat-card">
-          <span class="stat-card__value" id="stat-month">0</span>
-          <span class="stat-card__label">Done this month</span>
-          <span class="stat-card__icon">M</span>
-        </div>
-
-        <!-- Yearly stat -->
-        <div class="stat-card">
-          <span class="stat-card__value" id="stat-year">0</span>
-          <span class="stat-card__label">Done this year</span>
-          <span class="stat-card__icon">Y</span>
-        </div>
-
-        <!-- Streak -->
-        <div class="stat-card">
-          <span class="stat-card__value" id="stat-streak">0</span>
-          <span class="stat-card__label">Day streak</span>
-          <span class="stat-card__icon">S</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Task Board -->
-    <div class="tracker__board">
-      <!-- Short-term section (2-column internally) -->
-      <section class="task-section task-section--short" aria-labelledby="section-short-title">
-        <div class="task-section__header">
-          <div>
-            <h2 class="task-section__title" id="section-short-title">
-              <span class="task-section__icon">W</span>
-              This Week
-            </h2>
-            <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
-          </div>
-          <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
-        </div>
-        <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short"
-             role="list" aria-label="Short-term tasks">
-          <!-- tasks injected by JS -->
-          <div class="task-empty-state" data-type="short">
-            <span class="task-empty-state__icon">W</span>
-            <p>No weekly tasks yet. Add one!</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Medium and Long side-by-side -->
-      <div class="task-sections-row">
-        <!-- Medium-term section -->
-        <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
-          <div class="task-section__header">
+        <!-- Stats Bar -->
+        <header class="tracker__header">
+          <div class="tracker__title-row">
             <div>
-              <h2 class="task-section__title" id="section-medium-title">
-                <span class="task-section__icon">M</span>
-                This Month
-              </h2>
-              <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
+              <h1 class="tracker__title">Productivity Tracker</h1>
+              <p class="tracker__subtitle" id="tip-text">Loading tip…</p>
             </div>
-            <button class="btn btn--ghost add-section-btn" data-type="medium" aria-label="Add monthly task">＋</button>
-          </div>
-          <div class="task-grid" id="tasks-medium" data-type="medium"
-               role="list" aria-label="Medium-term tasks">
-            <div class="task-empty-state" data-type="medium">
-              <span class="task-empty-state__icon">M</span>
-              <p>No monthly tasks yet. Add one!</p>
+            <div class="tracker__toolbar">
+              <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
+                <span aria-hidden="true">＋</span> Add Task
+              </button>
+              <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
+              <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
             </div>
           </div>
-        </section>
 
-        <!-- Long-term section -->
-        <section class="task-section task-section--long" aria-labelledby="section-long-title">
-          <div class="task-section__header">
-            <div>
-              <h2 class="task-section__title" id="section-long-title">
-                <span class="task-section__icon">Q</span>
-                This Quarter
-              </h2>
-              <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
+          <div class="stats-bar">
+            <!-- Level & XP -->
+            <div class="stat-card stat-card--level" id="level-card">
+              <div class="level-badge" id="level-badge">
+                <span class="level-badge__icon">●</span>
+                <span class="level-badge__label">Level</span>
+                <span class="level-badge__number" id="level-number">1</span>
+              </div>
+              <div class="xp-area">
+                <div class="xp-bar" role="progressbar" aria-label="XP progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <div class="xp-bar__fill" id="xp-bar-fill" style="width: 0%"></div>
+                  <div class="xp-bar__shimmer"></div>
+                </div>
+                <div class="xp-text" id="xp-text">0 / 100 XP</div>
+              </div>
+              <div class="total-xp" id="total-xp">0 XP total</div>
             </div>
-            <button class="btn btn--ghost add-section-btn" data-type="long" aria-label="Add quarterly task">＋</button>
-          </div>
-          <div class="task-grid" id="tasks-long" data-type="long"
-               role="list" aria-label="Long-term tasks">
-            <div class="task-empty-state" data-type="long">
-              <span class="task-empty-state__icon">Q</span>
-              <p>No quarterly goals yet. Add one!</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
 
-    <!-- ====================================================
+            <!-- Monthly stat -->
+            <div class="stat-card">
+              <span class="stat-card__value" id="stat-month">0</span>
+              <span class="stat-card__label">Done this month</span>
+              <span class="stat-card__icon">M</span>
+            </div>
+
+            <!-- Yearly stat -->
+            <div class="stat-card">
+              <span class="stat-card__value" id="stat-year">0</span>
+              <span class="stat-card__label">Done this year</span>
+              <span class="stat-card__icon">Y</span>
+            </div>
+
+            <!-- Streak -->
+            <div class="stat-card">
+              <span class="stat-card__value" id="stat-streak">0</span>
+              <span class="stat-card__label">Day streak</span>
+              <span class="stat-card__icon">S</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Task Board -->
+        <div class="tracker__board">
+          <!-- Short-term section (2-column internally) -->
+          <section class="task-section task-section--short" aria-labelledby="section-short-title">
+            <div class="task-section__header">
+              <div>
+                <h2 class="task-section__title" id="section-short-title">
+                  <span class="task-section__icon">W</span>
+                  This Week
+                </h2>
+                <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
+              </div>
+              <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
+            </div>
+            <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Short-term tasks">
+              <!-- tasks injected by JS -->
+              <div class="task-empty-state" data-type="short">
+                <span class="task-empty-state__icon">W</span>
+                <p>No weekly tasks yet. Add one!</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Medium and Long side-by-side -->
+          <div class="task-sections-row">
+            <!-- Medium-term section -->
+            <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
+              <div class="task-section__header">
+                <div>
+                  <h2 class="task-section__title" id="section-medium-title">
+                    <span class="task-section__icon">M</span>
+                    This Month
+                  </h2>
+                  <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
+                </div>
+                <button class="btn btn--ghost add-section-btn" data-type="medium" aria-label="Add monthly task">＋</button>
+              </div>
+              <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Medium-term tasks">
+                <div class="task-empty-state" data-type="medium">
+                  <span class="task-empty-state__icon">M</span>
+                  <p>No monthly tasks yet. Add one!</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Long-term section -->
+            <section class="task-section task-section--long" aria-labelledby="section-long-title">
+              <div class="task-section__header">
+                <div>
+                  <h2 class="task-section__title" id="section-long-title">
+                    <span class="task-section__icon">Q</span>
+                    This Quarter
+                  </h2>
+                  <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
+                </div>
+                <button class="btn btn--ghost add-section-btn" data-type="long" aria-label="Add quarterly task">＋</button>
+              </div>
+              <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Long-term tasks">
+                <div class="task-empty-state" data-type="long">
+                  <span class="task-empty-state__icon">Q</span>
+                  <p>No quarterly goals yet. Add one!</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ====================================================
          BELOW THE FOLD: Completed Tasks + Full Stats
          ==================================================== -->
 
-    <div class="below-fold">
-      <!-- Completed Tasks -->
-      <section class="completed-section" aria-labelledby="completed-title">
-        <div class="section-heading-row">
-          <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
-          <div class="completed-filters">
-            <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
-              <option value="all">All types</option>
-              <option value="short">Short-term</option>
-              <option value="medium">Medium-term</option>
-              <option value="long">Long-term</option>
-            </select>
-            <button class="btn btn--ghost btn--sm" id="clear-completed-btn">Clear completed</button>
-          </div>
-        </div>
-        <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
-          <p class="empty-completed">No completed tasks yet — get going.</p>
-        </div>
-        <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
-      </section>
+        <div class="below-fold">
+          <!-- Completed Tasks -->
+          <section class="completed-section" aria-labelledby="completed-title">
+            <div class="section-heading-row">
+              <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
+              <div class="completed-filters">
+                <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
+                  <option value="all">All types</option>
+                  <option value="short">Short-term</option>
+                  <option value="medium">Medium-term</option>
+                  <option value="long">Long-term</option>
+                </select>
+                <button class="btn btn--ghost btn--sm" id="clear-completed-btn">Clear completed</button>
+              </div>
+            </div>
+            <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
+              <p class="empty-completed">No completed tasks yet — get going.</p>
+            </div>
+            <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
+          </section>
 
-      <!-- Full Statistics -->
-      <section class="full-stats-section" aria-labelledby="stats-title">
-        <h2 class="section-heading" id="stats-title">Statistics</h2>
-        <div class="full-stats-grid" id="full-stats-grid">
-          <!-- rendered by JS -->
+          <!-- Full Statistics -->
+          <section class="full-stats-section" aria-labelledby="stats-title">
+            <h2 class="section-heading" id="stats-title">Statistics</h2>
+            <div class="full-stats-grid" id="full-stats-grid">
+              <!-- rendered by JS -->
+            </div>
+            <div class="achievement-grid" id="achievement-grid">
+              <!-- rendered by JS -->
+            </div>
+          </section>
         </div>
-        <div class="achievement-grid" id="achievement-grid">
-          <!-- rendered by JS -->
-        </div>
-      </section>
-    </div>
-  </div>
+      </div>
 
-  <!-- ====================================================
+      <!-- ====================================================
        MODALS
        ==================================================== -->
 
-  <!-- Add / Edit Task Modal -->
-  <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
-    <div class="modal">
-      <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
-      <h3 class="modal__title" id="task-modal-title">Add Task</h3>
-      <form class="modal__form" id="task-form" novalidate>
-        <input type="hidden" id="edit-task-id" />
-        <div class="form-group">
-          <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
-          <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
+      <!-- Add / Edit Task Modal -->
+      <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="task-modal-title">Add Task</h3>
+          <form class="modal__form" id="task-form" novalidate>
+            <input type="hidden" id="edit-task-id" />
+            <div class="form-group">
+              <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
+              <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
+            </div>
+            <div class="form-group">
+              <label for="task-desc-input" class="form-label">Description</label>
+              <textarea id="task-desc-input" class="form-textarea" placeholder="Optional notes…" rows="3" maxlength="500"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="task-type-input" class="form-label">Timeframe</label>
+                <select id="task-type-input" class="form-select">
+                  <option value="short">This Week (10 XP)</option>
+                  <option value="medium">This Month (25 XP)</option>
+                  <option value="long">This Quarter (50 XP)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="task-due-input" class="form-label">Due date</label>
+                <input type="date" id="task-due-input" class="form-input" />
+              </div>
+            </div>
+            <div class="modal__actions">
+              <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
+              <button type="submit" class="btn btn--primary" id="task-form-submit">Add Task</button>
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="task-desc-input" class="form-label">Description</label>
-          <textarea id="task-desc-input" class="form-textarea" placeholder="Optional notes…" rows="3" maxlength="500"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="task-type-input" class="form-label">Timeframe</label>
-            <select id="task-type-input" class="form-select">
-              <option value="short">This Week (10 XP)</option>
-              <option value="medium">This Month (25 XP)</option>
-              <option value="long">This Quarter (50 XP)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="task-due-input" class="form-label">Due date</label>
-            <input type="date" id="task-due-input" class="form-input" />
-          </div>
-        </div>
-        <div class="modal__actions">
-          <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
-          <button type="submit" class="btn btn--primary" id="task-form-submit">Add Task</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Export Modal -->
-  <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" hidden>
-    <div class="modal">
-      <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
-      <h3 class="modal__title" id="export-modal-title">Export Data</h3>
-      <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
-      <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
-      <div class="modal__actions">
-        <button class="btn btn--ghost" id="export-modal-close2">Close</button>
-        <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
-        <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
       </div>
-    </div>
-  </div>
 
-  <!-- Import Modal -->
-  <div class="modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
-    <div class="modal">
-      <button class="modal__close" id="import-modal-close" aria-label="Close">✕</button>
-      <h3 class="modal__title" id="import-modal-title">Import Data</h3>
-      <p class="modal__desc">Paste your export code below. <strong>This will merge with your current data.</strong></p>
-      <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
-      <div class="modal__actions">
-        <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
-        <button class="btn btn--primary" id="do-import-btn">Import</button>
+      <!-- Export Modal -->
+      <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="export-modal-title">Export Data</h3>
+          <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
+          <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
+          <div class="modal__actions">
+            <button class="btn btn--ghost" id="export-modal-close2">Close</button>
+            <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
+            <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+      <!-- Import Modal -->
+      <div class="modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="import-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="import-modal-title">Import Data</h3>
+          <p class="modal__desc">Paste your export code below. <strong>This will merge with your current data.</strong></p>
+          <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
+          <div class="modal__actions">
+            <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
+            <button class="btn btn--primary" id="do-import-btn">Import</button>
+          </div>
+        </div>
+      </div>
 
-</TrackerLayout>
+      <!-- Toast Container -->
+      <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+    </main>
+  </body>
+</html>
 
 <style lang="scss">
   @use "../styles/variables" as *;
@@ -270,6 +275,20 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   // ============================================================
   // Page layout
   // ============================================================
+
+  .tracker-layout {
+    min-height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle at 20% 0%, rgba(10, 73, 177, 0.08), transparent 45%), radial-gradient(circle at 100% 100%, rgba(124, 58, 237, 0.08), transparent 45%), $color-bg;
+
+    main {
+      padding-block: $space-xl $space-3xl;
+
+      @include respond-to(md) {
+        padding-block: $space-lg $space-2xl;
+      }
+    }
+  }
 
   .tracker {
     padding: $space-lg $space-xl;
@@ -436,14 +455,18 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     &__shimmer {
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
       animation: shimmer 2s infinite;
     }
   }
 
   @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(200%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
   }
 
   .xp-text {
@@ -614,13 +637,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
         content: "";
         position: absolute;
         inset: 0;
-        background: repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 8px,
-          rgba(100, 130, 20, 0.08) 8px,
-          rgba(100, 130, 20, 0.08) 16px
-        );
+        background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(100, 130, 20, 0.08) 8px, rgba(100, 130, 20, 0.08) 16px);
         pointer-events: none;
         z-index: 0;
       }
@@ -727,25 +744,55 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   @keyframes stink-rise {
-    0% { opacity: 0; transform: translateY(0) scale(0.6) rotate(0deg); }
-    20% { opacity: 0.9; }
-    80% { opacity: 0.5; }
-    100% { opacity: 0; transform: translateY(-60px) scale(1.2) rotate(360deg); }
+    0% {
+      opacity: 0;
+      transform: translateY(0) scale(0.6) rotate(0deg);
+    }
+    20% {
+      opacity: 0.9;
+    }
+    80% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) scale(1.2) rotate(360deg);
+    }
   }
 
   @keyframes wobble {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-5deg) scale(1.05); }
-    75% { transform: rotate(5deg) scale(1.05); }
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-5deg) scale(1.05);
+    }
+    75% {
+      transform: rotate(5deg) scale(1.05);
+    }
   }
 
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10% { transform: translateX(-2px) rotate(-0.3deg); }
-    20% { transform: translateX(2px) rotate(0.3deg); }
-    30% { transform: translateX(-1px); }
-    40% { transform: translateX(1px); }
-    50% { transform: translateX(0); }
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10% {
+      transform: translateX(-2px) rotate(-0.3deg);
+    }
+    20% {
+      transform: translateX(2px) rotate(0.3deg);
+    }
+    30% {
+      transform: translateX(-1px);
+    }
+    40% {
+      transform: translateX(1px);
+    }
+    50% {
+      transform: translateX(0);
+    }
   }
 
   // Buttons
@@ -793,7 +840,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
       border-color: transparent;
 
       &:hover {
-        background: rgba(0,0,0,0.06);
+        background: rgba(0, 0, 0, 0.06);
         color: $color-text-primary;
       }
     }
@@ -1174,7 +1221,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
       @include focus-visible;
 
       &:hover {
-        background: rgba(0,0,0,0.08);
+        background: rgba(0, 0, 0, 0.08);
         color: $color-text-primary;
       }
     }
@@ -1293,7 +1340,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     display: flex;
     align-items: center;
     gap: $space-sm;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
     pointer-events: auto;
     animation: toast-in 0.3s var(--ease-out-back) forwards;
     cursor: default;
@@ -1348,19 +1395,36 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   @keyframes toast-in {
-    from { opacity: 0; transform: translateX(40px) scale(0.9); }
-    to { opacity: 1; transform: translateX(0) scale(1); }
+    from {
+      opacity: 0;
+      transform: translateX(40px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
   }
 
   @keyframes toast-out {
-    from { opacity: 1; transform: translateX(0) scale(1); }
-    to { opacity: 0; transform: translateX(40px) scale(0.9); }
+    from {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(40px) scale(0.9);
+    }
   }
 
   // Level-up overlay
   @keyframes level-up-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(10, 73, 177, 0.4); }
-    50% { box-shadow: 0 0 0 20px rgba(10, 73, 177, 0); }
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(10, 73, 177, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 20px rgba(10, 73, 177, 0);
+    }
   }
 
   .level-up-flash {
@@ -1396,7 +1460,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     streak: number;
     lastActivityDate: string;
     monthKey: string; // "YYYY-MM"
-    yearKey: string;  // "YYYY"
+    yearKey: string; // "YYYY"
   }
 
   interface AppState {
@@ -1442,18 +1506,15 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     "Strong finish. Your future self will thank you.",
   ];
 
-  const LEVEL_TITLES = [
-    "Rookie", "Apprentice", "Journeyman", "Adept", "Expert",
-    "Master", "Grand Master", "Champion", "Legend", "Mythic",
-  ];
+  const LEVEL_TITLES = ["Rookie", "Apprentice", "Journeyman", "Adept", "Expert", "Master", "Grand Master", "Champion", "Legend", "Mythic"];
 
   // Achievements definition
   const ACHIEVEMENTS = [
-    { id: "first_task", icon: "A1", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 1 },
-    { id: "five_tasks", icon: "A2", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 5 },
-    { id: "ten_tasks", icon: "A3", name: "Building Momentum", desc: "Complete 10 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 10 },
-    { id: "fifty_tasks", icon: "A4", name: "Productivity Pro", desc: "Complete 50 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 50 },
-    { id: "first_long", icon: "A5", name: "Long Game", desc: "Complete a long-term goal", check: (s: AppState) => s.tasks.some(t => t.completedAt && t.type === "long") },
+    { id: "first_task", icon: "A1", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 1 },
+    { id: "five_tasks", icon: "A2", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 5 },
+    { id: "ten_tasks", icon: "A3", name: "Building Momentum", desc: "Complete 10 tasks", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 10 },
+    { id: "fifty_tasks", icon: "A4", name: "Productivity Pro", desc: "Complete 50 tasks", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 50 },
+    { id: "first_long", icon: "A5", name: "Long Game", desc: "Complete a long-term goal", check: (s: AppState) => s.tasks.some((t) => t.completedAt && t.type === "long") },
     { id: "level_5", icon: "A6", name: "Level 5", desc: "Reach level 5", check: (s: AppState) => s.game.level >= 5 },
     { id: "level_10", icon: "A7", name: "Level 10", desc: "Reach level 10", check: (s: AppState) => s.game.level >= 10 },
     { id: "streak_7", icon: "A8", name: "Week Warrior", desc: "7-day activity streak", check: (s: AppState) => s.game.streak >= 7 },
@@ -1470,9 +1531,13 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     return {
       tasks: [],
       game: {
-        level: 1, xp: 0, totalXP: 0,
-        completedThisMonth: 0, completedThisYear: 0,
-        streak: 0, lastActivityDate: "",
+        level: 1,
+        xp: 0,
+        totalXP: 0,
+        completedThisMonth: 0,
+        completedThisYear: 0,
+        streak: 0,
+        lastActivityDate: "",
         monthKey: monthKeyFromDate(now),
         yearKey: `${now.getFullYear()}`,
       },
@@ -1527,9 +1592,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
 
     const gameSource = app.game as Partial<GameState>;
     const now = new Date();
-    const normalizedTasks = app.tasks
-      .map((task, index) => normalizeTask(task, index))
-      .filter((task): task is Task => task !== null);
+    const normalizedTasks = app.tasks.map((task, index) => normalizeTask(task, index)).filter((task): task is Task => task !== null);
 
     const normalizedGame: GameState = {
       level: typeof gameSource.level === "number" && gameSource.level > 0 ? Math.floor(gameSource.level) : 1,
@@ -1599,14 +1662,14 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     const json = JSON.stringify(state);
     const bytes = new TextEncoder().encode(json);
     let binary = "";
-    bytes.forEach(b => (binary += String.fromCharCode(b)));
+    bytes.forEach((b) => (binary += String.fromCharCode(b)));
     return btoa(binary);
   }
 
   function decodeState(encoded: string): AppState | null {
     try {
       const binary = atob(encoded);
-      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
       const json = new TextDecoder().decode(bytes);
       return normalizeStatePayload(JSON.parse(json));
     } catch {
@@ -1629,7 +1692,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   function mergeStates(local: AppState, imported: AppState): AppState {
     // Merge tasks: prefer the most recently completed/updated version
     const taskMap = new Map<string, Task>();
-    [...local.tasks, ...imported.tasks].forEach(t => {
+    [...local.tasks, ...imported.tasks].forEach((t) => {
       const existing = taskMap.get(t.id);
       if (!existing || (t.completedAt ?? 0) > (existing.completedAt ?? 0)) {
         taskMap.set(t.id, t);
@@ -1643,8 +1706,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
       completedThisMonth: Math.max(local.game.completedThisMonth, imported.game.completedThisMonth),
       completedThisYear: Math.max(local.game.completedThisYear, imported.game.completedThisYear),
       streak: Math.max(local.game.streak, imported.game.streak),
-      lastActivityDate: local.game.lastActivityDate > imported.game.lastActivityDate
-        ? local.game.lastActivityDate : imported.game.lastActivityDate,
+      lastActivityDate: local.game.lastActivityDate > imported.game.lastActivityDate ? local.game.lastActivityDate : imported.game.lastActivityDate,
       monthKey: local.game.monthKey,
       yearKey: local.game.yearKey,
     };
@@ -1660,9 +1722,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   let currentPage = 1;
   let completedFilterType: TaskType | "all" = "all";
   let draggedTaskId: string | null = null;
-  let unlockedAchievements = new Set<string>(
-    JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]")
-  );
+  let unlockedAchievements = new Set<string>(JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]"));
 
   // ===========================================================
   // Gamification helpers
@@ -1897,14 +1957,14 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
       el.classList.remove("task-card--dragging");
       draggedTaskId = null;
       // Remove drop highlights
-      document.querySelectorAll(".task-grid.drag-over").forEach(g => g.classList.remove("drag-over"));
-      document.querySelectorAll(".task-card--drop-target").forEach(c => c.classList.remove("task-card--drop-target"));
+      document.querySelectorAll(".task-grid.drag-over").forEach((g) => g.classList.remove("drag-over"));
+      document.querySelectorAll(".task-card--drop-target").forEach((c) => c.classList.remove("task-card--drop-target"));
     });
 
     el.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.dataTransfer!.dropEffect = "move";
-      document.querySelectorAll(".task-card--drop-target").forEach(c => {
+      document.querySelectorAll(".task-card--drop-target").forEach((c) => {
         if (c !== el) c.classList.remove("task-card--drop-target");
       });
       if (el.dataset.id !== draggedTaskId) {
@@ -1917,11 +1977,9 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
 
   function renderTasks(): void {
     const types: TaskType[] = ["short", "medium", "long"];
-    types.forEach(type => {
+    types.forEach((type) => {
       const container = document.getElementById(`tasks-${type}`)!;
-      const active = state.tasks
-        .filter(t => t.type === type && !t.completedAt)
-        .sort((a, b) => a.order - b.order);
+      const active = state.tasks.filter((t) => t.type === type && !t.completedAt).sort((a, b) => a.order - b.order);
 
       container.innerHTML = "";
 
@@ -1934,7 +1992,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
         empty.innerHTML = `<span class="task-empty-state__icon">${icons[type]}</span><p>${labels[type]}</p>`;
         container.appendChild(empty);
       } else {
-        active.forEach(task => {
+        active.forEach((task) => {
           container.appendChild(renderTaskCard(task));
         });
       }
@@ -1962,8 +2020,8 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
 
   function renderCompleted(): void {
     const completed = state.tasks
-      .filter(t => t.completedAt !== null)
-      .filter(t => completedFilterType === "all" || t.type === completedFilterType)
+      .filter((t) => t.completedAt !== null)
+      .filter((t) => completedFilterType === "all" || t.type === completedFilterType)
       .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
 
     const totalPages = Math.max(1, Math.ceil(completed.length / PAGE_SIZE));
@@ -1976,7 +2034,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     if (page.length === 0) {
       container.innerHTML = '<p class="empty-completed">No completed tasks yet — get going.</p>';
     } else {
-      page.forEach(task => {
+      page.forEach((task) => {
         const item = document.createElement("div");
         item.className = "completed-item";
         item.setAttribute("role", "listitem");
@@ -2016,7 +2074,10 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
       btn.disabled = disabled;
       btn.setAttribute("aria-label", `Page ${page}`);
       if (!disabled) {
-        btn.addEventListener("click", () => { currentPage = page; renderCompleted(); });
+        btn.addEventListener("click", () => {
+          currentPage = page;
+          renderCompleted();
+        });
       }
       return btn;
     };
@@ -2029,11 +2090,11 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   function renderFullStats(): void {
-    const allCompleted = state.tasks.filter(t => t.completedAt !== null);
-    const activeCount = state.tasks.filter(t => !t.completedAt).length;
+    const allCompleted = state.tasks.filter((t) => t.completedAt !== null);
+    const activeCount = state.tasks.filter((t) => !t.completedAt).length;
     const totalXP = state.game.totalXP;
     const byType = { short: 0, medium: 0, long: 0 };
-    allCompleted.forEach(t => byType[t.type]++);
+    allCompleted.forEach((t) => byType[t.type]++);
 
     const statsData = [
       { value: allCompleted.length, label: "Total Completed" },
@@ -2047,12 +2108,16 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     ];
 
     const grid = document.getElementById("full-stats-grid")!;
-    grid.innerHTML = statsData.map(s => `
+    grid.innerHTML = statsData
+      .map(
+        (s) => `
       <div class="full-stat-card">
         <span class="full-stat-card__value">${s.value}</span>
         <span class="full-stat-card__label">${s.label}</span>
       </div>
-    `).join("");
+    `,
+      )
+      .join("");
 
     // Achievements
     renderAchievements();
@@ -2067,7 +2132,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     h3.className = "full-stats__achievements-title";
     grid.appendChild(h3);
 
-    ACHIEVEMENTS.forEach(ach => {
+    ACHIEVEMENTS.forEach((ach) => {
       const unlocked = ach.check(state);
       if (unlocked && !unlockedAchievements.has(ach.id)) {
         unlockedAchievements.add(ach.id);
@@ -2098,9 +2163,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   // ===========================================================
 
   function addTask(title: string, description: string, type: TaskType, dueDate: string | null): Task {
-    const maxOrder = state.tasks
-      .filter(t => t.type === type && !t.completedAt)
-      .reduce((m, t) => Math.max(m, t.order), -1);
+    const maxOrder = state.tasks.filter((t) => t.type === type && !t.completedAt).reduce((m, t) => Math.max(m, t.order), -1);
 
     const task: Task = {
       id: crypto.randomUUID(),
@@ -2118,7 +2181,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   function completeTask(id: string): void {
-    const task = state.tasks.find(t => t.id === id);
+    const task = state.tasks.find((t) => t.id === id);
     if (!task || task.completedAt) return;
     task.completedAt = Date.now();
 
@@ -2132,13 +2195,13 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   function deleteTask(id: string): void {
-    state.tasks = state.tasks.filter(t => t.id !== id);
+    state.tasks = state.tasks.filter((t) => t.id !== id);
     saveState(state);
     renderAll();
   }
 
   function editTask(id: string, title: string, description: string, type: TaskType, dueDate: string | null): void {
-    const task = state.tasks.find(t => t.id === id);
+    const task = state.tasks.find((t) => t.id === id);
     if (!task) return;
     task.title = title.trim();
     task.description = description.trim();
@@ -2154,7 +2217,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
 
   function normalizeOrders(type: TaskType): void {
     state.tasks
-      .filter(t => t.type === type && !t.completedAt)
+      .filter((t) => t.type === type && !t.completedAt)
       .sort((a, b) => a.order - b.order)
       .forEach((task, index) => {
         task.order = index;
@@ -2163,12 +2226,12 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
 
   function handleDrop(e: DragEvent): void {
     e.preventDefault();
-    const targetGrid = (e.currentTarget as HTMLElement);
+    const targetGrid = e.currentTarget as HTMLElement;
     const targetType = targetGrid.dataset.type as TaskType;
     targetGrid.classList.remove("drag-over");
 
     if (!draggedTaskId) return;
-    const task = state.tasks.find(t => t.id === draggedTaskId);
+    const task = state.tasks.find((t) => t.id === draggedTaskId);
     if (!task) return;
     const sourceType = task.type;
 
@@ -2176,7 +2239,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     const dropCard = (e.target as HTMLElement).closest<HTMLElement>(".task-card");
 
     if (dropCard && dropCard.dataset.id !== draggedTaskId) {
-      const targetTask = state.tasks.find(t => t.id === dropCard.dataset.id);
+      const targetTask = state.tasks.find((t) => t.id === dropCard.dataset.id);
       if (targetTask) {
         task.type = targetType;
         // Insert between items using a fractional order, then normalize immediately below.
@@ -2185,9 +2248,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
     } else {
       // Drop at end of section
       task.type = targetType;
-      const maxOrder = state.tasks
-        .filter(t => t.type === targetType && !t.completedAt && t.id !== draggedTaskId)
-        .reduce((m, t) => Math.max(m, t.order), -1);
+      const maxOrder = state.tasks.filter((t) => t.type === targetType && !t.completedAt && t.id !== draggedTaskId).reduce((m, t) => Math.max(m, t.order), -1);
       task.order = maxOrder + 1;
     }
 
@@ -2237,7 +2298,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   });
 
   // Add-section buttons
-  document.querySelectorAll(".add-section-btn").forEach(btn => {
+  document.querySelectorAll(".add-section-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const type = (btn as HTMLElement).dataset.type as TaskType;
       (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
@@ -2252,18 +2313,18 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   });
 
   // Modal close buttons
-  ["task-modal-close", "task-modal-cancel"].forEach(id => {
+  ["task-modal-close", "task-modal-cancel"].forEach((id) => {
     document.getElementById(id)!.addEventListener("click", () => closeModal("task-modal"));
   });
-  ["export-modal-close", "export-modal-close2"].forEach(id => {
+  ["export-modal-close", "export-modal-close2"].forEach((id) => {
     document.getElementById(id)!.addEventListener("click", () => closeModal("export-modal"));
   });
-  ["import-modal-close", "import-modal-cancel"].forEach(id => {
+  ["import-modal-close", "import-modal-cancel"].forEach((id) => {
     document.getElementById(id)!.addEventListener("click", () => closeModal("import-modal"));
   });
 
   // Close on overlay click
-  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  document.querySelectorAll(".modal-overlay").forEach((overlay) => {
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         overlay.setAttribute("hidden", "");
@@ -2274,7 +2335,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   // Close on Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      document.querySelectorAll(".modal-overlay:not([hidden])").forEach(m => m.setAttribute("hidden", ""));
+      document.querySelectorAll(".modal-overlay:not([hidden])").forEach((m) => m.setAttribute("hidden", ""));
     }
   });
 
@@ -2329,7 +2390,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
         deleteTask(id);
       }
     } else if (action === "edit") {
-      const task = state.tasks.find(t => t.id === id);
+      const task = state.tasks.find((t) => t.id === id);
       if (!task) return;
       (document.getElementById("edit-task-id") as HTMLInputElement).value = task.id;
       (document.getElementById("task-title-input") as HTMLInputElement).value = task.title;
@@ -2343,7 +2404,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   }
 
   // Drag over highlighting for task grids
-  document.querySelectorAll(".task-grid").forEach(grid => {
+  document.querySelectorAll(".task-grid").forEach((grid) => {
     grid.addEventListener("dragover", (e) => {
       e.preventDefault();
       grid.classList.add("drag-over");
@@ -2409,7 +2470,7 @@ import TrackerLayout from "../layouts/TrackerLayout.astro";
   // Clear completed
   document.getElementById("clear-completed-btn")!.addEventListener("click", () => {
     if (!confirm("Clear all completed tasks? This cannot be undone.")) return;
-    state.tasks = state.tasks.filter(t => !t.completedAt);
+    state.tasks = state.tasks.filter((t) => !t.completedAt);
     saveState(state);
     renderAll();
     showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
