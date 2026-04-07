@@ -8,7 +8,6 @@
  * - Visual decay for overdue tasks with stink particles
  * - Drag-and-drop reordering within and between sections
  * - LocalStorage persistence + base64 export/import for cross-device sync
- * - Google Calendar integration
  * - Statistics and positive reinforcement toasts
  */
 import "../styles/global.scss";
@@ -275,22 +274,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
               </div>
               <div class="form-group">
-                <label for="task-desc-input" class="form-label">Description</label>
-                <textarea id="task-desc-input" class="form-textarea" placeholder="Optional notes…" rows="3" maxlength="500"></textarea>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="task-type-input" class="form-label">Timeframe</label>
-                  <select id="task-type-input" class="form-select">
-                    <option value="short">This Week (10 XP)</option>
-                    <option value="medium">This Month (25 XP)</option>
-                    <option value="long">This Quarter (50 XP)</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="task-due-input" class="form-label">Due date</label>
-                  <input type="date" id="task-due-input" class="form-input" />
-                </div>
+                <label for="task-type-input" class="form-label">Timeframe</label>
+                <select id="task-type-input" class="form-select">
+                  <option value="short">This Week (10 XP)</option>
+                  <option value="medium">This Month (25 XP)</option>
+                  <option value="long">This Quarter (50 XP)</option>
+                </select>
               </div>
               <div class="modal__actions">
                 <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
@@ -681,7 +670,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
       // Task card
       .task-card {
-        @include elevated-panel($tracker-card-bg-subtle, $tracker-card-border, $shadow-xs);
+        @include elevated-panel($color-white, $tracker-card-stroke, $shadow-sm);
         border-radius: $radius-md;
         padding: $space-sm $space-md;
         cursor: grab;
@@ -693,7 +682,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         @include tracker-transition(all);
 
         &:hover {
-          box-shadow: $shadow-md;
+          box-shadow: $shadow-lg;
           transform: translateY(-2px);
           border-color: $tracker-card-stroke;
           background: $color-white;
@@ -761,14 +750,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           z-index: 1;
         }
 
-        &__desc {
-          font-size: $font-size-xs;
-          color: $tracker-muted-text;
-          margin: 0;
-          position: relative;
-          z-index: 1;
-        }
-
         &__meta {
           display: flex;
           align-items: center;
@@ -776,16 +757,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           flex-wrap: wrap;
           position: relative;
           z-index: 1;
-        }
-
-        &__due {
-          font-size: $font-size-xs;
-          color: $tracker-soft-text;
-
-          &--overdue {
-            color: $color-decay-overdue;
-            font-weight: $font-weight-semibold;
-          }
         }
 
         &__xp {
@@ -796,16 +767,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           border: 1px solid $tracker-card-stroke;
           padding: 1px 8px;
           border-radius: $radius-full;
-        }
-
-        &__decay-label {
-          font-size: 11px;
-          font-weight: $font-weight-medium;
-          color: $tracker-soft-text;
-          border: 1px solid $tracker-card-stroke;
-          border-radius: $radius-full;
-          padding: 1px 8px;
-          background: $tracker-card-bg;
         }
 
         &__actions {
@@ -2033,18 +1994,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
 
       // ===========================================================
-      // Google Calendar helper
-      // ===========================================================
-
-      function buildCalendarURL(task: Task): string {
-        const title = encodeURIComponent(task.title);
-        const details = encodeURIComponent(task.description || "");
-        const due = task.dueDate ? task.dueDate.replace(/-/g, "") : "";
-        const dates = due ? `${due}/${due}` : "";
-        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates ? `&dates=${dates}` : ""}`;
-      }
-
-      // ===========================================================
       // Toast system
       // ===========================================================
 
@@ -2098,23 +2047,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
       }
 
-      function formatDueDate(dateStr: string | null): string {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-      }
-
-      function isDuePast(task: Task): boolean {
-        if (!task.dueDate) return false;
-        const due = new Date(task.dueDate);
-        due.setHours(23, 59, 59, 999);
-        return due < new Date();
-      }
-
       function renderTaskCard(task: Task): HTMLElement {
         const decay = getDecayLevel(task);
         const decayPct = getDecayProgress(task);
-        const overdue = isDuePast(task);
 
         const el = document.createElement("div");
         el.className = `task-card task-card--${decay}`;
@@ -2124,16 +2059,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         el.innerHTML = `
       <p class="task-card__title">${escHtml(task.title)}</p>
-      ${task.description ? `<p class="task-card__desc">${escHtml(task.description)}</p>` : ""}
       <div class="task-card__meta">
         <span class="task-card__xp">+${XP_VALUES[task.type]} XP</span>
-        ${task.dueDate ? `<span class="task-card__due${overdue ? " task-card__due--overdue" : ""}">Due ${formatDueDate(task.dueDate)}${overdue ? " • Overdue" : ""}</span>` : ""}
-        ${decay !== "fresh" ? `<span class="task-card__decay-label">${decay === "rotten" ? "Rotting" : "Getting stale"}</span>` : ""}
       </div>
       <div class="task-card__actions">
         <button class="btn btn--complete btn--sm" data-action="complete" data-id="${task.id}" aria-label="Complete task">Done</button>
         <button class="btn btn--ghost btn--sm" data-action="edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
-        <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
         <button class="btn btn--danger btn--sm" data-action="delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
       </div>
       ${decay !== "fresh" ? `<div class="task-card__decay-bar" style="width: ${decayPct}%"></div>` : ""}
@@ -2259,7 +2190,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             </div>
           </div>
           <div class="completed-item__actions">
-            <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
             <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">Delete</button>
           </div>
         `;
@@ -2372,16 +2302,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       // Task CRUD
       // ===========================================================
 
-      function addTask(title: string, description: string, type: TaskType, dueDate: string | null): Task {
+      function addTask(title: string, type: TaskType): Task {
         const maxOrder = state.tasks.filter((t) => t.type === type && !t.completedAt).reduce((m, t) => Math.max(m, t.order), -1);
 
         const task: Task = {
           id: crypto.randomUUID(),
           title: title.trim(),
-          description: description.trim(),
+          description: "",
           type,
           createdAt: Date.now(),
-          dueDate: dueDate || null,
+          dueDate: null,
           completedAt: null,
           order: maxOrder + 1,
         };
@@ -2399,11 +2329,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         const now = Date.now();
         const day = 86400000;
         const today = new Date();
-        const iso = (offsetDays: number) => {
-          const d = new Date(today);
-          d.setDate(d.getDate() + offsetDays);
-          return d.toISOString().slice(0, 10);
-        };
 
         const monthKey = monthKeyFromDate(today);
         const yearKey = `${today.getFullYear()}`;
@@ -2413,80 +2338,80 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             {
               id: crypto.randomUUID(),
               title: "Plan weekly sprint goals",
-              description: "Define clear outcomes for this week",
+              description: "",
               type: "short",
               createdAt: now - 1 * day,
-              dueDate: iso(2),
+              dueDate: null,
               completedAt: null,
               order: 0,
             },
             {
               id: crypto.randomUUID(),
               title: "Clean backlog",
-              description: "Remove stale tasks and clarify priorities",
+              description: "",
               type: "short",
               createdAt: now - 4 * day,
-              dueDate: iso(-1),
+              dueDate: null,
               completedAt: null,
               order: 1,
             },
             {
               id: crypto.randomUUID(),
               title: "Write architecture note",
-              description: "Document tracker UI decisions",
+              description: "",
               type: "medium",
               createdAt: now - 9 * day,
-              dueDate: iso(7),
+              dueDate: null,
               completedAt: null,
               order: 0,
             },
             {
               id: crypto.randomUUID(),
               title: "Refine motion system",
-              description: "Tune easing and reduced-motion behavior",
+              description: "",
               type: "medium",
               createdAt: now - 17 * day,
-              dueDate: iso(4),
+              dueDate: null,
               completedAt: null,
               order: 1,
             },
             {
               id: crypto.randomUUID(),
               title: "Ship Q2 portfolio update",
-              description: "Publish new featured case study",
+              description: "",
               type: "long",
               createdAt: now - 24 * day,
-              dueDate: iso(20),
+              dueDate: null,
               completedAt: null,
               order: 0,
             },
             {
               id: crypto.randomUUID(),
               title: "Audit Lighthouse regressions",
-              description: "Investigate CLS spikes",
+              description: "",
               type: "long",
               createdAt: now - 65 * day,
-              dueDate: iso(-5),
+              dueDate: null,
               completedAt: null,
               order: 1,
             },
             {
               id: crypto.randomUUID(),
               title: "Refactor hero section",
-              description: "Improve content hierarchy",
+              description: "",
               type: "short",
               createdAt: now - 8 * day,
-              dueDate: iso(-3),
+              dueDate: null,
               completedAt: now - 2 * day,
               order: 0,
             },
             {
               id: crypto.randomUUID(),
               title: "Publish blog draft",
-              description: "Write post on visual language decisions",
+              description: "",
               type: "medium",
               createdAt: now - 18 * day,
-              dueDate: iso(-10),
+              dueDate: null,
               completedAt: now - 6 * day,
               order: 0,
             },
@@ -2531,13 +2456,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         renderAll();
       }
 
-      function editTask(id: string, title: string, description: string, type: TaskType, dueDate: string | null): void {
+      function editTask(id: string, title: string, type: TaskType): void {
         const task = state.tasks.find((t) => t.id === id);
         if (!task) return;
         task.title = title.trim();
-        task.description = description.trim();
+        task.description = "";
         task.type = type;
-        task.dueDate = dueDate || null;
+        task.dueDate = null;
         saveState(state);
         renderAll();
       }
@@ -2620,9 +2545,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       document.getElementById("add-task-btn")!.addEventListener("click", () => {
         (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
         (document.getElementById("task-title-input") as HTMLInputElement).value = "";
-        (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = "";
         (document.getElementById("task-type-input") as HTMLSelectElement).value = "short";
-        (document.getElementById("task-due-input") as HTMLInputElement).value = "";
         (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
         (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
         openModal("task-modal");
@@ -2638,9 +2561,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const type = (btn as HTMLElement).dataset.type as TaskType;
           (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
           (document.getElementById("task-title-input") as HTMLInputElement).value = "";
-          (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = "";
           (document.getElementById("task-type-input") as HTMLSelectElement).value = type;
-          (document.getElementById("task-due-input") as HTMLInputElement).value = "";
           (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
           (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
           openModal("task-modal");
@@ -2679,17 +2600,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         e.preventDefault();
         const editId = (document.getElementById("edit-task-id") as HTMLInputElement).value;
         const title = (document.getElementById("task-title-input") as HTMLInputElement).value;
-        const description = (document.getElementById("task-desc-input") as HTMLTextAreaElement).value;
         const type = (document.getElementById("task-type-input") as HTMLSelectElement).value as TaskType;
-        const dueDate = (document.getElementById("task-due-input") as HTMLInputElement).value || null;
 
         if (!title.trim()) return;
 
         if (editId) {
-          editTask(editId, title, description, type, dueDate);
+          editTask(editId, title, type);
           showToast({ type: "info", icon: "i", title: "Task updated", text: "" });
         } else {
-          addTask(title, description, type, dueDate);
+          addTask(title, type);
           showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
         }
         closeModal("task-modal");
@@ -2729,9 +2648,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (!task) return;
           (document.getElementById("edit-task-id") as HTMLInputElement).value = task.id;
           (document.getElementById("task-title-input") as HTMLInputElement).value = task.title;
-          (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = task.description;
           (document.getElementById("task-type-input") as HTMLSelectElement).value = task.type;
-          (document.getElementById("task-due-input") as HTMLInputElement).value = task.dueDate ?? "";
           (document.getElementById("task-modal-title") as HTMLElement).textContent = "Edit Task";
           (document.getElementById("task-form-submit") as HTMLElement).textContent = "Save Changes";
           openModal("task-modal");
