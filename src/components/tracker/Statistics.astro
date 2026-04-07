@@ -1,0 +1,82 @@
+---
+import Achievement from "./Achievement.astro";
+import Metric from "./Metric.astro";
+
+type Props = Record<string, never>;
+
+const {} = Astro.props;
+---
+
+<section class="full-stats-section" aria-labelledby="stats-title">
+  <h2 class="section-heading" id="stats-title">Statistics</h2>
+  <div class="full-stats-grid" id="full-stats-grid">
+    <!-- rendered by JS -->
+  </div>
+  <div class="achievement-grid" id="achievement-grid">
+    <!-- rendered by JS -->
+  </div>
+  <Metric />
+  <Achievement />
+</section>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .full-stats-section {
+    @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
+    border-radius: $radius-xl;
+    padding: $space-lg;
+    height: 100%;
+    background:
+      linear-gradient(180deg, rgba(10, 73, 177, 0.08) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      22px 22px,
+      22px 22px;
+    animation:
+      panel-enter 0.75s var(--ease-out) both,
+      grid-drift 28s linear infinite;
+
+    @include respond-to(md) {
+      padding: $space-md;
+    }
+  }
+
+  .section-heading {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  .full-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: $space-md;
+    margin-top: $space-lg;
+    margin-bottom: $space-xl;
+  }
+
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: $space-md;
+    margin-top: $space-lg;
+  }
+
+  :global(.full-stats__achievements-title) {
+    grid-column: 1 / -1;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    margin: 0 0 $space-xs;
+    color: $color-text-primary;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .full-stats-section {
+      animation: none;
+    }
+  }
+</style>

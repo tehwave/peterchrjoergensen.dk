@@ -14,9 +14,11 @@ import "../styles/global.scss";
 
 import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
-import Achievement from "../components/tracker/Achievement.astro";
+import CompletedTaskTemplate from "../components/tracker/CompletedTask.astro";
 import Footer from "../components/Footer.astro";
-import Metric from "../components/tracker/Metric.astro";
+import Statistics from "../components/tracker/Statistics.astro";
+import TaskTemplate from "../components/tracker/Task.astro";
+import { XP_VALUES } from "../types/tracker";
 
 // Texture images for the background, generated at build time using Astro's Assets API.
 import textureSource from "../assets/black-paper.png";
@@ -137,21 +139,36 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             <div class="stat-card">
               <span class="stat-card__value" id="stat-month">0</span>
               <span class="stat-card__label">Done this month</span>
-              <span class="stat-card__icon">M</span>
+              <span class="stat-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                  <path d="M16 3v4M8 3v4M3 10h18"></path>
+                </svg>
+              </span>
             </div>
 
             <!-- Yearly stat -->
             <div class="stat-card">
               <span class="stat-card__value" id="stat-year">0</span>
               <span class="stat-card__label">Done this year</span>
-              <span class="stat-card__icon">Y</span>
+              <span class="stat-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <circle cx="12" cy="12" r="1"></circle>
+                </svg>
+              </span>
             </div>
 
             <!-- Streak -->
             <div class="stat-card">
               <span class="stat-card__value" id="stat-streak">0</span>
               <span class="stat-card__label">Day streak</span>
-              <span class="stat-card__icon">S</span>
+              <span class="stat-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3c.4 2.4-.6 4.1-2.2 5.6C8.2 10 7 11.5 7 13.7 7 17.2 9.7 20 13 20s6-2.8 6-6.3c0-2.4-1.4-4.1-3.4-5.6-.7 2-2.1 3.4-3.6 4.3C12.9 10.6 12.5 7.4 12 3Z"></path>
+                </svg>
+              </span>
             </div>
           </div>
 
@@ -248,18 +265,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             </section>
 
             <!-- Full Statistics -->
-            <section class="full-stats-section" aria-labelledby="stats-title">
-              <h2 class="section-heading" id="stats-title">Statistics</h2>
-              <div class="full-stats-grid" id="full-stats-grid">
-                <!-- rendered by JS -->
-              </div>
-              <div class="achievement-grid" id="achievement-grid">
-                <!-- rendered by JS -->
-              </div>
-              <Metric />
-              <Achievement />
-            </section>
+            <Statistics />
           </div>
+
+          <template id="task-card-template">
+            <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" xp={XP_VALUES.short} decayProgress={0} />
+          </template>
+
+          <template id="completed-task-template">
+            <CompletedTaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
+          </template>
 
           <!-- ====================================================
        MODALS
@@ -462,7 +477,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
 
           &__value {
-            font-size: $font-size-3xl;
+            font-size: $font-size-2xl;
             font-weight: $font-weight-black;
             color: $color-text-primary;
             line-height: 1;
@@ -480,8 +495,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             position: absolute;
             top: $space-md;
             right: $space-md;
-            font-size: 1.5rem;
-            opacity: 0.25;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.2;
+
+            svg {
+              width: 28px;
+              height: 28px;
+            }
           }
         }
 
@@ -1012,8 +1036,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
-        .completed-section,
-        .full-stats-section {
+        .completed-section {
           @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
           border-radius: $radius-xl;
           padding: $space-lg;
@@ -1029,19 +1052,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           background: transparent;
           border: 2px dotted $tracker-surface-stroke;
           box-shadow: none;
-        }
-
-        .full-stats-section {
-          background:
-            linear-gradient(180deg, rgba(10, 73, 177, 0.08) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
-          background-size:
-            100% 100%,
-            22px 22px,
-            22px 22px;
-          animation:
-            panel-enter 0.75s var(--ease-out) both,
-            grid-drift 28s linear infinite;
         }
 
         .section-heading-row {
@@ -1188,112 +1198,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           &:disabled {
             opacity: 0.4;
             cursor: not-allowed;
-          }
-        }
-
-        // ============================================================
-        // Full Stats
-        // ============================================================
-
-        .full-stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: $space-md;
-          margin-bottom: $space-xl;
-        }
-
-        .full-stat-card {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
-          border-radius: $radius-lg;
-          padding: $space-lg;
-          text-align: center;
-
-          &:hover {
-            box-shadow: $shadow-sm;
-            transform: translateY(-1px);
-            @include tracker-transition(all);
-          }
-
-          &__value {
-            font-size: $font-size-3xl;
-            font-weight: $font-weight-black;
-            color: $color-blue;
-            line-height: 1;
-            display: block;
-            margin-bottom: $space-xs;
-          }
-
-          &__label {
-            font-size: $font-size-xs;
-            text-transform: uppercase;
-            letter-spacing: $tracking-wide;
-            color: $tracker-soft-text;
-          }
-        }
-
-        // Achievements
-        .achievement-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-          gap: $space-md;
-          margin-top: $space-lg;
-        }
-
-        .full-stats__achievements-title {
-          grid-column: 1 / -1;
-          font-size: $font-size-lg;
-          font-weight: $font-weight-bold;
-          margin: 0 0 $space-xs;
-          color: $color-text-primary;
-        }
-
-        .achievement-card {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
-          border-radius: $radius-lg;
-          padding: $space-md;
-          text-align: center;
-          position: relative;
-          @include tracker-transition(all);
-
-          &--locked {
-            opacity: 0.55;
-            filter: grayscale(1);
-          }
-
-          &--unlocked {
-            border-color: $tracker-card-stroke;
-            background: linear-gradient(135deg, rgba(236, 131, 5, 0.08), $tracker-card-bg);
-          }
-
-          &__icon {
-            display: block;
-            font-size: 2.5rem;
-            margin-bottom: $space-xs;
-          }
-
-          &__name {
-            font-size: $font-size-xs;
-            font-weight: $font-weight-semibold;
-            color: $color-text-primary;
-            margin: 0 0 2px;
-          }
-
-          &__desc {
-            font-size: 11px;
-            color: $tracker-soft-text;
-            margin: 0;
-          }
-
-          &__badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: $color-orange;
-            color: white;
-            font-size: 10px;
-            font-weight: $font-weight-bold;
-            padding: 1px 5px;
-            border-radius: 99px;
           }
         }
 
@@ -1583,7 +1487,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         @media (prefers-reduced-motion: reduce) {
           .task-section,
           .completed-section,
-          .full-stats-section,
           .tracker__header,
           .tracker__board {
             animation: none;
@@ -1600,47 +1503,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       </style>
 
       <script>
-        import { TaskCard } from "../utils/tracker/taskCard";
+        import { getTaskDecayLevel, getTaskDecayProgress } from "../utils/tracker/decay";
+        import { XP_VALUES, type AppState, type CompletedTask, type GameState, type Task, type TaskType } from "../types/tracker";
 
         // ===========================================================
         // Types
         // ===========================================================
 
-        type TaskType = "short" | "medium" | "long";
-        interface Task {
-          id: string;
-          title: string;
-          description: string;
-          type: TaskType;
-          createdAt: number;
-          dueDate: string | null;
-          completedAt: number | null;
-          order: number;
-        }
-
-        interface GameState {
-          level: number;
-          xp: number;
-          totalXP: number;
-          completedThisMonth: number;
-          completedThisYear: number;
-          streak: number;
-          lastActivityDate: string;
-          monthKey: string; // "YYYY-MM"
-          yearKey: string; // "YYYY"
-        }
-
-        interface AppState {
-          tasks: Task[];
-          game: GameState;
-          version: number;
-        }
-
         // ===========================================================
         // Constants
         // ===========================================================
 
-        const XP_VALUES: Record<TaskType, number> = { short: 10, medium: 25, long: 50 };
         const STORAGE_KEY = "tracker_v1";
         const PAGE_SIZE = 10;
 
@@ -1668,6 +1541,30 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         ];
 
         const LEVEL_TITLES = ["Rookie", "Apprentice", "Journeyman", "Adept", "Expert", "Master", "Grand Master", "Champion", "Legend", "Mythic"];
+
+        const METRIC_ICONS: Record<string, string> = {
+          "Total Completed": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.5 2.5L16 9.5" /></svg>`,
+          "Active Tasks": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r="1" /><circle cx="4" cy="12" r="1" /><circle cx="4" cy="18" r="1" /></svg>`,
+          "Total XP Earned": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 6 5-6 13L6 8l6-5Z" /></svg>`,
+          "Weekly Completed": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18M8 14h3" /></svg>`,
+          "Monthly Completed": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18M7 14h10M7 18h7" /></svg>`,
+          "Quarterly Completed": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4m0 0h10l-2 4 2 4H5" /></svg>`,
+          "Day Streak": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.4 2.4-.6 4.1-2.2 5.6C8.2 10 7 11.5 7 13.7 7 17.2 9.7 20 13 20s6-2.8 6-6.3c0-2.4-1.4-4.1-3.4-5.6-.7 2-2.1 3.4-3.6 4.3C12.9 10.6 12.5 7.4 12 3Z" /></svg>`,
+          "Current Level": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.7 3 7.9 7 9 4-1.1 7-4.3 7-9V6l-7-3Z" /><path d="M9.5 12.5 11.2 14l3.3-3.5" /></svg>`,
+        };
+
+        const ACHIEVEMENT_ICONS: Record<string, string> = {
+          A1: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 17 4-10 3 7 3-7" /><path d="M4 19h16" /></svg>`,
+          A2: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="9,7 18,12 9,17" /></svg>`,
+          A3: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 5 13h6l-1 9 8-12h-6l1-8Z" /></svg>`,
+          A4: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v2a4 4 0 0 1-8 0V4Z" /><path d="M6 6H4a3 3 0 0 0 3 3M18 6h2a3 3 0 0 1-3 3" /><path d="M12 10v6M9 20h6" /></svg>`,
+          A5: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 20 6-8 4 5 3-4 5 7H3Z" /></svg>`,
+          A6: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.7 3 7.9 7 9 4-1.1 7-4.3 7-9V6l-7-3Z" /><path d="M12 9v7" /><path d="M9.5 12.5h5" /></svg>`,
+          A7: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.7 3 7.9 7 9 4-1.1 7-4.3 7-9V6l-7-3Z" /><path d="M9 11h6M9 14h6" /></svg>`,
+          A8: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="1" /></svg>`,
+          A9: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4 8 3 3 5-6 5 6 3-3-2 10H6L4 8Z" /></svg>`,
+          A10: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 6 5-6 13L6 8l6-5Z" /></svg>`,
+        };
 
         // Achievements definition
         const ACHIEVEMENTS = [
@@ -2043,15 +1940,73 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
         }
 
-        function renderTaskCard(task: Task): HTMLElement {
-          const card = new TaskCard(task, {
-            getDraggedTaskId: () => draggedTaskId,
-            setDraggedTaskId: (id) => {
-              draggedTaskId = id;
-            },
-          }).render();
+        function renderTaskCard(task: Task): HTMLElement | null {
+          const template = document.getElementById("task-card-template");
+          if (!(template instanceof HTMLTemplateElement)) return null;
+
+          const card = template.content.firstElementChild?.cloneNode(true);
+          if (!(card instanceof HTMLElement)) return null;
+
+          const decay = getTaskDecayLevel(task);
+          const decayProgress = getTaskDecayProgress(task);
+          const xp = XP_VALUES[task.type];
+
+          card.dataset.id = task.id;
+          card.dataset.type = task.type;
+
+          card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
+          card.classList.add(`task-card--${decay}`);
+
+          const titleEl = card.querySelector<HTMLElement>("[data-task-title]");
+          const xpEl = card.querySelector<HTMLElement>("[data-task-xp]");
+          const decayBar = card.querySelector<HTMLElement>("[data-task-decay-bar]");
+          const particles = card.querySelector<HTMLElement>("[data-task-particles]");
+
+          if (titleEl) titleEl.textContent = task.title;
+          if (xpEl) xpEl.textContent = `+${xp} XP`;
+
+          if (decayBar) {
+            decayBar.style.width = `${decayProgress}%`;
+            decayBar.hidden = decay === "fresh";
+          }
+
+          if (particles) {
+            particles.hidden = decay !== "rotten";
+          }
+
+          card.querySelectorAll<HTMLElement>("[data-id]").forEach((actionEl) => {
+            actionEl.dataset.id = task.id;
+          });
+
           applyAstroScope(card);
           return card;
+        }
+
+        function renderCompletedTaskItem(task: CompletedTask): HTMLElement | null {
+          const template = document.getElementById("completed-task-template");
+          if (!(template instanceof HTMLTemplateElement)) return null;
+
+          const item = template.content.firstElementChild?.cloneNode(true);
+          if (!(item instanceof HTMLElement)) return null;
+
+          const typeLabel = task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly";
+
+          item.dataset.completedId = task.id;
+
+          const titleEl = item.querySelector<HTMLElement>("[data-completed-title]");
+          const typeEl = item.querySelector<HTMLElement>("[data-completed-type]");
+          const dateEl = item.querySelector<HTMLElement>("[data-completed-date]");
+          const xpEl = item.querySelector<HTMLElement>("[data-completed-xp]");
+          const deleteBtn = item.querySelector<HTMLElement>("[data-action='delete-completed']");
+
+          if (titleEl) titleEl.textContent = task.title;
+          if (typeEl) typeEl.textContent = typeLabel;
+          if (dateEl) dateEl.textContent = `Completed ${formatDate(task.completedAt)}`;
+          if (xpEl) xpEl.textContent = `+${XP_VALUES[task.type]} XP`;
+          if (deleteBtn) deleteBtn.dataset.id = task.id;
+
+          applyAstroScope(item);
+          return item;
         }
 
         function renderTasks(): void {
@@ -2068,12 +2023,22 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               empty.dataset.type = type;
               const icons: Record<TaskType, string> = { short: "W", medium: "M", long: "Q" };
               const labels: Record<TaskType, string> = { short: "No weekly tasks yet. Add one!", medium: "No monthly tasks yet. Add one!", long: "No quarterly goals yet. Add one!" };
-              empty.innerHTML = `<span class="task-empty-state__icon">${icons[type]}</span><p>${labels[type]}</p>`;
+              const icon = document.createElement("span");
+              icon.className = "task-empty-state__icon";
+              icon.textContent = icons[type];
+
+              const label = document.createElement("p");
+              label.textContent = labels[type];
+
+              empty.append(icon, label);
               applyAstroScope(empty);
               container.appendChild(empty);
             } else {
               active.forEach((task) => {
-                container.appendChild(renderTaskCard(task));
+                const taskCard = renderTaskCard(task);
+                if (taskCard) {
+                  container.appendChild(taskCard);
+                }
               });
             }
           });
@@ -2112,28 +2077,24 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           container.innerHTML = "";
 
           if (page.length === 0) {
-            container.innerHTML = '<p class="empty-completed">No completed tasks yet — get going.</p>';
+            const empty = document.createElement("p");
+            empty.className = "empty-completed";
+            empty.textContent = "No completed tasks yet — get going.";
+            applyAstroScope(empty);
+            container.appendChild(empty);
           } else {
             page.forEach((task) => {
-              const item = document.createElement("div");
-              item.className = "completed-item";
-              item.setAttribute("role", "listitem");
-              item.innerHTML = `
-          <span class="completed-item__check" aria-hidden="true">Done</span>
-          <div class="completed-item__info">
-            <span class="completed-item__title">${escHtml(task.title)}</span>
-            <div class="completed-item__meta">
-              <span>${task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly"}</span>
-              <span>Completed ${formatDate(task.completedAt)}</span>
-              <span class="completed-item__xp">+${XP_VALUES[task.type]} XP</span>
-            </div>
-          </div>
-          <div class="completed-item__actions">
-            <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">Delete</button>
-          </div>
-        `;
-              applyAstroScope(item);
-              container.appendChild(item);
+              if (task.completedAt === null) return;
+
+              const completedTask: CompletedTask = {
+                ...task,
+                completedAt: task.completedAt,
+              };
+
+              const completedItem = renderCompletedTaskItem(completedTask);
+              if (completedItem) {
+                container.appendChild(completedItem);
+              }
             });
           }
 
@@ -2232,11 +2193,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (!(template instanceof HTMLTemplateElement)) return null;
 
           const fragment = template.content.cloneNode(true) as DocumentFragment;
+          const iconEl = fragment.querySelector<HTMLElement>("[data-metric-icon]");
           const valueEl = fragment.querySelector<HTMLElement>("[data-metric-value]");
           const labelEl = fragment.querySelector<HTMLElement>("[data-metric-label]");
 
-          if (!valueEl || !labelEl) return null;
+          if (!iconEl || !valueEl || !labelEl) return null;
 
+          iconEl.innerHTML = METRIC_ICONS[data.label] ?? "";
           valueEl.textContent = String(data.value);
           labelEl.textContent = data.label;
 
@@ -2261,7 +2224,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           card.classList.remove("achievement-card--locked", "achievement-card--unlocked");
           card.classList.add(`achievement-card--${data.unlocked ? "unlocked" : "locked"}`);
-          iconEl.textContent = data.icon;
+          iconEl.innerHTML = ACHIEVEMENT_ICONS[data.icon] ?? "";
           nameEl.textContent = data.name;
           descEl.textContent = data.desc;
 
@@ -2522,9 +2485,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Event wiring
         // ===========================================================
 
-        function escHtml(str: string): string {
-          return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-        }
+        document.addEventListener("tracker-task-dragstart", (event) => {
+          const dragEvent = event as CustomEvent<{ id: string }>;
+          draggedTaskId = dragEvent.detail?.id ?? null;
+        });
+
+        document.addEventListener("tracker-task-dragend", () => {
+          draggedTaskId = null;
+        });
 
         // Add task button
         document.getElementById("add-task-btn")!.addEventListener("click", () => {

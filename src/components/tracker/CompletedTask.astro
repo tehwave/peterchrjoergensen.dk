@@ -1,0 +1,35 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  typeLabel: string;
+  completedAtLabel: string;
+  xp: number;
+}
+
+const { id, title, typeLabel, completedAtLabel, xp } = Astro.props;
+---
+
+<div class="completed-item" role="listitem" data-completed-id={id}>
+  <span class="completed-item__check" aria-hidden="true">Done</span>
+  <div class="completed-item__info">
+    <span class="completed-item__title" data-completed-title>{title}</span>
+    <div class="completed-item__meta">
+      <span data-completed-type>{typeLabel}</span>
+      <span data-completed-date>{completedAtLabel}</span>
+      <span class="completed-item__xp" data-completed-xp>+{xp} XP</span>
+    </div>
+  </div>
+  <div class="completed-item__actions">
+    <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id={id} aria-label="Delete completed task">Delete</button>
+  </div>
+</div>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .completed-item {
+    min-height: 0;
+  }
+</style>

@@ -1,0 +1,126 @@
+---
+import type { DecayLevel, TaskType } from "../../types/tracker";
+
+interface Props {
+  id: string;
+  title: string;
+  type: TaskType;
+  decay: DecayLevel;
+  xp: number;
+  decayProgress?: number;
+  isDragging?: boolean;
+  isDropTarget?: boolean;
+}
+
+const { id, title, type, decay, xp, decayProgress = 0, isDragging = false, isDropTarget = false } = Astro.props;
+const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
+---
+
+<tracker-task-card
+  class:list={[
+    "task-card",
+    `task-card--${decay}`,
+    {
+      "task-card--dragging": isDragging,
+      "task-card--drop-target": isDropTarget,
+    },
+  ]}
+  role="listitem"
+  draggable="true"
+  data-id={id}
+  data-type={type}
+>
+  <p class="task-card__title" data-task-title>{title}</p>
+
+  <div class="task-card__meta">
+    <span class="task-card__xp" data-task-xp>+{xp} XP</span>
+  </div>
+
+  <div class="task-card__actions">
+    <button class="btn btn--complete btn--sm" data-action="complete" data-id={id} aria-label="Complete task">Done</button>
+    <button class="btn btn--ghost btn--sm" data-action="edit" data-id={id} aria-label="Edit task">Edit</button>
+    <button class="btn btn--danger btn--sm" data-action="delete" data-id={id} aria-label="Delete task">Delete</button>
+  </div>
+
+  <div class="task-card__decay-bar" data-task-decay-bar style={`width: ${safeDecayProgress}%`} hidden={decay === "fresh"}></div>
+
+  <div class="stink-particles" data-task-particles hidden={decay !== "rotten"}>
+    {Array.from({ length: 6 }).map((_, index) => <span class="stink-particle" data-particle-index={index} />)}
+  </div>
+</tracker-task-card>
+
+<script>
+  class TrackerTaskCard extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.taskCardInitialized === "true") return;
+      this.dataset.taskCardInitialized = "true";
+
+      this.addEventListener("dragstart", (event) => {
+        this.classList.add("task-card--dragging");
+        event.dataTransfer?.setData("text/plain", this.dataset.id ?? "");
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "move";
+        }
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-task-dragstart", {
+            bubbles: true,
+            detail: { id: this.dataset.id ?? "" },
+          }),
+        );
+      });
+
+      this.addEventListener("dragend", () => {
+        this.classList.remove("task-card--dragging");
+        document.querySelectorAll(".task-grid.drag-over").forEach((grid) => grid.classList.remove("drag-over"));
+        document.querySelectorAll(".task-card--drop-target").forEach((card) => card.classList.remove("task-card--drop-target"));
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-task-dragend", {
+            bubbles: true,
+          }),
+        );
+      });
+
+      this.addEventListener("dragover", (event) => {
+        event.preventDefault();
+
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = "move";
+        }
+
+        const activeDragging = document.querySelector<HTMLElement>(".task-card--dragging");
+        document.querySelectorAll(".task-card--drop-target").forEach((card) => {
+          if (card !== this) {
+            card.classList.remove("task-card--drop-target");
+          }
+        });
+
+        if (activeDragging?.dataset.id !== this.dataset.id) {
+          this.classList.add("task-card--drop-target");
+        }
+      });
+
+      const particles = this.querySelectorAll<HTMLElement>(".stink-particle");
+      particles.forEach((particle) => {
+        particle.style.setProperty("--duration", `${2 + Math.random() * 2}s`);
+        particle.style.setProperty("--delay", `${Math.random() * 2}s`);
+        particle.style.left = `${10 + Math.random() * 80}%`;
+        particle.style.setProperty("--size", `${8 + Math.random() * 8}px`);
+      });
+    }
+  }
+
+  if (!customElements.get("tracker-task-card")) {
+    customElements.define("tracker-task-card", TrackerTaskCard);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-task-card {
+    display: block;
+  }
+</style>

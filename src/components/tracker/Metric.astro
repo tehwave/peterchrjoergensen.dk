@@ -6,6 +6,7 @@ const {} = Astro.props;
 
 <template id="metric-template">
   <div class="full-stat-card">
+    <span class="full-stat-card__icon" data-metric-icon aria-hidden="true"></span>
     <span class="full-stat-card__value" data-metric-value></span>
     <span class="full-stat-card__label" data-metric-label></span>
   </div>
@@ -17,5 +18,58 @@ const {} = Astro.props;
 
   :global(#metric-template) {
     display: none;
+  }
+
+  :global(.full-stat-card) {
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-lg;
+    border-left: 3px solid $color-blue;
+    padding: $space-sm $space-md;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    column-gap: $space-sm;
+    row-gap: 2px;
+    align-items: center;
+  }
+
+  :global(.full-stat-card:hover) {
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+    @include tracker-transition(all);
+  }
+
+  :global(.full-stat-card__icon) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: rgba(10, 73, 177, 0.7);
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  :global(.full-stat-card__icon svg) {
+    width: 24px;
+    height: 24px;
+  }
+
+  :global(.full-stat-card__value) {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-black;
+    color: $color-blue;
+    line-height: 1;
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  :global(.full-stat-card__label) {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: $tracking-wide;
+    color: $tracker-soft-text;
+    grid-column: 2;
+    grid-row: 2;
   }
 </style>
