@@ -320,10 +320,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         <!-- Toast Container -->
         <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
-
-        <Footer />
       </div>
     </main>
+    <Footer />
 
     <style lang="scss">
       @use "../styles/variables" as *;
@@ -1604,13 +1603,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     </style>
 
     <script>
+      import { Task as TaskElement } from "../utils/tracker/taskElement";
+
       // ===========================================================
       // Types
       // ===========================================================
 
       type TaskType = "short" | "medium" | "long";
-      type DecayLevel = "fresh" | "stale" | "rotten";
-
       interface Task {
         id: string;
         title: string;
@@ -1647,12 +1646,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       const XP_VALUES: Record<TaskType, number> = { short: 10, medium: 25, long: 50 };
       const STORAGE_KEY = "tracker_v1";
       const PAGE_SIZE = 10;
-      // Decay thresholds in ms
-      const DECAY_THRESHOLDS: Record<TaskType, { stale: number; rotten: number }> = {
-        short: { stale: 3 * 86400000, rotten: 5 * 86400000 },
-        medium: { stale: 14 * 86400000, rotten: 21 * 86400000 },
-        long: { stale: 42 * 86400000, rotten: 63 * 86400000 },
-      };
 
       const TIPS = [
         "Break big goals into smaller weekly tasks — momentum is everything.",
@@ -1974,26 +1967,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
 
       // ===========================================================
-      // Decay helpers
-      // ===========================================================
-
-      function getDecayLevel(task: Task): DecayLevel {
-        if (task.completedAt) return "fresh";
-        const age = Date.now() - task.createdAt;
-        const thresh = DECAY_THRESHOLDS[task.type];
-        if (age >= thresh.rotten) return "rotten";
-        if (age >= thresh.stale) return "stale";
-        return "fresh";
-      }
-
-      function getDecayProgress(task: Task): number {
-        if (task.completedAt) return 0;
-        const age = Date.now() - task.createdAt;
-        const thresh = DECAY_THRESHOLDS[task.type];
-        return Math.min(100, (age / thresh.rotten) * 100);
-      }
-
-      // ===========================================================
       // Toast system
       // ===========================================================
 
@@ -2048,72 +2021,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
 
       function renderTaskCard(task: Task): HTMLElement {
-        const decay = getDecayLevel(task);
-        const decayPct = getDecayProgress(task);
-
-        const el = document.createElement("div");
-        el.className = `task-card task-card--${decay}`;
-        el.setAttribute("role", "listitem");
-        el.setAttribute("draggable", "true");
-        el.dataset.id = task.id;
-
-        el.innerHTML = `
-      <p class="task-card__title">${escHtml(task.title)}</p>
-      <div class="task-card__meta">
-        <span class="task-card__xp">+${XP_VALUES[task.type]} XP</span>
-      </div>
-      <div class="task-card__actions">
-        <button class="btn btn--complete btn--sm" data-action="complete" data-id="${task.id}" aria-label="Complete task">Done</button>
-        <button class="btn btn--ghost btn--sm" data-action="edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
-        <button class="btn btn--danger btn--sm" data-action="delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
-      </div>
-      ${decay !== "fresh" ? `<div class="task-card__decay-bar" style="width: ${decayPct}%"></div>` : ""}
-    `;
-
-        // Stink particles for rotten tasks
-        if (decay === "rotten") {
-          const particles = document.createElement("div");
-          particles.className = "stink-particles";
-          for (let i = 0; i < 6; i++) {
-            const p = document.createElement("span");
-            p.className = "stink-particle";
-            p.style.setProperty("--duration", `${2 + Math.random() * 2}s`);
-            p.style.setProperty("--delay", `${Math.random() * 2}s`);
-            p.style.left = `${10 + Math.random() * 80}%`;
-            p.style.setProperty("--size", `${8 + Math.random() * 8}px`);
-            particles.appendChild(p);
-          }
-          el.appendChild(particles);
-        }
-
-        // Drag events
-        el.addEventListener("dragstart", (e) => {
-          draggedTaskId = task.id;
-          el.classList.add("task-card--dragging");
-          e.dataTransfer!.effectAllowed = "move";
-          e.dataTransfer!.setData("text/plain", task.id);
-        });
-
-        el.addEventListener("dragend", () => {
-          el.classList.remove("task-card--dragging");
-          draggedTaskId = null;
-          // Remove drop highlights
-          document.querySelectorAll(".task-grid.drag-over").forEach((g) => g.classList.remove("drag-over"));
-          document.querySelectorAll(".task-card--drop-target").forEach((c) => c.classList.remove("task-card--drop-target"));
-        });
-
-        el.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          e.dataTransfer!.dropEffect = "move";
-          document.querySelectorAll(".task-card--drop-target").forEach((c) => {
-            if (c !== el) c.classList.remove("task-card--drop-target");
-          });
-          if (el.dataset.id !== draggedTaskId) {
-            el.classList.add("task-card--drop-target");
-          }
-        });
-
-        return el;
+        return new TaskElement(task, {
+          getDraggedTaskId: () => draggedTaskId,
+          setDraggedTaskId: (id) => {
+            draggedTaskId = id;
+          },
+        }).render();
       }
 
       function renderTasks(): void {
