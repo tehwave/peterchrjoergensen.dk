@@ -66,28 +66,28 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   const TITLE_MIN_LENGTH = 1;
   const PARTICLE_VARIANTS = {
     stale: {
-      count: 8,
-      speedMin: 22,
-      speedMax: 48,
-      sizeMin: 12,
-      sizeMax: 18,
-      ttlMin: 900,
-      ttlMax: 1400,
+      count: 10,
+      speedMin: 14,
+      speedMax: 28,
+      sizeMin: 16,
+      sizeMax: 24,
+      ttlMin: 1200,
+      ttlMax: 1900,
       hueMin: 22,
       hueMax: 42,
-      alpha: 0.72,
+      alpha: 0.9,
     },
     rotten: {
-      count: 12,
-      speedMin: 34,
-      speedMax: 70,
-      sizeMin: 14,
-      sizeMax: 22,
-      ttlMin: 700,
-      ttlMax: 1200,
+      count: 15,
+      speedMin: 18,
+      speedMax: 36,
+      sizeMin: 18,
+      sizeMax: 28,
+      ttlMin: 1000,
+      ttlMax: 1650,
       hueMin: 10,
       hueMax: 30,
-      alpha: 0.94,
+      alpha: 1,
     },
   };
 
@@ -100,6 +100,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       super();
       this.titleEl = null;
       this.titleInputEl = null;
+      this.particlesContainerEl = null;
       this.isEditing = false;
       this.particleCanvasEl = null;
       this.particleCtx = null;
@@ -122,8 +123,10 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
 
       this.titleEl = this.querySelector("[data-task-title]");
       this.titleInputEl = this.querySelector("[data-task-title-input]");
+      this.particlesContainerEl = this.querySelector("[data-task-particles]");
 
       this.syncTitleFromDataset();
+      this.syncParticlesContainerClass();
       this.setupInlineEditing();
       this.setupActionButtons();
       this.setupParticles();
@@ -202,7 +205,19 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.syncParticles();
     }
 
+    syncParticlesContainerClass() {
+      const particlesContainer = this.particlesContainerEl;
+      if (!(particlesContainer instanceof HTMLElement)) return;
+
+      const decayState = this.dataset.decay ?? "fresh";
+      particlesContainer.classList.remove("fire-particles--fresh", "fire-particles--stale", "fire-particles--rotten");
+      particlesContainer.classList.add(`fire-particles--${decayState}`);
+      particlesContainer.hidden = false;
+    }
+
     syncParticles() {
+      this.syncParticlesContainerClass();
+
       const decayState = this.dataset.decay ?? "fresh";
       const variant = decayState === "stale" || decayState === "rotten" ? decayState : null;
       const canAnimate = !this.motionMediaQuery?.matches;
@@ -294,12 +309,12 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       const ttl = pick(config.ttlMin, config.ttlMax);
       const life = randomizeAge ? pick(0, ttl) : 0;
       const variantBoost = this.activeParticleVariant === "rotten" ? 1.12 : 1;
-      const travelRatio = pick(0.45, 0.95) * variantBoost;
+      const travelRatio = pick(0.35, 0.72) * variantBoost;
       const usableWidth = Math.max(20, this.cardWidth - 12);
 
       return {
         baseX: 6 + Math.random() * usableWidth,
-        startY: this.cardHeight + pick(2, 18),
+        startY: this.cardHeight + pick(-6, 8),
         rise: Math.max(28, this.cardHeight * travelRatio),
         drift: pick(-26, 26),
         wobbleAmp: pick(2.5, 11),
@@ -309,7 +324,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         hue: pick(config.hueMin, config.hueMax),
         life,
         ttl,
-        spawnDelay: randomizeAge ? 0 : pick(0, ttl * 0.5),
+        spawnDelay: randomizeAge ? 0 : pick(0, ttl * 0.2),
         spin: pick(-0.28, 0.28),
         tilt: pick(-0.2, 0.2),
       };
@@ -353,6 +368,12 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         this.particleCtx.translate(drawX, drawY);
         this.particleCtx.rotate(rotation);
         this.particleCtx.globalAlpha = alpha;
+
+        this.particleCtx.beginPath();
+        this.particleCtx.fillStyle = "rgba(255, 120, 32, 0.28)";
+        this.particleCtx.arc(0, 0, particle.size * 0.38, 0, Math.PI * 2);
+        this.particleCtx.fill();
+
         this.particleCtx.font = `${particle.size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
         this.particleCtx.textAlign = "center";
         this.particleCtx.textBaseline = "middle";
