@@ -67,8 +67,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   const PARTICLE_VARIANTS = {
     stale: {
       count: 10,
-      speedMin: 14,
-      speedMax: 28,
+      speedMin: 9,
+      speedMax: 18,
       sizeMin: 16,
       sizeMax: 24,
       ttlMin: 1200,
@@ -79,8 +79,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     },
     rotten: {
       count: 15,
-      speedMin: 18,
-      speedMax: 36,
+      speedMin: 12,
+      speedMax: 24,
       sizeMin: 18,
       sizeMax: 28,
       ttlMin: 1000,
@@ -309,7 +309,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       const ttl = pick(config.ttlMin, config.ttlMax);
       const life = randomizeAge ? pick(0, ttl) : 0;
       const variantBoost = this.activeParticleVariant === "rotten" ? 1.12 : 1;
-      const travelRatio = pick(0.35, 0.72) * variantBoost;
+      const travelRatio = pick(0.2, 0.42) * variantBoost;
       const usableWidth = Math.max(20, this.cardWidth - 12);
 
       return {
