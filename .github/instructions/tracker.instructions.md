@@ -38,11 +38,12 @@ The tracker is a **completely standalone personal productivity app** that lives 
 
 - All state lives in `localStorage` under key `tracker_v1`, with URL `#data=` for cross-device sync via base64 export
 - The app is centered in `src/pages/tracker.astro` with UI sub-components in `src/components/tracker/`
+- `Board.astro` owns task-board markup/styles and board-local UI controller behavior (task list rendering, empty states, add-button intent events, and drop-zone interaction events)
 - `Task.astro` owns task-card markup, task-card scoped styles, and card-local interactions (drag visuals, inline title edit, and semantic custom events)
 - `CompletedTask.astro` owns completed-card markup, completed-card scoped styles, and card-local interactions (semantic delete custom event)
 - `CompletedTasks.astro` owns completed-section markup/styles and completed-list UI controller state (filter, pagination, list rendering)
 - `Toast.astro` owns toast live-region/container markup and all toast presentation styles (placement, variants, animation, reduced-motion behavior), and should be mounted at the end of `<body>` so fixed overlays are not constrained by tracker layout containers
-- `tracker.astro` owns canonical app state mutations/persistence and global orchestration; it pushes completed-task snapshots into `CompletedTasks.astro` via `setCompletedTasks(...)`, listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`, `tracker-completed-task-delete`), and handles clear-all via `tracker-completed-clear`
+- `tracker.astro` owns canonical app state mutations/persistence and global orchestration; it pushes active-task snapshots into `Board.astro` via `setTasks(...)`, pushes completed-task snapshots into `CompletedTasks.astro` via `setCompletedTasks(...)`, listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`, `tracker-completed-task-delete`), handles board intent events (`tracker-board-add-task`, `tracker-board-drop`), and handles clear-all via `tracker-completed-clear`
 - `src/utils/tracker/toast.ts` owns the imperative toast API (`showToast(...)`, `clearToasts()`) and runtime toast lifecycle (create/show/hide/remove); `tracker.astro` should call this API instead of creating toast DOM directly
 - There is no server-side data — purely client-side
 - Gamification (XP, levels, streaks, achievements) and task decay (stink particles, visual rot) are intentional features, not bugs
