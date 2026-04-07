@@ -77,6 +77,27 @@
   }
 }
 
+// Refined focus ring for app-like controls
+@mixin focus-ring($ring: $tracker-focus-ring, $offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 3px $ring;
+    outline-offset: $offset;
+  }
+}
+
+// Subtle elevated panel treatment
+@mixin elevated-panel($background: $tracker-card-bg, $border: $tracker-card-stroke, $shadow: $shadow-sm) {
+  background: $background;
+  border: 1px solid $border;
+  box-shadow: $shadow;
+}
+
+// Crisp interaction timing used in tracker controls
+@mixin tracker-transition($properties: all) {
+  transition: $properties 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
 // Textured background with grunge overlay
 // Texture is automatically provided via Layout.astro define:vars
 @mixin textured-background($bg-color: $color-cream, $opacity: 0.15) {

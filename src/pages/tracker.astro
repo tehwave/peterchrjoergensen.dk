@@ -108,6 +108,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
                 <span aria-hidden="true">＋</span> Add Task
               </button>
+              <button class="btn btn--secondary" id="demo-data-btn" aria-label="Load demo tasks">Load Demo</button>
               <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
               <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
             </div>
@@ -347,7 +348,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   .tracker-layout {
     min-height: 100vh;
     margin: 0;
-    background: radial-gradient(circle at 20% 0%, rgba(10, 73, 177, 0.08), transparent 45%), radial-gradient(circle at 100% 100%, rgba(124, 58, 237, 0.08), transparent 45%), $color-bg;
+    background: radial-gradient(circle at 18% -6%, $tracker-bg-gradient-top, transparent 42%), radial-gradient(circle at 100% 100%, $tracker-bg-gradient-bottom, transparent 44%), $color-bg;
 
     main {
       padding-block: $space-xl $space-3xl;
@@ -359,16 +360,19 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   }
 
   .tracker {
-    padding: $space-lg $space-xl;
+    padding: 0;
     max-width: 1400px;
     margin: 0 auto;
-    border-radius: $tracker-surface-radius;
-    background: $tracker-surface-bg;
-    backdrop-filter: blur(6px);
-    box-shadow: $tracker-surface-shadow;
+    background: transparent;
+    border: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
 
     @include respond-to(md) {
-      padding: $space-md;
+      gap: $space-md;
     }
 
     // ============================================================
@@ -376,7 +380,23 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     // ============================================================
 
     &__header {
-      margin-bottom: $space-xl;
+      margin-bottom: 0;
+      background:
+        linear-gradient(180deg, rgba(252, 252, 253, 0.2) 0%, rgba(252, 252, 253, 0.05) 100%), linear-gradient(rgba(75, 85, 101, 0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.14) 1px, transparent 1px);
+      background-size:
+        100% 100%,
+        24px 24px,
+        24px 24px;
+      border: 1px solid $tracker-surface-stroke;
+      border-radius: $radius-xl;
+      padding: $space-lg $space-xl;
+      box-shadow: none;
+      animation: panel-enter 0.45s var(--ease-out) both;
+
+      @include respond-to(md) {
+        padding: $space-md;
+      }
     }
 
     &__title-row {
@@ -396,11 +416,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       font-weight: $font-weight-bold;
       color: $color-text-primary;
       margin: 0 0 $space-xs;
+      letter-spacing: $tracking-tight;
     }
 
     &__subtitle {
       font-size: $font-size-sm;
-      color: $color-text-secondary;
+      color: $tracker-muted-text;
       margin: 0;
       max-width: 55ch;
       font-style: italic;
@@ -428,15 +449,18 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       grid-template-columns: 1fr 1fr;
     }
 
+    @media (max-width: 560px) {
+      grid-template-columns: 1fr;
+    }
+
     @include respond-to(sm) {
       grid-template-columns: 1fr;
     }
   }
 
   .stat-card {
-    background: $color-bg-alt;
-    border: 1px solid $color-border;
-    border-radius: $tracker-card-radius;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-lg;
     padding: $space-md $space-lg;
     display: flex;
     flex-direction: column;
@@ -448,6 +472,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       background: linear-gradient(135deg, $color-blue-dark 0%, $color-blue 100%);
       border-color: transparent;
       color: $color-text-light;
+      box-shadow: $shadow-sm;
     }
 
     &__value {
@@ -461,7 +486,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       font-size: $font-size-xs;
       text-transform: uppercase;
       letter-spacing: $tracking-wider;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
       font-weight: $font-weight-semibold;
     }
 
@@ -558,14 +583,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     &__board {
       display: flex;
       flex-direction: column;
-      gap: $space-xl;
+      gap: $space-lg;
+      animation: panel-enter 0.55s var(--ease-out) both;
     }
   }
 
   .task-sections-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: $space-xl;
+    gap: $space-lg;
 
     @include respond-to(lg) {
       grid-template-columns: 1fr;
@@ -574,25 +600,35 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
   // Task section
   .task-section {
-    background: $color-bg-alt;
-    border: 1px solid $color-border;
-    border-radius: $tracker-card-radius;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, none);
+    border-radius: $radius-lg;
     padding: $space-lg;
     position: relative;
+    background-image:
+      linear-gradient(180deg, rgba(252, 252, 253, 0.96) 0%, rgba(247, 248, 250, 0.92) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      18px 18px,
+      18px 18px;
+    animation: grid-drift 18s linear infinite;
 
     &--short {
-      border-color: $color-blue-light;
-      background: linear-gradient(180deg, rgba(41, 136, 250, 0.04) 0%, $color-bg-alt 100%);
+      background-image:
+        linear-gradient(180deg, rgba(41, 136, 250, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
     }
 
     &--medium {
-      border-color: $color-orange;
-      background: linear-gradient(180deg, rgba(236, 131, 5, 0.04) 0%, $color-bg-alt 100%);
+      background-image:
+        linear-gradient(180deg, rgba(236, 131, 5, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
     }
 
     &--long {
-      border-color: $color-purple;
-      background: linear-gradient(180deg, rgba(124, 58, 237, 0.04) 0%, $color-bg-alt 100%);
+      background-image:
+        linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
     }
 
     &__header {
@@ -619,7 +655,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__meta {
       font-size: $font-size-xs;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
       margin: 0;
     }
   }
@@ -641,18 +677,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     // Drop target highlight
     &.drag-over {
-      background: rgba(41, 136, 250, 0.06);
-      border-radius: 8px;
-      outline: 2px dashed $color-blue-light;
+      background: rgba(41, 136, 250, 0.05);
+      border-radius: $radius-md;
+      outline: 1px dashed $tracker-card-stroke;
       outline-offset: 2px;
     }
   }
 
   // Task card
   .task-card {
-    background: $color-white;
-    border: 1px solid $tracker-card-border;
-    border-radius: $tracker-card-radius;
+    @include elevated-panel($tracker-card-bg-subtle, $tracker-card-border, $shadow-xs);
+    border-radius: $radius-md;
     padding: $space-sm $space-md;
     cursor: grab;
     position: relative;
@@ -660,11 +695,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     display: flex;
     flex-direction: column;
     gap: $space-xs;
-    @include transition(all, 0.2s);
+    @include tracker-transition(all);
 
     &:hover {
-      box-shadow: 0 4px 12px $color-shadow-hover;
-      transform: translateY(-1px);
+      box-shadow: $shadow-md;
+      transform: translateY(-2px);
+      border-color: $tracker-card-stroke;
+      background: $color-white;
     }
 
     &:active {
@@ -676,13 +713,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     }
 
     &--drop-target {
-      border-color: $color-blue-light;
-      box-shadow: 0 0 0 2px rgba(41, 136, 250, 0.4);
+      box-shadow: 0 0 0 3px rgba(41, 136, 250, 0.28);
     }
 
     // Decay states
     &--stale {
-      border-color: $color-decay-stale;
       background: $color-decay-stale-bg;
 
       &::after {
@@ -696,7 +731,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     }
 
     &--rotten {
-      border-color: $color-decay-rotten;
       background: $color-decay-rotten-bg;
       animation: shake 4s ease-in-out infinite;
       filter: hue-rotate(20deg) saturate(1.3);
@@ -734,7 +768,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__desc {
       font-size: $font-size-xs;
-      color: $color-text-secondary;
+      color: $tracker-muted-text;
       margin: 0;
       position: relative;
       z-index: 1;
@@ -751,7 +785,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__due {
       font-size: $font-size-xs;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
 
       &--overdue {
         color: $color-decay-overdue;
@@ -764,8 +798,19 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       font-weight: $font-weight-semibold;
       color: $color-orange;
       background: rgba(236, 131, 5, 0.12);
-      padding: 1px 6px;
-      border-radius: 4px;
+      border: 1px solid $tracker-card-stroke;
+      padding: 1px 8px;
+      border-radius: $radius-full;
+    }
+
+    &__decay-label {
+      font-size: 11px;
+      font-weight: $font-weight-medium;
+      color: $tracker-soft-text;
+      border: 1px solid $tracker-card-stroke;
+      border-radius: $radius-full;
+      padding: 1px 8px;
+      background: $tracker-card-bg;
     }
 
     &__actions {
@@ -869,46 +914,53 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     align-items: center;
     gap: $space-xs;
     padding: $space-xs $space-md;
-    border-radius: 8px;
+    border-radius: $radius-md;
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
     cursor: pointer;
-    border: 2px solid transparent;
-    @include transition(all, 0.18s);
+    border: 1px solid transparent;
+    @include tracker-transition(all);
     text-decoration: none;
     white-space: nowrap;
 
-    @include focus-visible;
+    @include focus-ring;
 
     &--primary {
-      background: $color-blue;
+      background: linear-gradient(180deg, $color-blue 0%, $color-blue-dark 100%);
       color: $color-white;
-      border-color: $color-blue;
+      border-color: $tracker-card-stroke;
+      box-shadow: $shadow-xs;
 
       &:hover {
-        background: $color-blue-dark;
-        border-color: $color-blue-dark;
+        filter: brightness(1.04);
+        transform: translateY(-1px);
+        box-shadow: $shadow-sm;
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
 
     &--secondary {
-      background: $color-bg-alt;
+      background: $tracker-card-bg;
       color: $color-text-primary;
-      border-color: $color-border;
+      border-color: $tracker-card-stroke;
 
       &:hover {
-        border-color: $color-blue;
+        border-color: $tracker-card-stroke;
         color: $color-blue;
+        background: $color-neutral-100;
       }
     }
 
     &--ghost {
       background: transparent;
-      color: $color-text-secondary;
+      color: $tracker-muted-text;
       border-color: transparent;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.06);
+        background: rgba(31, 39, 51, 0.07);
         color: $color-text-primary;
       }
     }
@@ -934,6 +986,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     }
 
     &--sm {
+      min-height: 36px;
       padding: 2px $space-sm;
       font-size: $font-size-xs;
     }
@@ -950,12 +1003,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     font-size: 1.5rem;
     line-height: 1;
     padding: $space-xs;
-    color: $color-text-secondary;
-    border: 1.5px dashed $color-border;
-    border-radius: 8px;
+    color: $tracker-muted-text;
+    border: 1px dashed $tracker-card-stroke;
+    border-radius: $radius-md;
+    @include focus-ring($tracker-focus-ring-accent);
 
     &:hover {
-      border-color: $color-blue;
+      border-color: $tracker-card-stroke;
       color: $color-blue;
     }
   }
@@ -964,10 +1018,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   .task-empty-state {
     padding: $space-lg;
     text-align: center;
-    color: $color-text-secondary;
+    color: $tracker-muted-text;
     font-size: $font-size-sm;
-    border: 1.5px dashed $color-border;
-    border-radius: 8px;
+    border: 1px dashed $tracker-card-stroke;
+    border-radius: $radius-md;
+    background: rgba(247, 248, 250, 0.55);
 
     &__icon {
       display: block;
@@ -985,12 +1040,56 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   // ============================================================
 
   .below-fold {
-    margin-top: $space-4xl;
+    margin-top: $space-2xl;
     display: flex;
     flex-direction: column;
-    gap: $space-3xl;
-    padding-top: $space-2xl;
-    border-top: 2px solid $color-border;
+    gap: $space-xl;
+    padding-top: 0;
+    border-top: 0;
+
+    @media (min-width: #{$breakpoint-lg}) {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .completed-section,
+  .full-stats-section {
+    @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
+    border-radius: $radius-xl;
+    padding: $space-lg;
+    animation: panel-enter 0.65s var(--ease-out) both;
+
+    @include respond-to(md) {
+      padding: $space-md;
+    }
+  }
+
+  .completed-section {
+    background:
+      linear-gradient(180deg, rgba(247, 248, 250, 0.95) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      22px 22px,
+      22px 22px;
+    animation:
+      panel-enter 0.65s var(--ease-out) both,
+      grid-drift 24s linear infinite;
+  }
+
+  .full-stats-section {
+    background:
+      linear-gradient(180deg, rgba(10, 73, 177, 0.08) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      22px 22px,
+      22px 22px;
+    animation:
+      panel-enter 0.75s var(--ease-out) both,
+      grid-drift 28s linear infinite;
   }
 
   .section-heading-row {
@@ -1019,13 +1118,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   .filter-select {
     font-size: $font-size-sm;
     padding: $space-xs $space-sm;
-    border: 1px solid $color-border;
-    border-radius: 6px;
-    background: $color-bg-alt;
+    border: 1px solid $tracker-card-stroke;
+    border-radius: $radius-sm;
+    background: $tracker-card-bg;
     color: $color-text-primary;
     cursor: pointer;
 
-    @include focus-visible;
+    @include focus-ring;
   }
 
   .completed-list {
@@ -1036,7 +1135,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
   .empty-completed {
     text-align: center;
-    color: $color-text-secondary;
+    color: $tracker-muted-text;
     font-size: $font-size-sm;
     padding: $space-2xl;
   }
@@ -1048,9 +1147,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     align-items: center;
     gap: $space-md;
     padding: $space-sm $space-md;
-    background: $color-bg-alt;
-    border: 1px solid $color-border;
-    border-radius: 8px;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-md;
+    backdrop-filter: blur(2px);
 
     @include respond-to(sm) {
       grid-template-columns: auto 1fr;
@@ -1077,7 +1176,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__meta {
       font-size: $font-size-xs;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
       display: flex;
       gap: $space-sm;
       flex-wrap: wrap;
@@ -1115,23 +1214,23 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid $color-border;
-    border-radius: 6px;
-    background: $color-bg-alt;
+    border: 1px solid $tracker-card-stroke;
+    border-radius: $radius-sm;
+    background: $tracker-card-bg;
     font-size: $font-size-sm;
     cursor: pointer;
-    @include transition(all, 0.15s);
-    @include focus-visible;
+    @include tracker-transition(all);
+    @include focus-ring;
 
     &:hover {
-      border-color: $color-blue;
+      border-color: $tracker-card-stroke;
       color: $color-blue;
     }
 
     &--active {
       background: $color-blue;
       color: $color-white;
-      border-color: $color-blue;
+      border-color: $tracker-card-stroke;
     }
 
     &:disabled {
@@ -1152,11 +1251,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   }
 
   .full-stat-card {
-    background: $color-bg-alt;
-    border: 1px solid $color-border;
-    border-radius: 12px;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-lg;
     padding: $space-lg;
     text-align: center;
+
+    &:hover {
+      box-shadow: $shadow-sm;
+      transform: translateY(-1px);
+      @include tracker-transition(all);
+    }
 
     &__value {
       font-size: $font-size-3xl;
@@ -1171,7 +1275,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       font-size: $font-size-xs;
       text-transform: uppercase;
       letter-spacing: $tracking-wide;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
     }
   }
 
@@ -1192,22 +1296,21 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   }
 
   .achievement-card {
-    background: $color-bg-alt;
-    border: 1px solid $color-border;
-    border-radius: 12px;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-lg;
     padding: $space-md;
     text-align: center;
     position: relative;
-    @include transition(all, 0.2s);
+    @include tracker-transition(all);
 
     &--locked {
-      opacity: 0.45;
+      opacity: 0.55;
       filter: grayscale(1);
     }
 
     &--unlocked {
-      border-color: $color-orange;
-      background: linear-gradient(135deg, rgba(236, 131, 5, 0.08), $color-bg-alt);
+      border-color: $tracker-card-stroke;
+      background: linear-gradient(135deg, rgba(236, 131, 5, 0.08), $tracker-card-bg);
     }
 
     &__icon {
@@ -1225,7 +1328,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__desc {
       font-size: 11px;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
       margin: 0;
     }
 
@@ -1264,8 +1367,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   }
 
   .modal {
-    background: $color-bg-alt;
-    border-radius: 16px;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke-strong, $shadow-md);
+    border-radius: $radius-xl;
     padding: $space-xl;
     width: 100%;
     max-width: 520px;
@@ -1273,6 +1376,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     animation: scaleIn 0.15s ease-out;
     max-height: 90vh;
     overflow-y: auto;
+
+    @include respond-to(sm) {
+      padding: $space-lg;
+    }
 
     &__close {
       position: absolute;
@@ -1284,9 +1391,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       cursor: pointer;
       color: $color-text-secondary;
       padding: $space-xs;
-      border-radius: 6px;
-      @include transition(all, 0.15s);
-      @include focus-visible;
+      border-radius: $radius-sm;
+      @include tracker-transition(all);
+      @include focus-ring;
 
       &:hover {
         background: rgba(0, 0, 0, 0.08);
@@ -1303,7 +1410,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__desc {
       font-size: $font-size-sm;
-      color: $color-text-secondary;
+      color: $tracker-muted-text;
       margin: 0 0 $space-md;
     }
 
@@ -1349,19 +1456,19 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   .form-textarea,
   .form-select {
     padding: $space-sm $space-md;
-    border: 1.5px solid $color-border;
-    border-radius: 8px;
+    border: 1px solid $tracker-card-stroke;
+    border-radius: $radius-md;
     font-size: $font-size-sm;
     color: $color-text-primary;
-    background: $color-bg-alt;
-    @include transition(border-color, 0.15s);
+    background: $tracker-card-bg;
+    @include tracker-transition(border-color);
 
     &:focus {
       outline: none;
-      border-color: $color-blue;
+      border-color: $tracker-card-stroke;
     }
 
-    @include focus-visible;
+    @include focus-ring;
   }
 
   .form-textarea {
@@ -1401,38 +1508,34 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
   }
 
   .toast {
-    background: $color-white;
-    border: 1px solid $color-border;
-    border-radius: 12px;
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-md);
+    border-radius: $radius-lg;
     padding: $space-sm $space-md;
     display: flex;
     align-items: center;
     gap: $space-sm;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
     pointer-events: auto;
     animation: toast-in 0.3s var(--ease-out-back) forwards;
     cursor: default;
 
     &--success {
-      border-color: $color-success;
-      border-left: 4px solid $color-success;
+      border-color: $tracker-card-stroke;
+      background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), $color-white);
     }
 
     &--xp {
-      border-color: $color-orange;
-      border-left: 4px solid $color-orange;
+      border-color: $tracker-card-stroke;
       background: linear-gradient(90deg, rgba(236, 131, 5, 0.05), $color-white);
     }
 
     &--level {
-      border-color: $color-blue;
-      border-left: 4px solid $color-blue;
+      border-color: $tracker-card-stroke;
       background: linear-gradient(90deg, rgba(10, 73, 177, 0.05), $color-white);
     }
 
     &--info {
-      border-color: $color-blue-light;
-      border-left: 4px solid $color-blue-light;
+      border-color: $tracker-card-stroke;
+      background: linear-gradient(90deg, rgba(41, 136, 250, 0.05), $color-white);
     }
 
     &__icon {
@@ -1453,7 +1556,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
     &__text {
       font-size: $font-size-xs;
-      color: $color-text-secondary;
+      color: $tracker-soft-text;
       margin: 0;
     }
 
@@ -1497,6 +1600,50 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
   .level-up-flash {
     animation: level-up-pulse 0.8s ease-out 3;
+  }
+
+  @keyframes panel-enter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes grid-drift {
+    from {
+      background-position:
+        0 0,
+        0 0,
+        0 0;
+    }
+    to {
+      background-position:
+        0 0,
+        22px 22px,
+        22px 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task-section,
+    .completed-section,
+    .full-stats-section,
+    .tracker__header,
+    .tracker__board {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .task-card__meta {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 6px;
+    }
   }
 </style>
 
@@ -2248,6 +2395,127 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     return task;
   }
 
+  function loadDemoTasks(): void {
+    if (state.tasks.length > 0) {
+      const shouldReplace = confirm("Replace your current tasks with demo data?");
+      if (!shouldReplace) return;
+    }
+
+    const now = Date.now();
+    const day = 86400000;
+    const today = new Date();
+    const iso = (offsetDays: number) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const monthKey = monthKeyFromDate(today);
+    const yearKey = `${today.getFullYear()}`;
+
+    state = {
+      tasks: [
+        {
+          id: crypto.randomUUID(),
+          title: "Plan weekly sprint goals",
+          description: "Define clear outcomes for this week",
+          type: "short",
+          createdAt: now - 1 * day,
+          dueDate: iso(2),
+          completedAt: null,
+          order: 0,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Clean backlog",
+          description: "Remove stale tasks and clarify priorities",
+          type: "short",
+          createdAt: now - 4 * day,
+          dueDate: iso(-1),
+          completedAt: null,
+          order: 1,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Write architecture note",
+          description: "Document tracker UI decisions",
+          type: "medium",
+          createdAt: now - 9 * day,
+          dueDate: iso(7),
+          completedAt: null,
+          order: 0,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Refine motion system",
+          description: "Tune easing and reduced-motion behavior",
+          type: "medium",
+          createdAt: now - 17 * day,
+          dueDate: iso(4),
+          completedAt: null,
+          order: 1,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Ship Q2 portfolio update",
+          description: "Publish new featured case study",
+          type: "long",
+          createdAt: now - 24 * day,
+          dueDate: iso(20),
+          completedAt: null,
+          order: 0,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Audit Lighthouse regressions",
+          description: "Investigate CLS spikes",
+          type: "long",
+          createdAt: now - 65 * day,
+          dueDate: iso(-5),
+          completedAt: null,
+          order: 1,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Refactor hero section",
+          description: "Improve content hierarchy",
+          type: "short",
+          createdAt: now - 8 * day,
+          dueDate: iso(-3),
+          completedAt: now - 2 * day,
+          order: 0,
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Publish blog draft",
+          description: "Write post on visual language decisions",
+          type: "medium",
+          createdAt: now - 18 * day,
+          dueDate: iso(-10),
+          completedAt: now - 6 * day,
+          order: 0,
+        },
+      ],
+      game: {
+        level: 4,
+        xp: 35,
+        totalXP: 385,
+        completedThisMonth: 2,
+        completedThisYear: 2,
+        streak: 3,
+        lastActivityDate: localDateKey(today),
+        monthKey,
+        yearKey,
+      },
+      version: 1,
+    };
+
+    saveState(state);
+    currentPage = 1;
+    renderAll();
+    showToast({ type: "success", icon: "✓", title: "Demo data loaded", text: "Sample tasks added for testing." });
+  }
+
   function completeTask(id: string): void {
     const task = state.tasks.find((t) => t.id === id);
     if (!task || task.completedAt) return;
@@ -2363,6 +2631,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
     (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
     openModal("task-modal");
+  });
+
+  document.getElementById("demo-data-btn")!.addEventListener("click", () => {
+    loadDemoTasks();
   });
 
   // Add-section buttons
