@@ -46,3 +46,6 @@ The tracker is a **completely standalone personal productivity app** that lives 
 - Treat this like maintaining a standalone SPA embedded in an Astro page
 - Follow the same SASS/BEM conventions as the rest of the site, but within the tracker's own namespace
 - The `<script>` block is TypeScript and runs entirely client-side — keep it self-contained
+
+**Keep this file updated:**  
+If you make architectural changes to the tracker (new features, state structure changes, component additions, storage format updates, etc.), **update this instructions file** to reflect the current reality. This ensures future agents understand the tracker correctly.
