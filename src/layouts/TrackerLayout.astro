@@ -1,0 +1,49 @@
+---
+import "../styles/global.scss";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Personal productivity tracker" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <slot name="head" />
+  </head>
+  <body class="tracker-layout">
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .tracker-layout {
+    min-height: 100vh;
+    margin: 0;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(10, 73, 177, 0.08), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(124, 58, 237, 0.08), transparent 45%),
+      $color-bg;
+  }
+
+  .tracker-layout main {
+    padding-block: $space-xl $space-3xl;
+
+    @include respond-to(md) {
+      padding-block: $space-lg $space-2xl;
+    }
+  }
+</style>

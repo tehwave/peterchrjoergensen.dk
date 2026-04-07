@@ -1,0 +1,2462 @@
+---
+/**
+ * Productivity Tracker & Kanban Board
+ *
+ * A single-page productivity app with:
+ * - Three task sections: Short-term (weekly), Medium-term (monthly), Long-term (quarterly)
+ * - Gamification: XP, levels, streaks
+ * - Visual decay for overdue tasks with stink particles
+ * - Drag-and-drop reordering within and between sections
+ * - LocalStorage persistence + base64 export/import for cross-device sync
+ * - Google Calendar integration
+ * - Statistics and positive reinforcement toasts
+ */
+import TrackerLayout from "../layouts/TrackerLayout.astro";
+---
+
+<TrackerLayout
+  title="Productivity Tracker — Peter Chr. Jørgensen"
+  description="Personal productivity tracker and kanban board with gamification, visual task decay, and cross-device sync."
+>
+  <div class="tracker">
+    <!-- ====================================================
+         ABOVE THE FOLD: Stats + Task Board
+         ==================================================== -->
+
+    <!-- Stats Bar -->
+    <header class="tracker__header">
+      <div class="tracker__title-row">
+        <div>
+          <h1 class="tracker__title">Productivity Tracker</h1>
+          <p class="tracker__subtitle" id="tip-text">Loading tip…</p>
+        </div>
+        <div class="tracker__toolbar">
+          <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
+            <span aria-hidden="true">＋</span> Add Task
+          </button>
+          <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
+          <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
+        </div>
+      </div>
+
+      <div class="stats-bar">
+        <!-- Level & XP -->
+        <div class="stat-card stat-card--level" id="level-card">
+          <div class="level-badge" id="level-badge">
+            <span class="level-badge__icon">●</span>
+            <span class="level-badge__label">Level</span>
+            <span class="level-badge__number" id="level-number">1</span>
+          </div>
+          <div class="xp-area">
+            <div class="xp-bar" role="progressbar" aria-label="XP progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="xp-bar__fill" id="xp-bar-fill" style="width: 0%"></div>
+              <div class="xp-bar__shimmer"></div>
+            </div>
+            <div class="xp-text" id="xp-text">0 / 100 XP</div>
+          </div>
+          <div class="total-xp" id="total-xp">0 XP total</div>
+        </div>
+
+        <!-- Monthly stat -->
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-month">0</span>
+          <span class="stat-card__label">Done this month</span>
+          <span class="stat-card__icon">M</span>
+        </div>
+
+        <!-- Yearly stat -->
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-year">0</span>
+          <span class="stat-card__label">Done this year</span>
+          <span class="stat-card__icon">Y</span>
+        </div>
+
+        <!-- Streak -->
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-streak">0</span>
+          <span class="stat-card__label">Day streak</span>
+          <span class="stat-card__icon">S</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Task Board -->
+    <div class="tracker__board">
+      <!-- Short-term section (2-column internally) -->
+      <section class="task-section task-section--short" aria-labelledby="section-short-title">
+        <div class="task-section__header">
+          <div>
+            <h2 class="task-section__title" id="section-short-title">
+              <span class="task-section__icon">W</span>
+              This Week
+            </h2>
+            <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
+          </div>
+          <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
+        </div>
+        <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short"
+             role="list" aria-label="Short-term tasks">
+          <!-- tasks injected by JS -->
+          <div class="task-empty-state" data-type="short">
+            <span class="task-empty-state__icon">W</span>
+            <p>No weekly tasks yet. Add one!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Medium and Long side-by-side -->
+      <div class="task-sections-row">
+        <!-- Medium-term section -->
+        <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
+          <div class="task-section__header">
+            <div>
+              <h2 class="task-section__title" id="section-medium-title">
+                <span class="task-section__icon">M</span>
+                This Month
+              </h2>
+              <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
+            </div>
+            <button class="btn btn--ghost add-section-btn" data-type="medium" aria-label="Add monthly task">＋</button>
+          </div>
+          <div class="task-grid" id="tasks-medium" data-type="medium"
+               role="list" aria-label="Medium-term tasks">
+            <div class="task-empty-state" data-type="medium">
+              <span class="task-empty-state__icon">M</span>
+              <p>No monthly tasks yet. Add one!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Long-term section -->
+        <section class="task-section task-section--long" aria-labelledby="section-long-title">
+          <div class="task-section__header">
+            <div>
+              <h2 class="task-section__title" id="section-long-title">
+                <span class="task-section__icon">Q</span>
+                This Quarter
+              </h2>
+              <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
+            </div>
+            <button class="btn btn--ghost add-section-btn" data-type="long" aria-label="Add quarterly task">＋</button>
+          </div>
+          <div class="task-grid" id="tasks-long" data-type="long"
+               role="list" aria-label="Long-term tasks">
+            <div class="task-empty-state" data-type="long">
+              <span class="task-empty-state__icon">Q</span>
+              <p>No quarterly goals yet. Add one!</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         BELOW THE FOLD: Completed Tasks + Full Stats
+         ==================================================== -->
+
+    <div class="below-fold">
+      <!-- Completed Tasks -->
+      <section class="completed-section" aria-labelledby="completed-title">
+        <div class="section-heading-row">
+          <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
+          <div class="completed-filters">
+            <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
+              <option value="all">All types</option>
+              <option value="short">Short-term</option>
+              <option value="medium">Medium-term</option>
+              <option value="long">Long-term</option>
+            </select>
+            <button class="btn btn--ghost btn--sm" id="clear-completed-btn">Clear completed</button>
+          </div>
+        </div>
+        <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
+          <p class="empty-completed">No completed tasks yet — get going.</p>
+        </div>
+        <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
+      </section>
+
+      <!-- Full Statistics -->
+      <section class="full-stats-section" aria-labelledby="stats-title">
+        <h2 class="section-heading" id="stats-title">Statistics</h2>
+        <div class="full-stats-grid" id="full-stats-grid">
+          <!-- rendered by JS -->
+        </div>
+        <div class="achievement-grid" id="achievement-grid">
+          <!-- rendered by JS -->
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       MODALS
+       ==================================================== -->
+
+  <!-- Add / Edit Task Modal -->
+  <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
+    <div class="modal">
+      <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
+      <h3 class="modal__title" id="task-modal-title">Add Task</h3>
+      <form class="modal__form" id="task-form" novalidate>
+        <input type="hidden" id="edit-task-id" />
+        <div class="form-group">
+          <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
+          <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
+        </div>
+        <div class="form-group">
+          <label for="task-desc-input" class="form-label">Description</label>
+          <textarea id="task-desc-input" class="form-textarea" placeholder="Optional notes…" rows="3" maxlength="500"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-type-input" class="form-label">Timeframe</label>
+            <select id="task-type-input" class="form-select">
+              <option value="short">This Week (10 XP)</option>
+              <option value="medium">This Month (25 XP)</option>
+              <option value="long">This Quarter (50 XP)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-due-input" class="form-label">Due date</label>
+            <input type="date" id="task-due-input" class="form-input" />
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="task-form-submit">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" hidden>
+    <div class="modal">
+      <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
+      <h3 class="modal__title" id="export-modal-title">Export Data</h3>
+      <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
+      <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="export-modal-close2">Close</button>
+        <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
+        <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
+    <div class="modal">
+      <button class="modal__close" id="import-modal-close" aria-label="Close">✕</button>
+      <h3 class="modal__title" id="import-modal-title">Import Data</h3>
+      <p class="modal__desc">Paste your export code below. <strong>This will merge with your current data.</strong></p>
+      <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
+        <button class="btn btn--primary" id="do-import-btn">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+</TrackerLayout>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  // ============================================================
+  // Page layout
+  // ============================================================
+
+  .tracker {
+    padding: $space-lg $space-xl;
+    max-width: 1400px;
+    margin: 0 auto;
+    border-radius: $tracker-surface-radius;
+    background: $tracker-surface-bg;
+    backdrop-filter: blur(6px);
+    box-shadow: $tracker-surface-shadow;
+
+    @include respond-to(md) {
+      padding: $space-md;
+    }
+
+    // ============================================================
+    // Header / Stats Bar
+    // ============================================================
+
+    &__header {
+      margin-bottom: $space-xl;
+    }
+
+    &__title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: $space-lg;
+      margin-bottom: $space-lg;
+
+      @include respond-to(md) {
+        flex-direction: column;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-xs;
+    }
+
+    &__subtitle {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin: 0;
+      max-width: 55ch;
+      font-style: italic;
+    }
+
+    &__toolbar {
+      display: flex;
+      gap: $space-sm;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+
+      @include respond-to(md) {
+        width: 100%;
+      }
+    }
+  }
+
+  // Stats bar
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: $space-md;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @include respond-to(sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-card {
+    background: $color-bg-alt;
+    border: 1px solid $color-border;
+    border-radius: $tracker-card-radius;
+    padding: $space-md $space-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+    position: relative;
+    overflow: hidden;
+
+    &--level {
+      background: linear-gradient(135deg, $color-blue-dark 0%, $color-blue 100%);
+      border-color: transparent;
+      color: $color-text-light;
+    }
+
+    &__value {
+      font-size: $font-size-3xl;
+      font-weight: $font-weight-black;
+      color: $color-text-primary;
+      line-height: 1;
+    }
+
+    &__label {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-wider;
+      color: $color-text-secondary;
+      font-weight: $font-weight-semibold;
+    }
+
+    &__icon {
+      position: absolute;
+      top: $space-md;
+      right: $space-md;
+      font-size: 1.5rem;
+      opacity: 0.25;
+    }
+  }
+
+  // Level badge
+  .level-badge {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    margin-bottom: $space-sm;
+
+    &__icon {
+      font-size: 1.5rem;
+    }
+
+    &__label {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-wider;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    &__number {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-black;
+      color: $color-text-light;
+    }
+  }
+
+  .xp-area {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+  }
+
+  .xp-bar {
+    flex: 1;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+
+    &__fill {
+      height: 100%;
+      background: linear-gradient(90deg, $color-orange-light, $color-orange);
+      border-radius: 5px;
+      @include transition(width, 0.5s, ease-out);
+    }
+
+    &__shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  .xp-text {
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    font-weight: $font-weight-semibold;
+  }
+
+  .total-xp {
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: $space-xs;
+  }
+
+  // ============================================================
+  // Task Board
+  // ============================================================
+
+  .tracker {
+    &__board {
+      display: flex;
+      flex-direction: column;
+      gap: $space-xl;
+    }
+  }
+
+  .task-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-xl;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Task section
+  .task-section {
+    background: $color-bg-alt;
+    border: 1px solid $color-border;
+    border-radius: $tracker-card-radius;
+    padding: $space-lg;
+    position: relative;
+
+    &--short {
+      border-color: $color-blue-light;
+      background: linear-gradient(180deg, rgba(41, 136, 250, 0.04) 0%, $color-bg-alt 100%);
+    }
+
+    &--medium {
+      border-color: $color-orange;
+      background: linear-gradient(180deg, rgba(236, 131, 5, 0.04) 0%, $color-bg-alt 100%);
+    }
+
+    &--long {
+      border-color: $color-purple;
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.04) 0%, $color-bg-alt 100%);
+    }
+
+    &__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: $space-lg;
+      gap: $space-md;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-xs;
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+    }
+
+    &__icon {
+      font-size: 1.1em;
+    }
+
+    &__meta {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      margin: 0;
+    }
+  }
+
+  // Task grid
+  .task-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    min-height: 60px;
+
+    &--two-col {
+      @media (min-width: #{$breakpoint-lg}) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: $space-sm;
+      }
+    }
+
+    // Drop target highlight
+    &.drag-over {
+      background: rgba(41, 136, 250, 0.06);
+      border-radius: 8px;
+      outline: 2px dashed $color-blue-light;
+      outline-offset: 2px;
+    }
+  }
+
+  // Task card
+  .task-card {
+    background: $color-white;
+    border: 1px solid $tracker-card-border;
+    border-radius: $tracker-card-radius;
+    padding: $space-sm $space-md;
+    cursor: grab;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+    @include transition(all, 0.2s);
+
+    &:hover {
+      box-shadow: 0 4px 12px $color-shadow-hover;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--dragging {
+      opacity: 0.4;
+    }
+
+    &--drop-target {
+      border-color: $color-blue-light;
+      box-shadow: 0 0 0 2px rgba(41, 136, 250, 0.4);
+    }
+
+    // Decay states
+    &--stale {
+      border-color: $color-decay-stale;
+      background: $color-decay-stale-bg;
+
+      &::after {
+        content: "!";
+        position: absolute;
+        top: $space-xs;
+        right: $space-xs;
+        font-size: 0.85rem;
+        animation: wobble 3s ease-in-out infinite;
+      }
+    }
+
+    &--rotten {
+      border-color: $color-decay-rotten;
+      background: $color-decay-rotten-bg;
+      animation: shake 4s ease-in-out infinite;
+      filter: hue-rotate(20deg) saturate(1.3);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 8px,
+          rgba(100, 130, 20, 0.08) 8px,
+          rgba(100, 130, 20, 0.08) 16px
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      &::after {
+        content: "OLD";
+        position: absolute;
+        top: $space-xs;
+        right: $space-xs;
+        font-size: 0.65rem;
+        letter-spacing: 0.05em;
+        font-weight: $font-weight-bold;
+        animation: wobble 1.5s ease-in-out infinite;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin: 0;
+      line-height: $leading-snug;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__desc {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__meta {
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__due {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+
+      &--overdue {
+        color: $color-decay-overdue;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    &__xp {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      color: $color-orange;
+      background: rgba(236, 131, 5, 0.12);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    &__actions {
+      display: flex;
+      gap: $space-xs;
+      margin-top: $space-xs;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__decay-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, $color-decay-rotten, $color-decay-stale, $color-decay-overdue);
+      @include transition(width, 0.5s);
+    }
+  }
+
+  // Stink particles
+  .stink-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .stink-particle {
+    position: absolute;
+    width: var(--size, 10px);
+    height: var(--size, 10px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(90, 122, 26, 0.7), rgba(90, 122, 26, 0.1) 70%, transparent 100%);
+    filter: blur(0.4px);
+    animation: stink-rise var(--duration, 3s) ease-out var(--delay, 0s) infinite;
+    opacity: 0;
+    bottom: 0;
+
+    @include reduced-motion {
+      display: none;
+    }
+  }
+
+  @keyframes stink-rise {
+    0% { opacity: 0; transform: translateY(0) scale(0.6) rotate(0deg); }
+    20% { opacity: 0.9; }
+    80% { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(-60px) scale(1.2) rotate(360deg); }
+  }
+
+  @keyframes wobble {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg) scale(1.05); }
+    75% { transform: rotate(5deg) scale(1.05); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px) rotate(-0.3deg); }
+    20% { transform: translateX(2px) rotate(0.3deg); }
+    30% { transform: translateX(-1px); }
+    40% { transform: translateX(1px); }
+    50% { transform: translateX(0); }
+  }
+
+  // Buttons
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    padding: $space-xs $space-md;
+    border-radius: 8px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    border: 2px solid transparent;
+    @include transition(all, 0.18s);
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include focus-visible;
+
+    &--primary {
+      background: $color-blue;
+      color: $color-white;
+      border-color: $color-blue;
+
+      &:hover {
+        background: $color-blue-dark;
+        border-color: $color-blue-dark;
+      }
+    }
+
+    &--secondary {
+      background: $color-bg-alt;
+      color: $color-text-primary;
+      border-color: $color-border;
+
+      &:hover {
+        border-color: $color-blue;
+        color: $color-blue;
+      }
+    }
+
+    &--ghost {
+      background: transparent;
+      color: $color-text-secondary;
+      border-color: transparent;
+
+      &:hover {
+        background: rgba(0,0,0,0.06);
+        color: $color-text-primary;
+      }
+    }
+
+    &--danger {
+      background: $color-danger-bg;
+      color: $color-danger-text;
+      border-color: transparent;
+
+      &:hover {
+        background: $color-danger-bg-hover;
+      }
+    }
+
+    &--complete {
+      background: $color-success-bg;
+      color: $color-success-dark;
+      border-color: transparent;
+
+      &:hover {
+        background: $color-success-bg-hover;
+      }
+    }
+
+    &--sm {
+      padding: 2px $space-sm;
+      font-size: $font-size-xs;
+    }
+
+    &--icon-only {
+      padding: $space-xs;
+      aspect-ratio: 1;
+      justify-content: center;
+    }
+  }
+
+  // Add-section button
+  .add-section-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: $space-xs;
+    color: $color-text-secondary;
+    border: 1.5px dashed $color-border;
+    border-radius: 8px;
+
+    &:hover {
+      border-color: $color-blue;
+      color: $color-blue;
+    }
+  }
+
+  // Empty state
+  .task-empty-state {
+    padding: $space-lg;
+    text-align: center;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    border: 1.5px dashed $color-border;
+    border-radius: 8px;
+
+    &__icon {
+      display: block;
+      font-size: 2rem;
+      margin-bottom: $space-xs;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  // ============================================================
+  // Below fold
+  // ============================================================
+
+  .below-fold {
+    margin-top: $space-4xl;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3xl;
+    padding-top: $space-2xl;
+    border-top: 2px solid $color-border;
+  }
+
+  .section-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-md;
+    margin-bottom: $space-lg;
+    flex-wrap: wrap;
+  }
+
+  .section-heading {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  .completed-filters {
+    display: flex;
+    gap: $space-sm;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    font-size: $font-size-sm;
+    padding: $space-xs $space-sm;
+    border: 1px solid $color-border;
+    border-radius: 6px;
+    background: $color-bg-alt;
+    color: $color-text-primary;
+    cursor: pointer;
+
+    @include focus-visible;
+  }
+
+  .completed-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+  }
+
+  .empty-completed {
+    text-align: center;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    padding: $space-2xl;
+  }
+
+  // Completed task item
+  .completed-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: $space-md;
+    padding: $space-sm $space-md;
+    background: $color-bg-alt;
+    border: 1px solid $color-border;
+    border-radius: 8px;
+
+    @include respond-to(sm) {
+      grid-template-columns: auto 1fr;
+    }
+
+    &__check {
+      font-size: 1.2rem;
+      color: $color-success-dark;
+    }
+
+    &__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    &__title {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-text-primary;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    &__meta {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      display: flex;
+      gap: $space-sm;
+      flex-wrap: wrap;
+    }
+
+    &__xp {
+      font-size: $font-size-xs;
+      color: $color-orange;
+      font-weight: $font-weight-semibold;
+    }
+
+    &__actions {
+      display: flex;
+      gap: $space-xs;
+
+      @include respond-to(sm) {
+        display: none;
+      }
+    }
+  }
+
+  // Pagination
+  .pagination {
+    display: flex;
+    gap: $space-xs;
+    margin-top: $space-lg;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination__btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 $space-sm;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $color-border;
+    border-radius: 6px;
+    background: $color-bg-alt;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    @include transition(all, 0.15s);
+    @include focus-visible;
+
+    &:hover {
+      border-color: $color-blue;
+      color: $color-blue;
+    }
+
+    &--active {
+      background: $color-blue;
+      color: $color-white;
+      border-color: $color-blue;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  // ============================================================
+  // Full Stats
+  // ============================================================
+
+  .full-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $space-md;
+    margin-bottom: $space-xl;
+  }
+
+  .full-stat-card {
+    background: $color-bg-alt;
+    border: 1px solid $color-border;
+    border-radius: 12px;
+    padding: $space-lg;
+    text-align: center;
+
+    &__value {
+      font-size: $font-size-3xl;
+      font-weight: $font-weight-black;
+      color: $color-blue;
+      line-height: 1;
+      display: block;
+      margin-bottom: $space-xs;
+    }
+
+    &__label {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-wide;
+      color: $color-text-secondary;
+    }
+  }
+
+  // Achievements
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: $space-md;
+    margin-top: $space-lg;
+  }
+
+  .full-stats__achievements-title {
+    grid-column: 1 / -1;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    margin: 0 0 $space-xs;
+    color: $color-text-primary;
+  }
+
+  .achievement-card {
+    background: $color-bg-alt;
+    border: 1px solid $color-border;
+    border-radius: 12px;
+    padding: $space-md;
+    text-align: center;
+    position: relative;
+    @include transition(all, 0.2s);
+
+    &--locked {
+      opacity: 0.45;
+      filter: grayscale(1);
+    }
+
+    &--unlocked {
+      border-color: $color-orange;
+      background: linear-gradient(135deg, rgba(236, 131, 5, 0.08), $color-bg-alt);
+    }
+
+    &__icon {
+      display: block;
+      font-size: 2.5rem;
+      margin-bottom: $space-xs;
+    }
+
+    &__name {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin: 0 0 2px;
+    }
+
+    &__desc {
+      font-size: 11px;
+      color: $color-text-secondary;
+      margin: 0;
+    }
+
+    &__badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: $color-orange;
+      color: white;
+      font-size: 10px;
+      font-weight: $font-weight-bold;
+      padding: 1px 5px;
+      border-radius: 99px;
+    }
+  }
+
+  // ============================================================
+  // Modals
+  // ============================================================
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-md;
+    animation: fadeIn 0.15s ease-out;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .modal {
+    background: $color-bg-alt;
+    border-radius: 16px;
+    padding: $space-xl;
+    width: 100%;
+    max-width: 520px;
+    position: relative;
+    animation: scaleIn 0.15s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    &__close {
+      position: absolute;
+      top: $space-md;
+      right: $space-md;
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: $color-text-secondary;
+      padding: $space-xs;
+      border-radius: 6px;
+      @include transition(all, 0.15s);
+      @include focus-visible;
+
+      &:hover {
+        background: rgba(0,0,0,0.08);
+        color: $color-text-primary;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-md;
+    }
+
+    &__desc {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin: 0 0 $space-md;
+    }
+
+    &__form {
+      display: flex;
+      flex-direction: column;
+      gap: $space-md;
+    }
+
+    &__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $space-sm;
+      margin-top: $space-sm;
+      flex-wrap: wrap;
+    }
+  }
+
+  // Form elements
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-md;
+
+    @include respond-to(sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: $space-sm $space-md;
+    border: 1.5px solid $color-border;
+    border-radius: 8px;
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+    background: $color-bg-alt;
+    @include transition(border-color, 0.15s);
+
+    &:focus {
+      outline: none;
+      border-color: $color-blue;
+    }
+
+    @include focus-visible;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    font-family: $font-sans;
+
+    &--code {
+      font-family: $font-mono;
+      font-size: $font-size-xs;
+      background: $color-code-bg;
+      color: $color-code-text;
+      border-color: $color-code-border;
+    }
+  }
+
+  // ============================================================
+  // Toast Notifications
+  // ============================================================
+
+  .toast-container {
+    position: fixed;
+    bottom: $space-lg;
+    right: $space-lg;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    pointer-events: none;
+    max-width: 360px;
+
+    @include respond-to(sm) {
+      bottom: $space-sm;
+      right: $space-sm;
+      left: $space-sm;
+      max-width: none;
+    }
+  }
+
+  .toast {
+    background: $color-white;
+    border: 1px solid $color-border;
+    border-radius: 12px;
+    padding: $space-sm $space-md;
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    pointer-events: auto;
+    animation: toast-in 0.3s var(--ease-out-back) forwards;
+    cursor: default;
+
+    &--success {
+      border-color: $color-success;
+      border-left: 4px solid $color-success;
+    }
+
+    &--xp {
+      border-color: $color-orange;
+      border-left: 4px solid $color-orange;
+      background: linear-gradient(90deg, rgba(236, 131, 5, 0.05), $color-white);
+    }
+
+    &--level {
+      border-color: $color-blue;
+      border-left: 4px solid $color-blue;
+      background: linear-gradient(90deg, rgba(10, 73, 177, 0.05), $color-white);
+    }
+
+    &--info {
+      border-color: $color-blue-light;
+      border-left: 4px solid $color-blue-light;
+    }
+
+    &__icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    &__body {
+      flex: 1;
+    }
+
+    &__title {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0;
+    }
+
+    &__text {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      margin: 0;
+    }
+
+    &--hiding {
+      animation: toast-out 0.3s ease-in forwards;
+    }
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateX(40px) scale(0.9); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  @keyframes toast-out {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to { opacity: 0; transform: translateX(40px) scale(0.9); }
+  }
+
+  // Level-up overlay
+  @keyframes level-up-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(10, 73, 177, 0.4); }
+    50% { box-shadow: 0 0 0 20px rgba(10, 73, 177, 0); }
+  }
+
+  .level-up-flash {
+    animation: level-up-pulse 0.8s ease-out 3;
+  }
+</style>
+
+<script>
+  // ===========================================================
+  // Types
+  // ===========================================================
+
+  type TaskType = "short" | "medium" | "long";
+  type DecayLevel = "fresh" | "stale" | "rotten";
+
+  interface Task {
+    id: string;
+    title: string;
+    description: string;
+    type: TaskType;
+    createdAt: number;
+    dueDate: string | null;
+    completedAt: number | null;
+    order: number;
+  }
+
+  interface GameState {
+    level: number;
+    xp: number;
+    totalXP: number;
+    completedThisMonth: number;
+    completedThisYear: number;
+    streak: number;
+    lastActivityDate: string;
+    monthKey: string; // "YYYY-MM"
+    yearKey: string;  // "YYYY"
+  }
+
+  interface AppState {
+    tasks: Task[];
+    game: GameState;
+    version: number;
+  }
+
+  // ===========================================================
+  // Constants
+  // ===========================================================
+
+  const XP_VALUES: Record<TaskType, number> = { short: 10, medium: 25, long: 50 };
+  const STORAGE_KEY = "tracker_v1";
+  const PAGE_SIZE = 10;
+  // Decay thresholds in ms
+  const DECAY_THRESHOLDS: Record<TaskType, { stale: number; rotten: number }> = {
+    short: { stale: 3 * 86400000, rotten: 5 * 86400000 },
+    medium: { stale: 14 * 86400000, rotten: 21 * 86400000 },
+    long: { stale: 42 * 86400000, rotten: 63 * 86400000 },
+  };
+
+  const TIPS = [
+    "Break big goals into smaller weekly tasks — momentum is everything.",
+    "Focus on completing one long-term goal before adding more.",
+    "Weekly tasks keep daily habits sharp. Don't skip.",
+    "Streaks compound. Even one task a day makes a difference.",
+    "Medium-term tasks bridge daily work and larger goals.",
+    "Every XP counts. Small wins accumulate into major achievements.",
+    "Review and prune tasks weekly — stale goals drag you down.",
+    "Completed tasks tell the story of who you're becoming.",
+    "Quality over quantity. One done is better than five pending.",
+    "Write tasks as clear actions, not broad areas.",
+  ];
+
+  const ENCOURAGE_COMPLETE = [
+    "Great work. Keep the momentum going.",
+    "Task completed. On to the next one.",
+    "Done. What's next?",
+    "Solid progress toward your goals.",
+    "Excellent execution.",
+    "That's how it's done. Keep going.",
+    "Strong finish. Your future self will thank you.",
+  ];
+
+  const LEVEL_TITLES = [
+    "Rookie", "Apprentice", "Journeyman", "Adept", "Expert",
+    "Master", "Grand Master", "Champion", "Legend", "Mythic",
+  ];
+
+  // Achievements definition
+  const ACHIEVEMENTS = [
+    { id: "first_task", icon: "A1", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 1 },
+    { id: "five_tasks", icon: "A2", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 5 },
+    { id: "ten_tasks", icon: "A3", name: "Building Momentum", desc: "Complete 10 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 10 },
+    { id: "fifty_tasks", icon: "A4", name: "Productivity Pro", desc: "Complete 50 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 50 },
+    { id: "first_long", icon: "A5", name: "Long Game", desc: "Complete a long-term goal", check: (s: AppState) => s.tasks.some(t => t.completedAt && t.type === "long") },
+    { id: "level_5", icon: "A6", name: "Level 5", desc: "Reach level 5", check: (s: AppState) => s.game.level >= 5 },
+    { id: "level_10", icon: "A7", name: "Level 10", desc: "Reach level 10", check: (s: AppState) => s.game.level >= 10 },
+    { id: "streak_7", icon: "A8", name: "Week Warrior", desc: "7-day activity streak", check: (s: AppState) => s.game.streak >= 7 },
+    { id: "streak_30", icon: "A9", name: "Month Master", desc: "30-day activity streak", check: (s: AppState) => s.game.streak >= 30 },
+    { id: "xp_500", icon: "A10", name: "XP Hunter", desc: "Earn 500 total XP", check: (s: AppState) => s.game.totalXP >= 500 },
+  ];
+
+  // ===========================================================
+  // State management
+  // ===========================================================
+
+  function defaultState(): AppState {
+    const now = new Date();
+    return {
+      tasks: [],
+      game: {
+        level: 1, xp: 0, totalXP: 0,
+        completedThisMonth: 0, completedThisYear: 0,
+        streak: 0, lastActivityDate: "",
+        monthKey: monthKeyFromDate(now),
+        yearKey: `${now.getFullYear()}`,
+      },
+      version: 1,
+    };
+  }
+
+  function monthKeyFromDate(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function localDateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
+
+  function dayOrdinalFromKey(dateKey: string): number | null {
+    const parts = dateKey.split("-");
+    if (parts.length !== 3) return null;
+    const [year, month, day] = parts.map(Number);
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+  }
+
+  function isTaskType(value: unknown): value is TaskType {
+    return value === "short" || value === "medium" || value === "long";
+  }
+
+  function normalizeTask(value: unknown, index: number): Task | null {
+    if (!value || typeof value !== "object") return null;
+    const task = value as Partial<Task>;
+    if (typeof task.id !== "string" || typeof task.title !== "string" || !isTaskType(task.type)) return null;
+    if (typeof task.createdAt !== "number") return null;
+    const completedAt = typeof task.completedAt === "number" ? task.completedAt : null;
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: typeof task.description === "string" ? task.description : "",
+      type: task.type,
+      createdAt: task.createdAt,
+      dueDate: typeof task.dueDate === "string" ? task.dueDate : null,
+      completedAt,
+      order: typeof task.order === "number" ? task.order : index,
+    };
+  }
+
+  function normalizeStatePayload(payload: unknown): AppState | null {
+    if (!payload || typeof payload !== "object") return null;
+    const app = payload as Partial<AppState>;
+    if (!Array.isArray(app.tasks) || !app.game || typeof app.game !== "object") return null;
+
+    const gameSource = app.game as Partial<GameState>;
+    const now = new Date();
+    const normalizedTasks = app.tasks
+      .map((task, index) => normalizeTask(task, index))
+      .filter((task): task is Task => task !== null);
+
+    const normalizedGame: GameState = {
+      level: typeof gameSource.level === "number" && gameSource.level > 0 ? Math.floor(gameSource.level) : 1,
+      xp: typeof gameSource.xp === "number" && gameSource.xp >= 0 ? Math.floor(gameSource.xp) : 0,
+      totalXP: typeof gameSource.totalXP === "number" && gameSource.totalXP >= 0 ? Math.floor(gameSource.totalXP) : 0,
+      completedThisMonth: typeof gameSource.completedThisMonth === "number" && gameSource.completedThisMonth >= 0 ? Math.floor(gameSource.completedThisMonth) : 0,
+      completedThisYear: typeof gameSource.completedThisYear === "number" && gameSource.completedThisYear >= 0 ? Math.floor(gameSource.completedThisYear) : 0,
+      streak: typeof gameSource.streak === "number" && gameSource.streak >= 0 ? Math.floor(gameSource.streak) : 0,
+      lastActivityDate: typeof gameSource.lastActivityDate === "string" ? gameSource.lastActivityDate : "",
+      monthKey: typeof gameSource.monthKey === "string" ? gameSource.monthKey : monthKeyFromDate(now),
+      yearKey: typeof gameSource.yearKey === "string" ? gameSource.yearKey : String(now.getFullYear()),
+    };
+
+    return {
+      tasks: normalizedTasks,
+      game: normalizedGame,
+      version: typeof app.version === "number" ? app.version : 1,
+    };
+  }
+
+  function loadState(): AppState {
+    // Check URL hash first (for cross-device sync via URL)
+    if (window.location.hash.startsWith("#data=")) {
+      try {
+        const encoded = window.location.hash.slice(6);
+        const imported = decodeState(encoded);
+        if (imported) {
+          const merged = mergeStates(loadFromStorage(), imported);
+          saveState(merged, false);
+          return merged;
+        }
+        pendingImportError = "Import link format is invalid. Falling back to local data.";
+      } catch {
+        pendingImportError = "Import link encoding could not be parsed. Falling back to local data.";
+      }
+    }
+    return loadFromStorage();
+  }
+
+  function loadFromStorage(): AppState {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      const parsed = normalizeStatePayload(JSON.parse(raw));
+      return parsed ?? defaultState();
+    } catch {
+      return defaultState();
+    }
+  }
+
+  function saveState(state: AppState, pushHistory = true): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      showToast({
+        type: "info",
+        icon: "!",
+        title: "Save failed",
+        text: "Browser storage is full or unavailable on this device.",
+      });
+      return;
+    }
+    syncShareUrl(state, pushHistory);
+  }
+
+  function encodeState(state: AppState): string {
+    const json = JSON.stringify(state);
+    const bytes = new TextEncoder().encode(json);
+    let binary = "";
+    bytes.forEach(b => (binary += String.fromCharCode(b)));
+    return btoa(binary);
+  }
+
+  function decodeState(encoded: string): AppState | null {
+    try {
+      const binary = atob(encoded);
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      const json = new TextDecoder().decode(bytes);
+      return normalizeStatePayload(JSON.parse(json));
+    } catch {
+      return null;
+    }
+  }
+
+  function syncShareUrl(nextState: AppState, pushHistory = true): void {
+    const hash = `#data=${encodeState(nextState)}`;
+    if (window.location.hash === hash) return;
+
+    const nextUrl = `${window.location.pathname}${hash}`;
+    if (pushHistory) {
+      history.pushState({ tracker: true }, "", nextUrl);
+    } else {
+      history.replaceState({ tracker: true }, "", nextUrl);
+    }
+  }
+
+  function mergeStates(local: AppState, imported: AppState): AppState {
+    // Merge tasks: prefer the most recently completed/updated version
+    const taskMap = new Map<string, Task>();
+    [...local.tasks, ...imported.tasks].forEach(t => {
+      const existing = taskMap.get(t.id);
+      if (!existing || (t.completedAt ?? 0) > (existing.completedAt ?? 0)) {
+        taskMap.set(t.id, t);
+      }
+    });
+    // Use higher game stats
+    const game: GameState = {
+      level: Math.max(local.game.level, imported.game.level),
+      xp: Math.max(local.game.xp, imported.game.xp),
+      totalXP: Math.max(local.game.totalXP, imported.game.totalXP),
+      completedThisMonth: Math.max(local.game.completedThisMonth, imported.game.completedThisMonth),
+      completedThisYear: Math.max(local.game.completedThisYear, imported.game.completedThisYear),
+      streak: Math.max(local.game.streak, imported.game.streak),
+      lastActivityDate: local.game.lastActivityDate > imported.game.lastActivityDate
+        ? local.game.lastActivityDate : imported.game.lastActivityDate,
+      monthKey: local.game.monthKey,
+      yearKey: local.game.yearKey,
+    };
+    return { tasks: Array.from(taskMap.values()), game, version: 1 };
+  }
+
+  // ===========================================================
+  // App state
+  // ===========================================================
+
+  let pendingImportError = "";
+  let state = loadState();
+  let currentPage = 1;
+  let completedFilterType: TaskType | "all" = "all";
+  let draggedTaskId: string | null = null;
+  let unlockedAchievements = new Set<string>(
+    JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]")
+  );
+
+  // ===========================================================
+  // Gamification helpers
+  // ===========================================================
+
+  function xpForNextLevel(level: number): number {
+    return level * 100;
+  }
+
+  function gainXP(amount: number): void {
+    const oldLevel = state.game.level;
+    state.game.xp += amount;
+    state.game.totalXP += amount;
+
+    let xpNeeded = xpForNextLevel(state.game.level);
+    while (state.game.xp >= xpNeeded) {
+      state.game.xp -= xpNeeded;
+      state.game.level++;
+      xpNeeded = xpForNextLevel(state.game.level);
+    }
+
+    if (state.game.level > oldLevel) {
+      onLevelUp(state.game.level);
+    }
+
+    showToast({
+      type: "xp",
+      icon: "+",
+      title: `+${amount} XP!`,
+      text: ENCOURAGE_COMPLETE[Math.floor(Math.random() * ENCOURAGE_COMPLETE.length)],
+    });
+  }
+
+  function onLevelUp(newLevel: number): void {
+    const title = LEVEL_TITLES[Math.min(newLevel - 1, LEVEL_TITLES.length - 1)];
+    showToast({
+      type: "level",
+      icon: "▲",
+      title: `Level up: ${newLevel}`,
+      text: `You are now a ${title}! Keep crushing it!`,
+    });
+    document.getElementById("level-card")?.classList.add("level-up-flash");
+    setTimeout(() => document.getElementById("level-card")?.classList.remove("level-up-flash"), 3000);
+  }
+
+  function recordActivity(): void {
+    const now = new Date();
+    const today = localDateKey(now);
+    const nowMonth = monthKeyFromDate(now);
+    const nowYear = `${now.getFullYear()}`;
+
+    // Reset monthly/yearly counters if period changed
+    if (state.game.monthKey !== nowMonth) {
+      state.game.completedThisMonth = 0;
+      state.game.monthKey = nowMonth;
+    }
+    if (state.game.yearKey !== nowYear) {
+      state.game.completedThisYear = 0;
+      state.game.yearKey = nowYear;
+    }
+
+    // Streak logic
+    if (state.game.lastActivityDate === "") {
+      state.game.streak = 1;
+    } else {
+      const todayOrdinal = dayOrdinalFromKey(today);
+      const lastOrdinal = dayOrdinalFromKey(state.game.lastActivityDate);
+      const diff = todayOrdinal !== null && lastOrdinal !== null ? todayOrdinal - lastOrdinal : null;
+      if (diff === 0) {
+        // same day
+      } else if (diff === 1) {
+        state.game.streak++;
+      } else {
+        state.game.streak = 1; // streak broken
+      }
+    }
+    state.game.lastActivityDate = today;
+  }
+
+  // ===========================================================
+  // Decay helpers
+  // ===========================================================
+
+  function getDecayLevel(task: Task): DecayLevel {
+    if (task.completedAt) return "fresh";
+    const age = Date.now() - task.createdAt;
+    const thresh = DECAY_THRESHOLDS[task.type];
+    if (age >= thresh.rotten) return "rotten";
+    if (age >= thresh.stale) return "stale";
+    return "fresh";
+  }
+
+  function getDecayProgress(task: Task): number {
+    if (task.completedAt) return 0;
+    const age = Date.now() - task.createdAt;
+    const thresh = DECAY_THRESHOLDS[task.type];
+    return Math.min(100, (age / thresh.rotten) * 100);
+  }
+
+  // ===========================================================
+  // Google Calendar helper
+  // ===========================================================
+
+  function buildCalendarURL(task: Task): string {
+    const title = encodeURIComponent(task.title);
+    const details = encodeURIComponent(task.description || "");
+    const due = task.dueDate ? task.dueDate.replace(/-/g, "") : "";
+    const dates = due ? `${due}/${due}` : "";
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates ? `&dates=${dates}` : ""}`;
+  }
+
+  // ===========================================================
+  // Toast system
+  // ===========================================================
+
+  interface ToastOptions {
+    type: "success" | "xp" | "level" | "info";
+    icon: string;
+    title: string;
+    text?: string;
+    duration?: number;
+  }
+
+  function showToast(opts: ToastOptions): void {
+    const container = document.getElementById("toast-container")!;
+    const toast = document.createElement("div");
+    const icon = document.createElement("span");
+    const body = document.createElement("div");
+    const title = document.createElement("p");
+
+    toast.className = `toast toast--${opts.type}`;
+    icon.className = "toast__icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = opts.icon;
+
+    body.className = "toast__body";
+    title.className = "toast__title";
+    title.textContent = opts.title;
+    body.appendChild(title);
+
+    if (opts.text) {
+      const text = document.createElement("p");
+      text.className = "toast__text";
+      text.textContent = opts.text;
+      body.appendChild(text);
+    }
+
+    toast.append(icon, body);
+    container.appendChild(toast);
+    const duration = opts.duration ?? 3500;
+    setTimeout(() => {
+      toast.classList.add("toast--hiding");
+      setTimeout(() => toast.remove(), 350);
+    }, duration);
+  }
+
+  // ===========================================================
+  // Render helpers
+  // ===========================================================
+
+  function formatDate(ts: number | null): string {
+    if (!ts) return "";
+    return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function formatDueDate(dateStr: string | null): string {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  }
+
+  function isDuePast(task: Task): boolean {
+    if (!task.dueDate) return false;
+    const due = new Date(task.dueDate);
+    due.setHours(23, 59, 59, 999);
+    return due < new Date();
+  }
+
+  function renderTaskCard(task: Task): HTMLElement {
+    const decay = getDecayLevel(task);
+    const decayPct = getDecayProgress(task);
+    const overdue = isDuePast(task);
+
+    const el = document.createElement("div");
+    el.className = `task-card task-card--${decay}`;
+    el.setAttribute("role", "listitem");
+    el.setAttribute("draggable", "true");
+    el.dataset.id = task.id;
+
+    el.innerHTML = `
+      <p class="task-card__title">${escHtml(task.title)}</p>
+      ${task.description ? `<p class="task-card__desc">${escHtml(task.description)}</p>` : ""}
+      <div class="task-card__meta">
+        <span class="task-card__xp">+${XP_VALUES[task.type]} XP</span>
+        ${task.dueDate ? `<span class="task-card__due${overdue ? " task-card__due--overdue" : ""}">Due ${formatDueDate(task.dueDate)}${overdue ? " • Overdue" : ""}</span>` : ""}
+        ${decay !== "fresh" ? `<span class="task-card__decay-label">${decay === "rotten" ? "Rotting" : "Getting stale"}</span>` : ""}
+      </div>
+      <div class="task-card__actions">
+        <button class="btn btn--complete btn--sm" data-action="complete" data-id="${task.id}" aria-label="Complete task">Done</button>
+        <button class="btn btn--ghost btn--sm" data-action="edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
+        <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
+        <button class="btn btn--danger btn--sm" data-action="delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
+      </div>
+      ${decay !== "fresh" ? `<div class="task-card__decay-bar" style="width: ${decayPct}%"></div>` : ""}
+    `;
+
+    // Stink particles for rotten tasks
+    if (decay === "rotten") {
+      const particles = document.createElement("div");
+      particles.className = "stink-particles";
+      for (let i = 0; i < 6; i++) {
+        const p = document.createElement("span");
+        p.className = "stink-particle";
+        p.style.setProperty("--duration", `${2 + Math.random() * 2}s`);
+        p.style.setProperty("--delay", `${Math.random() * 2}s`);
+        p.style.left = `${10 + Math.random() * 80}%`;
+        p.style.setProperty("--size", `${8 + Math.random() * 8}px`);
+        particles.appendChild(p);
+      }
+      el.appendChild(particles);
+    }
+
+    // Drag events
+    el.addEventListener("dragstart", (e) => {
+      draggedTaskId = task.id;
+      el.classList.add("task-card--dragging");
+      e.dataTransfer!.effectAllowed = "move";
+      e.dataTransfer!.setData("text/plain", task.id);
+    });
+
+    el.addEventListener("dragend", () => {
+      el.classList.remove("task-card--dragging");
+      draggedTaskId = null;
+      // Remove drop highlights
+      document.querySelectorAll(".task-grid.drag-over").forEach(g => g.classList.remove("drag-over"));
+      document.querySelectorAll(".task-card--drop-target").forEach(c => c.classList.remove("task-card--drop-target"));
+    });
+
+    el.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = "move";
+      document.querySelectorAll(".task-card--drop-target").forEach(c => {
+        if (c !== el) c.classList.remove("task-card--drop-target");
+      });
+      if (el.dataset.id !== draggedTaskId) {
+        el.classList.add("task-card--drop-target");
+      }
+    });
+
+    return el;
+  }
+
+  function renderTasks(): void {
+    const types: TaskType[] = ["short", "medium", "long"];
+    types.forEach(type => {
+      const container = document.getElementById(`tasks-${type}`)!;
+      const active = state.tasks
+        .filter(t => t.type === type && !t.completedAt)
+        .sort((a, b) => a.order - b.order);
+
+      container.innerHTML = "";
+
+      if (active.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "task-empty-state";
+        empty.dataset.type = type;
+        const icons: Record<TaskType, string> = { short: "W", medium: "M", long: "Q" };
+        const labels: Record<TaskType, string> = { short: "No weekly tasks yet. Add one!", medium: "No monthly tasks yet. Add one!", long: "No quarterly goals yet. Add one!" };
+        empty.innerHTML = `<span class="task-empty-state__icon">${icons[type]}</span><p>${labels[type]}</p>`;
+        container.appendChild(empty);
+      } else {
+        active.forEach(task => {
+          container.appendChild(renderTaskCard(task));
+        });
+      }
+    });
+  }
+
+  function renderStats(): void {
+    const g = state.game;
+    document.getElementById("level-number")!.textContent = String(g.level);
+    const xpNeeded = xpForNextLevel(g.level);
+    const pct = (g.xp / xpNeeded) * 100;
+    const fill = document.getElementById("xp-bar-fill")!;
+    fill.style.width = `${pct}%`;
+    const bar = fill.parentElement!;
+    bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+    bar.setAttribute("aria-valuemax", String(100));
+    document.getElementById("xp-text")!.textContent = `${g.xp} / ${xpNeeded} XP`;
+    document.getElementById("total-xp")!.textContent = `${g.totalXP} XP total`;
+    document.getElementById("stat-month")!.textContent = String(g.completedThisMonth);
+    document.getElementById("stat-year")!.textContent = String(g.completedThisYear);
+    document.getElementById("stat-streak")!.textContent = String(g.streak);
+    const title = LEVEL_TITLES[Math.min(g.level - 1, LEVEL_TITLES.length - 1)];
+    document.getElementById("level-badge")!.setAttribute("title", title);
+  }
+
+  function renderCompleted(): void {
+    const completed = state.tasks
+      .filter(t => t.completedAt !== null)
+      .filter(t => completedFilterType === "all" || t.type === completedFilterType)
+      .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+
+    const totalPages = Math.max(1, Math.ceil(completed.length / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const page = completed.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const container = document.getElementById("completed-list")!;
+    container.innerHTML = "";
+
+    if (page.length === 0) {
+      container.innerHTML = '<p class="empty-completed">No completed tasks yet — get going.</p>';
+    } else {
+      page.forEach(task => {
+        const item = document.createElement("div");
+        item.className = "completed-item";
+        item.setAttribute("role", "listitem");
+        item.innerHTML = `
+          <span class="completed-item__check" aria-hidden="true">Done</span>
+          <div class="completed-item__info">
+            <span class="completed-item__title">${escHtml(task.title)}</span>
+            <div class="completed-item__meta">
+              <span>${task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly"}</span>
+              <span>Completed ${formatDate(task.completedAt)}</span>
+              <span class="completed-item__xp">+${XP_VALUES[task.type]} XP</span>
+            </div>
+          </div>
+          <div class="completed-item__actions">
+            <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
+            <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">Delete</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Pagination
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages: number): void {
+    const container = document.getElementById("pagination")!;
+    container.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const createBtn = (label: string, page: number, disabled = false, active = false) => {
+      const btn = document.createElement("button");
+      btn.className = `pagination__btn${active ? " pagination__btn--active" : ""}`;
+      btn.textContent = label;
+      btn.disabled = disabled;
+      btn.setAttribute("aria-label", `Page ${page}`);
+      if (!disabled) {
+        btn.addEventListener("click", () => { currentPage = page; renderCompleted(); });
+      }
+      return btn;
+    };
+
+    container.appendChild(createBtn("‹", currentPage - 1, currentPage === 1));
+    for (let i = 1; i <= totalPages; i++) {
+      container.appendChild(createBtn(String(i), i, false, i === currentPage));
+    }
+    container.appendChild(createBtn("›", currentPage + 1, currentPage === totalPages));
+  }
+
+  function renderFullStats(): void {
+    const allCompleted = state.tasks.filter(t => t.completedAt !== null);
+    const activeCount = state.tasks.filter(t => !t.completedAt).length;
+    const totalXP = state.game.totalXP;
+    const byType = { short: 0, medium: 0, long: 0 };
+    allCompleted.forEach(t => byType[t.type]++);
+
+    const statsData = [
+      { value: allCompleted.length, label: "Total Completed" },
+      { value: activeCount, label: "Active Tasks" },
+      { value: totalXP, label: "Total XP Earned" },
+      { value: byType.short, label: "Weekly Completed" },
+      { value: byType.medium, label: "Monthly Completed" },
+      { value: byType.long, label: "Quarterly Completed" },
+      { value: state.game.streak, label: "Day Streak" },
+      { value: state.game.level, label: "Current Level" },
+    ];
+
+    const grid = document.getElementById("full-stats-grid")!;
+    grid.innerHTML = statsData.map(s => `
+      <div class="full-stat-card">
+        <span class="full-stat-card__value">${s.value}</span>
+        <span class="full-stat-card__label">${s.label}</span>
+      </div>
+    `).join("");
+
+    // Achievements
+    renderAchievements();
+  }
+
+  function renderAchievements(): void {
+    const grid = document.getElementById("achievement-grid")!;
+    grid.innerHTML = "";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = "Achievements";
+    h3.className = "full-stats__achievements-title";
+    grid.appendChild(h3);
+
+    ACHIEVEMENTS.forEach(ach => {
+      const unlocked = ach.check(state);
+      if (unlocked && !unlockedAchievements.has(ach.id)) {
+        unlockedAchievements.add(ach.id);
+        localStorage.setItem("tracker_achievements", JSON.stringify([...unlockedAchievements]));
+        showToast({ type: "success", icon: "A", title: `Achievement unlocked: ${ach.name}`, text: ach.desc });
+      }
+      const card = document.createElement("div");
+      card.className = `achievement-card achievement-card--${unlocked ? "unlocked" : "locked"}`;
+      card.innerHTML = `
+        <span class="achievement-card__icon">${ach.icon}</span>
+        <p class="achievement-card__name">${ach.name}</p>
+        <p class="achievement-card__desc">${ach.desc}</p>
+        ${unlocked ? '<span class="achievement-card__badge">✓</span>' : ""}
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderAll(): void {
+    renderTasks();
+    renderStats();
+    renderCompleted();
+    renderFullStats();
+  }
+
+  // ===========================================================
+  // Task CRUD
+  // ===========================================================
+
+  function addTask(title: string, description: string, type: TaskType, dueDate: string | null): Task {
+    const maxOrder = state.tasks
+      .filter(t => t.type === type && !t.completedAt)
+      .reduce((m, t) => Math.max(m, t.order), -1);
+
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      description: description.trim(),
+      type,
+      createdAt: Date.now(),
+      dueDate: dueDate || null,
+      completedAt: null,
+      order: maxOrder + 1,
+    };
+    state.tasks.push(task);
+    saveState(state);
+    return task;
+  }
+
+  function completeTask(id: string): void {
+    const task = state.tasks.find(t => t.id === id);
+    if (!task || task.completedAt) return;
+    task.completedAt = Date.now();
+
+    recordActivity();
+    state.game.completedThisMonth++;
+    state.game.completedThisYear++;
+
+    gainXP(XP_VALUES[task.type]);
+    saveState(state);
+    renderAll();
+  }
+
+  function deleteTask(id: string): void {
+    state.tasks = state.tasks.filter(t => t.id !== id);
+    saveState(state);
+    renderAll();
+  }
+
+  function editTask(id: string, title: string, description: string, type: TaskType, dueDate: string | null): void {
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+    task.title = title.trim();
+    task.description = description.trim();
+    task.type = type;
+    task.dueDate = dueDate || null;
+    saveState(state);
+    renderAll();
+  }
+
+  // ===========================================================
+  // Drag & Drop
+  // ===========================================================
+
+  function normalizeOrders(type: TaskType): void {
+    state.tasks
+      .filter(t => t.type === type && !t.completedAt)
+      .sort((a, b) => a.order - b.order)
+      .forEach((task, index) => {
+        task.order = index;
+      });
+  }
+
+  function handleDrop(e: DragEvent): void {
+    e.preventDefault();
+    const targetGrid = (e.currentTarget as HTMLElement);
+    const targetType = targetGrid.dataset.type as TaskType;
+    targetGrid.classList.remove("drag-over");
+
+    if (!draggedTaskId) return;
+    const task = state.tasks.find(t => t.id === draggedTaskId);
+    if (!task) return;
+    const sourceType = task.type;
+
+    // Find drop position
+    const dropCard = (e.target as HTMLElement).closest<HTMLElement>(".task-card");
+
+    if (dropCard && dropCard.dataset.id !== draggedTaskId) {
+      const targetTask = state.tasks.find(t => t.id === dropCard.dataset.id);
+      if (targetTask) {
+        task.type = targetType;
+        // Insert between items using a fractional order, then normalize immediately below.
+        task.order = targetTask.order - 0.5;
+      }
+    } else {
+      // Drop at end of section
+      task.type = targetType;
+      const maxOrder = state.tasks
+        .filter(t => t.type === targetType && !t.completedAt && t.id !== draggedTaskId)
+        .reduce((m, t) => Math.max(m, t.order), -1);
+      task.order = maxOrder + 1;
+    }
+
+    normalizeOrders(sourceType);
+    normalizeOrders(targetType);
+    saveState(state);
+    renderAll();
+    showToast({ type: "info", icon: "i", title: "Task moved", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
+  }
+
+  // ===========================================================
+  // Modal helpers
+  // ===========================================================
+
+  function openModal(id: string): void {
+    const modal = document.getElementById(id)!;
+    modal.removeAttribute("hidden");
+    // Focus first focusable element
+    setTimeout(() => {
+      const first = modal.querySelector<HTMLElement>("input, select, textarea, button:not(.modal__close)");
+      first?.focus();
+    }, 50);
+  }
+
+  function closeModal(id: string): void {
+    document.getElementById(id)!.setAttribute("hidden", "");
+  }
+
+  // ===========================================================
+  // Event wiring
+  // ===========================================================
+
+  function escHtml(str: string): string {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // Add task button
+  document.getElementById("add-task-btn")!.addEventListener("click", () => {
+    (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
+    (document.getElementById("task-title-input") as HTMLInputElement).value = "";
+    (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = "";
+    (document.getElementById("task-type-input") as HTMLSelectElement).value = "short";
+    (document.getElementById("task-due-input") as HTMLInputElement).value = "";
+    (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
+    (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
+    openModal("task-modal");
+  });
+
+  // Add-section buttons
+  document.querySelectorAll(".add-section-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const type = (btn as HTMLElement).dataset.type as TaskType;
+      (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
+      (document.getElementById("task-title-input") as HTMLInputElement).value = "";
+      (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = "";
+      (document.getElementById("task-type-input") as HTMLSelectElement).value = type;
+      (document.getElementById("task-due-input") as HTMLInputElement).value = "";
+      (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
+      (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
+      openModal("task-modal");
+    });
+  });
+
+  // Modal close buttons
+  ["task-modal-close", "task-modal-cancel"].forEach(id => {
+    document.getElementById(id)!.addEventListener("click", () => closeModal("task-modal"));
+  });
+  ["export-modal-close", "export-modal-close2"].forEach(id => {
+    document.getElementById(id)!.addEventListener("click", () => closeModal("export-modal"));
+  });
+  ["import-modal-close", "import-modal-cancel"].forEach(id => {
+    document.getElementById(id)!.addEventListener("click", () => closeModal("import-modal"));
+  });
+
+  // Close on overlay click
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        overlay.setAttribute("hidden", "");
+      }
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal-overlay:not([hidden])").forEach(m => m.setAttribute("hidden", ""));
+    }
+  });
+
+  // Task form submit
+  document.getElementById("task-form")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const editId = (document.getElementById("edit-task-id") as HTMLInputElement).value;
+    const title = (document.getElementById("task-title-input") as HTMLInputElement).value;
+    const description = (document.getElementById("task-desc-input") as HTMLTextAreaElement).value;
+    const type = (document.getElementById("task-type-input") as HTMLSelectElement).value as TaskType;
+    const dueDate = (document.getElementById("task-due-input") as HTMLInputElement).value || null;
+
+    if (!title.trim()) return;
+
+    if (editId) {
+      editTask(editId, title, description, type, dueDate);
+      showToast({ type: "info", icon: "i", title: "Task updated", text: "" });
+    } else {
+      addTask(title, description, type, dueDate);
+      showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
+    }
+    closeModal("task-modal");
+    renderAll();
+  });
+
+  // Board event delegation
+  document.getElementById("tasks-short")!.addEventListener("click", handleBoardAction);
+  document.getElementById("tasks-medium")!.addEventListener("click", handleBoardAction);
+  document.getElementById("tasks-long")!.addEventListener("click", handleBoardAction);
+
+  // Completed list delegation
+  document.getElementById("completed-list")!.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>("[data-action='delete-completed']");
+    if (btn) {
+      if (confirm("Delete this completed task?")) {
+        deleteTask(btn.dataset.id!);
+      }
+    }
+  });
+
+  function handleBoardAction(e: Event): void {
+    const target = e.target as HTMLElement;
+    const btn = target.closest<HTMLElement>("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action!;
+    const id = btn.dataset.id!;
+
+    if (action === "complete") {
+      completeTask(id);
+    } else if (action === "delete") {
+      if (confirm("Delete this task?")) {
+        deleteTask(id);
+      }
+    } else if (action === "edit") {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      (document.getElementById("edit-task-id") as HTMLInputElement).value = task.id;
+      (document.getElementById("task-title-input") as HTMLInputElement).value = task.title;
+      (document.getElementById("task-desc-input") as HTMLTextAreaElement).value = task.description;
+      (document.getElementById("task-type-input") as HTMLSelectElement).value = task.type;
+      (document.getElementById("task-due-input") as HTMLInputElement).value = task.dueDate ?? "";
+      (document.getElementById("task-modal-title") as HTMLElement).textContent = "Edit Task";
+      (document.getElementById("task-form-submit") as HTMLElement).textContent = "Save Changes";
+      openModal("task-modal");
+    }
+  }
+
+  // Drag over highlighting for task grids
+  document.querySelectorAll(".task-grid").forEach(grid => {
+    grid.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      grid.classList.add("drag-over");
+    });
+    grid.addEventListener("drop", (e) => handleDrop(e as DragEvent));
+    grid.addEventListener("dragleave", (e) => {
+      if (!grid.contains((e as DragEvent).relatedTarget as Node)) {
+        grid.classList.remove("drag-over");
+      }
+    });
+  });
+
+  // Export
+  document.getElementById("export-btn")!.addEventListener("click", () => {
+    const code = encodeState(state);
+    (document.getElementById("export-code") as HTMLTextAreaElement).value = code;
+    openModal("export-modal");
+  });
+
+  document.getElementById("copy-code-btn")!.addEventListener("click", () => {
+    const code = (document.getElementById("export-code") as HTMLTextAreaElement).value;
+    navigator.clipboard.writeText(code).then(() => {
+      showToast({ type: "success", icon: "✓", title: "Copied", text: "Paste this on another device to sync." });
+    });
+  });
+
+  document.getElementById("copy-url-btn")!.addEventListener("click", () => {
+    syncShareUrl(state, false);
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast({ type: "success", icon: "✓", title: "URL copied", text: "Open this URL on another device to import." });
+    });
+  });
+
+  // Import
+  document.getElementById("import-btn")!.addEventListener("click", () => {
+    (document.getElementById("import-code") as HTMLTextAreaElement).value = "";
+    openModal("import-modal");
+  });
+
+  document.getElementById("do-import-btn")!.addEventListener("click", () => {
+    const code = (document.getElementById("import-code") as HTMLTextAreaElement).value.trim();
+    if (!code) return;
+    const imported = decodeState(code);
+    if (!imported) {
+      showToast({ type: "info", icon: "!", title: "Invalid import code", text: "Please check the code and try again." });
+      return;
+    }
+    state = mergeStates(state, imported);
+    saveState(state);
+    closeModal("import-modal");
+    renderAll();
+    showToast({ type: "success", icon: "✓", title: "Data imported", text: "Your tasks have been merged." });
+  });
+
+  // Completed filter
+  document.getElementById("completed-filter-type")!.addEventListener("change", (e) => {
+    completedFilterType = (e.target as HTMLSelectElement).value as TaskType | "all";
+    currentPage = 1;
+    renderCompleted();
+  });
+
+  // Clear completed
+  document.getElementById("clear-completed-btn")!.addEventListener("click", () => {
+    if (!confirm("Clear all completed tasks? This cannot be undone.")) return;
+    state.tasks = state.tasks.filter(t => !t.completedAt);
+    saveState(state);
+    renderAll();
+    showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
+  });
+
+  // ===========================================================
+  // Tip rotation
+  // ===========================================================
+
+  function showRandomTip(): void {
+    const tip = TIPS[Math.floor(Math.random() * TIPS.length)];
+    document.getElementById("tip-text")!.textContent = tip;
+  }
+
+  // ===========================================================
+  // Decay re-render (periodic)
+  // ===========================================================
+
+  // Re-render tasks every 10 minutes to refresh decay states
+  setInterval(() => {
+    renderTasks();
+  }, 600_000);
+
+  // ===========================================================
+  // Init
+  // ===========================================================
+
+  showRandomTip();
+  syncShareUrl(state, false);
+  renderAll();
+
+  if (pendingImportError) {
+    showToast({ type: "info", icon: "!", title: "Import warning", text: pendingImportError, duration: 5000 });
+  }
+
+  // Show a welcome tip after a brief delay if first visit
+  setTimeout(() => {
+    const visited = localStorage.getItem("tracker_visited");
+    if (!visited) {
+      showToast({
+        type: "info",
+        icon: "i",
+        title: "Welcome to your tracker",
+        text: "Add your first task to earn XP and start levelling up!",
+        duration: 6000,
+      });
+      localStorage.setItem("tracker_visited", "1");
+    }
+  }, 500);
+</script>
