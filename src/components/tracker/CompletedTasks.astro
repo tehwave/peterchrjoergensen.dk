@@ -21,24 +21,35 @@ import { XP_VALUES } from "../../types/tracker";
   </div>
   <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
 
+  <!--
+    Inert server-rendered blueprint used by the client controller to clone
+    completed-card markup with Astro-scoped styles intact.
+  -->
   <template data-completed-task-template>
     <CompletedTaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
   </template>
 
+  <!--
+    Hidden bootstrap instance ensures the custom element definition and scoped
+    styles are present before dynamic template cloning begins.
+  -->
   <div hidden aria-hidden="true">
     <CompletedTaskTemplate id="__BOOTSTRAP_COMPLETED__" title="Bootstrap" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
   </div>
 </tracker-completed-tasks>
 
 <script>
+  /** Supported tracker task horizons for completed items. */
   type TaskType = "short" | "medium" | "long";
 
+  /** XP lookup used to render reward labels on completed cards. */
   const XP_BY_TYPE: Record<TaskType, number> = {
     short: 10,
     medium: 25,
     long: 50,
   };
 
+  /** Minimal completed-task snapshot consumed by this list UI. */
   interface CompletedTaskData {
     id: string;
     title: string;
@@ -46,8 +57,15 @@ import { XP_VALUES } from "../../types/tracker";
     completedAt: number;
   }
 
+  /** Number of completed cards shown per page. */
   const PAGE_SIZE = 8;
 
+  /**
+   * Completed-list UI controller.
+   *
+   * Owns view-local state (filter + pagination + transitions) and exposes
+   * `setCompletedTasks(...)` as the bridge from page-level canonical state.
+   */
   class TrackerCompletedTasks extends HTMLElement {
     private currentPage = 1;
     private completedFilterType: TaskType | "all" = "all";
@@ -56,6 +74,7 @@ import { XP_VALUES } from "../../types/tracker";
     private transitionInProgress = false;
     private queuedRender = false;
 
+    /** Initializes event listeners and first paint once per element. */
     connectedCallback() {
       if (this.dataset.completedTasksInitialized === "true") return;
       this.dataset.completedTasksInitialized = "true";
@@ -72,6 +91,7 @@ import { XP_VALUES } from "../../types/tracker";
         this.requestRender();
       });
 
+      // Surface clear intent to the page orchestrator; this component does not mutate canonical state directly.
       this.addEventListener("click", (event) => {
         const target = event.target;
         const clearButton = target instanceof Element ? target.closest("#clear-completed-btn") : null;
@@ -87,6 +107,9 @@ import { XP_VALUES } from "../../types/tracker";
       this.requestRender();
     }
 
+    /**
+     * Receives canonical completed-task snapshots and normalizes shape before render.
+     */
     setCompletedTasks(tasks: CompletedTaskData[]): void {
       this.completedTasks = tasks.filter((task): task is CompletedTaskData => {
         return typeof task?.id === "string" && typeof task.title === "string" && (task.type === "short" || task.type === "medium" || task.type === "long") && typeof task.completedAt === "number";
@@ -100,14 +123,17 @@ import { XP_VALUES } from "../../types/tracker";
       this.requestRender();
     }
 
+    /** Applies the current type filter and keeps newest completions first. */
     private getFilteredCompletedTasks(): CompletedTaskData[] {
       return this.completedTasks.filter((task) => this.completedFilterType === "all" || task.type === this.completedFilterType).sort((a, b) => b.completedAt - a.completedAt);
     }
 
+    /** Formats completion timestamps for UI labels. */
     private formatDate(ts: number): string {
       return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
     }
 
+    /** Re-applies Astro scope attributes to runtime-created DOM nodes. */
     private applyAstroScope(root: Element): void {
       if (!this.astroScopeAttributeName) return;
       root.setAttribute(this.astroScopeAttributeName, "");
@@ -116,6 +142,7 @@ import { XP_VALUES } from "../../types/tracker";
       });
     }
 
+    /** Clones and hydrates a completed-task card from the inert template. */
     private renderCompletedTaskItem(task: CompletedTaskData): HTMLElement | null {
       const template = this.querySelector("[data-completed-task-template]");
       if (!(template instanceof HTMLTemplateElement)) return null;
@@ -140,6 +167,7 @@ import { XP_VALUES } from "../../types/tracker";
       return item;
     }
 
+    /** Renders page controls and wires navigation callbacks. */
     private renderPagination(totalPages: number): void {
       const container = this.querySelector("#pagination");
       if (!(container instanceof HTMLElement)) return;
@@ -171,6 +199,7 @@ import { XP_VALUES } from "../../types/tracker";
       container.appendChild(createBtn("›", this.currentPage + 1, this.currentPage === totalPages));
     }
 
+    /** Coalesces render calls while swap transitions are running. */
     private requestRender(): void {
       if (this.transitionInProgress) {
         this.queuedRender = true;
@@ -180,12 +209,14 @@ import { XP_VALUES } from "../../types/tracker";
       void this.render();
     }
 
+    /** Await one animation frame to ensure class toggles trigger transitions. */
     private nextFrame(): Promise<void> {
       return new Promise((resolve) => {
         window.requestAnimationFrame(() => resolve());
       });
     }
 
+    /** Waits for opacity transition completion with a timeout safety net. */
     private waitForTransition(el: HTMLElement, timeoutMs: number): Promise<void> {
       return new Promise((resolve) => {
         let settled = false;
@@ -206,6 +237,9 @@ import { XP_VALUES } from "../../types/tracker";
       });
     }
 
+    /**
+     * Performs a full list repaint for current filter/page with optional fade transition.
+     */
     private async render(): Promise<void> {
       this.transitionInProgress = true;
       const filtered = this.getFilteredCompletedTasks();

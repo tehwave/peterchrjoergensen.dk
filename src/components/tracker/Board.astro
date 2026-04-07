@@ -60,9 +60,16 @@ import TaskTemplate from "./Task.astro";
 </tracker-board>
 
 <script>
+  /** Supported board columns that map to week, month, and quarter scopes. */
   type TaskType = "short" | "medium" | "long";
+
+  /** Visual decay buckets used by `Task.astro` styling and progress UI. */
   type DecayLevel = "fresh" | "stale" | "rotten";
 
+  /**
+   * Minimal task payload consumed by the board renderer.
+   * Canonical state still lives in `src/pages/tracker.astro`.
+   */
   interface TaskSnapshot {
     id: string;
     title: string;
@@ -72,22 +79,27 @@ import TaskTemplate from "./Task.astro";
     order: number;
   }
 
+  /** Event detail emitted when a drag-drop operation targets a board column. */
   interface BoardDropDetail {
     targetType: TaskType;
     dropTaskId: string | null;
   }
 
+  /** Inclusive date range used for period metadata labels. */
   interface PeriodRange {
     start: Date;
     end: Date;
   }
 
+  /** Milliseconds per day, used for simple date-diff math in local time. */
   const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+  /** Normalizes a date to local midnight for calendar-only calculations. */
   function getStartOfDay(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
 
+  /** Returns Monday→Sunday range for the provided date. */
   function getWeekRange(date: Date): PeriodRange {
     const today = getStartOfDay(date);
     const mondayOffset = (today.getDay() + 6) % 7;
@@ -100,12 +112,14 @@ import TaskTemplate from "./Task.astro";
     return { start, end };
   }
 
+  /** Returns the first and last day of the current month. */
   function getMonthRange(date: Date): PeriodRange {
     const start = new Date(date.getFullYear(), date.getMonth(), 1);
     const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return { start, end };
   }
 
+  /** Returns the first and last day of the current quarter. */
   function getQuarterRange(date: Date): PeriodRange {
     const quarterStartMonth = Math.floor(date.getMonth() / 3) * 3;
     const start = new Date(date.getFullYear(), quarterStartMonth, 1);
@@ -113,12 +127,17 @@ import TaskTemplate from "./Task.astro";
     return { start, end };
   }
 
+  /**
+   * Computes inclusive remaining days from `today` to `endDate`.
+   * The value is clamped to zero to avoid negative labels for past periods.
+   */
   function getDaysLeft(endDate: Date, today: Date): number {
     const end = getStartOfDay(endDate);
     const start = getStartOfDay(today);
     return Math.max(0, Math.floor((end.getTime() - start.getTime()) / MS_PER_DAY) + 1);
   }
 
+  /** Formats human-friendly range text (e.g. `Apr 1–7` or `Mar 30–Apr 5`). */
   function formatRange(startDate: Date, endDate: Date): string {
     const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
 
@@ -132,16 +151,30 @@ import TaskTemplate from "./Task.astro";
     return `${start}–${end}`;
   }
 
+  /** Column-specific copy for empty states rendered by `render()`. */
   const EMPTY_STATE_LABELS: Record<TaskType, string> = {
     short: "No tasks for this week yet. Add one!",
     medium: "No must-do tasks for this month yet. Add one!",
     long: "No tasks for this quarter yet. Add one!",
   };
 
+  /**
+   * Board web component responsible for board-local UI behavior:
+   * - rendering task snapshots supplied via `setTasks(...)`
+   * - dispatching semantic intent events for add/drop actions
+   * - updating period metadata labels
+   */
   class TrackerBoard extends HTMLElement {
+    /** Last validated task snapshot pushed from parent orchestration. */
     private tasks: TaskSnapshot[] = [];
+
+    /** Astro's generated scoping attribute (e.g. `data-astro-cid-*`) if present. */
     private astroScopeAttributeName: string | null = null;
 
+    /**
+     * Initializes one-time listeners and performs initial paint.
+     * Guarded to avoid duplicate setup if the element reconnects.
+     */
     connectedCallback() {
       if (this.dataset.boardInitialized === "true") return;
       this.dataset.boardInitialized = "true";
@@ -204,6 +237,7 @@ import TaskTemplate from "./Task.astro";
       this.render();
     }
 
+    /** Refreshes period labels with current range + days-left info. */
     private updatePeriodMeta(): void {
       const today = new Date();
 
@@ -224,6 +258,10 @@ import TaskTemplate from "./Task.astro";
       });
     }
 
+    /**
+     * Accepts task snapshots from the page orchestrator, validates shape,
+     * then re-renders each column in `order` sequence.
+     */
     setTasks(tasks: TaskSnapshot[]): void {
       this.tasks = tasks.filter((task): task is TaskSnapshot => {
         return (
@@ -239,6 +277,10 @@ import TaskTemplate from "./Task.astro";
       this.render();
     }
 
+    /**
+     * Applies Astro's scope attribute to dynamically created nodes so scoped
+     * component styles continue to match runtime-generated markup.
+     */
     private applyAstroScope(root: Element): void {
       if (!this.astroScopeAttributeName) return;
       root.setAttribute(this.astroScopeAttributeName, "");
@@ -247,6 +289,7 @@ import TaskTemplate from "./Task.astro";
       });
     }
 
+    /** Builds a task card instance from the component template and task data. */
     private renderTaskCard(task: TaskSnapshot): HTMLElement | null {
       const template = this.querySelector("[data-task-card-template]");
       if (!(template instanceof HTMLTemplateElement)) return null;
@@ -277,6 +320,10 @@ import TaskTemplate from "./Task.astro";
       return card;
     }
 
+    /**
+     * Renders all board columns from `this.tasks`, including per-column
+     * empty-state fallbacks when no tasks exist.
+     */
     private render(): void {
       const types: TaskType[] = ["short", "medium", "long"];
       types.forEach((type) => {
@@ -390,6 +437,10 @@ import TaskTemplate from "./Task.astro";
       font-size: $font-size-xs;
       color: $tracker-soft-text;
       margin: 0;
+
+      strong {
+        color: $color-accent;
+      }
     }
   }
 

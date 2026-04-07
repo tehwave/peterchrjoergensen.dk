@@ -1,4 +1,7 @@
 ---
+/**
+ * Render payload for a single completed-task card.
+ */
 interface Props {
   id: string;
   title: string;
@@ -52,7 +55,16 @@ const { id, title, completedAtLabel, xp } = Astro.props;
 </tracker-completed-task>
 
 <script is:inline>
+  /**
+   * Card-local controller for completed-task interactions.
+   *
+   * This component only emits semantic intent events and leaves
+   * canonical state mutation to `tracker.astro`.
+   */
   class TrackerCompletedTask extends HTMLElement {
+    /**
+     * Wires one delegated click listener once per element instance.
+     */
     connectedCallback() {
       if (this.dataset.completedTaskInitialized === "true") return;
       this.dataset.completedTaskInitialized = "true";
@@ -65,6 +77,7 @@ const { id, title, completedAtLabel, xp } = Astro.props;
         const id = this.dataset.completedId ?? "";
         if (!id) return;
 
+        // Bubble intent upward so the page-level orchestrator can mutate state.
         this.dispatchEvent(
           new CustomEvent("tracker-completed-task-delete", {
             bubbles: true,
