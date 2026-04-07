@@ -72,4 +72,59 @@ const {} = Astro.props;
     grid-column: 2;
     grid-row: 2;
   }
+
+  @supports (animation-timeline: view()) {
+    :global(.full-stats-grid .full-stat-card) {
+      animation-name: metric-card-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 8% cover 32%;
+    }
+
+    :global(.full-stats-grid .full-stat-card__icon) {
+      animation-name: metric-icon-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out-back);
+      animation-timeline: view(block);
+      animation-range: entry 14% cover 34%;
+    }
+
+    :global(.full-stats-grid .full-stat-card:nth-child(2n)) {
+      animation-range: entry 12% cover 36%;
+    }
+  }
+
+  @keyframes metric-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes metric-icon-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.85);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.full-stats-grid .full-stat-card),
+    :global(.full-stats-grid .full-stat-card__icon) {
+      animation: none;
+    }
+  }
 </style>
