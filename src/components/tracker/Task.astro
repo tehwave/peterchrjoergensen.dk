@@ -15,7 +15,7 @@ const { id, title, type, decay, decayProgress = 0, isDragging = false, isDropTar
 const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
 ---
 
-<tracker-task-card
+<tracker-task-card-v2
   class:list={[
     "task-card",
     `task-card--${decay}`,
@@ -60,7 +60,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   <div class:list={["fire-particles", `fire-particles--${decay}`]} data-task-particles aria-hidden="true">
     <canvas class="fire-particles__canvas" data-task-particles-canvas></canvas>
   </div>
-</tracker-task-card>
+</tracker-task-card-v2>
 
 <script is:inline>
   const TITLE_MIN_LENGTH = 1;
@@ -69,8 +69,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       count: 8,
       speedMin: 22,
       speedMax: 48,
-      sizeMin: 1.8,
-      sizeMax: 4.8,
+      sizeMin: 12,
+      sizeMax: 18,
       ttlMin: 900,
       ttlMax: 1400,
       hueMin: 22,
@@ -81,8 +81,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       count: 12,
       speedMin: 34,
       speedMax: 70,
-      sizeMin: 2.1,
-      sizeMax: 6,
+      sizeMin: 14,
+      sizeMax: 22,
       ttlMin: 700,
       ttlMax: 1200,
       hueMin: 10,
@@ -95,7 +95,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     return min + Math.random() * (max - min);
   }
 
-  class TrackerTaskCard extends HTMLElement {
+  class TrackerTaskCardV2 extends HTMLElement {
     constructor() {
       super();
       this.titleEl = null;
@@ -310,6 +310,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         life,
         ttl,
         spawnDelay: randomizeAge ? 0 : pick(0, ttl * 0.5),
+        spin: pick(-0.28, 0.28),
+        tilt: pick(-0.2, 0.2),
       };
     }
 
@@ -345,11 +347,17 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         }
 
         const alpha = (1 - progress) * config.alpha;
+        const rotation = particle.tilt + particle.spin * progress;
 
-        this.particleCtx.beginPath();
-        this.particleCtx.fillStyle = `hsla(${particle.hue}, 95%, 57%, ${alpha})`;
-        this.particleCtx.arc(drawX, drawY, particle.size, 0, Math.PI * 2);
-        this.particleCtx.fill();
+        this.particleCtx.save();
+        this.particleCtx.translate(drawX, drawY);
+        this.particleCtx.rotate(rotation);
+        this.particleCtx.globalAlpha = alpha;
+        this.particleCtx.font = `${particle.size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        this.particleCtx.textAlign = "center";
+        this.particleCtx.textBaseline = "middle";
+        this.particleCtx.fillText("🔥", 0, 0);
+        this.particleCtx.restore();
       }
     }
 
@@ -472,8 +480,8 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     }
   }
 
-  if (!customElements.get("tracker-task-card")) {
-    customElements.define("tracker-task-card", TrackerTaskCard);
+  if (!customElements.get("tracker-task-card-v2")) {
+    customElements.define("tracker-task-card-v2", TrackerTaskCardV2);
   }
 </script>
 
@@ -481,7 +489,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
-  tracker-task-card {
+  tracker-task-card-v2 {
     display: block;
   }
 

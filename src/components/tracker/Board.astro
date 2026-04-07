@@ -1,0 +1,454 @@
+---
+import TaskTemplate from "./Task.astro";
+---
+
+<tracker-board class="tracker__board">
+  <section class="task-section task-section--short" aria-labelledby="section-short-title">
+    <div class="task-section__header">
+      <div>
+        <h2 class="task-section__title" id="section-short-title">
+          <span class="task-section__icon">W</span>
+          This Week
+        </h2>
+        <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
+      </div>
+      <button class="btn btn--ghost add-section-btn" data-type="short" type="button" aria-label="Add weekly task">＋</button>
+    </div>
+    <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Short-term tasks">
+      <div class="task-empty-state" data-type="short">
+        <span class="task-empty-state__icon">W</span>
+        <p>No weekly tasks yet. Add one!</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="task-sections-row">
+    <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
+      <div class="task-section__header">
+        <div>
+          <h2 class="task-section__title" id="section-medium-title">
+            <span class="task-section__icon">M</span>
+            This Month
+          </h2>
+          <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
+        </div>
+        <button class="btn btn--ghost add-section-btn" data-type="medium" type="button" aria-label="Add monthly task">＋</button>
+      </div>
+      <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Medium-term tasks">
+        <div class="task-empty-state" data-type="medium">
+          <span class="task-empty-state__icon">M</span>
+          <p>No monthly tasks yet. Add one!</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="task-section task-section--long" aria-labelledby="section-long-title">
+      <div class="task-section__header">
+        <div>
+          <h2 class="task-section__title" id="section-long-title">
+            <span class="task-section__icon">Q</span>
+            This Quarter
+          </h2>
+          <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
+        </div>
+        <button class="btn btn--ghost add-section-btn" data-type="long" type="button" aria-label="Add quarterly task">＋</button>
+      </div>
+      <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Long-term tasks">
+        <div class="task-empty-state" data-type="long">
+          <span class="task-empty-state__icon">Q</span>
+          <p>No quarterly goals yet. Add one!</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <template data-task-card-template>
+    <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" decayProgress={0} />
+  </template>
+
+  <div hidden aria-hidden="true">
+    <TaskTemplate id="__BOOTSTRAP__" title="Bootstrap" type="short" decay="fresh" decayProgress={0} />
+  </div>
+</tracker-board>
+
+<script>
+  type TaskType = "short" | "medium" | "long";
+  type DecayLevel = "fresh" | "stale" | "rotten";
+
+  interface TaskSnapshot {
+    id: string;
+    title: string;
+    type: TaskType;
+    decay: DecayLevel;
+    decayProgress: number;
+    order: number;
+  }
+
+  interface BoardDropDetail {
+    targetType: TaskType;
+    dropTaskId: string | null;
+  }
+
+  const EMPTY_STATE_ICONS: Record<TaskType, string> = {
+    short: "W",
+    medium: "M",
+    long: "Q",
+  };
+
+  const EMPTY_STATE_LABELS: Record<TaskType, string> = {
+    short: "No weekly tasks yet. Add one!",
+    medium: "No monthly tasks yet. Add one!",
+    long: "No quarterly goals yet. Add one!",
+  };
+
+  class TrackerBoard extends HTMLElement {
+    private tasks: TaskSnapshot[] = [];
+    private astroScopeAttributeName: string | null = null;
+
+    connectedCallback() {
+      if (this.dataset.boardInitialized === "true") return;
+      this.dataset.boardInitialized = "true";
+      this.astroScopeAttributeName = this.getAttributeNames().find((name) => name.startsWith("data-astro-cid-")) ?? null;
+
+      this.addEventListener("click", (event) => {
+        const target = event.target;
+        const addButton = target instanceof Element ? target.closest<HTMLButtonElement>(".add-section-btn") : null;
+        if (!addButton) return;
+
+        const type = addButton.dataset.type;
+        if (type !== "short" && type !== "medium" && type !== "long") return;
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-board-add-task", {
+            bubbles: true,
+            detail: { type },
+          }),
+        );
+      });
+
+      this.querySelectorAll<HTMLElement>(".task-grid").forEach((grid) => {
+        grid.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          grid.classList.add("drag-over");
+        });
+
+        grid.addEventListener("dragleave", (event) => {
+          if (!grid.contains((event as DragEvent).relatedTarget as Node)) {
+            grid.classList.remove("drag-over");
+          }
+        });
+
+        grid.addEventListener("drop", (event) => {
+          event.preventDefault();
+          grid.classList.remove("drag-over");
+
+          const targetType = grid.dataset.type;
+          if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
+
+          const dropCard = (event.target as HTMLElement).closest<HTMLElement>(".task-card");
+          const dropTaskId = dropCard?.dataset.id ?? null;
+
+          const detail: BoardDropDetail = {
+            targetType,
+            dropTaskId,
+          };
+
+          this.dispatchEvent(
+            new CustomEvent<BoardDropDetail>("tracker-board-drop", {
+              bubbles: true,
+              detail,
+            }),
+          );
+        });
+      });
+
+      this.render();
+    }
+
+    setTasks(tasks: TaskSnapshot[]): void {
+      this.tasks = tasks.filter((task): task is TaskSnapshot => {
+        return (
+          typeof task?.id === "string" &&
+          typeof task.title === "string" &&
+          (task.type === "short" || task.type === "medium" || task.type === "long") &&
+          (task.decay === "fresh" || task.decay === "stale" || task.decay === "rotten") &&
+          typeof task.decayProgress === "number" &&
+          typeof task.order === "number"
+        );
+      });
+
+      this.render();
+    }
+
+    private applyAstroScope(root: Element): void {
+      if (!this.astroScopeAttributeName) return;
+      root.setAttribute(this.astroScopeAttributeName, "");
+      root.querySelectorAll("*").forEach((node) => {
+        node.setAttribute(this.astroScopeAttributeName!, "");
+      });
+    }
+
+    private renderTaskCard(task: TaskSnapshot): HTMLElement | null {
+      const template = this.querySelector("[data-task-card-template]");
+      if (!(template instanceof HTMLTemplateElement)) return null;
+
+      const card = template.content.firstElementChild?.cloneNode(true);
+      if (!(card instanceof HTMLElement)) return null;
+
+      card.dataset.id = task.id;
+      card.dataset.title = task.title;
+      card.dataset.type = task.type;
+      card.dataset.decay = task.decay;
+
+      card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
+      card.classList.add(`task-card--${task.decay}`);
+
+      const titleEl = card.querySelector<HTMLElement>("[data-task-title]");
+      const titleInputEl = card.querySelector<HTMLInputElement>("[data-task-title-input]");
+      if (titleEl) titleEl.textContent = task.title;
+      if (titleInputEl) titleInputEl.value = task.title;
+
+      const decayBar = card.querySelector<HTMLElement>("[data-task-decay-bar]");
+      if (decayBar) {
+        decayBar.style.width = `${Math.min(100, Math.max(0, task.decayProgress))}%`;
+        decayBar.hidden = task.decay === "fresh";
+      }
+
+      this.applyAstroScope(card);
+      return card;
+    }
+
+    private render(): void {
+      const types: TaskType[] = ["short", "medium", "long"];
+      types.forEach((type) => {
+        const container = this.querySelector<HTMLElement>(`#tasks-${type}`);
+        if (!container) return;
+
+        const active = this.tasks.filter((task) => task.type === type).sort((a, b) => a.order - b.order);
+
+        container.innerHTML = "";
+
+        if (active.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "task-empty-state";
+          empty.dataset.type = type;
+
+          const icon = document.createElement("span");
+          icon.className = "task-empty-state__icon";
+          icon.textContent = EMPTY_STATE_ICONS[type];
+
+          const label = document.createElement("p");
+          label.textContent = EMPTY_STATE_LABELS[type];
+
+          empty.append(icon, label);
+          this.applyAstroScope(empty);
+          container.appendChild(empty);
+          return;
+        }
+
+        active.forEach((task) => {
+          const card = this.renderTaskCard(task);
+          if (card) container.appendChild(card);
+        });
+      });
+    }
+  }
+
+  if (!customElements.get("tracker-board")) {
+    customElements.define("tracker-board", TrackerBoard);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-board {
+    display: block;
+  }
+
+  .tracker__board {
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
+    animation: panel-enter 0.55s var(--ease-out) both;
+  }
+
+  .task-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .task-section {
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, none);
+    border-radius: $radius-lg;
+    padding: $space-lg;
+    position: relative;
+    background-image:
+      linear-gradient(180deg, rgba(252, 252, 253, 0.96) 0%, rgba(247, 248, 250, 0.92) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      18px 18px,
+      18px 18px;
+    animation: grid-drift 18s linear infinite;
+
+    &--short {
+      background-image:
+        linear-gradient(180deg, rgba(41, 136, 250, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &--medium {
+      background-image:
+        linear-gradient(180deg, rgba(236, 131, 5, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &--long {
+      background-image:
+        linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: $space-lg;
+      gap: $space-md;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-xs;
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+    }
+
+    &__icon {
+      font-size: 1.1em;
+    }
+
+    &__meta {
+      font-size: $font-size-xs;
+      color: $tracker-soft-text;
+      margin: 0;
+    }
+  }
+
+  .task-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    min-height: 60px;
+
+    &--two-col {
+      @media (min-width: #{$breakpoint-lg}) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: $space-sm;
+      }
+    }
+
+    &.drag-over {
+      background: rgba(41, 136, 250, 0.05);
+      border-radius: $radius-md;
+      outline: 1px dashed $tracker-card-stroke;
+      outline-offset: 2px;
+    }
+  }
+
+  .task-empty-state {
+    padding: $space-lg;
+    text-align: center;
+    color: $tracker-muted-text;
+    font-size: $font-size-sm;
+    border: 1px dashed $tracker-card-stroke;
+    border-radius: $radius-md;
+    background: rgba(247, 248, 250, 0.55);
+
+    &__icon {
+      display: block;
+      font-size: 2rem;
+      margin-bottom: $space-xs;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    padding: $space-xs $space-md;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    border: 1px solid transparent;
+    @include tracker-transition(all);
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include focus-ring;
+
+    &--ghost {
+      background: transparent;
+      color: $tracker-muted-text;
+      border-color: transparent;
+
+      &:hover {
+        background: rgba(31, 39, 51, 0.07);
+        color: $color-text-primary;
+      }
+    }
+  }
+
+  .add-section-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: $space-xs;
+    color: $tracker-muted-text;
+    border: 1px dashed $tracker-card-stroke;
+    border-radius: $radius-md;
+    @include focus-ring($tracker-focus-ring-accent);
+
+    &:hover {
+      border-color: $tracker-card-stroke;
+      color: $color-blue;
+    }
+  }
+
+  @keyframes grid-drift {
+    from {
+      background-position:
+        0 0,
+        0 0,
+        0 0;
+    }
+    to {
+      background-position:
+        0 0,
+        22px 22px,
+        22px 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task-section,
+    .tracker__board {
+      animation: none;
+    }
+  }
+</style>

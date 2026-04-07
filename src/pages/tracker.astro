@@ -15,9 +15,9 @@ import "../styles/global.scss";
 import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
 import CompletedTasks from "../components/tracker/CompletedTasks.astro";
+import Board from "../components/tracker/Board.astro";
 import Footer from "../components/Footer.astro";
 import Statistics from "../components/tracker/Statistics.astro";
-import TaskTemplate from "../components/tracker/Task.astro";
 import Toast from "../components/tracker/Toast.astro";
 
 // Texture images for the background, generated at build time using Astro's Assets API.
@@ -174,71 +174,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           </div>
 
           <!-- Task Board -->
-          <div class="tracker__board">
-            <!-- Short-term section (2-column internally) -->
-            <section class="task-section task-section--short" aria-labelledby="section-short-title">
-              <div class="task-section__header">
-                <div>
-                  <h2 class="task-section__title" id="section-short-title">
-                    <span class="task-section__icon">W</span>
-                    This Week
-                  </h2>
-                  <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
-                </div>
-                <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
-              </div>
-              <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Short-term tasks">
-                <!-- tasks injected by JS -->
-                <div class="task-empty-state" data-type="short">
-                  <span class="task-empty-state__icon">W</span>
-                  <p>No weekly tasks yet. Add one!</p>
-                </div>
-              </div>
-            </section>
-
-            <!-- Medium and Long side-by-side -->
-            <div class="task-sections-row">
-              <!-- Medium-term section -->
-              <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
-                <div class="task-section__header">
-                  <div>
-                    <h2 class="task-section__title" id="section-medium-title">
-                      <span class="task-section__icon">M</span>
-                      This Month
-                    </h2>
-                    <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
-                  </div>
-                  <button class="btn btn--ghost add-section-btn" data-type="medium" aria-label="Add monthly task">＋</button>
-                </div>
-                <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Medium-term tasks">
-                  <div class="task-empty-state" data-type="medium">
-                    <span class="task-empty-state__icon">M</span>
-                    <p>No monthly tasks yet. Add one!</p>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Long-term section -->
-              <section class="task-section task-section--long" aria-labelledby="section-long-title">
-                <div class="task-section__header">
-                  <div>
-                    <h2 class="task-section__title" id="section-long-title">
-                      <span class="task-section__icon">Q</span>
-                      This Quarter
-                    </h2>
-                    <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
-                  </div>
-                  <button class="btn btn--ghost add-section-btn" data-type="long" aria-label="Add quarterly task">＋</button>
-                </div>
-                <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Long-term tasks">
-                  <div class="task-empty-state" data-type="long">
-                    <span class="task-empty-state__icon">Q</span>
-                    <p>No quarterly goals yet. Add one!</p>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </div>
+          <Board />
 
           <!-- ====================================================
          BELOW THE FOLD: Completed Tasks + Full Stats
@@ -250,14 +186,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
             <!-- Full Statistics -->
             <Statistics />
-          </div>
-
-          <template id="task-card-template">
-            <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" decayProgress={0} />
-          </template>
-
-          <div hidden aria-hidden="true">
-            <TaskTemplate id="__BOOTSTRAP__" title="Bootstrap" type="short" decay="fresh" decayProgress={0} />
           </div>
 
           <!-- ====================================================
@@ -565,115 +493,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           margin-top: $space-xs;
         }
 
-        // ============================================================
-        // Task Board
-        // ============================================================
-
-        .tracker {
-          &__board {
-            display: flex;
-            flex-direction: column;
-            gap: $space-lg;
-            animation: panel-enter 0.55s var(--ease-out) both;
-          }
-        }
-
-        .task-sections-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: $space-lg;
-
-          @include respond-to(lg) {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        // Task section
-        .task-section {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke, none);
-          border-radius: $radius-lg;
-          padding: $space-lg;
-          position: relative;
-          background-image:
-            linear-gradient(180deg, rgba(252, 252, 253, 0.96) 0%, rgba(247, 248, 250, 0.92) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
-          background-size:
-            100% 100%,
-            18px 18px,
-            18px 18px;
-          animation: grid-drift 18s linear infinite;
-
-          &--short {
-            background-image:
-              linear-gradient(180deg, rgba(41, 136, 250, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
-          }
-
-          &--medium {
-            background-image:
-              linear-gradient(180deg, rgba(236, 131, 5, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
-          }
-
-          &--long {
-            background-image:
-              linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
-          }
-
-          &__header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: $space-lg;
-            gap: $space-md;
-          }
-
-          &__title {
-            font-size: $font-size-lg;
-            font-weight: $font-weight-bold;
-            color: $color-text-primary;
-            margin: 0 0 $space-xs;
-            display: flex;
-            align-items: center;
-            gap: $space-sm;
-          }
-
-          &__icon {
-            font-size: 1.1em;
-          }
-
-          &__meta {
-            font-size: $font-size-xs;
-            color: $tracker-soft-text;
-            margin: 0;
-          }
-        }
-
-        // Task grid
-        .task-grid {
-          display: flex;
-          flex-direction: column;
-          gap: $space-sm;
-          min-height: 60px;
-
-          &--two-col {
-            @media (min-width: #{$breakpoint-lg}) {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: $space-sm;
-            }
-          }
-
-          // Drop target highlight
-          &.drag-over {
-            background: rgba(41, 136, 250, 0.05);
-            border-radius: $radius-md;
-            outline: 1px dashed $tracker-card-stroke;
-            outline-offset: 2px;
-          }
-        }
-
         // Buttons
         .btn {
           display: inline-flex;
@@ -761,43 +580,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             padding: $space-xs;
             aspect-ratio: 1;
             justify-content: center;
-          }
-        }
-
-        // Add-section button
-        .add-section-btn {
-          font-size: 1.5rem;
-          line-height: 1;
-          padding: $space-xs;
-          color: $tracker-muted-text;
-          border: 1px dashed $tracker-card-stroke;
-          border-radius: $radius-md;
-          @include focus-ring($tracker-focus-ring-accent);
-
-          &:hover {
-            border-color: $tracker-card-stroke;
-            color: $color-blue;
-          }
-        }
-
-        // Empty state
-        .task-empty-state {
-          padding: $space-lg;
-          text-align: center;
-          color: $tracker-muted-text;
-          font-size: $font-size-sm;
-          border: 1px dashed $tracker-card-stroke;
-          border-radius: $radius-md;
-          background: rgba(247, 248, 250, 0.55);
-
-          &__icon {
-            display: block;
-            font-size: 2rem;
-            margin-bottom: $space-xs;
-          }
-
-          p {
-            margin: 0;
           }
         }
 
@@ -985,26 +767,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
-        @keyframes grid-drift {
-          from {
-            background-position:
-              0 0,
-              0 0,
-              0 0;
-          }
-          to {
-            background-position:
-              0 0,
-              22px 22px,
-              22px 22px;
-          }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-          .task-section,
-          .completed-section,
-          .tracker__header,
-          .tracker__board {
+          .tracker__header {
             animation: none;
           }
         }
@@ -1399,57 +1163,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Render helpers
         // ===========================================================
 
-        function renderTaskCard(task: Task): HTMLElement | null {
-          const template = document.getElementById("task-card-template");
-          if (!(template instanceof HTMLTemplateElement)) return null;
-
-          const card = template.content.firstElementChild?.cloneNode(true);
-          if (!(card instanceof HTMLElement)) return null;
-
-          const decay = getTaskDecayLevel(task);
-          const decayProgress = getTaskDecayProgress(task);
-
-          card.dataset.id = task.id;
-          card.dataset.title = task.title;
-          card.dataset.type = task.type;
-          card.dataset.decay = decay;
-
-          card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
-          card.classList.add(`task-card--${decay}`);
-
-          const decayBar = card.querySelector<HTMLElement>("[data-task-decay-bar]");
-          const particles = card.querySelector<HTMLElement>("[data-task-particles]");
-
-          if (decayBar) {
-            decayBar.style.width = `${decayProgress}%`;
-            decayBar.hidden = decay === "fresh";
-          }
-
-          if (particles) {
-            particles.hidden = false;
-            particles.classList.remove("fire-particles--fresh", "fire-particles--stale", "fire-particles--rotten");
-            particles.classList.add(`fire-particles--${decay}`);
-
-            let canvas = particles.querySelector("[data-task-particles-canvas]");
-            if (!(canvas instanceof HTMLCanvasElement)) {
-              particles.textContent = "";
-              canvas = document.createElement("canvas");
-              canvas.className = "fire-particles__canvas";
-              canvas.setAttribute("data-task-particles-canvas", "");
-
-              const particleScopeAttributes = particles.getAttributeNames().filter((name) => name.startsWith("data-astro-cid-"));
-              particleScopeAttributes.forEach((scopeAttribute) => {
-                canvas?.setAttribute(scopeAttribute, "");
-              });
-
-              particles.appendChild(canvas);
-            }
-          }
-
-          applyAstroScope(card);
-          return card;
-        }
-
         interface CompletedTaskSnapshot {
           id: string;
           title: string;
@@ -1461,39 +1174,35 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           setCompletedTasks: (tasks: CompletedTaskSnapshot[]) => void;
         }
 
-        function renderTasks(): void {
-          const types: TaskType[] = ["short", "medium", "long"];
-          types.forEach((type) => {
-            const container = document.getElementById(`tasks-${type}`)!;
-            const active = state.tasks.filter((t) => t.type === type && !t.completedAt).sort((a, b) => a.order - b.order);
+        interface BoardTaskSnapshot {
+          id: string;
+          title: string;
+          type: TaskType;
+          decay: ReturnType<typeof getTaskDecayLevel>;
+          decayProgress: number;
+          order: number;
+        }
 
-            container.innerHTML = "";
+        interface BoardElement extends HTMLElement {
+          setTasks: (tasks: BoardTaskSnapshot[]) => void;
+        }
 
-            if (active.length === 0) {
-              const empty = document.createElement("div");
-              empty.className = "task-empty-state";
-              empty.dataset.type = type;
-              const icons: Record<TaskType, string> = { short: "W", medium: "M", long: "Q" };
-              const labels: Record<TaskType, string> = { short: "No weekly tasks yet. Add one!", medium: "No monthly tasks yet. Add one!", long: "No quarterly goals yet. Add one!" };
-              const icon = document.createElement("span");
-              icon.className = "task-empty-state__icon";
-              icon.textContent = icons[type];
+        function renderBoard(): void {
+          const board = document.querySelector<BoardElement>("tracker-board");
+          if (!board) return;
 
-              const label = document.createElement("p");
-              label.textContent = labels[type];
+          const activeTasks: BoardTaskSnapshot[] = state.tasks
+            .filter((task) => task.completedAt === null)
+            .map((task) => ({
+              id: task.id,
+              title: task.title,
+              type: task.type,
+              decay: getTaskDecayLevel(task),
+              decayProgress: getTaskDecayProgress(task),
+              order: task.order,
+            }));
 
-              empty.append(icon, label);
-              applyAstroScope(empty);
-              container.appendChild(empty);
-            } else {
-              active.forEach((task) => {
-                const taskCard = renderTaskCard(task);
-                if (taskCard) {
-                  container.appendChild(taskCard);
-                }
-              });
-            }
-          });
+          board.setTasks(activeTasks);
         }
 
         function renderStats(): void {
@@ -1721,7 +1430,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         function renderAll(): void {
-          renderTasks();
+          renderBoard();
           renderStats();
           renderCompletedSection();
           renderFullStats();
@@ -2055,22 +1764,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             });
         }
 
-        function handleDrop(e: DragEvent): void {
-          e.preventDefault();
-          const targetGrid = e.currentTarget as HTMLElement;
-          const targetType = targetGrid.dataset.type as TaskType;
-          targetGrid.classList.remove("drag-over");
-
+        function handleDrop(targetType: TaskType, dropTaskId: string | null): void {
           if (!draggedTaskId) return;
           const task = state.tasks.find((t) => t.id === draggedTaskId);
           if (!task) return;
           const sourceType = task.type;
 
-          // Find drop position
-          const dropCard = (e.target as HTMLElement).closest<HTMLElement>(".task-card");
-
-          if (dropCard && dropCard.dataset.id !== draggedTaskId) {
-            const targetTask = state.tasks.find((t) => t.id === dropCard.dataset.id);
+          if (dropTaskId && dropTaskId !== draggedTaskId) {
+            const targetTask = state.tasks.find((t) => t.id === dropTaskId);
             if (targetTask) {
               task.type = targetType;
               // Insert between items using a fractional order, then normalize immediately below.
@@ -2119,6 +1820,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         document.addEventListener("tracker-task-dragend", () => {
           draggedTaskId = null;
+        });
+
+        document.addEventListener("tracker-board-drop", (event) => {
+          const dropEvent = event as CustomEvent<{ targetType: TaskType; dropTaskId: string | null }>;
+          const targetType = dropEvent.detail?.targetType;
+
+          if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
+          handleDrop(targetType, dropEvent.detail?.dropTaskId ?? null);
         });
 
         document.addEventListener("tracker-task-complete", (event) => {
@@ -2184,16 +1893,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }, 220);
         });
 
-        // Add-section buttons
-        document.querySelectorAll(".add-section-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const type = (btn as HTMLElement).dataset.type as TaskType;
-            (document.getElementById("task-title-input") as HTMLInputElement).value = "";
-            (document.getElementById("task-type-input") as HTMLSelectElement).value = type;
-            (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
-            (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
-            openModal("task-modal");
-          });
+        document.addEventListener("tracker-board-add-task", (event) => {
+          const addEvent = event as CustomEvent<{ type: TaskType }>;
+          const type = addEvent.detail?.type;
+          if (type !== "short" && type !== "medium" && type !== "long") return;
+
+          (document.getElementById("task-title-input") as HTMLInputElement).value = "";
+          (document.getElementById("task-type-input") as HTMLSelectElement).value = type;
+          (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
+          (document.getElementById("task-form-submit") as HTMLElement).textContent = "Add Task";
+          openModal("task-modal");
         });
 
         // Modal close buttons
@@ -2235,20 +1944,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
           closeModal("task-modal");
           renderAll();
-        });
-
-        // Drag over highlighting for task grids
-        document.querySelectorAll(".task-grid").forEach((grid) => {
-          grid.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            grid.classList.add("drag-over");
-          });
-          grid.addEventListener("drop", (e) => handleDrop(e as DragEvent));
-          grid.addEventListener("dragleave", (e) => {
-            if (!grid.contains((e as DragEvent).relatedTarget as Node)) {
-              grid.classList.remove("drag-over");
-            }
-          });
         });
 
         // Export
@@ -2309,7 +2004,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         // Re-render tasks every 10 minutes to refresh decay states
         setInterval(() => {
-          renderTasks();
+          renderBoard();
         }, 600_000);
 
         // ===========================================================
