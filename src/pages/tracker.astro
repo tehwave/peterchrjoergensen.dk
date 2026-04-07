@@ -18,6 +18,7 @@ import CompletedTasks from "../components/tracker/CompletedTasks.astro";
 import Footer from "../components/Footer.astro";
 import Statistics from "../components/tracker/Statistics.astro";
 import TaskTemplate from "../components/tracker/Task.astro";
+import Toast from "../components/tracker/Toast.astro";
 
 // Texture images for the background, generated at build time using Astro's Assets API.
 import textureSource from "../assets/black-paper.png";
@@ -110,6 +111,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
                 <span aria-hidden="true">＋</span> Add Task
               </button>
+              <button class="btn btn--secondary" id="toast-demo-btn" aria-label="Show demo toast">Toast Demo</button>
               <button class="btn btn--secondary" id="demo-data-btn" aria-label="Load demo tasks">Load Demo</button>
               <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
               <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
@@ -316,9 +318,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               </div>
             </div>
           </div>
-
-          <!-- Toast Container -->
-          <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
         </header>
       </div>
 
@@ -960,109 +959,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
-        // ============================================================
-        // Toast Notifications
-        // ============================================================
-
-        .toast-container {
-          position: fixed;
-          bottom: $space-lg;
-          right: $space-lg;
-          z-index: 2000;
-          display: flex;
-          flex-direction: column;
-          gap: $space-sm;
-          pointer-events: none;
-          max-width: 360px;
-
-          @include respond-to(sm) {
-            bottom: $space-sm;
-            right: $space-sm;
-            left: $space-sm;
-            max-width: none;
-          }
-        }
-
-        .toast {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-md);
-          border-radius: $radius-lg;
-          padding: $space-sm $space-md;
-          display: flex;
-          align-items: center;
-          gap: $space-sm;
-          pointer-events: auto;
-          animation: toast-in 0.3s var(--ease-out-back) forwards;
-          cursor: default;
-
-          &--success {
-            border-color: $tracker-card-stroke;
-            background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), $color-white);
-          }
-
-          &--xp {
-            border-color: $tracker-card-stroke;
-            background: linear-gradient(90deg, rgba(236, 131, 5, 0.05), $color-white);
-          }
-
-          &--level {
-            border-color: $tracker-card-stroke;
-            background: linear-gradient(90deg, rgba(10, 73, 177, 0.05), $color-white);
-          }
-
-          &--info {
-            border-color: $tracker-card-stroke;
-            background: linear-gradient(90deg, rgba(41, 136, 250, 0.05), $color-white);
-          }
-
-          &__icon {
-            font-size: 1.5rem;
-            flex-shrink: 0;
-          }
-
-          &__body {
-            flex: 1;
-          }
-
-          &__title {
-            font-size: $font-size-sm;
-            font-weight: $font-weight-bold;
-            color: $color-text-primary;
-            margin: 0;
-          }
-
-          &__text {
-            font-size: $font-size-xs;
-            color: $tracker-soft-text;
-            margin: 0;
-          }
-
-          &--hiding {
-            animation: toast-out 0.3s ease-in forwards;
-          }
-        }
-
-        @keyframes toast-in {
-          from {
-            opacity: 0;
-            transform: translateX(40px) scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-
-        @keyframes toast-out {
-          from {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-          to {
-            opacity: 0;
-            transform: translateX(40px) scale(0.9);
-          }
-        }
-
         // Level-up overlay
         @keyframes level-up-pulse {
           0%,
@@ -1116,6 +1012,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
       <script>
         import { getTaskDecayLevel, getTaskDecayProgress } from "../utils/tracker/decay";
+        import { clearToasts, showToast } from "../utils/tracker/toast";
         import { XP_VALUES, type AppState, type GameState, type Task, type TaskType } from "../types/tracker";
 
         // ===========================================================
@@ -1478,14 +1375,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Toast system
         // ===========================================================
 
-        interface ToastOptions {
-          type: "success" | "xp" | "level" | "info";
-          icon: string;
-          title: string;
-          text?: string;
-          duration?: number;
-        }
-
         interface MetricData {
           value: number;
           label: string;
@@ -1506,40 +1395,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         }
 
-        function showToast(opts: ToastOptions): void {
-          const container = document.getElementById("toast-container")!;
-          const toast = document.createElement("div");
-          const icon = document.createElement("span");
-          const body = document.createElement("div");
-          const title = document.createElement("p");
-
-          toast.className = `toast toast--${opts.type}`;
-          icon.className = "toast__icon";
-          icon.setAttribute("aria-hidden", "true");
-          icon.textContent = opts.icon;
-
-          body.className = "toast__body";
-          title.className = "toast__title";
-          title.textContent = opts.title;
-          body.appendChild(title);
-
-          if (opts.text) {
-            const text = document.createElement("p");
-            text.className = "toast__text";
-            text.textContent = opts.text;
-            body.appendChild(text);
-          }
-
-          toast.append(icon, body);
-          applyAstroScope(toast);
-          container.appendChild(toast);
-          const duration = opts.duration ?? 3500;
-          setTimeout(() => {
-            toast.classList.add("toast--hiding");
-            setTimeout(() => toast.remove(), 350);
-          }, duration);
-        }
-
         // ===========================================================
         // Render helpers
         // ===========================================================
@@ -1557,6 +1412,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           card.dataset.id = task.id;
           card.dataset.title = task.title;
           card.dataset.type = task.type;
+          card.dataset.decay = decay;
 
           card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
           card.classList.add(`task-card--${decay}`);
@@ -1570,7 +1426,25 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
 
           if (particles) {
-            particles.hidden = decay !== "rotten";
+            const particleCount = decay === "rotten" ? 12 : decay === "stale" ? 7 : 3;
+            const particleScopeAttributes = particles.getAttributeNames().filter((name) => name.startsWith("data-astro-cid-"));
+
+            particles.hidden = false;
+            particles.classList.remove("fire-particles--fresh", "fire-particles--stale", "fire-particles--rotten");
+            particles.classList.add(`fire-particles--${decay}`);
+
+            particles.textContent = "";
+            for (let index = 0; index < particleCount; index += 1) {
+              const particle = document.createElement("span");
+              particle.className = "fire-particle";
+              particle.dataset.particleIndex = String(index);
+              particle.setAttribute("aria-hidden", "true");
+              particle.textContent = "🔥";
+              particleScopeAttributes.forEach((scopeAttribute) => {
+                particle.setAttribute(scopeAttribute, "");
+              });
+              particles.appendChild(particle);
+            }
           }
 
           applyAstroScope(card);
@@ -2303,6 +2177,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           loadDemoTasks();
         });
 
+        document.getElementById("toast-demo-btn")!.addEventListener("click", () => {
+          clearToasts();
+          showToast({ type: "info", icon: "i", title: "Toast demo", text: "This is a test toast from the toolbar.", duration: 2000 });
+          window.setTimeout(() => {
+            showToast({ type: "success", icon: "✓", title: "Stacking check", text: "If you see this above everything, layering is correct.", duration: 3000 });
+          }, 220);
+        });
+
         // Add-section buttons
         document.querySelectorAll(".add-section-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
@@ -2459,5 +2341,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }, 500);
       </script>
     </main>
+
+    <Toast />
   </body>
 </html>

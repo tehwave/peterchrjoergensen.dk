@@ -2,6 +2,9 @@
 import Achievement from "./Achievement.astro";
 import Metric from "./Metric.astro";
 
+// Stats section shell.
+// UI state and list rendering are orchestrated client-side from `tracker.astro`.
+// This component provides semantic mount points plus hidden card templates.
 type Props = Record<string, never>;
 
 const {} = Astro.props;
@@ -9,12 +12,15 @@ const {} = Astro.props;
 
 <section class="full-stats-section" aria-labelledby="stats-title">
   <h2 class="section-heading" id="stats-title">Statistics</h2>
+  <!-- Metric cards are cloned from `#metric-template` and mounted here by JS. -->
   <div class="full-stats-grid" id="full-stats-grid">
     <!-- rendered by JS -->
   </div>
+  <!-- Achievement cards are cloned from `#achievement-template` and mounted here by JS. -->
   <div class="achievement-grid" id="achievement-grid">
     <!-- rendered by JS -->
   </div>
+  <!-- Hidden templates used by the tracker script for DOM cloning. -->
   <Metric />
   <Achievement />
 </section>
@@ -23,6 +29,7 @@ const {} = Astro.props;
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
+  // Card container: elevated panel + subtle animated paper/grid texture.
   .full-stats-section {
     @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
     border-radius: $radius-xl;
@@ -79,6 +86,7 @@ const {} = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    // Respect reduced-motion preference by disabling background drift.
     .full-stats-section {
       animation: none;
     }

@@ -1,12 +1,17 @@
 ---
+// Metric card template component.
+// Exposes a hidden card template consumed by tracker client-side rendering.
 type Props = Record<string, never>;
 
 const {} = Astro.props;
 ---
 
+<!-- Hidden template cloned into `.full-stats-grid` at runtime. -->
 <template id="metric-template">
   <div class="full-stat-card">
+    <!-- Decorative icon; runtime script injects SVG and keeps it out of the accessibility tree. -->
     <span class="full-stat-card__icon" data-metric-icon aria-hidden="true"></span>
+    <!-- Numeric value and label are populated by tracker state updates. -->
     <span class="full-stat-card__value" data-metric-value></span>
     <span class="full-stat-card__label" data-metric-label></span>
   </div>
@@ -16,10 +21,12 @@ const {} = Astro.props;
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
+  // Keep template markup available for cloning but not visible in layout.
   :global(#metric-template) {
     display: none;
   }
 
+  // Two-column card with a decorative left lane and right-aligned value.
   :global(.full-stat-card) {
     @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
     border-radius: $radius-lg;
@@ -33,6 +40,7 @@ const {} = Astro.props;
     overflow: hidden;
   }
 
+  // Color wash layer across the left side of the card.
   :global(.full-stat-card::before) {
     content: "";
     position: absolute;
@@ -44,6 +52,7 @@ const {} = Astro.props;
     z-index: 0;
   }
 
+  // Subtle stripe texture over the gradient layer.
   :global(.full-stat-card::after) {
     content: "";
     position: absolute;
@@ -62,6 +71,7 @@ const {} = Astro.props;
     @include tracker-transition(all);
   }
 
+  // Icon sits behind content and acts as an ambient motif.
   :global(.full-stat-card__icon) {
     display: inline-flex;
     align-items: center;
@@ -99,6 +109,7 @@ const {} = Astro.props;
     text-align: right;
   }
 
+  // Label is the primary left-aligned token and stays legible over gradient layers.
   :global(.full-stat-card__label) {
     font-size: $font-size-xs;
     font-weight: $font-weight-bold;
@@ -131,6 +142,7 @@ const {} = Astro.props;
   }
 
   @supports (animation-timeline: view()) {
+    // Progressive enhancement: entrance animations are scroll-driven when supported.
     :global(.full-stats-grid .full-stat-card) {
       animation-name: metric-card-in;
       animation-duration: 1ms;
@@ -221,6 +233,7 @@ const {} = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    // Accessibility fallback: disable motion for users requesting reduced animation.
     :global(.full-stats-grid .full-stat-card),
     :global(.full-stats-grid .full-stat-card__icon),
     :global(.full-stats-grid .full-stat-card__value),

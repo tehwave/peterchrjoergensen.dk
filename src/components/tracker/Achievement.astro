@@ -1,15 +1,21 @@
 ---
+// Achievement card template component.
+// Exposes a hidden card template used by tracker runtime rendering.
 type Props = Record<string, never>;
 
 const {} = Astro.props;
 ---
 
+<!-- Hidden template cloned into `.achievement-grid` at runtime. -->
 <template id="achievement-template">
   <div class="achievement-card achievement-card--locked" data-achievement-card>
+    <!-- Icon and copy are injected from achievement definitions in client-side state. -->
     <span class="achievement-card__icon" data-achievement-icon aria-hidden="true"></span>
     <p class="achievement-card__name" data-achievement-name></p>
     <p class="achievement-card__desc" data-achievement-desc></p>
+    <!-- Screen-reader status announces locked/unlocked state changes. -->
     <span class="achievement-card__status sr-only" data-achievement-status></span>
+    <!-- Visual-only unlocked badge; hidden attribute toggled by runtime script. -->
     <span class="achievement-card__badge" data-achievement-badge hidden aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 6 9 17l-5-5"></path>
@@ -22,10 +28,12 @@ const {} = Astro.props;
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
+  // Keep template available in DOM for cloning while hidden from layout.
   :global(#achievement-template) {
     display: none;
   }
 
+  // Base achievement card appearance and transitions shared by both states.
   :global(.achievement-card) {
     @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
     border-radius: $radius-lg;
@@ -35,6 +43,7 @@ const {} = Astro.props;
     @include tracker-transition(all);
   }
 
+  // Locked state intentionally looks muted and unavailable.
   :global(.achievement-card--locked) {
     border-style: dashed;
     border-color: $tracker-card-stroke-strong;
@@ -42,6 +51,7 @@ const {} = Astro.props;
     box-shadow: inset 0 0 0 1px rgba(47, 56, 71, 0.12);
   }
 
+  // Unlocked state uses success accents and subtle glow.
   :global(.achievement-card--unlocked) {
     border-color: $tracker-card-stroke;
     background: linear-gradient(135deg, rgba(5, 150, 105, 0.12), $tracker-card-bg);
@@ -87,6 +97,7 @@ const {} = Astro.props;
     margin: 0;
   }
 
+  // Utility class for accessible, non-visual announcements.
   :global(.achievement-card .sr-only) {
     position: absolute !important;
     width: 1px !important;
@@ -123,6 +134,7 @@ const {} = Astro.props;
   }
 
   @supports (animation-timeline: view()) {
+    // Progressive enhancement: scroll-linked entrance/pop animations.
     :global(.achievement-grid .achievement-card) {
       animation-name: achievement-card-in;
       animation-duration: 1ms;
@@ -192,6 +204,7 @@ const {} = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    // Accessibility fallback: disable animation for reduced-motion users.
     :global(.achievement-grid .achievement-card),
     :global(.achievement-grid .achievement-card__icon),
     :global(.achievement-grid .achievement-card--unlocked .achievement-card__badge) {

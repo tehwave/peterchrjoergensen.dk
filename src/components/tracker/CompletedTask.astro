@@ -2,12 +2,12 @@
 interface Props {
   id: string;
   title: string;
-  typeLabel: string;
+  typeLabel?: string;
   completedAtLabel: string;
   xp: number;
 }
 
-const { id, title, typeLabel, completedAtLabel, xp } = Astro.props;
+const { id, title, completedAtLabel, xp } = Astro.props;
 ---
 
 <tracker-completed-task class="completed-item" role="listitem" data-completed-id={id}>
@@ -25,7 +25,6 @@ const { id, title, typeLabel, completedAtLabel, xp } = Astro.props;
   <div class="completed-item__info">
     <span class="completed-item__title" data-completed-title>{title}</span>
     <div class="completed-item__meta">
-      <span data-completed-type>{typeLabel}</span>
       <span data-completed-date>{completedAtLabel}</span>
       <span class="completed-item__xp" data-completed-xp>+{xp} XP</span>
     </div>

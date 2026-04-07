@@ -46,14 +46,15 @@ import { XP_VALUES } from "../../types/tracker";
     completedAt: number;
   }
 
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 8;
 
   class TrackerCompletedTasks extends HTMLElement {
     private currentPage = 1;
     private completedFilterType: TaskType | "all" = "all";
     private completedTasks: CompletedTaskData[] = [];
     private astroScopeAttributeName: string | null = null;
-    private pageTransitionAnimation: Animation | null = null;
+    private transitionInProgress = false;
+    private queuedRender = false;
 
     connectedCallback() {
       if (this.dataset.completedTasksInitialized === "true") return;
@@ -68,7 +69,7 @@ import { XP_VALUES } from "../../types/tracker";
         if (value !== "all" && value !== "short" && value !== "medium" && value !== "long") return;
         this.completedFilterType = value;
         this.currentPage = 1;
-        this.render();
+        this.requestRender();
       });
 
       this.addEventListener("click", (event) => {
@@ -83,7 +84,7 @@ import { XP_VALUES } from "../../types/tracker";
         );
       });
 
-      this.render();
+      this.requestRender();
     }
 
     setCompletedTasks(tasks: CompletedTaskData[]): void {
@@ -96,7 +97,7 @@ import { XP_VALUES } from "../../types/tracker";
         this.currentPage = totalPages;
       }
 
-      this.render();
+      this.requestRender();
     }
 
     private getFilteredCompletedTasks(): CompletedTaskData[] {
@@ -156,7 +157,7 @@ import { XP_VALUES } from "../../types/tracker";
         if (!disabled) {
           btn.addEventListener("click", () => {
             this.currentPage = page;
-            this.render();
+            this.requestRender();
           });
         }
         this.applyAstroScope(btn);
@@ -170,7 +171,43 @@ import { XP_VALUES } from "../../types/tracker";
       container.appendChild(createBtn("›", this.currentPage + 1, this.currentPage === totalPages));
     }
 
-    private render(): void {
+    private requestRender(): void {
+      if (this.transitionInProgress) {
+        this.queuedRender = true;
+        return;
+      }
+
+      void this.render();
+    }
+
+    private nextFrame(): Promise<void> {
+      return new Promise((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+    }
+
+    private waitForTransition(el: HTMLElement, timeoutMs: number): Promise<void> {
+      return new Promise((resolve) => {
+        let settled = false;
+
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          el.removeEventListener("transitionend", onEnd);
+          resolve();
+        };
+
+        const onEnd = (event: Event) => {
+          if (event.target === el) finish();
+        };
+
+        el.addEventListener("transitionend", onEnd);
+        window.setTimeout(finish, timeoutMs);
+      });
+    }
+
+    private async render(): Promise<void> {
+      this.transitionInProgress = true;
       const filtered = this.getFilteredCompletedTasks();
       const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
       if (this.currentPage > totalPages) {
@@ -179,7 +216,19 @@ import { XP_VALUES } from "../../types/tracker";
 
       const page = filtered.slice((this.currentPage - 1) * PAGE_SIZE, this.currentPage * PAGE_SIZE);
       const container = this.querySelector("#completed-list");
-      if (!(container instanceof HTMLElement)) return;
+      if (!(container instanceof HTMLElement)) {
+        this.transitionInProgress = false;
+        return;
+      }
+
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const previousHeight = container.offsetHeight;
+      if (previousHeight > 0) {
+        container.style.minHeight = `${previousHeight}px`;
+      }
+
+      if (!prefersReducedMotion) container.classList.add("is-swapping");
+
       container.innerHTML = "";
 
       if (page.length === 0) {
@@ -198,24 +247,20 @@ import { XP_VALUES } from "../../types/tracker";
       }
 
       this.renderPagination(totalPages);
-      this.animatePageTransition(container);
-    }
 
-    private animatePageTransition(container: HTMLElement): void {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!prefersReducedMotion) {
+        await this.nextFrame();
+        container.classList.remove("is-swapping");
+        await this.waitForTransition(container, 220);
+      }
 
-      this.pageTransitionAnimation?.cancel();
-      this.pageTransitionAnimation = container.animate(
-        [
-          { opacity: 0, transform: "translateY(8px)" },
-          { opacity: 1, transform: "translateY(0)" },
-        ],
-        {
-          duration: 220,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-          fill: "both",
-        },
-      );
+      container.style.minHeight = "";
+
+      this.transitionInProgress = false;
+      if (this.queuedRender) {
+        this.queuedRender = false;
+        this.requestRender();
+      }
     }
   }
 
@@ -234,6 +279,8 @@ import { XP_VALUES } from "../../types/tracker";
 
   .completed-section {
     @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
+    display: flex;
+    flex-direction: column;
     border-radius: $radius-xl;
     padding: $space-lg;
     height: 100%;
@@ -285,8 +332,16 @@ import { XP_VALUES } from "../../types/tracker";
   .completed-list {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     gap: $space-sm;
+    min-height: 0;
     transform-origin: 50% 0;
+    transition: opacity 200ms var(--ease-out);
+    will-change: opacity;
+
+    &.is-swapping {
+      opacity: 0.42;
+    }
   }
 
   .empty-completed {
@@ -299,7 +354,8 @@ import { XP_VALUES } from "../../types/tracker";
   .pagination {
     display: flex;
     gap: $space-xs;
-    margin-top: $space-lg;
+    margin-top: auto;
+    padding-top: $space-lg;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -400,6 +456,10 @@ import { XP_VALUES } from "../../types/tracker";
   @media (prefers-reduced-motion: reduce) {
     :global(.completed-list tracker-completed-task) {
       animation: none;
+    }
+
+    .completed-list {
+      transition: none;
     }
   }
 </style>
