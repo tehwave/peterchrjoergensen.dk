@@ -2,12 +2,19 @@
 
 ---
 
+<!--
+  Runtime mount point for tracker toasts.
+  The client-side toast utility appends/removes `.toast` nodes inside this container.
+  `role=status` + polite live region announces additions without interrupting current speech.
+-->
 <div class="toast-container" id="toast-container" role="status" aria-live="polite" aria-atomic="false" aria-relevant="additions text"></div>
 
 <style lang="scss">
   @use "../../styles/variables" as *;
   @use "../../styles/mixins" as *;
 
+  // Fixed overlay stack for notifications. Pointer events are disabled on container
+  // so only individual toast cards can intercept interaction.
   .toast-container {
     position: fixed;
     right: $space-lg;
@@ -20,6 +27,7 @@
     pointer-events: none;
   }
 
+  // Base toast card; runtime applies variant modifiers (`--success`, `--xp`, etc.).
   .toast {
     @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-md);
     display: flex;
@@ -32,6 +40,7 @@
     cursor: default;
     animation: toast-in 0.3s var(--ease-out-back) forwards;
 
+    // Task completion / positive outcome.
     &--success {
       border-color: $tracker-card-stroke;
       background-image: linear-gradient(90deg, rgba(5, 150, 105, 0.08), $color-white);
@@ -42,6 +51,7 @@
       }
     }
 
+    // XP gain feedback.
     &--xp {
       border-color: $tracker-card-stroke;
       background-image: linear-gradient(90deg, rgba(236, 131, 5, 0.05), $color-white);
@@ -52,6 +62,7 @@
       }
     }
 
+    // Level-up milestone feedback.
     &--level {
       border-color: $tracker-card-stroke;
       background-image: linear-gradient(90deg, rgba(10, 73, 177, 0.05), $color-white);
@@ -62,6 +73,7 @@
       }
     }
 
+    // Neutral informational feedback.
     &--info {
       border-color: $tracker-card-stroke;
       background-image: linear-gradient(90deg, rgba(41, 136, 250, 0.05), $color-white);
@@ -72,10 +84,12 @@
       }
     }
 
+    // Exit state toggled by runtime before DOM removal.
     &--hiding {
       animation: toast-out 0.3s ease-in forwards;
     }
 
+    // Icon slot rendered by runtime SVG injection.
     &__icon {
       width: 2rem;
       min-width: 2rem;
@@ -92,6 +106,7 @@
       }
     }
 
+    // Text wrapper allows title/body to flex while icon stays fixed-size.
     &__body {
       flex: 1;
     }
@@ -110,6 +125,7 @@
     }
   }
 
+  // Enter animation for newly mounted toasts.
   @keyframes toast-in {
     from {
       opacity: 0;
@@ -122,6 +138,7 @@
     }
   }
 
+  // Exit animation before runtime removes toast node.
   @keyframes toast-out {
     from {
       opacity: 1;
@@ -134,6 +151,7 @@
     }
   }
 
+  // Small-screen layout: edge-to-edge inset instead of fixed max width.
   @include respond-to(sm) {
     .toast-container {
       right: $space-sm;
@@ -144,6 +162,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    // Respect reduced-motion preferences by effectively disabling transitions.
     .toast,
     .toast--hiding {
       animation-duration: 0.01ms;
