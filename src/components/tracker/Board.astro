@@ -6,18 +6,14 @@ import TaskTemplate from "./Task.astro";
   <section class="task-section task-section--short" aria-labelledby="section-short-title">
     <div class="task-section__header">
       <div>
-        <h2 class="task-section__title" id="section-short-title">
-          <span class="task-section__icon">W</span>
-          This Week
-        </h2>
-        <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
+        <h2 class="task-section__title" id="section-short-title">Tasks for you this week</h2>
+        <p class="task-section__meta"><strong>10 XP</strong> · <span data-period-meta="short">This week</span></p>
       </div>
       <button class="btn btn--ghost add-section-btn" data-type="short" type="button" aria-label="Add weekly task">＋</button>
     </div>
-    <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Short-term tasks">
+    <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Tasks for this week">
       <div class="task-empty-state" data-type="short">
-        <span class="task-empty-state__icon">W</span>
-        <p>No weekly tasks yet. Add one!</p>
+        <p>No tasks for this week yet. Add one!</p>
       </div>
     </div>
   </section>
@@ -26,18 +22,14 @@ import TaskTemplate from "./Task.astro";
     <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
       <div class="task-section__header">
         <div>
-          <h2 class="task-section__title" id="section-medium-title">
-            <span class="task-section__icon">M</span>
-            This Month
-          </h2>
-          <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
+          <h2 class="task-section__title" id="section-medium-title">By the end of month</h2>
+          <p class="task-section__meta"><strong>25 XP</strong> · <span data-period-meta="medium">This month</span></p>
         </div>
         <button class="btn btn--ghost add-section-btn" data-type="medium" type="button" aria-label="Add monthly task">＋</button>
       </div>
-      <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Medium-term tasks">
+      <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Tasks for this month">
         <div class="task-empty-state" data-type="medium">
-          <span class="task-empty-state__icon">M</span>
-          <p>No monthly tasks yet. Add one!</p>
+          <p>No must-do tasks for this month yet. Add one!</p>
         </div>
       </div>
     </section>
@@ -45,18 +37,14 @@ import TaskTemplate from "./Task.astro";
     <section class="task-section task-section--long" aria-labelledby="section-long-title">
       <div class="task-section__header">
         <div>
-          <h2 class="task-section__title" id="section-long-title">
-            <span class="task-section__icon">Q</span>
-            This Quarter
-          </h2>
-          <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
+          <h2 class="task-section__title" id="section-long-title">Before the quarter ends</h2>
+          <p class="task-section__meta"><strong>50 XP</strong> · <span data-period-meta="long">This quarter</span></p>
         </div>
         <button class="btn btn--ghost add-section-btn" data-type="long" type="button" aria-label="Add quarterly task">＋</button>
       </div>
-      <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Long-term tasks">
+      <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Tasks for this quarter">
         <div class="task-empty-state" data-type="long">
-          <span class="task-empty-state__icon">Q</span>
-          <p>No quarterly goals yet. Add one!</p>
+          <p>No tasks for this quarter yet. Add one!</p>
         </div>
       </div>
     </section>
@@ -89,16 +77,65 @@ import TaskTemplate from "./Task.astro";
     dropTaskId: string | null;
   }
 
-  const EMPTY_STATE_ICONS: Record<TaskType, string> = {
-    short: "W",
-    medium: "M",
-    long: "Q",
-  };
+  interface PeriodRange {
+    start: Date;
+    end: Date;
+  }
+
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+  function getStartOfDay(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  function getWeekRange(date: Date): PeriodRange {
+    const today = getStartOfDay(date);
+    const mondayOffset = (today.getDay() + 6) % 7;
+    const start = new Date(today);
+    start.setDate(today.getDate() - mondayOffset);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return { start, end };
+  }
+
+  function getMonthRange(date: Date): PeriodRange {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return { start, end };
+  }
+
+  function getQuarterRange(date: Date): PeriodRange {
+    const quarterStartMonth = Math.floor(date.getMonth() / 3) * 3;
+    const start = new Date(date.getFullYear(), quarterStartMonth, 1);
+    const end = new Date(date.getFullYear(), quarterStartMonth + 3, 0);
+    return { start, end };
+  }
+
+  function getDaysLeft(endDate: Date, today: Date): number {
+    const end = getStartOfDay(endDate);
+    const start = getStartOfDay(today);
+    return Math.max(0, Math.floor((end.getTime() - start.getTime()) / MS_PER_DAY) + 1);
+  }
+
+  function formatRange(startDate: Date, endDate: Date): string {
+    const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
+
+    if (sameMonth) {
+      const month = startDate.toLocaleDateString("en-US", { month: "short" });
+      return `${month} ${startDate.getDate()}–${endDate.getDate()}`;
+    }
+
+    const start = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const end = endDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${start}–${end}`;
+  }
 
   const EMPTY_STATE_LABELS: Record<TaskType, string> = {
-    short: "No weekly tasks yet. Add one!",
-    medium: "No monthly tasks yet. Add one!",
-    long: "No quarterly goals yet. Add one!",
+    short: "No tasks for this week yet. Add one!",
+    medium: "No must-do tasks for this month yet. Add one!",
+    long: "No tasks for this quarter yet. Add one!",
   };
 
   class TrackerBoard extends HTMLElement {
@@ -162,7 +199,29 @@ import TaskTemplate from "./Task.astro";
         });
       });
 
+      this.updatePeriodMeta();
+
       this.render();
+    }
+
+    private updatePeriodMeta(): void {
+      const today = new Date();
+
+      const ranges: Record<TaskType, PeriodRange> = {
+        short: getWeekRange(today),
+        medium: getMonthRange(today),
+        long: getQuarterRange(today),
+      };
+
+      (Object.keys(ranges) as TaskType[]).forEach((type) => {
+        const meta = this.querySelector<HTMLElement>(`[data-period-meta="${type}"]`);
+        if (!meta) return;
+
+        const { start, end } = ranges[type];
+        const daysLeft = getDaysLeft(end, today);
+        const dayLabel = daysLeft === 1 ? "day" : "days";
+        meta.textContent = `${formatRange(start, end)} · ${daysLeft} ${dayLabel} left`;
+      });
     }
 
     setTasks(tasks: TaskSnapshot[]): void {
@@ -233,14 +292,10 @@ import TaskTemplate from "./Task.astro";
           empty.className = "task-empty-state";
           empty.dataset.type = type;
 
-          const icon = document.createElement("span");
-          icon.className = "task-empty-state__icon";
-          icon.textContent = EMPTY_STATE_ICONS[type];
-
           const label = document.createElement("p");
           label.textContent = EMPTY_STATE_LABELS[type];
 
-          empty.append(icon, label);
+          empty.append(label);
           this.applyAstroScope(empty);
           container.appendChild(empty);
           return;
@@ -329,13 +384,6 @@ import TaskTemplate from "./Task.astro";
       font-weight: $font-weight-bold;
       color: $color-text-primary;
       margin: 0 0 $space-xs;
-      display: flex;
-      align-items: center;
-      gap: $space-sm;
-    }
-
-    &__icon {
-      font-size: 1.1em;
     }
 
     &__meta {
@@ -376,12 +424,6 @@ import TaskTemplate from "./Task.astro";
     border-radius: $radius-md;
     background: rgba(247, 248, 250, 0.55);
 
-    &__icon {
-      display: block;
-      font-size: 2rem;
-      margin-bottom: $space-xs;
-    }
-
     p {
       margin: 0;
     }
@@ -419,12 +461,14 @@ import TaskTemplate from "./Task.astro";
     font-size: 1.5rem;
     line-height: 1;
     padding: $space-xs;
-    color: $tracker-muted-text;
-    border: 1px dashed $tracker-card-stroke;
+    background: #fff;
+    color: $color-text-primary;
+    border: 2px solid $tracker-card-stroke;
     border-radius: $radius-md;
     @include focus-ring($tracker-focus-ring-accent);
 
     &:hover {
+      background: #fff;
       border-color: $tracker-card-stroke;
       color: $color-blue;
     }

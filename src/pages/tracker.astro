@@ -111,7 +111,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
                 <span aria-hidden="true">＋</span> Add Task
               </button>
-              <button class="btn btn--secondary" id="toast-demo-btn" aria-label="Show demo toast">Toast Demo</button>
               <button class="btn btn--secondary" id="demo-data-btn" aria-label="Load demo tasks">Load Demo</button>
               <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
               <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
@@ -187,66 +186,66 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             <!-- Full Statistics -->
             <Statistics />
           </div>
+        </header>
+      </div>
 
-          <!-- ====================================================
+      <!-- ====================================================
        MODALS
        ==================================================== -->
 
-          <!-- Add Task Modal -->
-          <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
-            <div class="modal">
-              <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
-              <h3 class="modal__title" id="task-modal-title">Add Task</h3>
-              <form class="modal__form" id="task-form" novalidate>
-                <div class="form-group">
-                  <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
-                  <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
-                </div>
-                <div class="form-group">
-                  <label for="task-type-input" class="form-label">Timeframe</label>
-                  <select id="task-type-input" class="form-select">
-                    <option value="short">This Week (10 XP)</option>
-                    <option value="medium">This Month (25 XP)</option>
-                    <option value="long">This Quarter (50 XP)</option>
-                  </select>
-                </div>
-                <div class="modal__actions">
-                  <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
-                  <button type="submit" class="btn btn--primary" id="task-form-submit">Add Task</button>
-                </div>
-              </form>
+      <!-- Add Task Modal -->
+      <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="task-modal-title">Add Task</h3>
+          <form class="modal__form" id="task-form" novalidate>
+            <div class="form-group">
+              <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
+              <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
             </div>
-          </div>
+            <div class="form-group">
+              <label for="task-type-input" class="form-label">Timeframe</label>
+              <select id="task-type-input" class="form-select">
+                <option value="short">This Week (10 XP)</option>
+                <option value="medium">This Month (25 XP)</option>
+                <option value="long">This Quarter (50 XP)</option>
+              </select>
+            </div>
+            <div class="modal__actions">
+              <button type="button" class="btn btn--ghost" id="task-modal-cancel">Cancel</button>
+              <button type="submit" class="btn btn--primary" id="task-form-submit">Add Task</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-          <!-- Export Modal -->
-          <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" hidden>
-            <div class="modal">
-              <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
-              <h3 class="modal__title" id="export-modal-title">Export Data</h3>
-              <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
-              <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
-              <div class="modal__actions">
-                <button class="btn btn--ghost" id="export-modal-close2">Close</button>
-                <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
-                <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
-              </div>
-            </div>
+      <!-- Export Modal -->
+      <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="export-modal-title">Export Data</h3>
+          <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
+          <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
+          <div class="modal__actions">
+            <button class="btn btn--ghost" id="export-modal-close2">Close</button>
+            <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
+            <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
           </div>
+        </div>
+      </div>
 
-          <!-- Import Modal -->
-          <div class="modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
-            <div class="modal">
-              <button class="modal__close" id="import-modal-close" aria-label="Close">✕</button>
-              <h3 class="modal__title" id="import-modal-title">Import Data</h3>
-              <p class="modal__desc">Paste your export code below. <strong>This will merge with your current data.</strong></p>
-              <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
-              <div class="modal__actions">
-                <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
-                <button class="btn btn--primary" id="do-import-btn">Import</button>
-              </div>
-            </div>
+      <!-- Import Modal -->
+      <div class="modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
+        <div class="modal">
+          <button class="modal__close" id="import-modal-close" aria-label="Close">✕</button>
+          <h3 class="modal__title" id="import-modal-title">Import Data</h3>
+          <p class="modal__desc">Paste your export code below. <strong>This will merge with your current data.</strong></p>
+          <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
+          <div class="modal__actions">
+            <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
+            <button class="btn btn--primary" id="do-import-btn">Import</button>
           </div>
-        </header>
+        </div>
       </div>
 
       <Footer />
@@ -777,7 +776,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
       <script>
         import { getTaskDecayLevel, getTaskDecayProgress } from "../utils/tracker/decay";
-        import { clearToasts, showToast } from "../utils/tracker/toast";
+        import { showToast } from "../utils/tracker/toast";
         import { XP_VALUES, type AppState, type GameState, type Task, type TaskType } from "../types/tracker";
 
         // ===========================================================
@@ -1884,14 +1883,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         document.getElementById("demo-data-btn")!.addEventListener("click", () => {
           loadDemoTasks();
-        });
-
-        document.getElementById("toast-demo-btn")!.addEventListener("click", () => {
-          clearToasts();
-          showToast({ type: "info", icon: "i", title: "Toast demo", text: "This is a test toast from the toolbar.", duration: 2000 });
-          window.setTimeout(() => {
-            showToast({ type: "success", icon: "✓", title: "Stacking check", text: "If you see this above everything, layering is correct.", duration: 3000 });
-          }, 220);
         });
 
         document.addEventListener("tracker-board-add-task", (event) => {
