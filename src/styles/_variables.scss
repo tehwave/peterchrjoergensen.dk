@@ -25,6 +25,26 @@ $color-shadow-hover: rgba(0, 0, 0, 0.15);
 // Code block colors
 $color-code-bg: #1e1e1e;
 $color-code-text: #d4d4d4;
+$color-code-border: #444;
+
+// Success / positive feedback colors
+$color-success: #059669;
+$color-success-dark: #065f46;
+$color-success-bg: #d1fae5;
+$color-success-bg-hover: #a7f3d0;
+
+// Decay state colors (for visual rot/stale effects)
+$color-decay-stale: #d4ac0d;
+$color-decay-stale-bg: #fffef0;
+$color-decay-rotten: #5a7a1a;
+$color-decay-rotten-bg: #f0f5e8;
+$color-decay-overdue: #c0392b;
+
+// Purple accent (for long-term section)
+$color-purple: #7c3aed;
+$color-danger-bg: #fee2e2;
+$color-danger-bg-hover: #fecaca;
+$color-danger-text: #c0392b;
 
 // Semantic aliases
 $color-accent: $color-orange;
