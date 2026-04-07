@@ -11,10 +11,10 @@
  * - Google Calendar integration
  * - Statistics and positive reinforcement toasts
  */
-import Layout from "../layouts/Layout.astro";
+import TrackerLayout from "../layouts/TrackerLayout.astro";
 ---
 
-<Layout
+<TrackerLayout
   title="Productivity Tracker — Peter Chr. Jørgensen"
   description="Personal productivity tracker and kanban board with gamification, visual task decay, and cross-device sync."
 >
@@ -34,12 +34,8 @@ import Layout from "../layouts/Layout.astro";
           <button class="btn btn--primary" id="add-task-btn" aria-label="Add new task">
             <span aria-hidden="true">＋</span> Add Task
           </button>
-          <button class="btn btn--secondary" id="export-btn" aria-label="Export data">
-            <span aria-hidden="true">📤</span> Export
-          </button>
-          <button class="btn btn--secondary" id="import-btn" aria-label="Import data">
-            <span aria-hidden="true">📥</span> Import
-          </button>
+          <button class="btn btn--secondary" id="export-btn" aria-label="Export data">Export</button>
+          <button class="btn btn--secondary" id="import-btn" aria-label="Import data">Import</button>
         </div>
       </div>
 
@@ -47,7 +43,7 @@ import Layout from "../layouts/Layout.astro";
         <!-- Level & XP -->
         <div class="stat-card stat-card--level" id="level-card">
           <div class="level-badge" id="level-badge">
-            <span class="level-badge__icon">⚔️</span>
+            <span class="level-badge__icon">●</span>
             <span class="level-badge__label">Level</span>
             <span class="level-badge__number" id="level-number">1</span>
           </div>
@@ -65,21 +61,21 @@ import Layout from "../layouts/Layout.astro";
         <div class="stat-card">
           <span class="stat-card__value" id="stat-month">0</span>
           <span class="stat-card__label">Done this month</span>
-          <span class="stat-card__icon">📅</span>
+          <span class="stat-card__icon">M</span>
         </div>
 
         <!-- Yearly stat -->
         <div class="stat-card">
           <span class="stat-card__value" id="stat-year">0</span>
           <span class="stat-card__label">Done this year</span>
-          <span class="stat-card__icon">🏆</span>
+          <span class="stat-card__icon">Y</span>
         </div>
 
         <!-- Streak -->
         <div class="stat-card">
           <span class="stat-card__value" id="stat-streak">0</span>
-          <span class="stat-card__label">Day streak 🔥</span>
-          <span class="stat-card__icon">🔥</span>
+          <span class="stat-card__label">Day streak</span>
+          <span class="stat-card__icon">S</span>
         </div>
       </div>
     </header>
@@ -91,7 +87,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="task-section__header">
           <div>
             <h2 class="task-section__title" id="section-short-title">
-              <span class="task-section__icon">⚡</span>
+              <span class="task-section__icon">W</span>
               This Week
             </h2>
             <p class="task-section__meta">Short-term · <strong>10 XP</strong> · Renews weekly</p>
@@ -99,11 +95,10 @@ import Layout from "../layouts/Layout.astro";
           <button class="btn btn--ghost add-section-btn" data-type="short" aria-label="Add weekly task">＋</button>
         </div>
         <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short"
-             role="list" aria-label="Short-term tasks"
-             ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+             role="list" aria-label="Short-term tasks">
           <!-- tasks injected by JS -->
           <div class="task-empty-state" data-type="short">
-            <span class="task-empty-state__icon">⚡</span>
+            <span class="task-empty-state__icon">W</span>
             <p>No weekly tasks yet. Add one!</p>
           </div>
         </div>
@@ -116,7 +111,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="task-section__header">
             <div>
               <h2 class="task-section__title" id="section-medium-title">
-                <span class="task-section__icon">📅</span>
+                <span class="task-section__icon">M</span>
                 This Month
               </h2>
               <p class="task-section__meta">Medium-term · <strong>25 XP</strong> · Renews monthly</p>
@@ -124,10 +119,9 @@ import Layout from "../layouts/Layout.astro";
             <button class="btn btn--ghost add-section-btn" data-type="medium" aria-label="Add monthly task">＋</button>
           </div>
           <div class="task-grid" id="tasks-medium" data-type="medium"
-               role="list" aria-label="Medium-term tasks"
-               ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+               role="list" aria-label="Medium-term tasks">
             <div class="task-empty-state" data-type="medium">
-              <span class="task-empty-state__icon">📅</span>
+              <span class="task-empty-state__icon">M</span>
               <p>No monthly tasks yet. Add one!</p>
             </div>
           </div>
@@ -138,7 +132,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="task-section__header">
             <div>
               <h2 class="task-section__title" id="section-long-title">
-                <span class="task-section__icon">🎯</span>
+                <span class="task-section__icon">Q</span>
                 This Quarter
               </h2>
               <p class="task-section__meta">Long-term · <strong>50 XP</strong> · Renews quarterly</p>
@@ -146,10 +140,9 @@ import Layout from "../layouts/Layout.astro";
             <button class="btn btn--ghost add-section-btn" data-type="long" aria-label="Add quarterly task">＋</button>
           </div>
           <div class="task-grid" id="tasks-long" data-type="long"
-               role="list" aria-label="Long-term tasks"
-               ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+               role="list" aria-label="Long-term tasks">
             <div class="task-empty-state" data-type="long">
-              <span class="task-empty-state__icon">🎯</span>
+              <span class="task-empty-state__icon">Q</span>
               <p>No quarterly goals yet. Add one!</p>
             </div>
           </div>
@@ -165,7 +158,7 @@ import Layout from "../layouts/Layout.astro";
       <!-- Completed Tasks -->
       <section class="completed-section" aria-labelledby="completed-title">
         <div class="section-heading-row">
-          <h2 class="section-heading" id="completed-title">✅ Completed Tasks</h2>
+          <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
           <div class="completed-filters">
             <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
               <option value="all">All types</option>
@@ -173,18 +166,18 @@ import Layout from "../layouts/Layout.astro";
               <option value="medium">Medium-term</option>
               <option value="long">Long-term</option>
             </select>
-            <button class="btn btn--ghost btn--sm" id="clear-completed-btn">🗑 Clear completed</button>
+            <button class="btn btn--ghost btn--sm" id="clear-completed-btn">Clear completed</button>
           </div>
         </div>
         <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
-          <p class="empty-completed">No completed tasks yet — get going! 🚀</p>
+          <p class="empty-completed">No completed tasks yet — get going.</p>
         </div>
         <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
       </section>
 
       <!-- Full Statistics -->
       <section class="full-stats-section" aria-labelledby="stats-title">
-        <h2 class="section-heading" id="stats-title">📊 Statistics</h2>
+        <h2 class="section-heading" id="stats-title">Statistics</h2>
         <div class="full-stats-grid" id="full-stats-grid">
           <!-- rendered by JS -->
         </div>
@@ -218,9 +211,9 @@ import Layout from "../layouts/Layout.astro";
           <div class="form-group">
             <label for="task-type-input" class="form-label">Timeframe</label>
             <select id="task-type-input" class="form-select">
-              <option value="short">⚡ This Week (10 XP)</option>
-              <option value="medium">📅 This Month (25 XP)</option>
-              <option value="long">🎯 This Quarter (50 XP)</option>
+              <option value="short">This Week (10 XP)</option>
+              <option value="medium">This Month (25 XP)</option>
+              <option value="long">This Quarter (50 XP)</option>
             </select>
           </div>
           <div class="form-group">
@@ -245,8 +238,8 @@ import Layout from "../layouts/Layout.astro";
       <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
       <div class="modal__actions">
         <button class="btn btn--ghost" id="export-modal-close2">Close</button>
-        <button class="btn btn--secondary" id="copy-url-btn">🔗 Copy as URL</button>
-        <button class="btn btn--primary" id="copy-code-btn">📋 Copy Code</button>
+        <button class="btn btn--secondary" id="copy-url-btn">Copy URL</button>
+        <button class="btn btn--primary" id="copy-code-btn">Copy code</button>
       </div>
     </div>
   </div>
@@ -260,7 +253,7 @@ import Layout from "../layouts/Layout.astro";
       <textarea class="form-textarea form-textarea--code" id="import-code" placeholder="Paste export code here…" rows="6" aria-label="Import code"></textarea>
       <div class="modal__actions">
         <button class="btn btn--ghost" id="import-modal-cancel">Cancel</button>
-        <button class="btn btn--primary" id="do-import-btn">📥 Import</button>
+        <button class="btn btn--primary" id="do-import-btn">Import</button>
       </div>
     </div>
   </div>
@@ -268,11 +261,7 @@ import Layout from "../layouts/Layout.astro";
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
 
-  <!-- Stink particle template (hidden, cloned by JS) -->
-  <template id="stink-particle-tpl">
-    <span class="stink-particle" aria-hidden="true"></span>
-  </template>
-</Layout>
+</TrackerLayout>
 
 <style lang="scss">
   @use "../styles/variables" as *;
@@ -286,55 +275,59 @@ import Layout from "../layouts/Layout.astro";
     padding: $space-lg $space-xl;
     max-width: 1400px;
     margin: 0 auto;
+    border-radius: $tracker-surface-radius;
+    background: $tracker-surface-bg;
+    backdrop-filter: blur(6px);
+    box-shadow: $tracker-surface-shadow;
 
     @include respond-to(md) {
       padding: $space-md;
     }
-  }
 
-  // ============================================================
-  // Header / Stats Bar
-  // ============================================================
+    // ============================================================
+    // Header / Stats Bar
+    // ============================================================
 
-  .tracker__header {
-    margin-bottom: $space-xl;
-  }
-
-  .tracker__title-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: $space-lg;
-    margin-bottom: $space-lg;
-
-    @include respond-to(md) {
-      flex-direction: column;
+    &__header {
+      margin-bottom: $space-xl;
     }
-  }
 
-  .tracker__title {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $color-text-primary;
-    margin: 0 0 $space-xs;
-  }
+    &__title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: $space-lg;
+      margin-bottom: $space-lg;
 
-  .tracker__subtitle {
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
-    margin: 0;
-    max-width: 55ch;
-    font-style: italic;
-  }
+      @include respond-to(md) {
+        flex-direction: column;
+      }
+    }
 
-  .tracker__toolbar {
-    display: flex;
-    gap: $space-sm;
-    flex-shrink: 0;
-    flex-wrap: wrap;
+    &__title {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-xs;
+    }
 
-    @include respond-to(md) {
-      width: 100%;
+    &__subtitle {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin: 0;
+      max-width: 55ch;
+      font-style: italic;
+    }
+
+    &__toolbar {
+      display: flex;
+      gap: $space-sm;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+
+      @include respond-to(md) {
+        width: 100%;
+      }
     }
   }
 
@@ -356,7 +349,7 @@ import Layout from "../layouts/Layout.astro";
   .stat-card {
     background: $color-bg-alt;
     border: 1px solid $color-border;
-    border-radius: 12px;
+    border-radius: $tracker-card-radius;
     padding: $space-md $space-lg;
     display: flex;
     flex-direction: column;
@@ -470,10 +463,12 @@ import Layout from "../layouts/Layout.astro";
   // Task Board
   // ============================================================
 
-  .tracker__board {
-    display: flex;
-    flex-direction: column;
-    gap: $space-xl;
+  .tracker {
+    &__board {
+      display: flex;
+      flex-direction: column;
+      gap: $space-xl;
+    }
   }
 
   .task-sections-row {
@@ -489,8 +484,8 @@ import Layout from "../layouts/Layout.astro";
   // Task section
   .task-section {
     background: $color-bg-alt;
-    border: 2px solid $color-border;
-    border-radius: 16px;
+    border: 1px solid $color-border;
+    border-radius: $tracker-card-radius;
     padding: $space-lg;
     position: relative;
 
@@ -565,8 +560,8 @@ import Layout from "../layouts/Layout.astro";
   // Task card
   .task-card {
     background: $color-white;
-    border: 1px solid $color-border;
-    border-radius: 10px;
+    border: 1px solid $tracker-card-border;
+    border-radius: $tracker-card-radius;
     padding: $space-sm $space-md;
     cursor: grab;
     position: relative;
@@ -600,7 +595,7 @@ import Layout from "../layouts/Layout.astro";
       background: $color-decay-stale-bg;
 
       &::after {
-        content: "🤢";
+        content: "!";
         position: absolute;
         top: $space-xs;
         right: $space-xs;
@@ -631,11 +626,13 @@ import Layout from "../layouts/Layout.astro";
       }
 
       &::after {
-        content: "🤮💀🧟";
+        content: "OLD";
         position: absolute;
         top: $space-xs;
         right: $space-xs;
-        font-size: 0.75rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.05em;
+        font-weight: $font-weight-bold;
         animation: wobble 1.5s ease-in-out infinite;
       }
     }
@@ -715,7 +712,11 @@ import Layout from "../layouts/Layout.astro";
 
   .stink-particle {
     position: absolute;
-    font-size: 0.8rem;
+    width: var(--size, 10px);
+    height: var(--size, 10px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(90, 122, 26, 0.7), rgba(90, 122, 26, 0.1) 70%, transparent 100%);
+    filter: blur(0.4px);
     animation: stink-rise var(--duration, 3s) ease-out var(--delay, 0s) infinite;
     opacity: 0;
     bottom: 0;
@@ -1067,6 +1068,14 @@ import Layout from "../layouts/Layout.astro";
     margin-top: $space-lg;
   }
 
+  .full-stats__achievements-title {
+    grid-column: 1 / -1;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    margin: 0 0 $space-xs;
+    color: $color-text-primary;
+  }
+
   .achievement-card {
     background: $color-bg-alt;
     border: 1px solid $color-border;
@@ -1403,8 +1412,6 @@ import Layout from "../layouts/Layout.astro";
   const XP_VALUES: Record<TaskType, number> = { short: 10, medium: 25, long: 50 };
   const STORAGE_KEY = "tracker_v1";
   const PAGE_SIZE = 10;
-  const STINK_EMOJIS = ["💨", "🤢", "🦨", "🧟", "☠️", "🤮"];
-
   // Decay thresholds in ms
   const DECAY_THRESHOLDS: Record<TaskType, { stale: number; rotten: number }> = {
     short: { stale: 3 * 86400000, rotten: 5 * 86400000 },
@@ -1413,26 +1420,26 @@ import Layout from "../layouts/Layout.astro";
   };
 
   const TIPS = [
-    "💡 Break big goals into smaller weekly tasks — momentum is everything.",
-    "🎯 Focus on completing one long-term goal before adding more.",
-    "⚡ Weekly tasks keep daily habits sharp. Don't skip!",
-    "🔥 Streaks compound. Even one task a day makes a difference.",
-    "🌱 Medium-term tasks are your bridge between daily grind and big dreams.",
-    "💪 Every XP counts. Small wins accumulate into major achievements.",
-    "🗓 Review and prune tasks weekly — stale goals drag you down.",
-    "🚀 Completed tasks tell the story of who you're becoming.",
-    "✨ Quality over quantity. One done > five undone.",
-    "🧠 Write tasks as actions, not areas. 'Write blog post' beats 'Blog'.",
+    "Break big goals into smaller weekly tasks — momentum is everything.",
+    "Focus on completing one long-term goal before adding more.",
+    "Weekly tasks keep daily habits sharp. Don't skip.",
+    "Streaks compound. Even one task a day makes a difference.",
+    "Medium-term tasks bridge daily work and larger goals.",
+    "Every XP counts. Small wins accumulate into major achievements.",
+    "Review and prune tasks weekly — stale goals drag you down.",
+    "Completed tasks tell the story of who you're becoming.",
+    "Quality over quantity. One done is better than five pending.",
+    "Write tasks as clear actions, not broad areas.",
   ];
 
   const ENCOURAGE_COMPLETE = [
-    "🎉 Nailed it! Keep the momentum going!",
-    "⚡ Task crushed! You're on fire!",
-    "✅ Done and dusted! What's next?",
-    "🚀 Boom! One step closer to your goals!",
-    "🏆 Excellent work! You're unstoppable!",
-    "💪 That's how it's done! Keep going!",
-    "🌟 Outstanding! Your future self thanks you!",
+    "Great work. Keep the momentum going.",
+    "Task completed. On to the next one.",
+    "Done. What's next?",
+    "Solid progress toward your goals.",
+    "Excellent execution.",
+    "That's how it's done. Keep going.",
+    "Strong finish. Your future self will thank you.",
   ];
 
   const LEVEL_TITLES = [
@@ -1442,16 +1449,16 @@ import Layout from "../layouts/Layout.astro";
 
   // Achievements definition
   const ACHIEVEMENTS = [
-    { id: "first_task", icon: "🌱", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 1 },
-    { id: "five_tasks", icon: "🌿", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 5 },
-    { id: "ten_tasks", icon: "🌳", name: "Building Momentum", desc: "Complete 10 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 10 },
-    { id: "fifty_tasks", icon: "🌲", name: "Productivity Pro", desc: "Complete 50 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 50 },
-    { id: "first_long", icon: "🎯", name: "Long Game", desc: "Complete a long-term goal", check: (s: AppState) => s.tasks.some(t => t.completedAt && t.type === "long") },
-    { id: "level_5", icon: "⚔️", name: "Level 5", desc: "Reach level 5", check: (s: AppState) => s.game.level >= 5 },
-    { id: "level_10", icon: "🏰", name: "Level 10", desc: "Reach level 10", check: (s: AppState) => s.game.level >= 10 },
-    { id: "streak_7", icon: "🔥", name: "Week Warrior", desc: "7-day activity streak", check: (s: AppState) => s.game.streak >= 7 },
-    { id: "streak_30", icon: "🌟", name: "Month Master", desc: "30-day activity streak", check: (s: AppState) => s.game.streak >= 30 },
-    { id: "xp_500", icon: "💎", name: "XP Hunter", desc: "Earn 500 total XP", check: (s: AppState) => s.game.totalXP >= 500 },
+    { id: "first_task", icon: "A1", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 1 },
+    { id: "five_tasks", icon: "A2", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 5 },
+    { id: "ten_tasks", icon: "A3", name: "Building Momentum", desc: "Complete 10 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 10 },
+    { id: "fifty_tasks", icon: "A4", name: "Productivity Pro", desc: "Complete 50 tasks", check: (s: AppState) => s.tasks.filter(t => t.completedAt).length >= 50 },
+    { id: "first_long", icon: "A5", name: "Long Game", desc: "Complete a long-term goal", check: (s: AppState) => s.tasks.some(t => t.completedAt && t.type === "long") },
+    { id: "level_5", icon: "A6", name: "Level 5", desc: "Reach level 5", check: (s: AppState) => s.game.level >= 5 },
+    { id: "level_10", icon: "A7", name: "Level 10", desc: "Reach level 10", check: (s: AppState) => s.game.level >= 10 },
+    { id: "streak_7", icon: "A8", name: "Week Warrior", desc: "7-day activity streak", check: (s: AppState) => s.game.streak >= 7 },
+    { id: "streak_30", icon: "A9", name: "Month Master", desc: "30-day activity streak", check: (s: AppState) => s.game.streak >= 30 },
+    { id: "xp_500", icon: "A10", name: "XP Hunter", desc: "Earn 500 total XP", check: (s: AppState) => s.game.totalXP >= 500 },
   ];
 
   // ===========================================================
@@ -1466,10 +1473,80 @@ import Layout from "../layouts/Layout.astro";
         level: 1, xp: 0, totalXP: 0,
         completedThisMonth: 0, completedThisYear: 0,
         streak: 0, lastActivityDate: "",
-        monthKey: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+        monthKey: monthKeyFromDate(now),
         yearKey: `${now.getFullYear()}`,
       },
       version: 1,
+    };
+  }
+
+  function monthKeyFromDate(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function localDateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
+
+  function dayOrdinalFromKey(dateKey: string): number | null {
+    const parts = dateKey.split("-");
+    if (parts.length !== 3) return null;
+    const [year, month, day] = parts.map(Number);
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+  }
+
+  function isTaskType(value: unknown): value is TaskType {
+    return value === "short" || value === "medium" || value === "long";
+  }
+
+  function normalizeTask(value: unknown, index: number): Task | null {
+    if (!value || typeof value !== "object") return null;
+    const task = value as Partial<Task>;
+    if (typeof task.id !== "string" || typeof task.title !== "string" || !isTaskType(task.type)) return null;
+    if (typeof task.createdAt !== "number") return null;
+    const completedAt = typeof task.completedAt === "number" ? task.completedAt : null;
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: typeof task.description === "string" ? task.description : "",
+      type: task.type,
+      createdAt: task.createdAt,
+      dueDate: typeof task.dueDate === "string" ? task.dueDate : null,
+      completedAt,
+      order: typeof task.order === "number" ? task.order : index,
+    };
+  }
+
+  function normalizeStatePayload(payload: unknown): AppState | null {
+    if (!payload || typeof payload !== "object") return null;
+    const app = payload as Partial<AppState>;
+    if (!Array.isArray(app.tasks) || !app.game || typeof app.game !== "object") return null;
+
+    const gameSource = app.game as Partial<GameState>;
+    const now = new Date();
+    const normalizedTasks = app.tasks
+      .map((task, index) => normalizeTask(task, index))
+      .filter((task): task is Task => task !== null);
+
+    const normalizedGame: GameState = {
+      level: typeof gameSource.level === "number" && gameSource.level > 0 ? Math.floor(gameSource.level) : 1,
+      xp: typeof gameSource.xp === "number" && gameSource.xp >= 0 ? Math.floor(gameSource.xp) : 0,
+      totalXP: typeof gameSource.totalXP === "number" && gameSource.totalXP >= 0 ? Math.floor(gameSource.totalXP) : 0,
+      completedThisMonth: typeof gameSource.completedThisMonth === "number" && gameSource.completedThisMonth >= 0 ? Math.floor(gameSource.completedThisMonth) : 0,
+      completedThisYear: typeof gameSource.completedThisYear === "number" && gameSource.completedThisYear >= 0 ? Math.floor(gameSource.completedThisYear) : 0,
+      streak: typeof gameSource.streak === "number" && gameSource.streak >= 0 ? Math.floor(gameSource.streak) : 0,
+      lastActivityDate: typeof gameSource.lastActivityDate === "string" ? gameSource.lastActivityDate : "",
+      monthKey: typeof gameSource.monthKey === "string" ? gameSource.monthKey : monthKeyFromDate(now),
+      yearKey: typeof gameSource.yearKey === "string" ? gameSource.yearKey : String(now.getFullYear()),
+    };
+
+    return {
+      tasks: normalizedTasks,
+      game: normalizedGame,
+      version: typeof app.version === "number" ? app.version : 1,
     };
   }
 
@@ -1481,12 +1558,13 @@ import Layout from "../layouts/Layout.astro";
         const imported = decodeState(encoded);
         if (imported) {
           const merged = mergeStates(loadFromStorage(), imported);
-          saveState(merged);
-          // Clean URL
-          history.replaceState(null, "", window.location.pathname);
+          saveState(merged, false);
           return merged;
         }
-      } catch {}
+        pendingImportError = "Import link format is invalid. Falling back to local data.";
+      } catch {
+        pendingImportError = "Import link encoding could not be parsed. Falling back to local data.";
+      }
     }
     return loadFromStorage();
   }
@@ -1495,14 +1573,26 @@ import Layout from "../layouts/Layout.astro";
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultState();
-      return JSON.parse(raw) as AppState;
+      const parsed = normalizeStatePayload(JSON.parse(raw));
+      return parsed ?? defaultState();
     } catch {
       return defaultState();
     }
   }
 
-  function saveState(state: AppState): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function saveState(state: AppState, pushHistory = true): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      showToast({
+        type: "info",
+        icon: "!",
+        title: "Save failed",
+        text: "Browser storage is full or unavailable on this device.",
+      });
+      return;
+    }
+    syncShareUrl(state, pushHistory);
   }
 
   function encodeState(state: AppState): string {
@@ -1518,9 +1608,21 @@ import Layout from "../layouts/Layout.astro";
       const binary = atob(encoded);
       const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
       const json = new TextDecoder().decode(bytes);
-      return JSON.parse(json) as AppState;
+      return normalizeStatePayload(JSON.parse(json));
     } catch {
       return null;
+    }
+  }
+
+  function syncShareUrl(nextState: AppState, pushHistory = true): void {
+    const hash = `#data=${encodeState(nextState)}`;
+    if (window.location.hash === hash) return;
+
+    const nextUrl = `${window.location.pathname}${hash}`;
+    if (pushHistory) {
+      history.pushState({ tracker: true }, "", nextUrl);
+    } else {
+      history.replaceState({ tracker: true }, "", nextUrl);
     }
   }
 
@@ -1553,6 +1655,7 @@ import Layout from "../layouts/Layout.astro";
   // App state
   // ===========================================================
 
+  let pendingImportError = "";
   let state = loadState();
   let currentPage = 1;
   let completedFilterType: TaskType | "all" = "all";
@@ -1587,7 +1690,7 @@ import Layout from "../layouts/Layout.astro";
 
     showToast({
       type: "xp",
-      icon: "⚡",
+      icon: "+",
       title: `+${amount} XP!`,
       text: ENCOURAGE_COMPLETE[Math.floor(Math.random() * ENCOURAGE_COMPLETE.length)],
     });
@@ -1597,8 +1700,8 @@ import Layout from "../layouts/Layout.astro";
     const title = LEVEL_TITLES[Math.min(newLevel - 1, LEVEL_TITLES.length - 1)];
     showToast({
       type: "level",
-      icon: "🎊",
-      title: `LEVEL UP! → Level ${newLevel}`,
+      icon: "▲",
+      title: `Level up: ${newLevel}`,
       text: `You are now a ${title}! Keep crushing it!`,
     });
     document.getElementById("level-card")?.classList.add("level-up-flash");
@@ -1606,9 +1709,10 @@ import Layout from "../layouts/Layout.astro";
   }
 
   function recordActivity(): void {
-    const today = new Date().toISOString().split("T")[0];
-    const nowMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
-    const nowYear = `${new Date().getFullYear()}`;
+    const now = new Date();
+    const today = localDateKey(now);
+    const nowMonth = monthKeyFromDate(now);
+    const nowYear = `${now.getFullYear()}`;
 
     // Reset monthly/yearly counters if period changed
     if (state.game.monthKey !== nowMonth) {
@@ -1624,9 +1728,9 @@ import Layout from "../layouts/Layout.astro";
     if (state.game.lastActivityDate === "") {
       state.game.streak = 1;
     } else {
-      const last = new Date(state.game.lastActivityDate);
-      const todayDate = new Date(today);
-      const diff = Math.round((todayDate.getTime() - last.getTime()) / 86400000);
+      const todayOrdinal = dayOrdinalFromKey(today);
+      const lastOrdinal = dayOrdinalFromKey(state.game.lastActivityDate);
+      const diff = todayOrdinal !== null && lastOrdinal !== null ? todayOrdinal - lastOrdinal : null;
       if (diff === 0) {
         // same day
       } else if (diff === 1) {
@@ -1685,14 +1789,28 @@ import Layout from "../layouts/Layout.astro";
   function showToast(opts: ToastOptions): void {
     const container = document.getElementById("toast-container")!;
     const toast = document.createElement("div");
+    const icon = document.createElement("span");
+    const body = document.createElement("div");
+    const title = document.createElement("p");
+
     toast.className = `toast toast--${opts.type}`;
-    toast.innerHTML = `
-      <span class="toast__icon" aria-hidden="true">${opts.icon}</span>
-      <div class="toast__body">
-        <p class="toast__title">${opts.title}</p>
-        ${opts.text ? `<p class="toast__text">${opts.text}</p>` : ""}
-      </div>
-    `;
+    icon.className = "toast__icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = opts.icon;
+
+    body.className = "toast__body";
+    title.className = "toast__title";
+    title.textContent = opts.title;
+    body.appendChild(title);
+
+    if (opts.text) {
+      const text = document.createElement("p");
+      text.className = "toast__text";
+      text.textContent = opts.text;
+      body.appendChild(text);
+    }
+
+    toast.append(icon, body);
     container.appendChild(toast);
     const duration = opts.duration ?? 3500;
     setTimeout(() => {
@@ -1739,14 +1857,14 @@ import Layout from "../layouts/Layout.astro";
       ${task.description ? `<p class="task-card__desc">${escHtml(task.description)}</p>` : ""}
       <div class="task-card__meta">
         <span class="task-card__xp">+${XP_VALUES[task.type]} XP</span>
-        ${task.dueDate ? `<span class="task-card__due${overdue ? " task-card__due--overdue" : ""}">📅 ${formatDueDate(task.dueDate)}${overdue ? " ⚠️ Overdue" : ""}</span>` : ""}
-        ${decay !== "fresh" ? `<span class="task-card__decay-label">${decay === "rotten" ? "🤮 Rotting!" : "🤢 Getting stale"}</span>` : ""}
+        ${task.dueDate ? `<span class="task-card__due${overdue ? " task-card__due--overdue" : ""}">Due ${formatDueDate(task.dueDate)}${overdue ? " • Overdue" : ""}</span>` : ""}
+        ${decay !== "fresh" ? `<span class="task-card__decay-label">${decay === "rotten" ? "Rotting" : "Getting stale"}</span>` : ""}
       </div>
       <div class="task-card__actions">
-        <button class="btn btn--complete btn--sm" data-action="complete" data-id="${task.id}" aria-label="Complete task">✓ Done</button>
-        <button class="btn btn--ghost btn--sm" data-action="edit" data-id="${task.id}" aria-label="Edit task">✏️</button>
-        <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">📅</a>
-        <button class="btn btn--danger btn--sm" data-action="delete" data-id="${task.id}" aria-label="Delete task">🗑</button>
+        <button class="btn btn--complete btn--sm" data-action="complete" data-id="${task.id}" aria-label="Complete task">Done</button>
+        <button class="btn btn--ghost btn--sm" data-action="edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
+        <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
+        <button class="btn btn--danger btn--sm" data-action="delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
       </div>
       ${decay !== "fresh" ? `<div class="task-card__decay-bar" style="width: ${decayPct}%"></div>` : ""}
     `;
@@ -1758,10 +1876,10 @@ import Layout from "../layouts/Layout.astro";
       for (let i = 0; i < 6; i++) {
         const p = document.createElement("span");
         p.className = "stink-particle";
-        p.textContent = STINK_EMOJIS[Math.floor(Math.random() * STINK_EMOJIS.length)];
         p.style.setProperty("--duration", `${2 + Math.random() * 2}s`);
         p.style.setProperty("--delay", `${Math.random() * 2}s`);
         p.style.left = `${10 + Math.random() * 80}%`;
+        p.style.setProperty("--size", `${8 + Math.random() * 8}px`);
         particles.appendChild(p);
       }
       el.appendChild(particles);
@@ -1811,7 +1929,7 @@ import Layout from "../layouts/Layout.astro";
         const empty = document.createElement("div");
         empty.className = "task-empty-state";
         empty.dataset.type = type;
-        const icons: Record<TaskType, string> = { short: "⚡", medium: "📅", long: "🎯" };
+        const icons: Record<TaskType, string> = { short: "W", medium: "M", long: "Q" };
         const labels: Record<TaskType, string> = { short: "No weekly tasks yet. Add one!", medium: "No monthly tasks yet. Add one!", long: "No quarterly goals yet. Add one!" };
         empty.innerHTML = `<span class="task-empty-state__icon">${icons[type]}</span><p>${labels[type]}</p>`;
         container.appendChild(empty);
@@ -1856,25 +1974,25 @@ import Layout from "../layouts/Layout.astro";
     container.innerHTML = "";
 
     if (page.length === 0) {
-      container.innerHTML = '<p class="empty-completed">No completed tasks yet — get going! 🚀</p>';
+      container.innerHTML = '<p class="empty-completed">No completed tasks yet — get going.</p>';
     } else {
       page.forEach(task => {
         const item = document.createElement("div");
         item.className = "completed-item";
         item.setAttribute("role", "listitem");
         item.innerHTML = `
-          <span class="completed-item__check" aria-hidden="true">✅</span>
+          <span class="completed-item__check" aria-hidden="true">Done</span>
           <div class="completed-item__info">
             <span class="completed-item__title">${escHtml(task.title)}</span>
             <div class="completed-item__meta">
-              <span>${task.type === "short" ? "⚡ Weekly" : task.type === "medium" ? "📅 Monthly" : "🎯 Quarterly"}</span>
+              <span>${task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly"}</span>
               <span>Completed ${formatDate(task.completedAt)}</span>
               <span class="completed-item__xp">+${XP_VALUES[task.type]} XP</span>
             </div>
           </div>
           <div class="completed-item__actions">
-            <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">📅</a>
-            <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">🗑</button>
+            <a class="btn btn--ghost btn--sm" href="${buildCalendarURL(task)}" target="_blank" rel="noopener" aria-label="Add to Google Calendar">Calendar</a>
+            <button class="btn btn--danger btn--sm" data-action="delete-completed" data-id="${task.id}" aria-label="Delete completed task">Delete</button>
           </div>
         `;
         container.appendChild(item);
@@ -1945,8 +2063,8 @@ import Layout from "../layouts/Layout.astro";
     grid.innerHTML = "";
 
     const h3 = document.createElement("h3");
-    h3.textContent = "🏅 Achievements";
-    h3.style.cssText = "grid-column: 1/-1; font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem;";
+    h3.textContent = "Achievements";
+    h3.className = "full-stats__achievements-title";
     grid.appendChild(h3);
 
     ACHIEVEMENTS.forEach(ach => {
@@ -1954,7 +2072,7 @@ import Layout from "../layouts/Layout.astro";
       if (unlocked && !unlockedAchievements.has(ach.id)) {
         unlockedAchievements.add(ach.id);
         localStorage.setItem("tracker_achievements", JSON.stringify([...unlockedAchievements]));
-        showToast({ type: "success", icon: ach.icon, title: `Achievement Unlocked: ${ach.name}`, text: ach.desc });
+        showToast({ type: "success", icon: "A", title: `Achievement unlocked: ${ach.name}`, text: ach.desc });
       }
       const card = document.createElement("div");
       card.className = `achievement-card achievement-card--${unlocked ? "unlocked" : "locked"}`;
@@ -2034,6 +2152,15 @@ import Layout from "../layouts/Layout.astro";
   // Drag & Drop
   // ===========================================================
 
+  function normalizeOrders(type: TaskType): void {
+    state.tasks
+      .filter(t => t.type === type && !t.completedAt)
+      .sort((a, b) => a.order - b.order)
+      .forEach((task, index) => {
+        task.order = index;
+      });
+  }
+
   function handleDrop(e: DragEvent): void {
     e.preventDefault();
     const targetGrid = (e.currentTarget as HTMLElement);
@@ -2043,31 +2170,17 @@ import Layout from "../layouts/Layout.astro";
     if (!draggedTaskId) return;
     const task = state.tasks.find(t => t.id === draggedTaskId);
     if (!task) return;
+    const sourceType = task.type;
 
     // Find drop position
     const dropCard = (e.target as HTMLElement).closest<HTMLElement>(".task-card");
 
     if (dropCard && dropCard.dataset.id !== draggedTaskId) {
-      // Reorder within or between sections
       const targetTask = state.tasks.find(t => t.id === dropCard.dataset.id);
       if (targetTask) {
-        const originalOrder = task.order;
-        const targetOrder = targetTask.order;
         task.type = targetType;
-        task.order = targetOrder;
-        // Shift other tasks
-        state.tasks.forEach(t => {
-          if (t.id === draggedTaskId) return;
-          if (t.type === targetType && !t.completedAt) {
-            if (t.order >= targetOrder) t.order++;
-          }
-        });
-        // If moved to different section, fix old section orders
-        if (task.type !== targetType) {
-          state.tasks
-            .filter(t => t.type === task.type && !t.completedAt && t.order > originalOrder)
-            .forEach(t => t.order--);
-        }
+        // Insert between items using a fractional order, then normalize immediately below.
+        task.order = targetTask.order - 0.5;
       }
     } else {
       // Drop at end of section
@@ -2078,13 +2191,12 @@ import Layout from "../layouts/Layout.astro";
       task.order = maxOrder + 1;
     }
 
+    normalizeOrders(sourceType);
+    normalizeOrders(targetType);
     saveState(state);
     renderAll();
-    showToast({ type: "info", icon: "🔀", title: "Task moved!", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
+    showToast({ type: "info", icon: "i", title: "Task moved", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
   }
-
-  // Expose to inline handlers in HTML
-  (window as any).handleDrop = handleDrop;
 
   // ===========================================================
   // Modal helpers
@@ -2179,10 +2291,10 @@ import Layout from "../layouts/Layout.astro";
 
     if (editId) {
       editTask(editId, title, description, type, dueDate);
-      showToast({ type: "info", icon: "✏️", title: "Task updated!", text: "" });
+      showToast({ type: "info", icon: "i", title: "Task updated", text: "" });
     } else {
       addTask(title, description, type, dueDate);
-      showToast({ type: "success", icon: "➕", title: "Task added!", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
+      showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
     }
     closeModal("task-modal");
     renderAll();
@@ -2236,6 +2348,7 @@ import Layout from "../layouts/Layout.astro";
       e.preventDefault();
       grid.classList.add("drag-over");
     });
+    grid.addEventListener("drop", (e) => handleDrop(e as DragEvent));
     grid.addEventListener("dragleave", (e) => {
       if (!grid.contains((e as DragEvent).relatedTarget as Node)) {
         grid.classList.remove("drag-over");
@@ -2253,15 +2366,15 @@ import Layout from "../layouts/Layout.astro";
   document.getElementById("copy-code-btn")!.addEventListener("click", () => {
     const code = (document.getElementById("export-code") as HTMLTextAreaElement).value;
     navigator.clipboard.writeText(code).then(() => {
-      showToast({ type: "success", icon: "📋", title: "Copied!", text: "Paste this on another device to sync." });
+      showToast({ type: "success", icon: "✓", title: "Copied", text: "Paste this on another device to sync." });
     });
   });
 
   document.getElementById("copy-url-btn")!.addEventListener("click", () => {
-    const code = (document.getElementById("export-code") as HTMLTextAreaElement).value;
-    const url = `${window.location.origin}${window.location.pathname}#data=${code}`;
+    syncShareUrl(state, false);
+    const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-      showToast({ type: "success", icon: "🔗", title: "URL copied!", text: "Open this URL on another device to import." });
+      showToast({ type: "success", icon: "✓", title: "URL copied", text: "Open this URL on another device to import." });
     });
   });
 
@@ -2276,14 +2389,14 @@ import Layout from "../layouts/Layout.astro";
     if (!code) return;
     const imported = decodeState(code);
     if (!imported) {
-      showToast({ type: "info", icon: "❌", title: "Invalid import code", text: "Please check the code and try again." });
+      showToast({ type: "info", icon: "!", title: "Invalid import code", text: "Please check the code and try again." });
       return;
     }
     state = mergeStates(state, imported);
     saveState(state);
     closeModal("import-modal");
     renderAll();
-    showToast({ type: "success", icon: "📥", title: "Data imported!", text: "Your tasks have been merged." });
+    showToast({ type: "success", icon: "✓", title: "Data imported", text: "Your tasks have been merged." });
   });
 
   // Completed filter
@@ -2299,7 +2412,7 @@ import Layout from "../layouts/Layout.astro";
     state.tasks = state.tasks.filter(t => !t.completedAt);
     saveState(state);
     renderAll();
-    showToast({ type: "info", icon: "🗑", title: "Cleared!", text: "All completed tasks removed." });
+    showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
   });
 
   // ===========================================================
@@ -2325,7 +2438,12 @@ import Layout from "../layouts/Layout.astro";
   // ===========================================================
 
   showRandomTip();
+  syncShareUrl(state, false);
   renderAll();
+
+  if (pendingImportError) {
+    showToast({ type: "info", icon: "!", title: "Import warning", text: pendingImportError, duration: 5000 });
+  }
 
   // Show a welcome tip after a brief delay if first visit
   setTimeout(() => {
@@ -2333,8 +2451,8 @@ import Layout from "../layouts/Layout.astro";
     if (!visited) {
       showToast({
         type: "info",
-        icon: "👋",
-        title: "Welcome to your Tracker!",
+        icon: "i",
+        title: "Welcome to your tracker",
         text: "Add your first task to earn XP and start levelling up!",
         duration: 6000,
       });

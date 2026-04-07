@@ -121,6 +121,11 @@ $space-4xl: 6rem;
 $max-width: 1200px;
 $max-width-text: 65ch;
 $header-height: 80px;
+$tracker-surface-radius: 18px;
+$tracker-surface-bg: rgba(251, 251, 251, 0.76);
+$tracker-surface-shadow: 0 12px 30px rgba(9, 16, 87, 0.08);
+$tracker-card-radius: 14px;
+$tracker-card-border: rgba(200, 192, 190, 0.7);
 
 // Breakpoints
 $breakpoint-sm: 640px;
