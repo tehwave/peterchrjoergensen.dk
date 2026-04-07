@@ -1,0 +1,405 @@
+---
+import CompletedTaskTemplate from "./CompletedTask.astro";
+import { XP_VALUES } from "../../types/tracker";
+---
+
+<tracker-completed-tasks class="completed-section" aria-labelledby="completed-title">
+  <div class="section-heading-row">
+    <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
+    <div class="completed-filters">
+      <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
+        <option value="all">All types</option>
+        <option value="short">Short-term</option>
+        <option value="medium">Medium-term</option>
+        <option value="long">Long-term</option>
+      </select>
+      <button class="btn btn--ghost btn--sm" id="clear-completed-btn" type="button">Clear completed</button>
+    </div>
+  </div>
+  <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
+    <p class="empty-completed">No completed tasks yet — get going.</p>
+  </div>
+  <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
+
+  <template data-completed-task-template>
+    <CompletedTaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
+  </template>
+
+  <div hidden aria-hidden="true">
+    <CompletedTaskTemplate id="__BOOTSTRAP_COMPLETED__" title="Bootstrap" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
+  </div>
+</tracker-completed-tasks>
+
+<script>
+  type TaskType = "short" | "medium" | "long";
+
+  const XP_BY_TYPE: Record<TaskType, number> = {
+    short: 10,
+    medium: 25,
+    long: 50,
+  };
+
+  interface CompletedTaskData {
+    id: string;
+    title: string;
+    type: TaskType;
+    completedAt: number;
+  }
+
+  const PAGE_SIZE = 10;
+
+  class TrackerCompletedTasks extends HTMLElement {
+    private currentPage = 1;
+    private completedFilterType: TaskType | "all" = "all";
+    private completedTasks: CompletedTaskData[] = [];
+    private astroScopeAttributeName: string | null = null;
+    private pageTransitionAnimation: Animation | null = null;
+
+    connectedCallback() {
+      if (this.dataset.completedTasksInitialized === "true") return;
+      this.dataset.completedTasksInitialized = "true";
+      this.astroScopeAttributeName = this.getAttributeNames().find((name) => name.startsWith("data-astro-cid-")) ?? null;
+
+      const filter = this.querySelector<HTMLSelectElement>("#completed-filter-type");
+      filter?.addEventListener("change", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLSelectElement)) return;
+        const value = target.value;
+        if (value !== "all" && value !== "short" && value !== "medium" && value !== "long") return;
+        this.completedFilterType = value;
+        this.currentPage = 1;
+        this.render();
+      });
+
+      this.addEventListener("click", (event) => {
+        const target = event.target;
+        const clearButton = target instanceof Element ? target.closest("#clear-completed-btn") : null;
+        if (!clearButton) return;
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-completed-clear", {
+            bubbles: true,
+          }),
+        );
+      });
+
+      this.render();
+    }
+
+    setCompletedTasks(tasks: CompletedTaskData[]): void {
+      this.completedTasks = tasks.filter((task): task is CompletedTaskData => {
+        return typeof task?.id === "string" && typeof task.title === "string" && (task.type === "short" || task.type === "medium" || task.type === "long") && typeof task.completedAt === "number";
+      });
+
+      const totalPages = Math.max(1, Math.ceil(this.getFilteredCompletedTasks().length / PAGE_SIZE));
+      if (this.currentPage > totalPages) {
+        this.currentPage = totalPages;
+      }
+
+      this.render();
+    }
+
+    private getFilteredCompletedTasks(): CompletedTaskData[] {
+      return this.completedTasks.filter((task) => this.completedFilterType === "all" || task.type === this.completedFilterType).sort((a, b) => b.completedAt - a.completedAt);
+    }
+
+    private formatDate(ts: number): string {
+      return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    }
+
+    private applyAstroScope(root: Element): void {
+      if (!this.astroScopeAttributeName) return;
+      root.setAttribute(this.astroScopeAttributeName, "");
+      root.querySelectorAll("*").forEach((node) => {
+        node.setAttribute(this.astroScopeAttributeName!, "");
+      });
+    }
+
+    private renderCompletedTaskItem(task: CompletedTaskData): HTMLElement | null {
+      const template = this.querySelector("[data-completed-task-template]");
+      if (!(template instanceof HTMLTemplateElement)) return null;
+
+      const item = template.content.firstElementChild?.cloneNode(true);
+      if (!(item instanceof HTMLElement)) return null;
+
+      const typeLabel = task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly";
+
+      item.dataset.completedId = task.id;
+
+      const titleEl = item.querySelector<HTMLElement>("[data-completed-title]");
+      const typeEl = item.querySelector<HTMLElement>("[data-completed-type]");
+      const dateEl = item.querySelector<HTMLElement>("[data-completed-date]");
+      const xpEl = item.querySelector<HTMLElement>("[data-completed-xp]");
+
+      if (titleEl) titleEl.textContent = task.title;
+      if (typeEl) typeEl.textContent = typeLabel;
+      if (dateEl) dateEl.textContent = `Completed ${this.formatDate(task.completedAt)}`;
+      if (xpEl) xpEl.textContent = `+${XP_BY_TYPE[task.type]} XP`;
+
+      return item;
+    }
+
+    private renderPagination(totalPages: number): void {
+      const container = this.querySelector("#pagination");
+      if (!(container instanceof HTMLElement)) return;
+      container.innerHTML = "";
+
+      if (totalPages <= 1) return;
+
+      const createBtn = (label: string, page: number, disabled = false, active = false): HTMLButtonElement => {
+        const btn = document.createElement("button");
+        btn.className = `pagination__btn${active ? " pagination__btn--active" : ""}`;
+        btn.textContent = label;
+        btn.disabled = disabled;
+        btn.type = "button";
+        btn.setAttribute("aria-label", `Page ${page}`);
+        if (!disabled) {
+          btn.addEventListener("click", () => {
+            this.currentPage = page;
+            this.render();
+          });
+        }
+        this.applyAstroScope(btn);
+        return btn;
+      };
+
+      container.appendChild(createBtn("‹", this.currentPage - 1, this.currentPage === 1));
+      for (let i = 1; i <= totalPages; i++) {
+        container.appendChild(createBtn(String(i), i, false, i === this.currentPage));
+      }
+      container.appendChild(createBtn("›", this.currentPage + 1, this.currentPage === totalPages));
+    }
+
+    private render(): void {
+      const filtered = this.getFilteredCompletedTasks();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      if (this.currentPage > totalPages) {
+        this.currentPage = totalPages;
+      }
+
+      const page = filtered.slice((this.currentPage - 1) * PAGE_SIZE, this.currentPage * PAGE_SIZE);
+      const container = this.querySelector("#completed-list");
+      if (!(container instanceof HTMLElement)) return;
+      container.innerHTML = "";
+
+      if (page.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-completed";
+        empty.textContent = "No completed tasks yet — get going.";
+        this.applyAstroScope(empty);
+        container.appendChild(empty);
+      } else {
+        page.forEach((task) => {
+          const completedItem = this.renderCompletedTaskItem(task);
+          if (completedItem) {
+            container.appendChild(completedItem);
+          }
+        });
+      }
+
+      this.renderPagination(totalPages);
+      this.animatePageTransition(container);
+    }
+
+    private animatePageTransition(container: HTMLElement): void {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      this.pageTransitionAnimation?.cancel();
+      this.pageTransitionAnimation = container.animate(
+        [
+          { opacity: 0, transform: "translateY(8px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        {
+          duration: 220,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "both",
+        },
+      );
+    }
+  }
+
+  if (!customElements.get("tracker-completed-tasks")) {
+    customElements.define("tracker-completed-tasks", TrackerCompletedTasks);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-completed-tasks {
+    display: block;
+  }
+
+  .completed-section {
+    @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
+    border-radius: $radius-xl;
+    padding: $space-lg;
+    height: 100%;
+    animation: panel-enter 0.65s var(--ease-out) both;
+    background: transparent;
+    border: 2px dotted $tracker-surface-stroke;
+    box-shadow: none;
+
+    @include respond-to(md) {
+      padding: $space-md;
+    }
+  }
+
+  .section-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-md;
+    margin-bottom: $space-lg;
+    flex-wrap: wrap;
+  }
+
+  .section-heading {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  .completed-filters {
+    display: flex;
+    gap: $space-sm;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    font-size: $font-size-sm;
+    padding: $space-xs $space-sm;
+    border: 1px solid $tracker-card-stroke;
+    border-radius: $radius-sm;
+    background: $tracker-card-bg;
+    color: $color-text-primary;
+    cursor: pointer;
+
+    @include focus-ring;
+  }
+
+  .completed-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    transform-origin: 50% 0;
+  }
+
+  .empty-completed {
+    text-align: center;
+    color: $tracker-muted-text;
+    font-size: $font-size-sm;
+    padding: $space-2xl;
+  }
+
+  .pagination {
+    display: flex;
+    gap: $space-xs;
+    margin-top: $space-lg;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination__btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 $space-sm;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $tracker-card-stroke;
+    border-radius: $radius-sm;
+    background: $tracker-card-bg;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    @include tracker-transition(all);
+    @include focus-ring;
+
+    &:hover {
+      border-color: $tracker-card-stroke;
+      color: $color-blue;
+    }
+
+    &--active {
+      background: $color-blue;
+      color: $color-white;
+      border-color: $tracker-card-stroke;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    padding: $space-xs $space-md;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    border: 1px solid transparent;
+    @include tracker-transition(all);
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include focus-ring;
+
+    &--ghost {
+      background: transparent;
+      color: $tracker-muted-text;
+      border-color: transparent;
+
+      &:hover {
+        background: rgba(31, 39, 51, 0.07);
+        color: $color-text-primary;
+      }
+    }
+
+    &--sm {
+      min-height: 36px;
+      padding: 2px $space-sm;
+      font-size: $font-size-xs;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    :global(.completed-list tracker-completed-task) {
+      animation-name: completed-item-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 10% cover 36%;
+    }
+
+    :global(.completed-list tracker-completed-task:nth-child(2n)) {
+      animation-range: entry 14% cover 40%;
+    }
+  }
+
+  @keyframes completed-item-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.99);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.completed-list tracker-completed-task) {
+      animation: none;
+    }
+  }
+</style>

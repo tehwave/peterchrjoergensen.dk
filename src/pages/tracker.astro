@@ -14,11 +14,10 @@ import "../styles/global.scss";
 
 import { Font } from "astro:assets";
 import { getImage } from "astro:assets";
-import CompletedTaskTemplate from "../components/tracker/CompletedTask.astro";
+import CompletedTasks from "../components/tracker/CompletedTasks.astro";
 import Footer from "../components/Footer.astro";
 import Statistics from "../components/tracker/Statistics.astro";
 import TaskTemplate from "../components/tracker/Task.astro";
-import { XP_VALUES } from "../types/tracker";
 
 // Texture images for the background, generated at build time using Astro's Assets API.
 import textureSource from "../assets/black-paper.png";
@@ -245,24 +244,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           <div class="below-fold">
             <!-- Completed Tasks -->
-            <section class="completed-section" aria-labelledby="completed-title">
-              <div class="section-heading-row">
-                <h2 class="section-heading" id="completed-title">Completed Tasks</h2>
-                <div class="completed-filters">
-                  <select id="completed-filter-type" class="filter-select" aria-label="Filter by type">
-                    <option value="all">All types</option>
-                    <option value="short">Short-term</option>
-                    <option value="medium">Medium-term</option>
-                    <option value="long">Long-term</option>
-                  </select>
-                  <button class="btn btn--ghost btn--sm" id="clear-completed-btn">Clear completed</button>
-                </div>
-              </div>
-              <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
-                <p class="empty-completed">No completed tasks yet — get going.</p>
-              </div>
-              <div class="pagination" id="pagination" aria-label="Completed tasks pagination"></div>
-            </section>
+            <CompletedTasks />
 
             <!-- Full Statistics -->
             <Statistics />
@@ -274,14 +256,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           <div hidden aria-hidden="true">
             <TaskTemplate id="__BOOTSTRAP__" title="Bootstrap" type="short" decay="fresh" decayProgress={0} />
-          </div>
-
-          <template id="completed-task-template">
-            <CompletedTaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
-          </template>
-
-          <div hidden aria-hidden="true">
-            <CompletedTaskTemplate id="__BOOTSTRAP_COMPLETED__" title="Bootstrap" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
           </div>
 
           <!-- ====================================================
@@ -847,113 +821,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
-        .completed-section {
-          @include elevated-panel($tracker-surface-bg-elevated, $tracker-surface-stroke, none);
-          border-radius: $radius-xl;
-          padding: $space-lg;
-          height: 100%;
-          animation: panel-enter 0.65s var(--ease-out) both;
-
-          @include respond-to(md) {
-            padding: $space-md;
-          }
-        }
-
-        .completed-section {
-          background: transparent;
-          border: 2px dotted $tracker-surface-stroke;
-          box-shadow: none;
-        }
-
-        .section-heading-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: $space-md;
-          margin-bottom: $space-lg;
-          flex-wrap: wrap;
-        }
-
-        .section-heading {
-          font-size: $font-size-2xl;
-          font-weight: $font-weight-bold;
-          color: $color-text-primary;
-          margin: 0;
-        }
-
-        .completed-filters {
-          display: flex;
-          gap: $space-sm;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .filter-select {
-          font-size: $font-size-sm;
-          padding: $space-xs $space-sm;
-          border: 1px solid $tracker-card-stroke;
-          border-radius: $radius-sm;
-          background: $tracker-card-bg;
-          color: $color-text-primary;
-          cursor: pointer;
-
-          @include focus-ring;
-        }
-
-        .completed-list {
-          display: flex;
-          flex-direction: column;
-          gap: $space-sm;
-        }
-
-        .empty-completed {
-          text-align: center;
-          color: $tracker-muted-text;
-          font-size: $font-size-sm;
-          padding: $space-2xl;
-        }
-
-        // Pagination
-        .pagination {
-          display: flex;
-          gap: $space-xs;
-          margin-top: $space-lg;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .pagination__btn {
-          min-width: 36px;
-          height: 36px;
-          padding: 0 $space-sm;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid $tracker-card-stroke;
-          border-radius: $radius-sm;
-          background: $tracker-card-bg;
-          font-size: $font-size-sm;
-          cursor: pointer;
-          @include tracker-transition(all);
-          @include focus-ring;
-
-          &:hover {
-            border-color: $tracker-card-stroke;
-            color: $color-blue;
-          }
-
-          &--active {
-            background: $color-blue;
-            color: $color-white;
-            border-color: $tracker-card-stroke;
-          }
-
-          &:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-          }
-        }
-
         // ============================================================
         // Modals
         // ============================================================
@@ -1249,7 +1116,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
       <script>
         import { getTaskDecayLevel, getTaskDecayProgress } from "../utils/tracker/decay";
-        import { XP_VALUES, type AppState, type CompletedTask, type GameState, type Task, type TaskType } from "../types/tracker";
+        import { XP_VALUES, type AppState, type GameState, type Task, type TaskType } from "../types/tracker";
 
         // ===========================================================
         // Types
@@ -1260,8 +1127,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ===========================================================
 
         const STORAGE_KEY = "tracker_v1";
-        const PAGE_SIZE = 10;
-
         const TIPS = [
           "Break big goals into smaller weekly tasks — momentum is everything.",
           "Focus on completing one long-term goal before adding more.",
@@ -1522,9 +1387,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         let pendingImportError = "";
         let state = loadState();
-        let currentPage = 1;
-        let completedFilterType: TaskType | "all" = "all";
         let draggedTaskId: string | null = null;
+        let metricCountObserver: IntersectionObserver | null = null;
         let unlockedAchievements = new Set<string>(JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]"));
         const astroScopeAttributeName =
           document
@@ -1680,11 +1544,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Render helpers
         // ===========================================================
 
-        function formatDate(ts: number | null): string {
-          if (!ts) return "";
-          return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-        }
-
         function renderTaskCard(task: Task): HTMLElement | null {
           const template = document.getElementById("task-card-template");
           if (!(template instanceof HTMLTemplateElement)) return null;
@@ -1718,29 +1577,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return card;
         }
 
-        function renderCompletedTaskItem(task: CompletedTask): HTMLElement | null {
-          const template = document.getElementById("completed-task-template");
-          if (!(template instanceof HTMLTemplateElement)) return null;
+        interface CompletedTaskSnapshot {
+          id: string;
+          title: string;
+          type: TaskType;
+          completedAt: number;
+        }
 
-          const item = template.content.firstElementChild?.cloneNode(true);
-          if (!(item instanceof HTMLElement)) return null;
-
-          const typeLabel = task.type === "short" ? "Weekly" : task.type === "medium" ? "Monthly" : "Quarterly";
-
-          item.dataset.completedId = task.id;
-
-          const titleEl = item.querySelector<HTMLElement>("[data-completed-title]");
-          const typeEl = item.querySelector<HTMLElement>("[data-completed-type]");
-          const dateEl = item.querySelector<HTMLElement>("[data-completed-date]");
-          const xpEl = item.querySelector<HTMLElement>("[data-completed-xp]");
-
-          if (titleEl) titleEl.textContent = task.title;
-          if (typeEl) typeEl.textContent = typeLabel;
-          if (dateEl) dateEl.textContent = `Completed ${formatDate(task.completedAt)}`;
-          if (xpEl) xpEl.textContent = `+${XP_VALUES[task.type]} XP`;
-
-          applyAstroScope(item);
-          return item;
+        interface CompletedTasksElement extends HTMLElement {
+          setCompletedTasks: (tasks: CompletedTaskSnapshot[]) => void;
         }
 
         function renderTasks(): void {
@@ -1797,72 +1642,18 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           document.getElementById("level-badge")!.setAttribute("title", title);
         }
 
-        function renderCompleted(): void {
-          const completed = state.tasks
-            .filter((t) => t.completedAt !== null)
-            .filter((t) => completedFilterType === "all" || t.type === completedFilterType)
-            .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+        function renderCompletedSection(): void {
+          const completedTasks: CompletedTaskSnapshot[] = state.tasks
+            .filter((task): task is Task & { completedAt: number } => task.completedAt !== null)
+            .map((task) => ({
+              id: task.id,
+              title: task.title,
+              type: task.type,
+              completedAt: task.completedAt,
+            }));
 
-          const totalPages = Math.max(1, Math.ceil(completed.length / PAGE_SIZE));
-          if (currentPage > totalPages) currentPage = totalPages;
-
-          const page = completed.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-          const container = document.getElementById("completed-list")!;
-          container.innerHTML = "";
-
-          if (page.length === 0) {
-            const empty = document.createElement("p");
-            empty.className = "empty-completed";
-            empty.textContent = "No completed tasks yet — get going.";
-            applyAstroScope(empty);
-            container.appendChild(empty);
-          } else {
-            page.forEach((task) => {
-              if (task.completedAt === null) return;
-
-              const completedTask: CompletedTask = {
-                ...task,
-                completedAt: task.completedAt,
-              };
-
-              const completedItem = renderCompletedTaskItem(completedTask);
-              if (completedItem) {
-                container.appendChild(completedItem);
-              }
-            });
-          }
-
-          // Pagination
-          renderPagination(totalPages);
-        }
-
-        function renderPagination(totalPages: number): void {
-          const container = document.getElementById("pagination")!;
-          container.innerHTML = "";
-
-          if (totalPages <= 1) return;
-
-          const createBtn = (label: string, page: number, disabled = false, active = false) => {
-            const btn = document.createElement("button");
-            btn.className = `pagination__btn${active ? " pagination__btn--active" : ""}`;
-            btn.textContent = label;
-            btn.disabled = disabled;
-            btn.setAttribute("aria-label", `Page ${page}`);
-            if (!disabled) {
-              btn.addEventListener("click", () => {
-                currentPage = page;
-                renderCompleted();
-              });
-            }
-            applyAstroScope(btn);
-            return btn;
-          };
-
-          container.appendChild(createBtn("‹", currentPage - 1, currentPage === 1));
-          for (let i = 1; i <= totalPages; i++) {
-            container.appendChild(createBtn(String(i), i, false, i === currentPage));
-          }
-          container.appendChild(createBtn("›", currentPage + 1, currentPage === totalPages));
+          const completedRoot = document.querySelector<CompletedTasksElement>("tracker-completed-tasks");
+          completedRoot?.setCompletedTasks(completedTasks);
         }
 
         function renderFullStats(): void {
@@ -1890,8 +1681,85 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             if (metric) grid.appendChild(metric);
           });
 
+          setupMetricCountUp(grid);
+
           // Achievements
           renderAchievements();
+        }
+
+        function animateMetricCount(valueEl: HTMLElement, targetValue: number): void {
+          if (targetValue <= 0) {
+            valueEl.textContent = "0";
+            return;
+          }
+
+          const duration = Math.min(1200, Math.max(550, targetValue * 16));
+          const startTime = performance.now();
+
+          const step = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - (1 - progress) ** 3;
+            const currentValue = Math.round(targetValue * eased);
+            valueEl.textContent = String(currentValue);
+
+            if (progress < 1) {
+              requestAnimationFrame(step);
+            }
+          };
+
+          valueEl.textContent = "0";
+          requestAnimationFrame(step);
+        }
+
+        function setupMetricCountUp(grid: HTMLElement): void {
+          metricCountObserver?.disconnect();
+          metricCountObserver = null;
+
+          const cards = Array.from(grid.querySelectorAll<HTMLElement>(".full-stat-card"));
+          if (cards.length === 0) return;
+
+          const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+          if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+            cards.forEach((card) => {
+              const valueEl = card.querySelector<HTMLElement>("[data-metric-value]");
+              const targetValue = Number.parseInt(card.dataset.metricValue ?? "0", 10);
+              if (!valueEl || Number.isNaN(targetValue)) return;
+              valueEl.textContent = String(targetValue);
+            });
+            return;
+          }
+
+          metricCountObserver = new IntersectionObserver(
+            (entries, observer) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+
+                const card = entry.target as HTMLElement;
+                const valueEl = card.querySelector<HTMLElement>("[data-metric-value]");
+                const targetValue = Number.parseInt(card.dataset.metricValue ?? "0", 10);
+
+                if (!valueEl || Number.isNaN(targetValue)) {
+                  observer.unobserve(card);
+                  return;
+                }
+
+                animateMetricCount(valueEl, targetValue);
+                observer.unobserve(card);
+              });
+            },
+            {
+              threshold: 0.35,
+              rootMargin: "0px 0px -8% 0px",
+            },
+          );
+
+          cards.forEach((card) => {
+            const valueEl = card.querySelector<HTMLElement>("[data-metric-value]");
+            if (valueEl) valueEl.textContent = "0";
+            metricCountObserver?.observe(card);
+          });
         }
 
         function renderAchievements(): void {
@@ -1934,11 +1802,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (!iconEl || !valueEl || !labelEl) return null;
 
           iconEl.innerHTML = METRIC_ICONS[data.label] ?? "";
-          valueEl.textContent = String(data.value);
+          valueEl.textContent = "0";
           labelEl.textContent = data.label;
 
           const metricCard = fragment.firstElementChild as HTMLElement | null;
-          if (metricCard) applyAstroScope(metricCard);
+          if (metricCard) {
+            metricCard.dataset.metricValue = String(data.value);
+            applyAstroScope(metricCard);
+          }
 
           return metricCard;
         }
@@ -1979,7 +1850,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         function renderAll(): void {
           renderTasks();
           renderStats();
-          renderCompleted();
+          renderCompletedSection();
           renderFullStats();
         }
 
@@ -2266,7 +2137,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
 
           saveState(state);
-          currentPage = 1;
           renderAll();
           showToast({ type: "success", icon: "✓", title: "Demo data loaded", text: "Sample tasks added for testing." });
         }
@@ -2412,6 +2282,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         });
 
+        document.addEventListener("tracker-completed-clear", () => {
+          if (!confirm("Clear all completed tasks? This cannot be undone.")) return;
+          state.tasks = state.tasks.filter((task) => task.completedAt === null);
+          saveState(state);
+          renderAll();
+          showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
+        });
+
         // Add task button
         document.getElementById("add-task-btn")!.addEventListener("click", () => {
           (document.getElementById("task-title-input") as HTMLInputElement).value = "";
@@ -2533,22 +2411,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           closeModal("import-modal");
           renderAll();
           showToast({ type: "success", icon: "✓", title: "Data imported", text: "Your tasks have been merged." });
-        });
-
-        // Completed filter
-        document.getElementById("completed-filter-type")!.addEventListener("change", (e) => {
-          completedFilterType = (e.target as HTMLSelectElement).value as TaskType | "all";
-          currentPage = 1;
-          renderCompleted();
-        });
-
-        // Clear completed
-        document.getElementById("clear-completed-btn")!.addEventListener("click", () => {
-          if (!confirm("Clear all completed tasks? This cannot be undone.")) return;
-          state.tasks = state.tasks.filter((t) => !t.completedAt);
-          saveState(state);
-          renderAll();
-          showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
         });
 
         // ===========================================================

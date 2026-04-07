@@ -149,6 +149,24 @@ const {} = Astro.props;
       animation-range: entry 14% cover 34%;
     }
 
+    :global(.full-stats-grid .full-stat-card__value) {
+      animation-name: metric-value-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 18% cover 40%;
+    }
+
+    :global(.full-stats-grid .full-stat-card__label) {
+      animation-name: metric-label-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 14% cover 36%;
+    }
+
     :global(.full-stats-grid .full-stat-card:nth-child(2n)) {
       animation-range: entry 12% cover 36%;
     }
@@ -178,9 +196,35 @@ const {} = Astro.props;
     }
   }
 
+  @keyframes metric-value-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes metric-label-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :global(.full-stats-grid .full-stat-card),
-    :global(.full-stats-grid .full-stat-card__icon) {
+    :global(.full-stats-grid .full-stat-card__icon),
+    :global(.full-stats-grid .full-stat-card__value),
+    :global(.full-stats-grid .full-stat-card__label) {
       animation: none;
     }
   }

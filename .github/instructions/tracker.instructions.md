@@ -40,7 +40,8 @@ The tracker is a **completely standalone personal productivity app** that lives 
 - The app is centered in `src/pages/tracker.astro` with UI sub-components in `src/components/tracker/`
 - `Task.astro` owns task-card markup, task-card scoped styles, and card-local interactions (drag visuals, inline title edit, and semantic custom events)
 - `CompletedTask.astro` owns completed-card markup, completed-card scoped styles, and card-local interactions (semantic delete custom event)
-- `tracker.astro` owns app state mutations/persistence and listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`, `tracker-completed-task-delete`) for orchestration
+- `CompletedTasks.astro` owns completed-section markup/styles and completed-list UI controller state (filter, pagination, list rendering)
+- `tracker.astro` owns canonical app state mutations/persistence and global orchestration; it pushes completed-task snapshots into `CompletedTasks.astro` via `setCompletedTasks(...)`, listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`, `tracker-completed-task-delete`), and handles clear-all via `tracker-completed-clear`
 - There is no server-side data — purely client-side
 - Gamification (XP, levels, streaks, achievements) and task decay (stink particles, visual rot) are intentional features, not bugs
 
