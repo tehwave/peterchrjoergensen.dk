@@ -9,6 +9,7 @@ const {} = Astro.props;
     <span class="achievement-card__icon" data-achievement-icon aria-hidden="true"></span>
     <p class="achievement-card__name" data-achievement-name></p>
     <p class="achievement-card__desc" data-achievement-desc></p>
+    <span class="achievement-card__status" data-achievement-status></span>
     <span class="achievement-card__badge" data-achievement-badge hidden aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 6 9 17l-5-5"></path>
@@ -35,7 +36,6 @@ const {} = Astro.props;
   }
 
   :global(.achievement-card--locked) {
-    opacity: 0.78;
     border-style: dashed;
     border-color: $tracker-card-stroke-strong;
     background: repeating-linear-gradient(-45deg, rgba(47, 56, 71, 0.08) 0 6px, rgba(47, 56, 71, 0) 6px 12px), $tracker-card-bg-subtle;
@@ -83,8 +83,20 @@ const {} = Astro.props;
 
   :global(.achievement-card__desc) {
     font-size: 11px;
-    color: $tracker-soft-text;
+    color: $tracker-muted-text;
     margin: 0;
+  }
+
+  :global(.achievement-card__status) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   :global(.achievement-card__badge) {

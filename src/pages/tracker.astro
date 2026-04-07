@@ -1952,15 +1952,18 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const iconEl = fragment.querySelector<HTMLElement>("[data-achievement-icon]");
           const nameEl = fragment.querySelector<HTMLElement>("[data-achievement-name]");
           const descEl = fragment.querySelector<HTMLElement>("[data-achievement-desc]");
+          const statusEl = fragment.querySelector<HTMLElement>("[data-achievement-status]");
           const badgeEl = fragment.querySelector<HTMLElement>("[data-achievement-badge]");
 
-          if (!card || !iconEl || !nameEl || !descEl || !badgeEl) return null;
+          if (!card || !iconEl || !nameEl || !descEl || !statusEl || !badgeEl) return null;
 
           card.classList.remove("achievement-card--locked", "achievement-card--unlocked");
           card.classList.add(`achievement-card--${data.unlocked ? "unlocked" : "locked"}`);
           iconEl.innerHTML = ACHIEVEMENT_ICONS[data.icon] ?? "";
           nameEl.textContent = data.name;
           descEl.textContent = data.desc;
+          statusEl.textContent = `Status: ${data.unlocked ? "Unlocked" : "Locked"}`;
+          card.setAttribute("aria-label", `${data.name}. ${data.desc}. Status: ${data.unlocked ? "Unlocked" : "Locked"}`);
 
           if (data.unlocked) {
             badgeEl.removeAttribute("hidden");
