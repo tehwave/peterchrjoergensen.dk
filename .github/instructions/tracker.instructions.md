@@ -37,7 +37,9 @@ The tracker is a **completely standalone personal productivity app** that lives 
 ## Architecture notes
 
 - All state lives in `localStorage` under key `tracker_v1`, with URL `#data=` for cross-device sync via base64 export
-- The entire app is a single `.astro` file plus two small sub-components (`Achievement.astro`, `Metric.astro`) and one utility (`src/utils/tracker/taskCard.ts`)
+- The app is centered in `src/pages/tracker.astro` with UI sub-components in `src/components/tracker/`
+- `Task.astro` owns task-card markup, task-card scoped styles, and card-local interactions (drag visuals, inline title edit, and semantic custom events)
+- `tracker.astro` owns app state mutations/persistence and listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`) for orchestration
 - There is no server-side data — purely client-side
 - Gamification (XP, levels, streaks, achievements) and task decay (stink particles, visual rot) are intentional features, not bugs
 

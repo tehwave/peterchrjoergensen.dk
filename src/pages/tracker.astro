@@ -269,8 +269,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           </div>
 
           <template id="task-card-template">
-            <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" xp={XP_VALUES.short} decayProgress={0} />
+            <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" decayProgress={0} />
           </template>
+
+          <div hidden aria-hidden="true">
+            <TaskTemplate id="__BOOTSTRAP__" title="Bootstrap" type="short" decay="fresh" decayProgress={0} />
+          </div>
 
           <template id="completed-task-template">
             <CompletedTaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" typeLabel="Weekly" completedAtLabel="Completed 1 Jan 2000" xp={XP_VALUES.short} />
@@ -280,13 +284,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
        MODALS
        ==================================================== -->
 
-          <!-- Add / Edit Task Modal -->
+          <!-- Add Task Modal -->
           <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" hidden>
             <div class="modal">
               <button class="modal__close" id="task-modal-close" aria-label="Close">✕</button>
               <h3 class="modal__title" id="task-modal-title">Add Task</h3>
               <form class="modal__form" id="task-form" novalidate>
-                <input type="hidden" id="edit-task-id" />
                 <div class="form-group">
                   <label for="task-title-input" class="form-label">Title <span aria-hidden="true">*</span></label>
                   <input type="text" id="task-title-input" class="form-input" placeholder="What needs doing?" required maxlength="120" />
@@ -691,202 +694,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             border-radius: $radius-md;
             outline: 1px dashed $tracker-card-stroke;
             outline-offset: 2px;
-          }
-        }
-
-        // Task card
-        .task-card {
-          @include elevated-panel($color-white, $tracker-card-stroke, $shadow-sm);
-          border-radius: $radius-md;
-          padding: $space-sm $space-md;
-          cursor: grab;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          gap: $space-xs;
-          @include tracker-transition(all);
-
-          &:hover {
-            box-shadow: $shadow-lg;
-            transform: translateY(-2px);
-            border-color: $tracker-card-stroke;
-            background: $color-white;
-          }
-
-          &:active {
-            cursor: grabbing;
-          }
-
-          &--dragging {
-            opacity: 0.4;
-          }
-
-          &--drop-target {
-            box-shadow: 0 0 0 3px rgba(41, 136, 250, 0.28);
-          }
-
-          // Decay states
-          &--stale {
-            background: $color-decay-stale-bg;
-
-            &::after {
-              content: "!";
-              position: absolute;
-              top: $space-xs;
-              right: $space-xs;
-              font-size: 0.85rem;
-              animation: wobble 3s ease-in-out infinite;
-            }
-          }
-
-          &--rotten {
-            background: $color-decay-rotten-bg;
-            animation: shake 4s ease-in-out infinite;
-            filter: hue-rotate(20deg) saturate(1.3);
-
-            &::before {
-              content: "";
-              position: absolute;
-              inset: 0;
-              background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(100, 130, 20, 0.08) 8px, rgba(100, 130, 20, 0.08) 16px);
-              pointer-events: none;
-              z-index: 0;
-            }
-
-            &::after {
-              content: "OLD";
-              position: absolute;
-              top: $space-xs;
-              right: $space-xs;
-              font-size: 0.65rem;
-              letter-spacing: 0.05em;
-              font-weight: $font-weight-bold;
-              animation: wobble 1.5s ease-in-out infinite;
-            }
-          }
-
-          &__title {
-            font-size: $font-size-sm;
-            font-weight: $font-weight-semibold;
-            color: $color-text-primary;
-            margin: 0;
-            line-height: $leading-snug;
-            position: relative;
-            z-index: 1;
-          }
-
-          &__meta {
-            display: flex;
-            align-items: center;
-            gap: $space-sm;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-          }
-
-          &__xp {
-            font-size: $font-size-xs;
-            font-weight: $font-weight-semibold;
-            color: $color-orange;
-            background: rgba(236, 131, 5, 0.12);
-            border: 1px solid $tracker-card-stroke;
-            padding: 1px 8px;
-            border-radius: $radius-full;
-          }
-
-          &__actions {
-            display: flex;
-            gap: $space-xs;
-            margin-top: $space-xs;
-            position: relative;
-            z-index: 1;
-          }
-
-          &__decay-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, $color-decay-rotten, $color-decay-stale, $color-decay-overdue);
-            @include transition(width, 0.5s);
-          }
-        }
-
-        // Stink particles
-        .stink-particles {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 2;
-          overflow: hidden;
-        }
-
-        .stink-particle {
-          position: absolute;
-          width: var(--size, 10px);
-          height: var(--size, 10px);
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(90, 122, 26, 0.7), rgba(90, 122, 26, 0.1) 70%, transparent 100%);
-          filter: blur(0.4px);
-          animation: stink-rise var(--duration, 3s) ease-out var(--delay, 0s) infinite;
-          opacity: 0;
-          bottom: 0;
-
-          @include reduced-motion {
-            display: none;
-          }
-        }
-
-        @keyframes stink-rise {
-          0% {
-            opacity: 0;
-            transform: translateY(0) scale(0.6) rotate(0deg);
-          }
-          20% {
-            opacity: 0.9;
-          }
-          80% {
-            opacity: 0.5;
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-60px) scale(1.2) rotate(360deg);
-          }
-        }
-
-        @keyframes wobble {
-          0%,
-          100% {
-            transform: rotate(0deg);
-          }
-          25% {
-            transform: rotate(-5deg) scale(1.05);
-          }
-          75% {
-            transform: rotate(5deg) scale(1.05);
-          }
-        }
-
-        @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          10% {
-            transform: translateX(-2px) rotate(-0.3deg);
-          }
-          20% {
-            transform: translateX(2px) rotate(0.3deg);
-          }
-          30% {
-            transform: translateX(-1px);
-          }
-          40% {
-            transform: translateX(1px);
-          }
-          50% {
-            transform: translateX(0);
           }
         }
 
@@ -1492,14 +1299,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             animation: none;
           }
         }
-
-        @media (max-width: 900px) {
-          .task-card__meta {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 6px;
-          }
-        }
       </style>
 
       <script>
@@ -1949,21 +1748,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           const decay = getTaskDecayLevel(task);
           const decayProgress = getTaskDecayProgress(task);
-          const xp = XP_VALUES[task.type];
 
           card.dataset.id = task.id;
+          card.dataset.title = task.title;
           card.dataset.type = task.type;
 
           card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
           card.classList.add(`task-card--${decay}`);
 
-          const titleEl = card.querySelector<HTMLElement>("[data-task-title]");
-          const xpEl = card.querySelector<HTMLElement>("[data-task-xp]");
           const decayBar = card.querySelector<HTMLElement>("[data-task-decay-bar]");
           const particles = card.querySelector<HTMLElement>("[data-task-particles]");
-
-          if (titleEl) titleEl.textContent = task.title;
-          if (xpEl) xpEl.textContent = `+${xp} XP`;
 
           if (decayBar) {
             decayBar.style.width = `${decayProgress}%`;
@@ -1973,10 +1767,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (particles) {
             particles.hidden = decay !== "rotten";
           }
-
-          card.querySelectorAll<HTMLElement>("[data-id]").forEach((actionEl) => {
-            actionEl.dataset.id = task.id;
-          });
 
           applyAstroScope(card);
           return card;
@@ -2404,13 +2194,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAll();
         }
 
-        function editTask(id: string, title: string, type: TaskType): void {
+        function editTask(id: string, title: string): void {
           const task = state.tasks.find((t) => t.id === id);
           if (!task) return;
           task.title = title.trim();
-          task.description = "";
-          task.type = type;
-          task.dueDate = null;
           saveState(state);
           renderAll();
         }
@@ -2494,9 +2281,33 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           draggedTaskId = null;
         });
 
+        document.addEventListener("tracker-task-complete", (event) => {
+          const completeEvent = event as CustomEvent<{ id: string }>;
+          const id = completeEvent.detail?.id;
+          if (!id) return;
+          completeTask(id);
+        });
+
+        document.addEventListener("tracker-task-delete", (event) => {
+          const deleteEvent = event as CustomEvent<{ id: string }>;
+          const id = deleteEvent.detail?.id;
+          if (!id) return;
+          if (confirm("Delete this task?")) {
+            deleteTask(id);
+          }
+        });
+
+        document.addEventListener("tracker-task-titlechange", (event) => {
+          const renameEvent = event as CustomEvent<{ id: string; title: string }>;
+          const id = renameEvent.detail?.id;
+          const title = renameEvent.detail?.title;
+          if (!id || !title?.trim()) return;
+          editTask(id, title);
+          showToast({ type: "info", icon: "i", title: "Task renamed", text: "" });
+        });
+
         // Add task button
         document.getElementById("add-task-btn")!.addEventListener("click", () => {
-          (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
           (document.getElementById("task-title-input") as HTMLInputElement).value = "";
           (document.getElementById("task-type-input") as HTMLSelectElement).value = "short";
           (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
@@ -2512,7 +2323,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         document.querySelectorAll(".add-section-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             const type = (btn as HTMLElement).dataset.type as TaskType;
-            (document.getElementById("edit-task-id") as HTMLInputElement).value = "";
             (document.getElementById("task-title-input") as HTMLInputElement).value = "";
             (document.getElementById("task-type-input") as HTMLSelectElement).value = type;
             (document.getElementById("task-modal-title") as HTMLElement).textContent = "Add Task";
@@ -2551,27 +2361,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Task form submit
         document.getElementById("task-form")!.addEventListener("submit", (e) => {
           e.preventDefault();
-          const editId = (document.getElementById("edit-task-id") as HTMLInputElement).value;
           const title = (document.getElementById("task-title-input") as HTMLInputElement).value;
           const type = (document.getElementById("task-type-input") as HTMLSelectElement).value as TaskType;
 
           if (!title.trim()) return;
 
-          if (editId) {
-            editTask(editId, title, type);
-            showToast({ type: "info", icon: "i", title: "Task updated", text: "" });
-          } else {
-            addTask(title, type);
-            showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
-          }
+          addTask(title, type);
+          showToast({ type: "success", icon: "+", title: "Task added", text: `"${title}" added to your ${type === "short" ? "weekly" : type === "medium" ? "monthly" : "quarterly"} tasks.` });
           closeModal("task-modal");
           renderAll();
         });
-
-        // Board event delegation
-        document.getElementById("tasks-short")!.addEventListener("click", handleBoardAction);
-        document.getElementById("tasks-medium")!.addEventListener("click", handleBoardAction);
-        document.getElementById("tasks-long")!.addEventListener("click", handleBoardAction);
 
         // Completed list delegation
         document.getElementById("completed-list")!.addEventListener("click", (e) => {
@@ -2582,31 +2381,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             }
           }
         });
-
-        function handleBoardAction(e: Event): void {
-          const target = e.target as HTMLElement;
-          const btn = target.closest<HTMLElement>("[data-action]");
-          if (!btn) return;
-          const action = btn.dataset.action!;
-          const id = btn.dataset.id!;
-
-          if (action === "complete") {
-            completeTask(id);
-          } else if (action === "delete") {
-            if (confirm("Delete this task?")) {
-              deleteTask(id);
-            }
-          } else if (action === "edit") {
-            const task = state.tasks.find((t) => t.id === id);
-            if (!task) return;
-            (document.getElementById("edit-task-id") as HTMLInputElement).value = task.id;
-            (document.getElementById("task-title-input") as HTMLInputElement).value = task.title;
-            (document.getElementById("task-type-input") as HTMLSelectElement).value = task.type;
-            (document.getElementById("task-modal-title") as HTMLElement).textContent = "Edit Task";
-            (document.getElementById("task-form-submit") as HTMLElement).textContent = "Save Changes";
-            openModal("task-modal");
-          }
-        }
 
         // Drag over highlighting for task grids
         document.querySelectorAll(".task-grid").forEach((grid) => {
