@@ -35,16 +35,19 @@ const {} = Astro.props;
   }
 
   :global(.achievement-card--locked) {
-    opacity: 0.55;
-    filter: grayscale(1);
+    opacity: 0.78;
+    border-style: dashed;
+    border-color: $tracker-card-stroke-strong;
+    background: repeating-linear-gradient(-45deg, rgba(47, 56, 71, 0.08) 0 6px, rgba(47, 56, 71, 0) 6px 12px), $tracker-card-bg-subtle;
+    box-shadow: inset 0 0 0 1px rgba(47, 56, 71, 0.12);
   }
 
   :global(.achievement-card--unlocked) {
     border-color: $tracker-card-stroke;
-    background: linear-gradient(135deg, rgba(236, 131, 5, 0.08), $tracker-card-bg);
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.12), $tracker-card-bg);
     box-shadow:
-      0 0 0 1px rgba(236, 131, 5, 0.35),
-      inset 0 0 16px rgba(236, 131, 5, 0.07);
+      0 0 0 1px rgba(5, 150, 105, 0.4),
+      inset 0 0 16px rgba(5, 150, 105, 0.12);
   }
 
   :global(.achievement-card__icon) {
@@ -54,7 +57,16 @@ const {} = Astro.props;
     width: 1.75rem;
     height: 1.75rem;
     margin-bottom: $space-xs;
-    color: $color-blue;
+    color: $tracker-soft-text;
+  }
+
+  :global(.achievement-card--unlocked .achievement-card__icon) {
+    color: $color-success;
+  }
+
+  :global(.achievement-card--locked .achievement-card__icon) {
+    color: $tracker-soft-text;
+    opacity: 0.8;
   }
 
   :global(.achievement-card__icon svg) {
@@ -84,9 +96,13 @@ const {} = Astro.props;
     justify-content: center;
     width: 18px;
     height: 18px;
-    background: $color-orange;
+    background: $color-success;
     color: $color-white;
     border-radius: $radius-full;
+  }
+
+  :global(.achievement-card__badge[hidden]) {
+    display: none;
   }
 
   :global(.achievement-card__badge svg) {

@@ -23,13 +23,37 @@ const {} = Astro.props;
   :global(.full-stat-card) {
     @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
     border-radius: $radius-lg;
-    border-left: 3px solid $color-blue;
     padding: $space-sm $space-md;
     display: grid;
-    grid-template-columns: 24px 1fr;
-    column-gap: $space-sm;
-    row-gap: 2px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: $space-md;
     align-items: center;
+    min-height: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  :global(.full-stat-card::before) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 72%;
+    border-radius: $radius-lg 0 0 $radius-lg;
+    background: linear-gradient(90deg, rgba(10, 73, 177, 0.78) 0%, rgba(10, 73, 177, 0.52) 46%, rgba(10, 73, 177, 0.22) 74%, rgba(10, 73, 177, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :global(.full-stat-card::after) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 72%;
+    border-radius: $radius-lg 0 0 $radius-lg;
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 2px, rgba(255, 255, 255, 0) 2px 8px);
+    opacity: 0.28;
+    pointer-events: none;
+    z-index: 0;
   }
 
   :global(.full-stat-card:hover) {
@@ -42,16 +66,22 @@ const {} = Astro.props;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    color: rgba(10, 73, 177, 0.7);
-    grid-column: 1;
-    grid-row: 1 / span 2;
+    width: 44px;
+    height: 44px;
+    color: rgba(255, 255, 255, 0.92);
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-9deg);
+    transform-origin: center;
+    opacity: 0.72;
+    pointer-events: none;
+    z-index: 0;
   }
 
   :global(.full-stat-card__icon svg) {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
   }
 
   :global(.full-stat-card__value) {
@@ -62,15 +92,42 @@ const {} = Astro.props;
     display: block;
     grid-column: 2;
     grid-row: 1;
+    justify-self: end;
+    position: relative;
+    z-index: 1;
+    min-width: 2ch;
+    text-align: right;
   }
 
   :global(.full-stat-card__label) {
     font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: $tracking-wide;
-    color: $tracker-soft-text;
-    grid-column: 2;
-    grid-row: 2;
+    color: rgba(255, 255, 255, 0.96);
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    z-index: 2;
+    justify-self: start;
+    display: inline-block;
+    padding-inline-start: $space-sm;
+    padding-inline-end: $space-xs;
+    text-align: left;
+    background: rgba(8, 46, 115, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: $radius-sm;
+    text-shadow: 0 1px 1px rgba(10, 14, 24, 0.32);
+  }
+
+  :global(.full-stat-card__value),
+  :global(.full-stat-card__label) {
+    align-self: center;
   }
 
   @supports (animation-timeline: view()) {
@@ -112,12 +169,12 @@ const {} = Astro.props;
   @keyframes metric-icon-in {
     from {
       opacity: 0;
-      transform: translateY(4px) scale(0.85);
+      transform: translateY(calc(-50% + 6px)) rotate(-13deg) scale(0.88);
     }
 
     to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
+      opacity: 0.72;
+      transform: translateY(-50%) rotate(-9deg) scale(1);
     }
   }
 
