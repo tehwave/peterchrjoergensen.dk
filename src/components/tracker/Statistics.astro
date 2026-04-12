@@ -2,9 +2,13 @@
 import Achievement from "./Achievement.astro";
 import Metric from "./Metric.astro";
 
-// Stats section shell.
-// UI state and list rendering are orchestrated client-side from `tracker.astro`.
-// This component provides semantic mount points plus hidden card templates.
+/**
+ * Statistics section shell.
+ *
+ * Provides semantic mount points for runtime-rendered metric and achievement cards.
+ * Canonical data prep/render orchestration is handled in `src/pages/tracker.astro`.
+ * This file focuses on structure and styles only.
+ */
 type Props = Record<string, never>;
 
 const {} = Astro.props;

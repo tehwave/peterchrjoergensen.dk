@@ -1,4 +1,16 @@
 ---
+/**
+ * Tracker board shell + controller mount.
+ *
+ * Responsibilities in this component:
+ * - Render three task columns (week / month / quarter)
+ * - Maintain board-local interaction state (drop preview + edge autoscroll)
+ * - Emit semantic intent events for task creation and drop outcomes
+ *
+ * Non-responsibilities:
+ * - Mutating canonical task/game state (owned by `src/pages/tracker.astro`)
+ * - Persistence, XP progression, or history updates
+ */
 import TaskTemplate from "./Task.astro";
 ---
 
@@ -191,11 +203,17 @@ import TaskTemplate from "./Task.astro";
 
     /** Astro's generated scoping attribute (e.g. `data-astro-cid-*`) if present. */
     private astroScopeAttributeName: string | null = null;
+    /** Task id currently being dragged (mirrors task-card drag lifecycle). */
     private draggingTaskId: string | null = null;
+    /** Drop-preview target column while pointer hovers over a grid. */
     private previewTargetType: TaskType | null = null;
+    /** Drop-preview target task id when hovering a concrete card target. */
     private previewDropTaskId: string | null = null;
+    /** Preview placement around target card (`before`/`after`) or list end. */
     private previewDropPosition: "before" | "after" | "end" = "end";
+    /** RAF id for edge auto-scroll loop during drag interactions. */
     private autoScrollFrameId = 0;
+    /** Current vertical auto-scroll velocity in pixels/frame. */
     private autoScrollDeltaY = 0;
     private boundDragStartListener = (event: Event) => {
       const dragEvent = event as CustomEvent<{ id?: string; title?: string }>;
@@ -353,6 +371,7 @@ import TaskTemplate from "./Task.astro";
       this.render();
     }
 
+    /** Cleans global listeners/preview artifacts when element unmounts. */
     disconnectedCallback(): void {
       document.removeEventListener("tracker-task-dragstart", this.boundDragStartListener);
       document.removeEventListener("tracker-task-dragend", this.boundDragEndListener);
@@ -372,6 +391,10 @@ import TaskTemplate from "./Task.astro";
       });
     }
 
+    /**
+     * Calculates intended drop target from pointer position.
+     * Uses a midpoint deadzone to avoid rapid before/after flipping.
+     */
     private getDropPreviewFromEvent(event: DragEvent): { dropTaskId: string | null; dropPosition: "before" | "after" | "end" } {
       const eventTarget = event.target;
       const targetCard = eventTarget instanceof Element ? eventTarget.closest<HTMLElement>(".task-card") : null;
@@ -412,6 +435,7 @@ import TaskTemplate from "./Task.astro";
       };
     }
 
+    /** Draws the insertion line in the current drop container. */
     private applyDropPreviewState(grid: HTMLElement, dropTaskId: string | null, dropPosition: "before" | "after" | "end"): void {
       this.clearDropLine();
 
@@ -447,6 +471,7 @@ import TaskTemplate from "./Task.astro";
       this.renderDropLine(grid, clampedTop);
     }
 
+    /** Mounts a visual insertion line at the given y-offset within a grid. */
     private renderDropLine(grid: HTMLElement, topPx: number): void {
       const line = document.createElement("div");
       line.className = "task-drop-line";
@@ -455,12 +480,14 @@ import TaskTemplate from "./Task.astro";
       grid.appendChild(line);
     }
 
+    /** Removes all insertion line artifacts in this board instance. */
     private clearDropLine(): void {
       this.querySelectorAll<HTMLElement>(".task-drop-line").forEach((line) => {
         line.remove();
       });
     }
 
+    /** Resets drop-preview state and removes preview line UI. */
     private clearDropPreview(): void {
       this.clearDropLine();
       this.previewTargetType = null;
@@ -468,6 +495,7 @@ import TaskTemplate from "./Task.astro";
       this.previewDropPosition = "end";
     }
 
+    /** Updates edge auto-scroll velocity based on pointer y-position. */
     private updateAutoScroll(pointerClientY: number): void {
       const edgeSize = 120;
       const maxSpeed = 18;
@@ -488,6 +516,7 @@ import TaskTemplate from "./Task.astro";
       }
     }
 
+    /** RAF loop that scrolls the viewport while dragging near edges. */
     private runAutoScrollFrame(): void {
       if (this.autoScrollDeltaY === 0 || !this.draggingTaskId) {
         this.autoScrollFrameId = 0;
@@ -500,6 +529,7 @@ import TaskTemplate from "./Task.astro";
       });
     }
 
+    /** Stops edge auto-scroll and clears any pending animation frame. */
     private stopAutoScroll(): void {
       this.autoScrollDeltaY = 0;
       if (!this.autoScrollFrameId) return;

@@ -1,6 +1,10 @@
 ---
-// Metric card template component.
-// Exposes a hidden card template consumed by tracker client-side rendering.
+/**
+ * Metric card template component.
+ *
+ * Exposes a hidden template (`#metric-template`) cloned by tracker runtime
+ * to render statistics cards with Astro-scoped styling preserved.
+ */
 type Props = Record<string, never>;
 
 const {} = Astro.props;

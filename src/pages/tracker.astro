@@ -811,6 +811,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         import { showToast } from "../utils/tracker/toast";
         import { XP_VALUES, type AppState, type GameState, type Task, type TaskType } from "../types/tracker";
 
+        /**
+         * Tracker runtime architecture (client-side only):
+         * - `state` is the single canonical source of truth for tasks + gamification metrics.
+         * - UI subcomponents (`tracker-board`, `tracker-completed-tasks`) are render targets, not state owners.
+         * - Mutations always flow through helpers in this file, then persist via `saveState(...)`.
+         * - Persistence has two channels: localStorage (`tracker_v1`) + URL hash (`#data=`) for share/import.
+         * - Board/completed/task components communicate intent through semantic custom DOM events.
+         */
+
         // ===========================================================
         // Types
         // ===========================================================
@@ -819,7 +828,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Constants
         // ===========================================================
 
+        /** localStorage key for canonical tracker state. */
         const STORAGE_KEY = "tracker_v1";
+        /** Rotating, motivational subtitle copy shown under the page title. */
         const TIPS = [
           "Break big goals into smaller weekly tasks — momentum is everything.",
           "Focus on completing one long-term goal before adding more.",
@@ -833,6 +844,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           "Write tasks as clear actions, not broad areas.",
         ];
 
+        /** Completion toast variants used after XP rewards. */
         const ENCOURAGE_COMPLETE = [
           "Great work. Keep the momentum going.",
           "Task completed. On to the next one.",
@@ -843,8 +855,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           "Strong finish. Your future self will thank you.",
         ];
 
+        /** Human-readable labels for level milestones. */
         const LEVEL_TITLES = ["Rookie", "Apprentice", "Journeyman", "Adept", "Expert", "Master", "Grand Master", "Champion", "Legend", "Mythic"];
 
+        /** Inline SVG map for full-stat metric cards. */
         const METRIC_ICONS: Record<string, string> = {
           "Total Completed": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.5 2.5L16 9.5" /></svg>`,
           "Active Tasks": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r="1" /><circle cx="4" cy="12" r="1" /><circle cx="4" cy="18" r="1" /></svg>`,
@@ -856,6 +870,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           "Current Level": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.7 3 7.9 7 9 4-1.1 7-4.3 7-9V6l-7-3Z" /><path d="M9.5 12.5 11.2 14l3.3-3.5" /></svg>`,
         };
 
+        /** Inline SVG map for achievement cards. */
         const ACHIEVEMENT_ICONS: Record<string, string> = {
           A1: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 17 4-10 3 7 3-7" /><path d="M4 19h16" /></svg>`,
           A2: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="9,7 18,12 9,17" /></svg>`,
@@ -869,7 +884,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           A10: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 6 5-6 13L6 8l6-5Z" /></svg>`,
         };
 
-        // Achievements definition
+        /** Achievement definitions + unlock predicates evaluated against current app state. */
         const ACHIEVEMENTS = [
           { id: "first_task", icon: "A1", name: "First Steps", desc: "Complete your first task", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 1 },
           { id: "five_tasks", icon: "A2", name: "Getting Started", desc: "Complete 5 tasks", check: (s: AppState) => s.tasks.filter((t) => t.completedAt).length >= 5 },
@@ -887,6 +902,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // State management
         // ===========================================================
 
+        /** Creates a brand-new state object for first run or recovery fallback. */
         function defaultState(): AppState {
           const now = new Date();
           return {
@@ -906,14 +922,20 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
+        /** Formats a date as `YYYY-MM` in local time for month rollover checks. */
         function monthKeyFromDate(date: Date): string {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
         }
 
+        /** Formats a date as `YYYY-MM-DD` in local time for streak calculations. */
         function localDateKey(date: Date): string {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         }
 
+        /**
+         * Converts a `YYYY-MM-DD` key to a UTC day ordinal.
+         * Returns `null` when the input format is invalid.
+         */
         function dayOrdinalFromKey(dateKey: string): number | null {
           const parts = dateKey.split("-");
           if (parts.length !== 3) return null;
@@ -923,10 +945,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
         }
 
+        /** Runtime guard for supported task-type literals. */
         function isTaskType(value: unknown): value is TaskType {
           return value === "short" || value === "medium" || value === "long";
         }
 
+        /**
+         * Safely coerces unknown task-like input into a valid `Task`.
+         * Invalid values are rejected as `null`.
+         */
         function normalizeTask(value: unknown, index: number): Task | null {
           if (!value || typeof value !== "object") return null;
           const task = value as Partial<Task>;
@@ -948,6 +975,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
+        /**
+         * Validates and normalizes unknown persisted payloads.
+         * Used for both localStorage and imported share payloads.
+         */
         function normalizeStatePayload(payload: unknown): AppState | null {
           if (!payload || typeof payload !== "object") return null;
           const app = payload as Partial<AppState>;
@@ -976,6 +1007,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
+        /**
+         * Bootstraps state using URL hash import when present, otherwise localStorage.
+         * URL payloads are merged into local data and saved back immediately.
+         */
         async function loadState(): Promise<AppState> {
           // Check URL hash first (for cross-device sync via URL)
           if (window.location.hash.startsWith("#data=")) {
@@ -995,6 +1030,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return loadFromStorage();
         }
 
+        /** Loads canonical state from localStorage with safe fallback to defaults. */
         function loadFromStorage(): AppState {
           try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -1006,6 +1042,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
+        /**
+         * Persists canonical state to localStorage and keeps URL hash in sync.
+         * Toast warnings are shown for storage or hash-sync failures.
+         */
         async function saveState(state: AppState, pushHistory = true): Promise<void> {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1031,6 +1071,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
+        /**
+         * Compact payload schema used for URL export/import.
+         * Uses tuple positions + numeric task type IDs to minimize token length.
+         */
         type CompactTaskType = 0 | 1 | 2;
         type CompactTask = [id: string, title: string, type: CompactTaskType, createdAt: number, order: number, description?: string, dueDate?: string, completedAt?: number, archivedAt?: number];
         type CompactGame = [
@@ -1046,6 +1090,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         ];
         type CompactStatePayload = [tasks: CompactTask[], game: CompactGame];
 
+        /** Efficiently merges streamed byte chunks into a single contiguous `Uint8Array`. */
         function concatChunks(chunks: Uint8Array[], totalLength: number): Uint8Array {
           const merged = new Uint8Array(totalLength);
           let offset = 0;
@@ -1056,6 +1101,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return merged;
         }
 
+        /** Reads a full `ReadableStream<Uint8Array>` into memory. */
         async function readStreamBytes(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
           const reader = stream.getReader();
           const chunks: Uint8Array[] = [];
@@ -1073,24 +1119,28 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return concatChunks(chunks, totalLength);
         }
 
+        /** Compresses raw bytes with native `CompressionStream("gzip")`. */
         async function compressGzip(bytes: Uint8Array): Promise<Uint8Array> {
           const sourceStream = new Blob([new Uint8Array(bytes).buffer]).stream();
           const compressedStream = sourceStream.pipeThrough(new CompressionStream("gzip"));
           return readStreamBytes(compressedStream);
         }
 
+        /** Decompresses gzip bytes using native `DecompressionStream("gzip")`. */
         async function decompressGzip(bytes: Uint8Array): Promise<Uint8Array> {
           const sourceStream = new Blob([new Uint8Array(bytes).buffer]).stream();
           const decompressedStream = sourceStream.pipeThrough(new DecompressionStream("gzip"));
           return readStreamBytes(decompressedStream);
         }
 
+        /** Converts verbose task type literals to compact numeric IDs. */
         function toCompactTaskType(type: TaskType): CompactTaskType {
           if (type === "short") return 0;
           if (type === "medium") return 1;
           return 2;
         }
 
+        /** Converts compact numeric IDs back to task type literals. */
         function fromCompactTaskType(type: unknown): TaskType | null {
           if (type === 0) return "short";
           if (type === 1) return "medium";
@@ -1098,6 +1148,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return null;
         }
 
+        /** Serializes a full `Task` into compact tuple form for URL-safe payloads. */
         function taskToCompact(task: Task): CompactTask {
           const compact: CompactTask = [task.id, task.title, toCompactTaskType(task.type), task.createdAt, task.order];
 
@@ -1120,6 +1171,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return compact;
         }
 
+        /** Deserializes and validates a compact task tuple. */
         function taskFromCompact(value: unknown, index: number): Task | null {
           if (!Array.isArray(value) || value.length < 5) return null;
 
@@ -1147,10 +1199,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
+        /** Serializes `GameState` into compact tuple form. */
         function gameToCompact(game: GameState): CompactGame {
           return [game.level, game.xp, game.totalXP, game.completedThisMonth, game.completedThisYear, game.streak, game.lastActivityDate, game.monthKey, game.yearKey];
         }
 
+        /** Deserializes and validates compact `GameState` tuple data. */
         function gameFromCompact(value: unknown): GameState | null {
           if (!Array.isArray(value) || value.length !== 9) return null;
 
@@ -1182,6 +1236,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
+        /** Encodes bytes as URL-safe base64 (`+`→`-`, `/`→`_`, trim padding). */
         function encodeBase64Url(bytes: Uint8Array): string {
           let binary = "";
           bytes.forEach((byte) => {
@@ -1191,6 +1246,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
         }
 
+        /** Decodes URL-safe base64 back to raw bytes. */
         function decodeBase64Url(input: string): Uint8Array {
           const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
           const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
@@ -1198,6 +1254,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return Uint8Array.from(binary, (char) => char.charCodeAt(0));
         }
 
+        /** Encodes app state into compact JSON → gzip → base64url token for sharing. */
         async function encodeState(state: AppState): Promise<string> {
           const payload: CompactStatePayload = [state.tasks.map(taskToCompact), gameToCompact(state.game)];
           const json = JSON.stringify(payload);
@@ -1206,6 +1263,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return encodeBase64Url(compressed);
         }
 
+        /** Decodes imported token back into validated app state. */
         async function decodeState(encoded: string): Promise<AppState | null> {
           try {
             const bytes = decodeBase64Url(encoded);
@@ -1235,8 +1293,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
+        /**
+         * Monotonic write guard that prevents stale async URL writes
+         * from racing newer state updates.
+         */
         let shareUrlWriteVersion = 0;
 
+        /**
+         * Synchronizes URL hash (`#data=`) with current state.
+         * Uses `pushState` by default so state transitions remain navigable.
+         */
         async function syncShareUrl(nextState: AppState, pushHistory = true): Promise<void> {
           const writeVersion = ++shareUrlWriteVersion;
           const hash = `#data=${await encodeState(nextState)}`;
@@ -1251,6 +1317,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
+        /**
+         * Merges local and imported state snapshots.
+         * - Tasks: keeps freshest version per task id.
+         * - Game metrics: keeps highest numeric progress and latest activity date.
+         */
         function mergeStates(local: AppState, imported: AppState): AppState {
           // Merge tasks: prefer the most recently completed/updated version
           const taskMap = new Map<string, Task>();
@@ -1283,11 +1354,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // App state
         // ===========================================================
 
+        /** Deferred warning shown after bootstrap when hash import falls back. */
         let pendingImportError = "";
+        /** Canonical runtime state for the entire tracker app. */
         let state = defaultState();
+        /** Active dragged task id while board drag interactions are in progress. */
         let draggedTaskId: string | null = null;
+        /** Intersection observer for count-up animation lifecycle. */
         let metricCountObserver: IntersectionObserver | null = null;
+        /** Persisted achievement IDs (stored separately from core tracker payload). */
         let unlockedAchievements = new Set<string>(JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]"));
+        /** Astro scoped-style attribute copied onto template-cloned DOM nodes. */
         const astroScopeAttributeName =
           document
             .querySelector(".tracker")
@@ -1298,10 +1375,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Gamification helpers
         // ===========================================================
 
+        /** XP requirement for current level; linear progression at `level * 100`. */
         function xpForNextLevel(level: number): number {
           return level * 100;
         }
 
+        /** Applies XP gain, processes possible multi-level-ups, and shows feedback toast. */
         function gainXP(amount: number): void {
           const oldLevel = state.game.level;
           state.game.xp += amount;
@@ -1326,6 +1405,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         }
 
+        /** Recomputes level and in-level XP from total XP after rollbacks. */
         function syncLevelFromTotalXP(): void {
           let level = 1;
           let remainingXP = Math.max(0, Math.floor(state.game.totalXP));
@@ -1341,11 +1421,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           state.game.xp = remainingXP;
         }
 
+        /** Applies XP rollback and recomputes derived level state. */
         function loseXP(amount: number): void {
           state.game.totalXP = Math.max(0, state.game.totalXP - amount);
           syncLevelFromTotalXP();
         }
 
+        /** Triggers celebratory level-up UI and toast messaging. */
         function onLevelUp(newLevel: number): void {
           const title = LEVEL_TITLES[Math.min(newLevel - 1, LEVEL_TITLES.length - 1)];
           showToast({
@@ -1358,6 +1440,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           setTimeout(() => document.getElementById("level-card")?.classList.remove("level-up-flash"), 3000);
         }
 
+        /**
+         * Updates streak and period counters with local-date semantics.
+         * Handles month/year rollover resets.
+         */
         function recordActivity(): void {
           const now = new Date();
           const today = localDateKey(now);
@@ -1396,11 +1482,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Toast system
         // ===========================================================
 
+        /** Render model for full-stat metric cards. */
         interface MetricData {
           value: number;
           label: string;
         }
 
+        /** Render model for achievement cards. */
         interface AchievementRenderData {
           icon: string;
           name: string;
@@ -1408,6 +1496,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           unlocked: boolean;
         }
 
+        /** Applies Astro's scoped-style attribute to runtime-generated DOM. */
         function applyAstroScope(root: Element): void {
           if (!astroScopeAttributeName) return;
           root.setAttribute(astroScopeAttributeName, "");
@@ -1420,6 +1509,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Render helpers
         // ===========================================================
 
+        /** Public snapshot contract consumed by `tracker-completed-tasks`. */
         interface CompletedTaskSnapshot {
           id: string;
           title: string;
@@ -1428,10 +1518,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           archivedAt: number | null;
         }
 
+        /** Minimal imperative API exposed by `<CompletedTasks />`. */
         interface CompletedTasksElement extends HTMLElement {
           setCompletedTasks: (tasks: CompletedTaskSnapshot[]) => void;
         }
 
+        /** Public snapshot contract consumed by `tracker-board`. */
         interface BoardTaskSnapshot {
           id: string;
           title: string;
@@ -1441,10 +1533,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           order: number;
         }
 
+        /** Minimal imperative API exposed by `<Board />`. */
         interface BoardElement extends HTMLElement {
           setTasks: (tasks: BoardTaskSnapshot[]) => void;
         }
 
+        /** Pushes active task snapshots (including decay metadata) into board component. */
         function renderBoard(): void {
           const board = document.querySelector<BoardElement>("tracker-board");
           if (!board) return;
@@ -1467,6 +1561,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         }
 
+        /** Updates top-of-page compact stats bar (level, XP, month/year/streak). */
         function renderStats(): void {
           const g = state.game;
           document.getElementById("level-number")!.textContent = String(g.level);
@@ -1486,6 +1581,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           document.getElementById("level-badge")!.setAttribute("title", title);
         }
 
+        /** Pushes completed-task snapshots into completed section controller component. */
         function renderCompletedSection(): void {
           const completedTasks: CompletedTaskSnapshot[] = state.tasks
             .filter((task): task is Task & { completedAt: number } => task.completedAt !== null)
@@ -1501,6 +1597,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           completedRoot?.setCompletedTasks(completedTasks);
         }
 
+        /** Rebuilds full statistics and achievements sections in below-fold area. */
         function renderFullStats(): void {
           const allCompleted = state.tasks.filter((t) => t.completedAt !== null);
           const activeCount = state.tasks.filter((t) => !t.completedAt).length;
@@ -1532,6 +1629,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAchievements();
         }
 
+        /** Animates a metric value from 0 → target with cubic easing. */
         function animateMetricCount(valueEl: HTMLElement, targetValue: number): void {
           if (targetValue <= 0) {
             valueEl.textContent = "0";
@@ -1557,6 +1655,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           requestAnimationFrame(step);
         }
 
+        /** Sets up visibility-triggered count-up animations for metric cards. */
         function setupMetricCountUp(grid: HTMLElement): void {
           metricCountObserver?.disconnect();
           metricCountObserver = null;
@@ -1607,6 +1706,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         }
 
+        /** Renders achievement cards and handles first-time unlock persistence/feedback. */
         function renderAchievements(): void {
           const grid = document.getElementById("achievement-grid")!;
           grid.innerHTML = "";
@@ -1635,6 +1735,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         }
 
+        /** Clones a metric card template and injects icon/label/value metadata. */
         function createMetricCard(data: MetricData): HTMLElement | null {
           const template = document.getElementById("metric-template");
           if (!(template instanceof HTMLTemplateElement)) return null;
@@ -1659,6 +1760,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return metricCard;
         }
 
+        /** Clones and configures an achievement card template with accessibility labels. */
         function createAchievementCard(data: AchievementRenderData): HTMLElement | null {
           const template = document.getElementById("achievement-template");
           if (!(template instanceof HTMLTemplateElement)) return null;
@@ -1692,6 +1794,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return card;
         }
 
+        /** Full UI refresh across board, compact stats, completed list, and full stats. */
         function renderAll(): void {
           renderBoard();
           renderStats();
@@ -1703,6 +1806,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Task CRUD
         // ===========================================================
 
+        /** Adds a new active task at the end of its column order. */
         function addTask(title: string, type: TaskType): Task {
           const maxOrder = state.tasks.filter((t) => t.type === type && !t.completedAt).reduce((m, t) => Math.max(m, t.order), -1);
 
@@ -1722,6 +1826,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return task;
         }
 
+        /** Seeds deterministic demo state for local testing and interaction walkthroughs. */
         function loadDemoTasks(): void {
           if (state.tasks.length > 0) {
             const shouldReplace = confirm("Replace your current tasks with demo data?");
@@ -2109,6 +2214,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           showToast({ type: "success", icon: "✓", title: "Demo data loaded", text: "Sample tasks added for testing." });
         }
 
+        /** Completes a task, updates game progress, grants XP, and re-renders. */
         function completeTask(id: string): void {
           const task = state.tasks.find((t) => t.id === id);
           if (!task || task.completedAt) return;
@@ -2124,6 +2230,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAll();
         }
 
+        /** Reopens a completed task and rolls back linked progression rewards. */
         function uncompleteTask(id: string): boolean {
           const task = state.tasks.find((t) => t.id === id);
           if (!task || task.completedAt === null) return false;
@@ -2141,12 +2248,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return true;
         }
 
+        /** Permanently deletes a task regardless of completion state. */
         function deleteTask(id: string): void {
           state.tasks = state.tasks.filter((t) => t.id !== id);
           void saveState(state);
           renderAll();
         }
 
+        /** Marks a completed task as archived (hidden from default completed view). */
         function archiveCompletedTask(id: string): void {
           const task = state.tasks.find((t) => t.id === id);
           if (!task || task.completedAt === null || task.archivedAt !== null) return;
@@ -2155,6 +2264,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAll();
         }
 
+        /** Archives all visible completed tasks and returns affected count. */
         function archiveAllCompleted(): number {
           let archivedCount = 0;
           const archivedAt = Date.now();
@@ -2173,6 +2283,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return archivedCount;
         }
 
+        /** Restores all archived completed tasks and returns affected count. */
         function restoreAllArchived(): number {
           let restoredCount = 0;
           state.tasks.forEach((task) => {
@@ -2190,6 +2301,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return restoredCount;
         }
 
+        /** Permanently removes archived-completed tasks from history and returns count. */
         function clearArchivedHistory(): number {
           const previousCount = state.tasks.length;
           state.tasks = state.tasks.filter((task) => !(task.completedAt !== null && task.archivedAt !== null));
@@ -2203,6 +2315,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return clearedCount;
         }
 
+        /** Updates task title inline and persists immediately. */
         function editTask(id: string, title: string): void {
           const task = state.tasks.find((t) => t.id === id);
           if (!task) return;
@@ -2215,6 +2328,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Drag & Drop
         // ===========================================================
 
+        /** Re-normalizes active task order indices within a single board column. */
         function normalizeOrders(type: TaskType): void {
           state.tasks
             .filter((t) => t.type === type && !t.completedAt)
@@ -2224,6 +2338,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             });
         }
 
+        /**
+         * Canonical drop handler for pointer and keyboard move intents.
+         * Supports insert-before/after specific cards or append-to-end placement.
+         */
         function handleDrop(targetType: TaskType, dropTaskId: string | null, dropPosition: "before" | "after" | "end" = "end", draggedIdOverride: string | null = null): void {
           const activeDraggedTaskId = draggedIdOverride ?? draggedTaskId;
           if (!activeDraggedTaskId) return;
@@ -2263,6 +2381,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           showToast({ type: "info", icon: "i", title: "Task moved", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
         }
 
+        /** Keyboard-first move helper; translates directional intent into `handleDrop(...)`. */
         function moveTaskByDirection(id: string, direction: "left" | "right" | "up" | "down"): void {
           const task = state.tasks.find((t) => t.id === id && t.completedAt === null);
           if (!task) return;
@@ -2300,6 +2419,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Modal helpers
         // ===========================================================
 
+        /** Opens a modal overlay and focuses first interactive control. */
         function openModal(id: string): void {
           const modal = document.getElementById(id)!;
           modal.removeAttribute("hidden");
@@ -2310,6 +2430,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }, 50);
         }
 
+        /** Closes a modal overlay by restoring the `hidden` attribute. */
         function closeModal(id: string): void {
           document.getElementById(id)!.setAttribute("hidden", "");
         }
@@ -2317,6 +2438,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ===========================================================
         // Event wiring
         // ===========================================================
+        // Notes:
+        // - Board/task/completed components emit semantic intent events.
+        // - This file remains the canonical mutation + persistence owner.
+        // - Event handlers are intentionally explicit to keep contracts discoverable.
 
         document.addEventListener("tracker-task-dragstart", (event) => {
           const dragEvent = event as CustomEvent<{ id: string }>;
@@ -2419,7 +2544,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           showToast({ type: "info", icon: "i", title: "History cleared", text: `${clearedCount} archived ${clearedCount === 1 ? "task" : "tasks"} removed permanently.` });
         });
 
-        // Add task button
+        // Header toolbar actions
         document.getElementById("add-task-btn")!.addEventListener("click", () => {
           (document.getElementById("task-title-input") as HTMLInputElement).value = "";
           (document.getElementById("task-type-input") as HTMLSelectElement).value = "short";
@@ -2444,7 +2569,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           openModal("task-modal");
         });
 
-        // Modal close buttons
+        // Modal close controls
         ["task-modal-close", "task-modal-cancel"].forEach((id) => {
           document.getElementById(id)!.addEventListener("click", () => closeModal("task-modal"));
         });
@@ -2455,7 +2580,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           document.getElementById(id)!.addEventListener("click", () => closeModal("import-modal"));
         });
 
-        // Close on overlay click
+        // Overlay interaction: close when clicking backdrop (not modal content)
         document.querySelectorAll(".modal-overlay").forEach((overlay) => {
           overlay.addEventListener("click", (e) => {
             if (e.target === overlay) {
@@ -2464,14 +2589,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         });
 
-        // Close on Escape
+        // Escape closes all currently open modal overlays
         document.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             document.querySelectorAll(".modal-overlay:not([hidden])").forEach((m) => m.setAttribute("hidden", ""));
           }
         });
 
-        // Task form submit
+        // Add-task form submission
         document.getElementById("task-form")!.addEventListener("submit", (e) => {
           e.preventDefault();
           const title = (document.getElementById("task-title-input") as HTMLInputElement).value;
@@ -2485,7 +2610,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAll();
         });
 
-        // Export
+        // Export flows (raw token + full URL)
         document.getElementById("export-btn")!.addEventListener("click", async () => {
           const code = await encodeState(state);
           (document.getElementById("export-code") as HTMLTextAreaElement).value = code;
@@ -2507,7 +2632,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         });
 
-        // Import
+        // Import flow (merge imported payload into local state)
         document.getElementById("import-btn")!.addEventListener("click", () => {
           (document.getElementById("import-code") as HTMLTextAreaElement).value = "";
           openModal("import-modal");
@@ -2532,6 +2657,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Tip rotation
         // ===========================================================
 
+        /** Chooses a random motivational tip for the subtitle row. */
         function showRandomTip(): void {
           const tip = TIPS[Math.floor(Math.random() * TIPS.length)];
           document.getElementById("tip-text")!.textContent = tip;
@@ -2550,6 +2676,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Init
         // ===========================================================
 
+        /** App bootstrap: load state, sync hash, render UI, and surface import warnings. */
         async function bootstrap(): Promise<void> {
           state = await loadState();
           showRandomTip();

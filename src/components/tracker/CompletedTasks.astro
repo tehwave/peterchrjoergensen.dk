@@ -1,4 +1,14 @@
 ---
+/**
+ * Completed tasks section (UI-state controller + list rendering).
+ *
+ * Responsibilities:
+ * - Own completed-list presentation state (type filter, pagination, swap transitions)
+ * - Render completed snapshots pushed from tracker page via `setCompletedTasks(...)`
+ * - Emit history intent events (archive/restore/clear) for page-level mutation logic
+ *
+ * Canonical data mutation remains in `src/pages/tracker.astro`.
+ */
 import CompletedTaskTemplate from "./CompletedTask.astro";
 import { XP_VALUES } from "../../types/tracker";
 ---
@@ -70,11 +80,17 @@ import { XP_VALUES } from "../../types/tracker";
    * `setCompletedTasks(...)` as the bridge from page-level canonical state.
    */
   class TrackerCompletedTasks extends HTMLElement {
+    /** Current visible page in completed-task pagination. */
     private currentPage = 1;
+    /** Active completed-task type filter. */
     private completedFilterType: TaskType | "all" = "all";
+    /** Last validated completed snapshot payload from parent orchestrator. */
     private completedTasks: CompletedTaskData[] = [];
+    /** Astro scoped-style attribute copied to runtime-created DOM nodes. */
     private astroScopeAttributeName: string | null = null;
+    /** Prevents overlapping list swap transitions. */
     private transitionInProgress = false;
+    /** Coalesces render requests that occur mid-transition. */
     private queuedRender = false;
 
     /** Initializes event listeners and first paint once per element. */

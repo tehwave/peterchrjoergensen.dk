@@ -1,4 +1,14 @@
 ---
+/**
+ * Task card component (markup + card-local interaction controller).
+ *
+ * Responsibilities:
+ * - Local interactions: drag visuals, inline title editing, keyboard move intents
+ * - Visual decay affordances: decay progress bar + fire/stink particle rendering
+ * - Emitting semantic events (`tracker-task-*`) for page-level orchestration
+ *
+ * Canonical state mutation remains in `src/pages/tracker.astro`.
+ */
 import type { DecayLevel, TaskType } from "../../types/tracker";
 
 interface Props {
@@ -70,6 +80,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
 
 <script is:inline>
   const TITLE_MIN_LENGTH = 1;
+    /** Particle behavior presets by decay severity. */
   const PARTICLE_VARIANTS = {
     stale: {
       count: 10,
@@ -96,12 +107,18 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       alpha: 1,
     },
   };
+  /** Particle renderer cadence cap for a stable CPU budget. */
   const PARTICLE_FRAME_INTERVAL_MS = 1000 / 24;
 
+  /** Returns a random number in `[min, max]`. */
   function pick(min, max) {
     return min + Math.random() * (max - min);
   }
 
+  /**
+   * Custom element powering task-card local UX.
+   * Emits intents only; state writes happen upstream.
+   */
   class TrackerTaskCardV2 extends HTMLElement {
     constructor() {
       super();
@@ -135,6 +152,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       };
     }
 
+    /** Initializes card-local listeners and visual subsystems once. */
     connectedCallback() {
       if (this.dataset.taskCardInitialized === "true") return;
       this.dataset.taskCardInitialized = "true";
@@ -229,6 +247,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       });
     }
 
+    /** Cleans listeners, observers, and animation loops on detach. */
     disconnectedCallback() {
       this.stopParticles();
       document.removeEventListener("tracker-task-dragstart", this.boundDocumentDragStart);
@@ -239,6 +258,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       }
     }
 
+    /** Bootstraps particle canvas, media query hooks, and initial sync. */
     setupParticles() {
       this.particleCanvasEl = this.querySelector("[data-task-particles-canvas]");
       if (!(this.particleCanvasEl instanceof HTMLCanvasElement)) return;
@@ -252,6 +272,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.syncParticles();
     }
 
+    /** Syncs decay modifier class on the particle container wrapper. */
     syncParticlesContainerClass() {
       const particlesContainer = this.particlesContainerEl;
       if (!(particlesContainer instanceof HTMLElement)) return;
@@ -262,6 +283,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       particlesContainer.hidden = false;
     }
 
+    /** Starts/stops particles based on decay state, motion prefs, and drag state. */
     syncParticles() {
       this.syncParticlesContainerClass();
 
@@ -278,6 +300,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.startParticles(variant);
     }
 
+    /** Starts particle simulation/rendering for the given variant profile. */
     startParticles(variant) {
       if (!this.particleCanvasEl || !this.particleCtx) return;
 
@@ -319,6 +342,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.particleFrameId = requestAnimationFrame(frame);
     }
 
+    /** Stops particle rendering and tears down related observers/resources. */
     stopParticles() {
       if (this.particleFrameId) {
         cancelAnimationFrame(this.particleFrameId);
@@ -338,6 +362,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       }
     }
 
+    /** Resizes high-DPI canvas to match card bounds and device pixel ratio. */
     syncParticleCanvasSize() {
       if (!this.particleCanvasEl || !this.particleCtx) return;
 
@@ -351,6 +376,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.particleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
+    /** Re-seeds particle pool for current variant and card dimensions. */
     rebuildParticles() {
       const config = this.activeParticleVariant ? PARTICLE_VARIANTS[this.activeParticleVariant] : null;
       if (!config || !this.cardWidth || !this.cardHeight) {
@@ -361,6 +387,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.particles = Array.from({ length: config.count }, () => this.createParticle(config, true));
     }
 
+    /** Creates one particle with randomized motion/lifetime properties. */
     createParticle(config, randomizeAge = false) {
       const ttl = pick(config.ttlMin, config.ttlMax);
       const life = randomizeAge ? pick(0, ttl) : 0;
@@ -386,6 +413,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       };
     }
 
+    /** Advances particle simulation and paints the frame to canvas. */
     renderParticles(deltaSeconds) {
       if (!this.particleCtx || !this.activeParticleVariant) return;
 
@@ -438,6 +466,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       }
     }
 
+    /** Synchronizes title text/input from card dataset attributes. */
     syncTitleFromDataset() {
       if (!this.titleEl || !this.titleInputEl) return;
       const title = (this.dataset.title ?? "").trim();
@@ -446,6 +475,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.titleInputEl.value = title;
     }
 
+    /** Delegates action-button clicks and emits semantic task intents. */
     setupActionButtons() {
       this.addEventListener("click", (event) => {
         const target = event.target;
@@ -492,6 +522,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       });
     }
 
+    /** Emits directional move intent for keyboard and button navigation paths. */
     emitMoveIntent(direction) {
       const id = this.dataset.id ?? "";
       if (!id) return;
@@ -504,6 +535,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       );
     }
 
+    /** Builds a temporary drag ghost used as custom drag image. */
     configureDragImage(dataTransfer) {
       this.cleanupDragGhost();
 
@@ -531,12 +563,14 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       });
     }
 
+    /** Removes temporary drag ghost from the DOM if present. */
     cleanupDragGhost() {
       if (!(this.dragGhostEl instanceof HTMLElement)) return;
       this.dragGhostEl.remove();
       this.dragGhostEl = null;
     }
 
+    /** Wires inline title editing interactions (dblclick, enter/escape, blur). */
     setupInlineEditing() {
       if (!this.titleEl || !this.titleInputEl) return;
 
@@ -563,6 +597,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       });
     }
 
+    /** Enters inline-edit mode and moves focus into the title input. */
     startInlineEdit() {
       if (!this.titleEl || !this.titleInputEl || this.isEditing) return;
 
@@ -575,6 +610,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.titleInputEl.select();
     }
 
+    /** Commits inline title edit and emits rename event when value changed. */
     commitInlineEdit() {
       if (!this.titleEl || !this.titleInputEl || !this.isEditing) return;
 
@@ -597,12 +633,14 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       }
     }
 
+    /** Cancels inline edit and restores previous title value. */
     cancelInlineEdit() {
       if (!this.titleEl || !this.titleInputEl) return;
       const fallback = this.dataset.title ?? this.titleEl.textContent ?? "";
       this.finishInlineEdit(fallback);
     }
 
+    /** Finalizes inline edit UI state and writes the final title to dataset/DOM. */
     finishInlineEdit(finalTitle) {
       if (!this.titleEl || !this.titleInputEl) return;
 
