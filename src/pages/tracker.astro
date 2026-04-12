@@ -1757,6 +1757,39 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               },
               {
                 id: crypto.randomUUID(),
+                title: "Draft release notes",
+                description: "",
+                type: "short",
+                createdAt: now - 2 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 2,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Ship tracker UX polish",
+                description: "",
+                type: "short",
+                createdAt: now - 3 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 3,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Review pull requests",
+                description: "",
+                type: "short",
+                createdAt: now - 5 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 4,
+              },
+              {
+                id: crypto.randomUUID(),
                 title: "Write architecture note",
                 description: "",
                 type: "medium",
@@ -1779,6 +1812,39 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               },
               {
                 id: crypto.randomUUID(),
+                title: "Consolidate tracker events",
+                description: "",
+                type: "medium",
+                createdAt: now - 11 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 2,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Write quarterly planning brief",
+                description: "",
+                type: "medium",
+                createdAt: now - 8 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 3,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Document board keyboard controls",
+                description: "",
+                type: "medium",
+                createdAt: now - 6 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 4,
+              },
+              {
+                id: crypto.randomUUID(),
                 title: "Ship Q2 portfolio update",
                 description: "",
                 type: "long",
@@ -1798,6 +1864,39 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 completedAt: null,
                 archivedAt: null,
                 order: 1,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Migrate analytics dashboards",
+                description: "",
+                type: "long",
+                createdAt: now - 42 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 2,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Upgrade design system tokens",
+                description: "",
+                type: "long",
+                createdAt: now - 51 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 3,
+              },
+              {
+                id: crypto.randomUUID(),
+                title: "Plan next quarter roadmap",
+                description: "",
+                type: "long",
+                createdAt: now - 34 * day,
+                dueDate: null,
+                completedAt: null,
+                archivedAt: null,
+                order: 4,
               },
               {
                 id: crypto.randomUUID(),
@@ -2121,18 +2220,19 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             });
         }
 
-        function handleDrop(targetType: TaskType, dropTaskId: string | null): void {
+        function handleDrop(targetType: TaskType, dropTaskId: string | null, dropPosition: "before" | "after" | "end" = "end"): void {
           if (!draggedTaskId) return;
           const task = state.tasks.find((t) => t.id === draggedTaskId);
           if (!task) return;
           const sourceType = task.type;
+          const movedTaskId = task.id;
 
           if (dropTaskId && dropTaskId !== draggedTaskId) {
             const targetTask = state.tasks.find((t) => t.id === dropTaskId);
             if (targetTask) {
               task.type = targetType;
-              // Insert between items using a fractional order, then normalize immediately below.
-              task.order = targetTask.order - 0.5;
+              // Insert around target task using fractional order, then normalize immediately below.
+              task.order = dropPosition === "after" ? targetTask.order + 0.5 : targetTask.order - 0.5;
             }
           } else {
             // Drop at end of section
@@ -2145,7 +2245,48 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           normalizeOrders(targetType);
           void saveState(state);
           renderAll();
+          requestAnimationFrame(() => {
+            const movedCard = document.querySelector<HTMLElement>(`.task-card[data-id="${CSS.escape(movedTaskId)}"]`);
+            if (!movedCard) return;
+            movedCard.classList.remove("task-card--landed");
+            void movedCard.offsetWidth;
+            movedCard.classList.add("task-card--landed");
+            setTimeout(() => movedCard.classList.remove("task-card--landed"), 500);
+          });
           showToast({ type: "info", icon: "i", title: "Task moved", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
+        }
+
+        function moveTaskByDirection(id: string, direction: "left" | "right" | "up" | "down"): void {
+          const task = state.tasks.find((t) => t.id === id && t.completedAt === null);
+          if (!task) return;
+
+          const columnOrder: TaskType[] = ["short", "medium", "long"];
+          const currentColumnIndex = columnOrder.indexOf(task.type);
+          if (currentColumnIndex < 0) return;
+
+          if (direction === "left" || direction === "right") {
+            const nextColumnIndex = direction === "left" ? currentColumnIndex - 1 : currentColumnIndex + 1;
+            if (nextColumnIndex < 0 || nextColumnIndex >= columnOrder.length) return;
+
+            draggedTaskId = id;
+            handleDrop(columnOrder[nextColumnIndex], null, "end");
+            draggedTaskId = null;
+            return;
+          }
+
+          const sameColumn = state.tasks.filter((t) => t.type === task.type && t.completedAt === null).sort((a, b) => a.order - b.order);
+
+          const index = sameColumn.findIndex((t) => t.id === id);
+          if (index < 0) return;
+
+          const delta = direction === "up" ? -1 : 1;
+          const targetIndex = index + delta;
+          if (targetIndex < 0 || targetIndex >= sameColumn.length) return;
+
+          const targetTask = sameColumn[targetIndex];
+          draggedTaskId = id;
+          handleDrop(task.type, targetTask.id, direction === "up" ? "before" : "after");
+          draggedTaskId = null;
         }
 
         // ===========================================================
@@ -2180,11 +2321,19 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         });
 
         document.addEventListener("tracker-board-drop", (event) => {
-          const dropEvent = event as CustomEvent<{ targetType: TaskType; dropTaskId: string | null }>;
+          const dropEvent = event as CustomEvent<{ targetType: TaskType; dropTaskId: string | null; dropPosition?: "before" | "after" | "end" }>;
           const targetType = dropEvent.detail?.targetType;
 
           if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
-          handleDrop(targetType, dropEvent.detail?.dropTaskId ?? null);
+          handleDrop(targetType, dropEvent.detail?.dropTaskId ?? null, dropEvent.detail?.dropPosition ?? "end");
+        });
+
+        document.addEventListener("tracker-task-move", (event) => {
+          const moveEvent = event as CustomEvent<{ id: string; direction: "left" | "right" | "up" | "down" }>;
+          const id = moveEvent.detail?.id;
+          const direction = moveEvent.detail?.direction;
+          if (!id || !direction) return;
+          moveTaskByDirection(id, direction);
         });
 
         document.addEventListener("tracker-task-complete", (event) => {

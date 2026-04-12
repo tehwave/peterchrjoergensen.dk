@@ -49,10 +49,6 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     <div class="task-card__items" role="group" aria-label="Task status and actions">
       <span class="task-card__decay-label task-card__decay-label--stale" data-task-decay-label="stale">Stale</span>
       <span class="task-card__decay-label task-card__decay-label--rotten" data-task-decay-label="rotten">Old</span>
-      <button class="task-card__move-btn" data-action="move-left" type="button" aria-label="Move task to previous column" title="Move to previous column">←</button>
-      <button class="task-card__move-btn" data-action="move-up" type="button" aria-label="Move task up" title="Move up">↑</button>
-      <button class="task-card__move-btn" data-action="move-down" type="button" aria-label="Move task down" title="Move down">↓</button>
-      <button class="task-card__move-btn" data-action="move-right" type="button" aria-label="Move task to next column" title="Move to next column">→</button>
       <button class="task-card__action-btn task-card__action-btn--delete" data-action="delete" type="button" aria-label="Delete task">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 6h18"></path>
@@ -627,11 +623,6 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       .task-card__drag-handle {
         opacity: 0.9;
       }
-
-      .task-card__move-btn {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     &:active {
@@ -644,16 +635,16 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       box-shadow: 0 14px 28px rgba(17, 24, 39, 0.22);
     }
 
-    &--landed {
-      animation: card-land-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
     &--drop-target {
       box-shadow: 0 0 0 3px rgba(41, 136, 250, 0.28);
     }
 
     &--editing {
       cursor: text;
+    }
+
+    &--landed {
+      animation: card-land-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     &--stale {
@@ -746,33 +737,6 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       z-index: 1;
     }
 
-    &__move-btn {
-      width: 1.55rem;
-      height: 1.55rem;
-      border-radius: 999px;
-      border: 1px solid $tracker-card-stroke;
-      background: rgba(255, 255, 255, 0.95);
-      color: $tracker-muted-text;
-      font-size: 0.72rem;
-      font-weight: $font-weight-bold;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(2px);
-      @include tracker-transition(all);
-      @include focus-ring;
-
-      &:hover {
-        color: $color-blue;
-        border-color: $tracker-card-stroke;
-        background: $color-neutral-100;
-      }
-    }
-
     &__decay-label {
       align-items: center;
       background: rgba(17, 24, 39, 0.08);
@@ -857,11 +821,6 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     @include focus-ring($tracker-focus-ring-accent);
   }
 
-  .task-card__move-btn:focus-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
   .task-card--ghost {
     transform: rotate(1.3deg) scale(0.96);
     opacity: 0.88;
@@ -918,10 +877,6 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         animation: none;
         transform: none;
       }
-    }
-
-    .task-card__move-btn {
-      transform: none;
     }
 
     .task-card--ghost {

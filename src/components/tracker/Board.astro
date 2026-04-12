@@ -92,6 +92,7 @@ import TaskTemplate from "./Task.astro";
   interface BoardDropDetail {
     targetType: TaskType;
     dropTaskId: string | null;
+    dropPosition: "before" | "after" | "end";
   }
 
   /** Inclusive date range used for period metadata labels. */
@@ -189,6 +190,27 @@ import TaskTemplate from "./Task.astro";
 
     /** Astro's generated scoping attribute (e.g. `data-astro-cid-*`) if present. */
     private astroScopeAttributeName: string | null = null;
+    private draggingTaskId: string | null = null;
+    private draggingTaskTitle = "";
+    private previewTargetType: TaskType | null = null;
+    private previewDropTaskId: string | null = null;
+    private previewDropPosition: "before" | "after" | "end" = "end";
+    private autoScrollFrameId = 0;
+    private autoScrollDeltaY = 0;
+    private boundDragStartListener = (event: Event) => {
+      const dragEvent = event as CustomEvent<{ id?: string; title?: string }>;
+      this.draggingTaskId = dragEvent.detail?.id ?? null;
+      this.draggingTaskTitle = dragEvent.detail?.title?.trim() ?? "";
+    };
+    private boundDragEndListener = () => {
+      this.draggingTaskId = null;
+      this.draggingTaskTitle = "";
+      this.clearDropPreview();
+      this.stopAutoScroll();
+      this.querySelectorAll<HTMLElement>(".task-grid").forEach((grid) => {
+        grid.classList.remove("drag-over");
+      });
+    };
 
     /**
      * Initializes one-time listeners and performs initial paint.
@@ -198,6 +220,8 @@ import TaskTemplate from "./Task.astro";
       if (this.dataset.boardInitialized === "true") return;
       this.dataset.boardInitialized = "true";
       this.astroScopeAttributeName = this.getAttributeNames().find((name) => name.startsWith("data-astro-cid-")) ?? null;
+      document.addEventListener("tracker-task-dragstart", this.boundDragStartListener);
+      document.addEventListener("tracker-task-dragend", this.boundDragEndListener);
 
       this.addEventListener("click", (event) => {
         const target = event.target;
@@ -223,28 +247,52 @@ import TaskTemplate from "./Task.astro";
         grid.addEventListener("dragover", (event) => {
           event.preventDefault();
           grid.classList.add("drag-over");
+
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+
+          const dragEvent = event as DragEvent;
+          const targetType = grid.dataset.type;
+          if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
+
+          const result = this.getDropPreviewFromEvent(dragEvent);
+          this.previewTargetType = targetType;
+          this.previewDropTaskId = result.dropTaskId;
+          this.previewDropPosition = result.dropPosition;
+          this.renderDropPreview(grid, result.dropTaskId, result.dropPosition);
+          this.updateAutoScroll(dragEvent.clientY);
         });
 
         grid.addEventListener("dragleave", (event) => {
           if (!grid.contains((event as DragEvent).relatedTarget as Node)) {
             grid.classList.remove("drag-over");
+
+            if (this.previewTargetType === grid.dataset.type) {
+              this.clearDropPreview();
+            }
           }
         });
 
         grid.addEventListener("drop", (event) => {
           event.preventDefault();
           grid.classList.remove("drag-over");
+          this.stopAutoScroll();
 
           const targetType = grid.dataset.type;
           if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
 
-          const dropCard = (event.target as HTMLElement).closest<HTMLElement>(".task-card");
-          const dropTaskId = dropCard?.dataset.id ?? null;
+          const result = this.getDropPreviewFromEvent(event as DragEvent);
+          const dropTaskId = this.previewDropTaskId ?? result.dropTaskId;
+          const dropPosition = this.previewDropPosition ?? result.dropPosition;
 
           const detail: BoardDropDetail = {
             targetType,
             dropTaskId,
+            dropPosition,
           };
+
+          this.clearDropPreview();
 
           this.dispatchEvent(
             new CustomEvent<BoardDropDetail>("tracker-board-drop", {
@@ -300,6 +348,13 @@ import TaskTemplate from "./Task.astro";
       this.render();
     }
 
+    disconnectedCallback(): void {
+      document.removeEventListener("tracker-task-dragstart", this.boundDragStartListener);
+      document.removeEventListener("tracker-task-dragend", this.boundDragEndListener);
+      this.clearDropPreview();
+      this.stopAutoScroll();
+    }
+
     /**
      * Applies Astro's scope attribute to dynamically created nodes so scoped
      * component styles continue to match runtime-generated markup.
@@ -310,6 +365,108 @@ import TaskTemplate from "./Task.astro";
       root.querySelectorAll("*").forEach((node) => {
         node.setAttribute(this.astroScopeAttributeName!, "");
       });
+    }
+
+    private getDropPreviewFromEvent(event: DragEvent): { dropTaskId: string | null; dropPosition: "before" | "after" | "end" } {
+      const eventTarget = event.target;
+      const targetCard = eventTarget instanceof Element ? eventTarget.closest<HTMLElement>(".task-card") : null;
+
+      if (!targetCard) {
+        return {
+          dropTaskId: null,
+          dropPosition: "end",
+        };
+      }
+
+      const targetId = targetCard.dataset.id ?? null;
+      if (!targetId || targetId === this.draggingTaskId) {
+        return {
+          dropTaskId: null,
+          dropPosition: "end",
+        };
+      }
+
+      const rect = targetCard.getBoundingClientRect();
+      const dropPosition = event.clientY > rect.top + rect.height / 2 ? "after" : "before";
+
+      return {
+        dropTaskId: targetId,
+        dropPosition,
+      };
+    }
+
+    private renderDropPreview(grid: HTMLElement, dropTaskId: string | null, dropPosition: "before" | "after" | "end"): void {
+      this.clearDropPreview();
+
+      const preview = document.createElement("div");
+      preview.className = "task-drop-preview";
+      preview.dataset.dropPosition = dropPosition;
+      preview.textContent = this.draggingTaskTitle ? `Drop: ${this.draggingTaskTitle}` : "Drop task here";
+      this.applyAstroScope(preview);
+
+      if (!dropTaskId) {
+        grid.appendChild(preview);
+        return;
+      }
+
+      const targetCard = grid.querySelector<HTMLElement>(`.task-card[data-id="${CSS.escape(dropTaskId)}"]`);
+      if (!targetCard) {
+        grid.appendChild(preview);
+        return;
+      }
+
+      if (dropPosition === "after") {
+        targetCard.insertAdjacentElement("afterend", preview);
+        return;
+      }
+
+      targetCard.insertAdjacentElement("beforebegin", preview);
+    }
+
+    private clearDropPreview(): void {
+      this.querySelectorAll(".task-drop-preview").forEach((preview) => preview.remove());
+      this.previewTargetType = null;
+      this.previewDropTaskId = null;
+      this.previewDropPosition = "end";
+    }
+
+    private updateAutoScroll(pointerClientY: number): void {
+      const edgeSize = 120;
+      const maxSpeed = 18;
+      const viewportHeight = window.innerHeight;
+
+      if (pointerClientY < edgeSize) {
+        const intensity = 1 - pointerClientY / edgeSize;
+        this.autoScrollDeltaY = -Math.max(2, Math.round(maxSpeed * intensity));
+      } else if (pointerClientY > viewportHeight - edgeSize) {
+        const intensity = 1 - (viewportHeight - pointerClientY) / edgeSize;
+        this.autoScrollDeltaY = Math.max(2, Math.round(maxSpeed * intensity));
+      } else {
+        this.autoScrollDeltaY = 0;
+      }
+
+      if (!this.autoScrollFrameId && this.autoScrollDeltaY !== 0) {
+        this.runAutoScrollFrame();
+      }
+    }
+
+    private runAutoScrollFrame(): void {
+      if (this.autoScrollDeltaY === 0 || !this.draggingTaskId) {
+        this.autoScrollFrameId = 0;
+        return;
+      }
+
+      window.scrollBy(0, this.autoScrollDeltaY);
+      this.autoScrollFrameId = requestAnimationFrame(() => {
+        this.runAutoScrollFrame();
+      });
+    }
+
+    private stopAutoScroll(): void {
+      this.autoScrollDeltaY = 0;
+      if (!this.autoScrollFrameId) return;
+      cancelAnimationFrame(this.autoScrollFrameId);
+      this.autoScrollFrameId = 0;
     }
 
     /** Builds a task card instance from the component template and task data. */
@@ -488,6 +645,21 @@ import TaskTemplate from "./Task.astro";
     }
   }
 
+  .task-drop-preview {
+    border: 2px dashed rgba(10, 73, 177, 0.42);
+    border-radius: $radius-md;
+    min-height: 40px;
+    padding: $space-xs $space-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-blue-dark;
+    background: linear-gradient(120deg, rgba(191, 219, 254, 0.6), rgba(147, 197, 253, 0.32));
+    animation: task-drop-preview-bounce 0.33s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   .task-empty-state {
     padding: $space-lg;
     text-align: center;
@@ -562,9 +734,24 @@ import TaskTemplate from "./Task.astro";
     }
   }
 
+  @keyframes task-drop-preview-bounce {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .task-section,
     .tracker__board {
+      animation: none;
+    }
+
+    .task-drop-preview {
       animation: none;
     }
   }
