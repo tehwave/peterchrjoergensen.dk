@@ -1461,6 +1461,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             }));
 
           board.setTasks(activeTasks);
+
+          requestAnimationFrame(() => {
+            document.dispatchEvent(new CustomEvent("tracker-particles-resume"));
+          });
         }
 
         function renderStats(): void {
