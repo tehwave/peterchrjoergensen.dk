@@ -2244,8 +2244,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           normalizeOrders(sourceType);
           normalizeOrders(targetType);
-          void saveState(state);
-          renderAll();
+          renderBoard();
+          setTimeout(() => {
+            void saveState(state, false);
+          }, 0);
           requestAnimationFrame(() => {
             const movedCard = document.querySelector<HTMLElement>(`.task-card[data-id="${CSS.escape(movedTaskId)}"]`);
             if (!movedCard) return;
