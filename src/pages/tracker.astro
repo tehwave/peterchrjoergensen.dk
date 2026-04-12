@@ -2220,14 +2220,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             });
         }
 
-        function handleDrop(targetType: TaskType, dropTaskId: string | null, dropPosition: "before" | "after" | "end" = "end"): void {
-          if (!draggedTaskId) return;
-          const task = state.tasks.find((t) => t.id === draggedTaskId);
+        function handleDrop(targetType: TaskType, dropTaskId: string | null, dropPosition: "before" | "after" | "end" = "end", draggedIdOverride: string | null = null): void {
+          const activeDraggedTaskId = draggedIdOverride ?? draggedTaskId;
+          if (!activeDraggedTaskId) return;
+          const task = state.tasks.find((t) => t.id === activeDraggedTaskId);
           if (!task) return;
           const sourceType = task.type;
           const movedTaskId = task.id;
 
-          if (dropTaskId && dropTaskId !== draggedTaskId) {
+          if (dropTaskId && dropTaskId !== activeDraggedTaskId) {
             const targetTask = state.tasks.find((t) => t.id === dropTaskId);
             if (targetTask) {
               task.type = targetType;
@@ -2237,7 +2238,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           } else {
             // Drop at end of section
             task.type = targetType;
-            const maxOrder = state.tasks.filter((t) => t.type === targetType && !t.completedAt && t.id !== draggedTaskId).reduce((m, t) => Math.max(m, t.order), -1);
+            const maxOrder = state.tasks.filter((t) => t.type === targetType && !t.completedAt && t.id !== activeDraggedTaskId).reduce((m, t) => Math.max(m, t.order), -1);
             task.order = maxOrder + 1;
           }
 
@@ -2321,11 +2322,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         });
 
         document.addEventListener("tracker-board-drop", (event) => {
-          const dropEvent = event as CustomEvent<{ targetType: TaskType; dropTaskId: string | null; dropPosition?: "before" | "after" | "end" }>;
+          const dropEvent = event as CustomEvent<{ targetType: TaskType; dropTaskId: string | null; dropPosition?: "before" | "after" | "end"; draggedTaskId?: string | null }>;
           const targetType = dropEvent.detail?.targetType;
 
           if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
-          handleDrop(targetType, dropEvent.detail?.dropTaskId ?? null, dropEvent.detail?.dropPosition ?? "end");
+          handleDrop(targetType, dropEvent.detail?.dropTaskId ?? null, dropEvent.detail?.dropPosition ?? "end", dropEvent.detail?.draggedTaskId ?? null);
         });
 
         document.addEventListener("tracker-task-move", (event) => {
