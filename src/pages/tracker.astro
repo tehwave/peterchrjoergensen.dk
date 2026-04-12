@@ -829,7 +829,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ===========================================================
 
         /** localStorage key for canonical tracker state. */
-        const STORAGE_KEY = "tracker_v1";
+        const STORAGE_KEY = "tracker";
         /** Rotating, motivational subtitle copy shown under the page title. */
         const TIPS = [
           "Break big goals into smaller weekly tasks — momentum is everything.",
@@ -918,7 +918,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               monthKey: monthKeyFromDate(now),
               yearKey: `${now.getFullYear()}`,
             },
-            version: 1,
           };
         }
 
@@ -954,24 +953,27 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
          * Safely coerces unknown task-like input into a valid `Task`.
          * Invalid values are rejected as `null`.
          */
-        function normalizeTask(value: unknown, index: number): Task | null {
+        function normalizeTask(value: unknown): Task | null {
           if (!value || typeof value !== "object") return null;
           const task = value as Partial<Task>;
           if (typeof task.id !== "string" || typeof task.title !== "string" || !isTaskType(task.type)) return null;
-          if (typeof task.createdAt !== "number") return null;
-          const completedAt = typeof task.completedAt === "number" ? task.completedAt : null;
-          const archivedAt = typeof task.archivedAt === "number" ? task.archivedAt : null;
+          if (typeof task.description !== "string") return null;
+          if (typeof task.createdAt !== "number" || !Number.isFinite(task.createdAt) || task.createdAt < 0) return null;
+          if (task.dueDate !== null && typeof task.dueDate !== "string") return null;
+          if (task.completedAt !== null && (typeof task.completedAt !== "number" || !Number.isFinite(task.completedAt) || task.completedAt < 0)) return null;
+          if (task.archivedAt !== null && (typeof task.archivedAt !== "number" || !Number.isFinite(task.archivedAt) || task.archivedAt < 0)) return null;
+          if (typeof task.order !== "number" || !Number.isFinite(task.order)) return null;
 
           return {
             id: task.id,
             title: task.title,
-            description: typeof task.description === "string" ? task.description : "",
+            description: task.description,
             type: task.type,
             createdAt: task.createdAt,
-            dueDate: typeof task.dueDate === "string" ? task.dueDate : null,
-            completedAt,
-            archivedAt,
-            order: typeof task.order === "number" ? task.order : index,
+            dueDate: task.dueDate,
+            completedAt: task.completedAt,
+            archivedAt: task.archivedAt,
+            order: Math.floor(task.order),
           };
         }
 
@@ -984,27 +986,53 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const app = payload as Partial<AppState>;
           if (!Array.isArray(app.tasks) || !app.game || typeof app.game !== "object") return null;
 
+          const normalizedTasks: Task[] = [];
+          for (const task of app.tasks) {
+            const normalizedTask = normalizeTask(task);
+            if (!normalizedTask) return null;
+            normalizedTasks.push(normalizedTask);
+          }
+
           const gameSource = app.game as Partial<GameState>;
-          const now = new Date();
-          const normalizedTasks = app.tasks.map((task, index) => normalizeTask(task, index)).filter((task): task is Task => task !== null);
+          if (
+            typeof gameSource.level !== "number" ||
+            !Number.isFinite(gameSource.level) ||
+            gameSource.level < 1 ||
+            typeof gameSource.xp !== "number" ||
+            !Number.isFinite(gameSource.xp) ||
+            gameSource.xp < 0 ||
+            typeof gameSource.totalXP !== "number" ||
+            !Number.isFinite(gameSource.totalXP) ||
+            gameSource.totalXP < 0 ||
+            typeof gameSource.completedThisMonth !== "number" ||
+            !Number.isFinite(gameSource.completedThisMonth) ||
+            gameSource.completedThisMonth < 0 ||
+            typeof gameSource.completedThisYear !== "number" ||
+            !Number.isFinite(gameSource.completedThisYear) ||
+            gameSource.completedThisYear < 0 ||
+            typeof gameSource.streak !== "number" ||
+            !Number.isFinite(gameSource.streak) ||
+            gameSource.streak < 0 ||
+            typeof gameSource.lastActivityDate !== "string" ||
+            typeof gameSource.monthKey !== "string" ||
+            typeof gameSource.yearKey !== "string"
+          ) {
+            return null;
+          }
 
           const normalizedGame: GameState = {
-            level: typeof gameSource.level === "number" && gameSource.level > 0 ? Math.floor(gameSource.level) : 1,
-            xp: typeof gameSource.xp === "number" && gameSource.xp >= 0 ? Math.floor(gameSource.xp) : 0,
-            totalXP: typeof gameSource.totalXP === "number" && gameSource.totalXP >= 0 ? Math.floor(gameSource.totalXP) : 0,
-            completedThisMonth: typeof gameSource.completedThisMonth === "number" && gameSource.completedThisMonth >= 0 ? Math.floor(gameSource.completedThisMonth) : 0,
-            completedThisYear: typeof gameSource.completedThisYear === "number" && gameSource.completedThisYear >= 0 ? Math.floor(gameSource.completedThisYear) : 0,
-            streak: typeof gameSource.streak === "number" && gameSource.streak >= 0 ? Math.floor(gameSource.streak) : 0,
-            lastActivityDate: typeof gameSource.lastActivityDate === "string" ? gameSource.lastActivityDate : "",
-            monthKey: typeof gameSource.monthKey === "string" ? gameSource.monthKey : monthKeyFromDate(now),
-            yearKey: typeof gameSource.yearKey === "string" ? gameSource.yearKey : String(now.getFullYear()),
+            level: Math.floor(gameSource.level),
+            xp: Math.floor(gameSource.xp),
+            totalXP: Math.floor(gameSource.totalXP),
+            completedThisMonth: Math.floor(gameSource.completedThisMonth),
+            completedThisYear: Math.floor(gameSource.completedThisYear),
+            streak: Math.floor(gameSource.streak),
+            lastActivityDate: gameSource.lastActivityDate,
+            monthKey: gameSource.monthKey,
+            yearKey: gameSource.yearKey,
           };
 
-          return {
-            tasks: normalizedTasks,
-            game: normalizedGame,
-            version: typeof app.version === "number" ? app.version : 1,
-          };
+          return { tasks: normalizedTasks, game: normalizedGame };
         }
 
         /**
@@ -1172,7 +1200,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         /** Deserializes and validates a compact task tuple. */
-        function taskFromCompact(value: unknown, index: number): Task | null {
+        function taskFromCompact(value: unknown): Task | null {
           if (!Array.isArray(value) || value.length < 5) return null;
 
           const [id, title, compactType, createdAt, order, description, dueDate, completedAt, archivedAt] = value;
@@ -1180,7 +1208,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           const type = fromCompactTaskType(compactType);
           if (!type) return null;
-          if (typeof createdAt !== "number" || typeof order !== "number") return null;
+          if (typeof createdAt !== "number" || !Number.isFinite(createdAt) || createdAt < 0 || typeof order !== "number" || !Number.isFinite(order)) return null;
 
           const normalizedDueDate = typeof dueDate === "string" && dueDate !== "" ? dueDate : null;
           const normalizedCompletedAt = typeof completedAt === "number" && completedAt >= 0 ? completedAt : null;
@@ -1195,7 +1223,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             dueDate: normalizedDueDate,
             completedAt: normalizedCompletedAt,
             archivedAt: normalizedArchivedAt,
-            order: Number.isFinite(order) ? order : index,
+            order,
           };
         }
 
@@ -1278,8 +1306,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             const compactGame = parsed[1] as unknown;
 
             const tasks: Task[] = [];
-            for (const [index, taskValue] of compactTasks.entries()) {
-              const task = taskFromCompact(taskValue, index);
+            for (const taskValue of compactTasks) {
+              const task = taskFromCompact(taskValue);
               if (!task) return null;
               tasks.push(task);
             }
@@ -1319,11 +1347,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         /**
          * Merges local and imported state snapshots.
-         * - Tasks: keeps freshest version per task id.
+         * - Tasks: keeps freshest snapshot per task id.
          * - Game metrics: keeps highest numeric progress and latest activity date.
          */
         function mergeStates(local: AppState, imported: AppState): AppState {
-          // Merge tasks: prefer the most recently completed/updated version
+          // Merge tasks: prefer the most recently completed/updated snapshot
           const taskMap = new Map<string, Task>();
           const taskFreshnessScore = (task: Task): number => {
             return Math.max(task.createdAt, task.completedAt ?? 0, task.archivedAt ?? 0);
@@ -1347,7 +1375,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             monthKey: local.game.monthKey,
             yearKey: local.game.yearKey,
           };
-          return { tasks: Array.from(taskMap.values()), game, version: 1 };
+          return { tasks: Array.from(taskMap.values()), game };
         }
 
         // ===========================================================
@@ -2206,7 +2234,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               monthKey,
               yearKey,
             },
-            version: 1,
           };
 
           void saveState(state);

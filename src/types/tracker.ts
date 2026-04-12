@@ -30,7 +30,6 @@ export interface GameState {
 export interface AppState {
   tasks: Task[];
   game: GameState;
-  version: number;
 }
 
 export const XP_VALUES: Record<TaskType, number> = {

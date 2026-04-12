@@ -36,8 +36,9 @@ The tracker is a **completely standalone personal productivity app** that lives 
 
 ## Architecture notes
 
-- All state lives in `localStorage` under key `tracker_v1`, with URL `#data=` for cross-device sync via compact-json + `CompressionStream`/`DecompressionStream` gzip + base64url export
+- All state lives in `localStorage` under key `tracker`, with URL `#data=` for cross-device sync via compact-json + `CompressionStream`/`DecompressionStream` gzip + base64url export
 - URL import/export format is intentionally breaking and **not** backward-compatible with previous tracker tokens (no token versioning/fallbacks)
+- Tracker persistence/schema is intentionally strict for release: there is no app-state version field, no migration layer, and no legacy decode fallbacks
 - The app is centered in `src/pages/tracker.astro` with UI sub-components in `src/components/tracker/`
 - `Board.astro` owns task-board markup/styles and board-local UI controller behavior (task list rendering, empty states, add-button intent events, insertion-preview UI while dragging, edge auto-scroll during drag, and drop-zone interaction events with `dropPosition` intent)
 - `Task.astro` owns task-card markup, task-card scoped styles, and card-local interactions (drag visuals including custom drag ghost, inline title edit, and semantic custom events including keyboard/move intents)
