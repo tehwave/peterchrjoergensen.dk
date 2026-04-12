@@ -36,11 +36,12 @@ The tracker is a **completely standalone personal productivity app** that lives 
 
 ## Architecture notes
 
-- All state lives in `localStorage` under key `tracker_v1`, with URL `#data=` for cross-device sync via compact base64url export
+- All state lives in `localStorage` under key `tracker_v1`, with URL `#data=` for cross-device sync via compact-json + `CompressionStream`/`DecompressionStream` gzip + base64url export
+- URL import/export format is intentionally breaking and **not** backward-compatible with previous tracker tokens (no token versioning/fallbacks)
 - The app is centered in `src/pages/tracker.astro` with UI sub-components in `src/components/tracker/`
 - `Board.astro` owns task-board markup/styles and board-local UI controller behavior (task list rendering, empty states, add-button intent events, and drop-zone interaction events)
 - `Task.astro` owns task-card markup, task-card scoped styles, and card-local interactions (drag visuals, inline title edit, and semantic custom events)
-- `CompletedTask.astro` owns completed-card markup, completed-card scoped styles, and card-local interactions (semantic archive custom event)
+- `CompletedTask.astro` owns completed-card markup, completed-card scoped styles, and card-local interactions (semantic archive + uncomplete custom events)
 - `CompletedTasks.astro` owns completed-section markup/styles and completed-list UI controller state (filter, pagination, list rendering, archive/history controls)
 - `Toast.astro` owns toast live-region/container markup and all toast presentation styles (placement, variants, animation, reduced-motion behavior), and should be mounted at the end of `<body>` so fixed overlays are not constrained by tracker layout containers
 - `tracker.astro` owns canonical app state mutations/persistence and global orchestration; it pushes active-task snapshots into `Board.astro` via `setTasks(...)`, pushes completed-task snapshots into `CompletedTasks.astro` via `setCompletedTasks(...)`, listens to card events (`tracker-task-complete`, `tracker-task-delete`, `tracker-task-titlechange`, `tracker-completed-task-archive`), handles board intent events (`tracker-board-add-task`, `tracker-board-drop`), and handles completed history intents via `tracker-completed-archive-all`, `tracker-completed-restore-all`, and `tracker-completed-clear-history`

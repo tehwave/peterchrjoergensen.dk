@@ -32,17 +32,20 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   data-decay={decay}
 >
   <div class="task-card__row">
-    <p class="task-card__title" data-task-title title="Double-click to rename">{title}</p>
-    <input class="task-card__title-input" data-task-title-input type="text" maxlength="120" aria-label="Edit task title" hidden />
+    <button class="task-card__action-btn task-card__action-btn--done" data-action="complete" type="button" aria-label="Complete task">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m5 12 5 5 9-9"></path>
+      </svg>
+    </button>
+
+    <div class="task-card__title-wrap">
+      <p class="task-card__title" data-task-title title="Double-click to rename">{title}</p>
+      <input class="task-card__title-input" data-task-title-input type="text" maxlength="120" aria-label="Edit task title" hidden />
+    </div>
 
     <div class="task-card__items" role="group" aria-label="Task status and actions">
       <span class="task-card__decay-label task-card__decay-label--stale" data-task-decay-label="stale">Stale</span>
       <span class="task-card__decay-label task-card__decay-label--rotten" data-task-decay-label="rotten">Old</span>
-      <button class="task-card__action-btn task-card__action-btn--done" data-action="complete" type="button" aria-label="Complete task">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m5 12 5 5 9-9"></path>
-        </svg>
-      </button>
       <button class="task-card__action-btn task-card__action-btn--delete" data-action="delete" type="button" aria-label="Delete task">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 6h18"></path>
@@ -576,7 +579,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       align-items: center;
       display: grid;
       gap: $space-sm;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       min-height: 36px;
       position: relative;
       z-index: 1;
@@ -592,6 +595,11 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       min-width: 0;
       overflow-wrap: anywhere;
       user-select: none;
+    }
+
+    &__title-wrap {
+      min-width: 0;
+      width: 100%;
     }
 
     &__title-input {

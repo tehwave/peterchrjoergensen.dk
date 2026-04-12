@@ -4,10 +4,9 @@
  *
  * A single-page productivity app with:
  * - Three task sections: Short-term (weekly), Medium-term (monthly), Long-term (quarterly)
- * - LocalStorage persistence + compact base64url export/import for cross-device sync
+ * - LocalStorage persistence + compact-json + gzip + base64url export/import for cross-device sync
  * - Visual decay for overdue tasks with stink particles
  * - Drag-and-drop reordering within and between sections
- * - LocalStorage persistence + base64 export/import for cross-device sync
  * - Statistics and positive reinforcement toasts
  */
 import "../styles/global.scss";
@@ -121,7 +120,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             <!-- Level & XP -->
             <div class="stat-card stat-card--level" id="level-card">
               <div class="level-badge" id="level-badge">
-                <span class="level-badge__icon">●</span>
                 <span class="level-badge__label">Level</span>
                 <span class="level-badge__number" id="level-number">1</span>
               </div>
@@ -258,15 +256,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ============================================================
 
         .tracker-layout {
+          --tracker-section-gap: #{$space-xl};
           min-height: 100vh;
           margin: 0;
           background: radial-gradient(circle at 18% -6%, $tracker-bg-gradient-top, transparent 42%), radial-gradient(circle at 100% 100%, $tracker-bg-gradient-bottom, transparent 44%), $color-bg;
 
           main {
-            padding-block: $space-xl $space-3xl;
+            padding-block: $space-xl 0;
 
             @include respond-to(md) {
-              padding-block: $space-lg $space-2xl;
+              padding-block: $space-lg 0;
             }
           }
         }
@@ -282,6 +281,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           display: flex;
           flex-direction: column;
           gap: $space-lg;
+          margin-bottom: var(--tracker-section-gap);
           overflow: visible;
 
           @include respond-to(md) {
@@ -348,7 +348,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         // Stats bar
         .stats-bar {
-          margin-bottom: $space-sm;
+          margin-bottom: var(--tracker-section-gap);
           display: grid;
           grid-template-columns: 2fr 1fr 1fr 1fr;
 
@@ -368,12 +368,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         .stat-card {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+          @include elevated-panel($tracker-card-bg, 0, $shadow-xs);
           border-radius: $radius-lg;
-          padding: $space-xs $space-sm;
+          padding: $space-sm $space-lg;
           display: flex;
-          flex-direction: column;
-          gap: 2px;
+          align-items: center;
+          gap: $space-xs;
           position: relative;
           overflow: hidden;
 
@@ -398,22 +398,32 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             color: $tracker-soft-text;
             font-weight: $font-weight-semibold;
             line-height: 1.2;
+            white-space: nowrap;
           }
 
           &__icon {
-            position: absolute;
-            top: $space-xs;
-            right: $space-xs;
+            margin-left: auto;
             width: 18px;
             height: 18px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.16;
+            opacity: 0.44;
+            color: $tracker-muted-text;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+            flex-shrink: 0;
+            @include transition(opacity, 0.2s, ease-out);
 
             svg {
               width: 18px;
               height: 18px;
+              stroke-width: 1.85;
+            }
+          }
+
+          &:hover {
+            .stat-card__icon {
+              opacity: 0.72;
             }
           }
         }
@@ -423,11 +433,9 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           display: flex;
           align-items: center;
           gap: $space-xs;
-          margin-bottom: 2px;
-
-          &__icon {
-            font-size: 0.9rem;
-          }
+          margin-bottom: 0;
+          white-space: nowrap;
+          flex-shrink: 0;
 
           &__label {
             font-size: 0.625rem;
@@ -447,10 +455,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           display: flex;
           align-items: center;
           gap: 6px;
+          flex: 1;
+          min-width: 0;
         }
 
         .xp-bar {
           flex: 1;
+          min-width: 70px;
           height: 6px;
           background: rgba(255, 255, 255, 0.2);
           border-radius: 4px;
@@ -490,14 +501,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         .total-xp {
-          display: none;
+          display: inline;
+          font-size: 0.625rem;
+          color: rgba(255, 255, 255, 0.7);
+          margin-left: $space-xs;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         @media (max-width: 560px) {
-          .stat-card {
-            padding: $space-sm;
-          }
-
           .stat-card__value,
           .level-badge__number {
             font-size: $font-size-lg;
@@ -599,10 +611,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ============================================================
 
         .below-fold {
-          margin-top: $space-2xl;
+          margin-top: var(--tracker-section-gap);
           display: flex;
           flex-direction: column;
-          gap: $space-xl;
+          gap: var(--tracker-section-gap);
           padding-top: 0;
           border-top: 0;
 
@@ -610,6 +622,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
             align-items: stretch;
+          }
+        }
+
+        .tracker-layout :global(.footer) {
+          margin-top: 0;
+          padding-top: $space-3xl;
+
+          @include respond-to(md) {
+            padding-top: $space-2xl;
           }
         }
 
@@ -635,7 +656,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         .modal {
-          @include elevated-panel($tracker-card-bg, $tracker-card-stroke-strong, $shadow-md);
+          @include elevated-panel($tracker-card-bg, 0, $shadow-md);
           border-radius: $radius-xl;
           padding: $space-xl;
           width: 100%;
@@ -955,15 +976,15 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           };
         }
 
-        function loadState(): AppState {
+        async function loadState(): Promise<AppState> {
           // Check URL hash first (for cross-device sync via URL)
           if (window.location.hash.startsWith("#data=")) {
             try {
               const encoded = window.location.hash.slice(6);
-              const imported = decodeState(encoded);
+              const imported = await decodeState(encoded);
               if (imported) {
                 const merged = mergeStates(loadFromStorage(), imported);
-                saveState(merged, false);
+                await saveState(merged, false);
                 return merged;
               }
               pendingImportError = "Import link format is invalid. Falling back to local data.";
@@ -985,7 +1006,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
         }
 
-        function saveState(state: AppState, pushHistory = true): void {
+        async function saveState(state: AppState, pushHistory = true): Promise<void> {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           } catch {
@@ -997,7 +1018,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             });
             return;
           }
-          syncShareUrl(state, pushHistory);
+
+          try {
+            await syncShareUrl(state, pushHistory);
+          } catch {
+            showToast({
+              type: "info",
+              icon: "!",
+              title: "Share link unavailable",
+              text: "Could not update the share URL on this browser.",
+            });
+          }
         }
 
         type CompactTaskType = 0 | 1 | 2;
@@ -1013,7 +1044,46 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           monthKey: string,
           yearKey: string,
         ];
-        type CompactStatePayload = [version: 2, tasks: CompactTask[], game: CompactGame];
+        type CompactStatePayload = [tasks: CompactTask[], game: CompactGame];
+
+        function concatChunks(chunks: Uint8Array[], totalLength: number): Uint8Array {
+          const merged = new Uint8Array(totalLength);
+          let offset = 0;
+          chunks.forEach((chunk) => {
+            merged.set(chunk, offset);
+            offset += chunk.byteLength;
+          });
+          return merged;
+        }
+
+        async function readStreamBytes(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+          const reader = stream.getReader();
+          const chunks: Uint8Array[] = [];
+          let totalLength = 0;
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (!value) continue;
+
+            chunks.push(value);
+            totalLength += value.byteLength;
+          }
+
+          return concatChunks(chunks, totalLength);
+        }
+
+        async function compressGzip(bytes: Uint8Array): Promise<Uint8Array> {
+          const sourceStream = new Blob([new Uint8Array(bytes).buffer]).stream();
+          const compressedStream = sourceStream.pipeThrough(new CompressionStream("gzip"));
+          return readStreamBytes(compressedStream);
+        }
+
+        async function decompressGzip(bytes: Uint8Array): Promise<Uint8Array> {
+          const sourceStream = new Blob([new Uint8Array(bytes).buffer]).stream();
+          const decompressedStream = sourceStream.pipeThrough(new DecompressionStream("gzip"));
+          return readStreamBytes(decompressedStream);
+        }
 
         function toCompactTaskType(type: TaskType): CompactTaskType {
           if (type === "short") return 0;
@@ -1128,24 +1198,26 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return Uint8Array.from(binary, (char) => char.charCodeAt(0));
         }
 
-        function encodeState(state: AppState): string {
-          const payload: CompactStatePayload = [2, state.tasks.map(taskToCompact), gameToCompact(state.game)];
+        async function encodeState(state: AppState): Promise<string> {
+          const payload: CompactStatePayload = [state.tasks.map(taskToCompact), gameToCompact(state.game)];
           const json = JSON.stringify(payload);
           const bytes = new TextEncoder().encode(json);
-          return encodeBase64Url(bytes);
+          const compressed = await compressGzip(bytes);
+          return encodeBase64Url(compressed);
         }
 
-        function decodeState(encoded: string): AppState | null {
+        async function decodeState(encoded: string): Promise<AppState | null> {
           try {
             const bytes = decodeBase64Url(encoded);
-            const json = new TextDecoder().decode(bytes);
+            const decompressed = await decompressGzip(bytes);
+            const json = new TextDecoder().decode(decompressed);
             const parsed = JSON.parse(json);
-            if (!Array.isArray(parsed) || parsed.length !== 3 || parsed[0] !== 2 || !Array.isArray(parsed[1])) {
+            if (!Array.isArray(parsed) || parsed.length !== 2 || !Array.isArray(parsed[0])) {
               return null;
             }
 
-            const compactTasks = parsed[1] as unknown[];
-            const compactGame = parsed[2] as unknown;
+            const compactTasks = parsed[0] as unknown[];
+            const compactGame = parsed[1] as unknown;
 
             const tasks: Task[] = [];
             for (const [index, taskValue] of compactTasks.entries()) {
@@ -1157,14 +1229,18 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             const game = gameFromCompact(compactGame);
             if (!game) return null;
 
-            return normalizeStatePayload({ tasks, game, version: 2 });
+            return normalizeStatePayload({ tasks, game });
           } catch {
             return null;
           }
         }
 
-        function syncShareUrl(nextState: AppState, pushHistory = true): void {
-          const hash = `#data=${encodeState(nextState)}`;
+        let shareUrlWriteVersion = 0;
+
+        async function syncShareUrl(nextState: AppState, pushHistory = true): Promise<void> {
+          const writeVersion = ++shareUrlWriteVersion;
+          const hash = `#data=${await encodeState(nextState)}`;
+          if (writeVersion !== shareUrlWriteVersion) return;
           if (window.location.hash === hash) return;
 
           const nextUrl = `${window.location.pathname}${hash}`;
@@ -1208,7 +1284,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // ===========================================================
 
         let pendingImportError = "";
-        let state = loadState();
+        let state = defaultState();
         let draggedTaskId: string | null = null;
         let metricCountObserver: IntersectionObserver | null = null;
         let unlockedAchievements = new Set<string>(JSON.parse(localStorage.getItem("tracker_achievements") ?? "[]"));
@@ -1248,6 +1324,26 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             title: `+${amount} XP!`,
             text: ENCOURAGE_COMPLETE[Math.floor(Math.random() * ENCOURAGE_COMPLETE.length)],
           });
+        }
+
+        function syncLevelFromTotalXP(): void {
+          let level = 1;
+          let remainingXP = Math.max(0, Math.floor(state.game.totalXP));
+
+          let xpNeeded = xpForNextLevel(level);
+          while (remainingXP >= xpNeeded) {
+            remainingXP -= xpNeeded;
+            level++;
+            xpNeeded = xpForNextLevel(level);
+          }
+
+          state.game.level = level;
+          state.game.xp = remainingXP;
+        }
+
+        function loseXP(amount: number): void {
+          state.game.totalXP = Math.max(0, state.game.totalXP - amount);
+          syncLevelFromTotalXP();
         }
 
         function onLevelUp(newLevel: number): void {
@@ -1618,7 +1714,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             order: maxOrder + 1,
           };
           state.tasks.push(task);
-          saveState(state);
+          void saveState(state);
           return task;
         }
 
@@ -1905,7 +2001,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             version: 1,
           };
 
-          saveState(state);
+          void saveState(state);
           renderAll();
           showToast({ type: "success", icon: "✓", title: "Demo data loaded", text: "Sample tasks added for testing." });
         }
@@ -1921,13 +2017,30 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           state.game.completedThisYear++;
 
           gainXP(XP_VALUES[task.type]);
-          saveState(state);
+          void saveState(state);
           renderAll();
+        }
+
+        function uncompleteTask(id: string): boolean {
+          const task = state.tasks.find((t) => t.id === id);
+          if (!task || task.completedAt === null) return false;
+
+          task.completedAt = null;
+          task.archivedAt = null;
+
+          state.game.completedThisMonth = Math.max(0, state.game.completedThisMonth - 1);
+          state.game.completedThisYear = Math.max(0, state.game.completedThisYear - 1);
+          loseXP(XP_VALUES[task.type]);
+
+          normalizeOrders(task.type);
+          void saveState(state);
+          renderAll();
+          return true;
         }
 
         function deleteTask(id: string): void {
           state.tasks = state.tasks.filter((t) => t.id !== id);
-          saveState(state);
+          void saveState(state);
           renderAll();
         }
 
@@ -1935,7 +2048,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const task = state.tasks.find((t) => t.id === id);
           if (!task || task.completedAt === null || task.archivedAt !== null) return;
           task.archivedAt = Date.now();
-          saveState(state);
+          void saveState(state);
           renderAll();
         }
 
@@ -1950,7 +2063,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
 
           if (archivedCount > 0) {
-            saveState(state);
+            void saveState(state);
             renderAll();
           }
 
@@ -1967,7 +2080,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
 
           if (restoredCount > 0) {
-            saveState(state);
+            void saveState(state);
             renderAll();
           }
 
@@ -1980,7 +2093,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const clearedCount = previousCount - state.tasks.length;
 
           if (clearedCount > 0) {
-            saveState(state);
+            void saveState(state);
             renderAll();
           }
 
@@ -1991,7 +2104,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const task = state.tasks.find((t) => t.id === id);
           if (!task) return;
           task.title = title.trim();
-          saveState(state);
+          void saveState(state);
           renderAll();
         }
 
@@ -2030,7 +2143,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
           normalizeOrders(sourceType);
           normalizeOrders(targetType);
-          saveState(state);
+          void saveState(state);
           renderAll();
           showToast({ type: "info", icon: "i", title: "Task moved", text: `Moved to ${targetType === "short" ? "weekly" : targetType === "medium" ? "monthly" : "quarterly"} section.` });
         }
@@ -2105,6 +2218,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (!id) return;
           archiveCompletedTask(id);
           showToast({ type: "info", icon: "i", title: "Archived", text: "Completed task moved to archived history." });
+        });
+
+        document.addEventListener("tracker-completed-task-uncomplete", (event) => {
+          const uncompleteEvent = event as CustomEvent<{ id: string }>;
+          const id = uncompleteEvent.detail?.id;
+          if (!id) return;
+
+          const wasUncompleted = uncompleteTask(id);
+          if (!wasUncompleted) return;
+
+          showToast({ type: "success", icon: "↺", title: "Task reopened", text: "Task moved back to active and rewards were rolled back." });
         });
 
         document.addEventListener("tracker-completed-archive-all", () => {
@@ -2206,8 +2330,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         });
 
         // Export
-        document.getElementById("export-btn")!.addEventListener("click", () => {
-          const code = encodeState(state);
+        document.getElementById("export-btn")!.addEventListener("click", async () => {
+          const code = await encodeState(state);
           (document.getElementById("export-code") as HTMLTextAreaElement).value = code;
           openModal("export-modal");
         });
@@ -2219,8 +2343,8 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           });
         });
 
-        document.getElementById("copy-url-btn")!.addEventListener("click", () => {
-          syncShareUrl(state, false);
+        document.getElementById("copy-url-btn")!.addEventListener("click", async () => {
+          await syncShareUrl(state, false);
           const url = window.location.href;
           navigator.clipboard.writeText(url).then(() => {
             showToast({ type: "success", icon: "✓", title: "URL copied", text: "Open this URL on another device to import." });
@@ -2233,16 +2357,16 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           openModal("import-modal");
         });
 
-        document.getElementById("do-import-btn")!.addEventListener("click", () => {
+        document.getElementById("do-import-btn")!.addEventListener("click", async () => {
           const code = (document.getElementById("import-code") as HTMLTextAreaElement).value.trim();
           if (!code) return;
-          const imported = decodeState(code);
+          const imported = await decodeState(code);
           if (!imported) {
             showToast({ type: "info", icon: "!", title: "Invalid import code", text: "Please check the code and try again." });
             return;
           }
           state = mergeStates(state, imported);
-          saveState(state);
+          await saveState(state);
           closeModal("import-modal");
           renderAll();
           showToast({ type: "success", icon: "✓", title: "Data imported", text: "Your tasks have been merged." });
@@ -2270,13 +2394,18 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Init
         // ===========================================================
 
-        showRandomTip();
-        syncShareUrl(state, false);
-        renderAll();
+        async function bootstrap(): Promise<void> {
+          state = await loadState();
+          showRandomTip();
+          await syncShareUrl(state, false);
+          renderAll();
 
-        if (pendingImportError) {
-          showToast({ type: "info", icon: "!", title: "Import warning", text: pendingImportError, duration: 5000 });
+          if (pendingImportError) {
+            showToast({ type: "info", icon: "!", title: "Import warning", text: pendingImportError, duration: 5000 });
+          }
         }
+
+        void bootstrap();
 
         // Show a welcome tip after a brief delay if first visit
         setTimeout(() => {

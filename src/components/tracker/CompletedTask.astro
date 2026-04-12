@@ -33,6 +33,21 @@ const { id, title, completedAtLabel, xp } = Astro.props;
     </div>
   </div>
   <div class="completed-item__actions">
+    <button class="completed-item__action-btn completed-item__action-btn--uncomplete" data-action="uncomplete-task" type="button" aria-label="Mark task as active again">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        style="display:block;width:15px;height:15px;flex:none;"
+      >
+        <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+        <path d="M3 4v5h5"></path>
+      </svg>
+    </button>
     <button class="completed-item__action-btn" data-action="archive-completed" type="button" aria-label="Archive completed task">
       <svg
         viewBox="0 0 24 24"
@@ -71,11 +86,22 @@ const { id, title, completedAtLabel, xp } = Astro.props;
 
       this.addEventListener("click", (event) => {
         const target = event.target;
-        const btn = target instanceof Element ? target.closest("[data-action='archive-completed']") : null;
-        if (!btn) return;
+        const uncompleteBtn = target instanceof Element ? target.closest("[data-action='uncomplete-task']") : null;
+        const archiveBtn = target instanceof Element ? target.closest("[data-action='archive-completed']") : null;
+        if (!uncompleteBtn && !archiveBtn) return;
 
         const id = this.dataset.completedId ?? "";
         if (!id) return;
+
+        if (uncompleteBtn) {
+          this.dispatchEvent(
+            new CustomEvent("tracker-completed-task-uncomplete", {
+              bubbles: true,
+              detail: { id },
+            }),
+          );
+          return;
+        }
 
         // Bubble intent upward so the page-level orchestrator can mutate state.
         this.dispatchEvent(
@@ -206,6 +232,16 @@ const { id, title, completedAtLabel, xp } = Astro.props;
       &:hover {
         background: $color-danger-bg-hover;
         transform: translateY(-1px);
+      }
+
+      &--uncomplete {
+        background: rgba(10, 73, 177, 0.12);
+        border-color: rgba(10, 73, 177, 0.24);
+        color: $color-blue;
+
+        &:hover {
+          background: rgba(10, 73, 177, 0.2);
+        }
       }
     }
   }
