@@ -26,12 +26,15 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
   ]}
   role="listitem"
   draggable="true"
+  tabindex="0"
   data-id={id}
   data-title={title}
   data-type={type}
   data-decay={decay}
 >
   <div class="task-card__row">
+    <span class="task-card__drag-handle" aria-hidden="true">⋮⋮</span>
+
     <button class="task-card__action-btn task-card__action-btn--done" data-action="complete" type="button" aria-label="Complete task">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="m5 12 5 5 9-9"></path>
@@ -46,6 +49,10 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     <div class="task-card__items" role="group" aria-label="Task status and actions">
       <span class="task-card__decay-label task-card__decay-label--stale" data-task-decay-label="stale">Stale</span>
       <span class="task-card__decay-label task-card__decay-label--rotten" data-task-decay-label="rotten">Old</span>
+      <button class="task-card__move-btn" data-action="move-left" type="button" aria-label="Move task to previous column" title="Move to previous column">←</button>
+      <button class="task-card__move-btn" data-action="move-up" type="button" aria-label="Move task up" title="Move up">↑</button>
+      <button class="task-card__move-btn" data-action="move-down" type="button" aria-label="Move task down" title="Move down">↓</button>
+      <button class="task-card__move-btn" data-action="move-right" type="button" aria-label="Move task to next column" title="Move to next column">→</button>
       <button class="task-card__action-btn task-card__action-btn--delete" data-action="delete" type="button" aria-label="Delete task">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 6h18"></path>
@@ -118,6 +125,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       this.handleMotionChange = () => {
         this.syncParticles();
       };
+      this.dragGhostEl = null;
     }
 
     connectedCallback() {
@@ -144,12 +152,16 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         event.dataTransfer?.setData("text/plain", this.dataset.id ?? "");
         if (event.dataTransfer) {
           event.dataTransfer.effectAllowed = "move";
+          this.configureDragImage(event.dataTransfer);
         }
 
         this.dispatchEvent(
           new CustomEvent("tracker-task-dragstart", {
             bubbles: true,
-            detail: { id: this.dataset.id ?? "" },
+            detail: {
+              id: this.dataset.id ?? "",
+              title: this.dataset.title ?? "",
+            },
           }),
         );
       });
@@ -158,6 +170,7 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         this.classList.remove("task-card--dragging");
         document.querySelectorAll(".task-grid.drag-over").forEach((grid) => grid.classList.remove("drag-over"));
         document.querySelectorAll(".task-card--drop-target").forEach((card) => card.classList.remove("task-card--drop-target"));
+        this.cleanupDragGhost();
 
         this.dispatchEvent(
           new CustomEvent("tracker-task-dragend", {
@@ -185,6 +198,24 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
         if (activeDragging?.dataset.id !== this.dataset.id) {
           this.classList.add("task-card--drop-target");
         }
+      });
+
+      this.addEventListener("keydown", (event) => {
+        if (!(event instanceof KeyboardEvent)) return;
+        if (!event.altKey || this.isEditing) return;
+
+        const moveDirectionByKey = {
+          ArrowLeft: "left",
+          ArrowRight: "right",
+          ArrowUp: "up",
+          ArrowDown: "down",
+        };
+
+        const direction = moveDirectionByKey[event.key];
+        if (!direction) return;
+
+        event.preventDefault();
+        this.emitMoveIntent(direction);
       });
     }
 
@@ -420,7 +451,68 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
             }),
           );
         }
+
+        if (action === "move-left") {
+          this.emitMoveIntent("left");
+        }
+
+        if (action === "move-right") {
+          this.emitMoveIntent("right");
+        }
+
+        if (action === "move-up") {
+          this.emitMoveIntent("up");
+        }
+
+        if (action === "move-down") {
+          this.emitMoveIntent("down");
+        }
       });
+    }
+
+    emitMoveIntent(direction) {
+      const id = this.dataset.id ?? "";
+      if (!id) return;
+
+      this.dispatchEvent(
+        new CustomEvent("tracker-task-move", {
+          bubbles: true,
+          detail: { id, direction },
+        }),
+      );
+    }
+
+    configureDragImage(dataTransfer) {
+      this.cleanupDragGhost();
+
+      const ghost = this.cloneNode(true);
+      if (!(ghost instanceof HTMLElement)) return;
+
+      ghost.classList.remove("task-card--drop-target", "task-card--landed");
+      ghost.classList.add("task-card--ghost");
+      ghost.style.width = `${this.offsetWidth}px`;
+      ghost.style.maxWidth = `${this.offsetWidth}px`;
+      ghost.style.position = "fixed";
+      ghost.style.top = "-10000px";
+      ghost.style.left = "-10000px";
+      ghost.style.pointerEvents = "none";
+
+      document.body.appendChild(ghost);
+      this.dragGhostEl = ghost;
+
+      const offsetX = Math.max(16, Math.floor(this.offsetWidth * 0.2));
+      const offsetY = Math.max(16, Math.floor(this.offsetHeight * 0.4));
+      dataTransfer.setDragImage(ghost, offsetX, offsetY);
+
+      requestAnimationFrame(() => {
+        this.cleanupDragGhost();
+      });
+    }
+
+    cleanupDragGhost() {
+      if (!(this.dragGhostEl instanceof HTMLElement)) return;
+      this.dragGhostEl.remove();
+      this.dragGhostEl = null;
     }
 
     setupInlineEditing() {
@@ -531,6 +623,15 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       transform: translateY(-2px);
       border-color: $tracker-card-stroke;
       background: $color-white;
+
+      .task-card__drag-handle {
+        opacity: 0.9;
+      }
+
+      .task-card__move-btn {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     &:active {
@@ -538,7 +639,13 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     }
 
     &--dragging {
-      opacity: 0.4;
+      opacity: 0.52;
+      transform: rotate(0.65deg) scale(0.985);
+      box-shadow: 0 14px 28px rgba(17, 24, 39, 0.22);
+    }
+
+    &--landed {
+      animation: card-land-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     &--drop-target {
@@ -579,10 +686,23 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       align-items: center;
       display: grid;
       gap: $space-sm;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
       min-height: 36px;
       position: relative;
       z-index: 1;
+    }
+
+    &__drag-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: $tracker-muted-text;
+      font-size: 0.95rem;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      opacity: 0.35;
+      user-select: none;
+      @include tracker-transition(opacity);
     }
 
     &__title {
@@ -624,6 +744,33 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
       justify-content: flex-end;
       position: relative;
       z-index: 1;
+    }
+
+    &__move-btn {
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 999px;
+      border: 1px solid $tracker-card-stroke;
+      background: rgba(255, 255, 255, 0.95);
+      color: $tracker-muted-text;
+      font-size: 0.72rem;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(2px);
+      @include tracker-transition(all);
+      @include focus-ring;
+
+      &:hover {
+        color: $color-blue;
+        border-color: $tracker-card-stroke;
+        background: $color-neutral-100;
+      }
     }
 
     &__decay-label {
@@ -706,6 +853,40 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
     }
   }
 
+  .task-card:focus-visible {
+    @include focus-ring($tracker-focus-ring-accent);
+  }
+
+  .task-card__move-btn:focus-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .task-card--ghost {
+    transform: rotate(1.3deg) scale(0.96);
+    opacity: 0.88;
+    filter: drop-shadow(0 14px 20px rgba(17, 24, 39, 0.28));
+
+    .fire-particles {
+      display: none;
+    }
+  }
+
+  @keyframes card-land-bounce {
+    0% {
+      transform: translateY(0) scale(0.94);
+    }
+    45% {
+      transform: translateY(-4px) scale(1.04);
+    }
+    70% {
+      transform: translateY(1px) scale(0.985);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
   .fire-particles {
     position: absolute;
     inset: 0;
@@ -727,6 +908,25 @@ const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
 
     &--rotten {
       opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task-card {
+      &--dragging,
+      &--landed {
+        animation: none;
+        transform: none;
+      }
+    }
+
+    .task-card__move-btn {
+      transform: none;
+    }
+
+    .task-card--ghost {
+      transform: none;
+      filter: none;
     }
   }
 

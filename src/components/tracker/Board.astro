@@ -421,7 +421,6 @@ import TaskTemplate from "./Task.astro";
       100% 100%,
       18px 18px,
       18px 18px;
-    animation: grid-drift 18s linear infinite;
 
     &--short {
       background-image:
@@ -560,21 +559,6 @@ import TaskTemplate from "./Task.astro";
       background: #fff;
       border-color: $tracker-card-stroke;
       color: $color-blue;
-    }
-  }
-
-  @keyframes grid-drift {
-    from {
-      background-position:
-        0 0,
-        0 0,
-        0 0;
-    }
-    to {
-      background-position:
-        0 0,
-        22px 22px,
-        22px 22px;
     }
   }
 
