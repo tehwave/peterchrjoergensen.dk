@@ -1378,17 +1378,42 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               taskMap.set(t.id, t);
             }
           });
+
+          const latestActivityDate = local.game.lastActivityDate > imported.game.lastActivityDate ? local.game.lastActivityDate : imported.game.lastActivityDate;
+          const prefersImportedOnTie = latestActivityDate === imported.game.lastActivityDate && imported.game.lastActivityDate !== "";
+
+          const mergedCompletedThisMonth = Math.max(local.game.completedThisMonth, imported.game.completedThisMonth);
+          const mergedCompletedThisYear = Math.max(local.game.completedThisYear, imported.game.completedThisYear);
+
+          const mergedMonthKey =
+            imported.game.completedThisMonth > local.game.completedThisMonth
+              ? imported.game.monthKey
+              : imported.game.completedThisMonth < local.game.completedThisMonth
+                ? local.game.monthKey
+                : prefersImportedOnTie
+                  ? imported.game.monthKey
+                  : local.game.monthKey;
+
+          const mergedYearKey =
+            imported.game.completedThisYear > local.game.completedThisYear
+              ? imported.game.yearKey
+              : imported.game.completedThisYear < local.game.completedThisYear
+                ? local.game.yearKey
+                : prefersImportedOnTie
+                  ? imported.game.yearKey
+                  : local.game.yearKey;
+
           // Use higher game stats
           const game: GameState = {
             level: Math.max(local.game.level, imported.game.level),
             xp: Math.max(local.game.xp, imported.game.xp),
             totalXP: Math.max(local.game.totalXP, imported.game.totalXP),
-            completedThisMonth: Math.max(local.game.completedThisMonth, imported.game.completedThisMonth),
-            completedThisYear: Math.max(local.game.completedThisYear, imported.game.completedThisYear),
+            completedThisMonth: mergedCompletedThisMonth,
+            completedThisYear: mergedCompletedThisYear,
             streak: Math.max(local.game.streak, imported.game.streak),
-            lastActivityDate: local.game.lastActivityDate > imported.game.lastActivityDate ? local.game.lastActivityDate : imported.game.lastActivityDate,
-            monthKey: local.game.monthKey,
-            yearKey: local.game.yearKey,
+            lastActivityDate: latestActivityDate,
+            monthKey: mergedMonthKey,
+            yearKey: mergedYearKey,
           };
           return { tasks: Array.from(taskMap.values()), game };
         }
