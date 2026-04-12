@@ -93,7 +93,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
       }
     </style>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <main>
+    <main id="main-content">
       <div class="tracker">
         <!-- ====================================================
          ABOVE THE FOLD: Stats + Task Board
@@ -223,6 +223,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           <button class="modal__close" id="export-modal-close" aria-label="Close">✕</button>
           <h3 class="modal__title" id="export-modal-title">Export Data</h3>
           <p class="modal__desc">Copy this code to back up or move your data to another device.</p>
+          <p class="modal__warning" id="export-url-warning" hidden>Share link may be too long for some apps/browsers. Prefer <strong>Copy code</strong> for reliable import.</p>
           <textarea class="form-textarea form-textarea--code" id="export-code" readonly rows="6" aria-label="Export code"></textarea>
           <div class="modal__actions">
             <button class="btn btn--ghost" id="export-modal-close2">Close</button>
@@ -703,6 +704,17 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             margin: 0 0 $space-md;
           }
 
+          &__warning {
+            margin: 0 0 $space-md;
+            padding: $space-sm $space-md;
+            border-radius: $radius-md;
+            border: 1px solid rgba(180, 83, 9, 0.32);
+            background: rgba(245, 158, 11, 0.12);
+            color: #7c2d12;
+            font-size: $font-size-xs;
+            line-height: 1.4;
+          }
+
           &__form {
             display: flex;
             flex-direction: column;
@@ -816,7 +828,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
          * - `state` is the single canonical source of truth for tasks + gamification metrics.
          * - UI subcomponents (`tracker-board`, `tracker-completed-tasks`) are render targets, not state owners.
          * - Mutations always flow through helpers in this file, then persist via `saveState(...)`.
-         * - Persistence has two channels: localStorage (`tracker_v1`) + URL hash (`#data=`) for share/import.
+         * - Persistence has two channels: localStorage (`tracker`) + URL hash (`#data=`) for share/import.
          * - Board/completed/task components communicate intent through semantic custom DOM events.
          */
 
@@ -830,6 +842,12 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         /** localStorage key for canonical tracker state. */
         const STORAGE_KEY = "tracker";
+        /** Conservative share URL length threshold where copy-url is still allowed but warned. */
+        const SAFE_SHARE_URL_LENGTH = 1800;
+        /** Import payload threshold for large-data warning UX. */
+        const LARGE_IMPORT_CODE_THRESHOLD = 1400;
+        /** Completed+active task count threshold for large-data warning UX. */
+        const LARGE_IMPORT_TASK_THRESHOLD = 75;
         /** Rotating, motivational subtitle copy shown under the page title. */
         const TIPS = [
           "Break big goals into smaller weekly tasks — momentum is everything.",
@@ -1353,9 +1371,6 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         function mergeStates(local: AppState, imported: AppState): AppState {
           // Merge tasks: prefer the most recently completed/updated snapshot
           const taskMap = new Map<string, Task>();
-          const taskFreshnessScore = (task: Task): number => {
-            return Math.max(task.createdAt, task.completedAt ?? 0, task.archivedAt ?? 0);
-          };
 
           [...local.tasks, ...imported.tasks].forEach((t) => {
             const existing = taskMap.get(t.id);
@@ -1378,6 +1393,47 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           return { tasks: Array.from(taskMap.values()), game };
         }
 
+        /** Computes task freshness for merge conflict resolution and import feedback. */
+        function taskFreshnessScore(task: Task): number {
+          return Math.max(task.createdAt, task.completedAt ?? 0, task.archivedAt ?? 0);
+        }
+
+        /** Result shape for robust copy operations across clipboard-restricted environments. */
+        type CopyTextResult = "copied" | "fallback-copied" | "manual";
+
+        /**
+         * Attempts modern clipboard API first, then `execCommand("copy")` fallback.
+         * Returns `manual` when no programmatic copy path succeeds.
+         */
+        async function copyTextWithFallback(text: string): Promise<CopyTextResult> {
+          if (window.isSecureContext && navigator.clipboard?.writeText) {
+            try {
+              await navigator.clipboard.writeText(text);
+              return "copied";
+            } catch {
+              // Fall through to legacy fallback.
+            }
+          }
+
+          try {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "true");
+            textarea.style.position = "fixed";
+            textarea.style.top = "-9999px";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            textarea.setSelectionRange(0, textarea.value.length);
+            const copied = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return copied ? "fallback-copied" : "manual";
+          } catch {
+            return "manual";
+          }
+        }
+
         // ===========================================================
         // App state
         // ===========================================================
@@ -1388,6 +1444,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         let state = defaultState();
         /** Active dragged task id while board drag interactions are in progress. */
         let draggedTaskId: string | null = null;
+        /** Currently open modal id, used for focus trap + escape close behavior. */
+        let activeModalId: string | null = null;
+        /** Element to restore focus to when modal closes. */
+        let modalReturnFocusEl: HTMLElement | null = null;
         /** Intersection observer for count-up animation lifecycle. */
         let metricCountObserver: IntersectionObserver | null = null;
         /** Persisted achievement IDs (stored separately from core tracker payload). */
@@ -2446,20 +2506,67 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         // Modal helpers
         // ===========================================================
 
-        /** Opens a modal overlay and focuses first interactive control. */
+        /** Selector for keyboard-focusable controls in modal dialogs. */
+        const MODAL_FOCUSABLE_SELECTOR = "a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])";
+
+        /** Returns the focusable elements within a given modal overlay. */
+        function getModalFocusableElements(modal: HTMLElement): HTMLElement[] {
+          return Array.from(modal.querySelectorAll<HTMLElement>(MODAL_FOCUSABLE_SELECTOR)).filter((el) => !el.hasAttribute("hidden") && el.offsetParent !== null);
+        }
+
+        /** Opens a modal overlay, traps focus, and records return-focus trigger. */
         function openModal(id: string): void {
           const modal = document.getElementById(id)!;
+          const currentFocus = document.activeElement;
+          modalReturnFocusEl = currentFocus instanceof HTMLElement ? currentFocus : null;
+          activeModalId = id;
           modal.removeAttribute("hidden");
-          // Focus first focusable element
+
           setTimeout(() => {
-            const first = modal.querySelector<HTMLElement>("input, select, textarea, button:not(.modal__close)");
+            const first = getModalFocusableElements(modal)[0];
             first?.focus();
           }, 50);
         }
 
-        /** Closes a modal overlay by restoring the `hidden` attribute. */
+        /** Closes a modal overlay and restores focus to its trigger when possible. */
         function closeModal(id: string): void {
-          document.getElementById(id)!.setAttribute("hidden", "");
+          const modal = document.getElementById(id);
+          if (!modal) return;
+          modal.setAttribute("hidden", "");
+
+          if (activeModalId === id) {
+            activeModalId = null;
+            modalReturnFocusEl?.focus();
+            modalReturnFocusEl = null;
+          }
+        }
+
+        /** Keeps keyboard focus trapped within the currently open modal. */
+        function trapFocusInActiveModal(event: KeyboardEvent): void {
+          if (event.key !== "Tab" || !activeModalId) return;
+
+          const modal = document.getElementById(activeModalId);
+          if (!(modal instanceof HTMLElement) || modal.hasAttribute("hidden")) return;
+
+          const focusable = getModalFocusableElements(modal);
+          if (focusable.length === 0) return;
+
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          const active = document.activeElement;
+
+          if (event.shiftKey) {
+            if (active === first || !modal.contains(active)) {
+              event.preventDefault();
+              last.focus();
+            }
+            return;
+          }
+
+          if (active === last) {
+            event.preventDefault();
+            first.focus();
+          }
         }
 
         // ===========================================================
@@ -2611,15 +2718,23 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         document.querySelectorAll(".modal-overlay").forEach((overlay) => {
           overlay.addEventListener("click", (e) => {
             if (e.target === overlay) {
-              overlay.setAttribute("hidden", "");
+              const overlayId = (overlay as HTMLElement).id;
+              closeModal(overlayId);
             }
           });
         });
 
         // Escape closes all currently open modal overlays
         document.addEventListener("keydown", (e) => {
+          trapFocusInActiveModal(e);
+
           if (e.key === "Escape") {
-            document.querySelectorAll(".modal-overlay:not([hidden])").forEach((m) => m.setAttribute("hidden", ""));
+            if (activeModalId) {
+              closeModal(activeModalId);
+              return;
+            }
+
+            document.querySelectorAll<HTMLElement>(".modal-overlay:not([hidden])").forEach((modal) => closeModal(modal.id));
           }
         });
 
@@ -2641,22 +2756,45 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         document.getElementById("export-btn")!.addEventListener("click", async () => {
           const code = await encodeState(state);
           (document.getElementById("export-code") as HTMLTextAreaElement).value = code;
+          const exportWarning = document.getElementById("export-url-warning");
+          const previewUrl = `${window.location.origin}${window.location.pathname}#data=${code}`;
+          if (previewUrl.length > SAFE_SHARE_URL_LENGTH) {
+            exportWarning?.removeAttribute("hidden");
+          } else {
+            exportWarning?.setAttribute("hidden", "");
+          }
           openModal("export-modal");
         });
 
-        document.getElementById("copy-code-btn")!.addEventListener("click", () => {
+        document.getElementById("copy-code-btn")!.addEventListener("click", async () => {
           const code = (document.getElementById("export-code") as HTMLTextAreaElement).value;
-          navigator.clipboard.writeText(code).then(() => {
-            showToast({ type: "success", icon: "✓", title: "Copied", text: "Paste this on another device to sync." });
-          });
+          const copyResult = await copyTextWithFallback(code);
+
+          if (copyResult === "copied" || copyResult === "fallback-copied") {
+            showToast({ type: "success", icon: "✓", title: "Code copied", text: "Paste this on another device to sync." });
+            return;
+          }
+
+          showToast({ type: "info", icon: "!", title: "Copy blocked", text: "Clipboard access is unavailable. Select the export code manually and copy it." });
         });
 
         document.getElementById("copy-url-btn")!.addEventListener("click", async () => {
           await syncShareUrl(state, false);
           const url = window.location.href;
-          navigator.clipboard.writeText(url).then(() => {
-            showToast({ type: "success", icon: "✓", title: "URL copied", text: "Open this URL on another device to import." });
-          });
+          const copyResult = await copyTextWithFallback(url);
+          const urlIsLong = url.length > SAFE_SHARE_URL_LENGTH;
+
+          if (copyResult === "copied" || copyResult === "fallback-copied") {
+            showToast({
+              type: urlIsLong ? "info" : "success",
+              icon: urlIsLong ? "!" : "✓",
+              title: urlIsLong ? "URL copied (long)" : "URL copied",
+              text: urlIsLong ? "This link may be too long in some apps. Prefer code export if import fails." : "Open this URL on another device to import.",
+            });
+            return;
+          }
+
+          showToast({ type: "info", icon: "!", title: "Copy blocked", text: "Clipboard access is unavailable. Copy the URL from your browser address bar." });
         });
 
         // Import flow (merge imported payload into local state)
@@ -2668,16 +2806,60 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         document.getElementById("do-import-btn")!.addEventListener("click", async () => {
           const code = (document.getElementById("import-code") as HTMLTextAreaElement).value.trim();
           if (!code) return;
+
           const imported = await decodeState(code);
           if (!imported) {
-            showToast({ type: "info", icon: "!", title: "Invalid import code", text: "Please check the code and try again." });
+            showToast({ type: "info", icon: "!", title: "Decode failed", text: "Import code could not be decoded. Verify the full code and try again." });
             return;
           }
-          state = mergeStates(state, imported);
+
+          const previousStateSerialized = JSON.stringify(state);
+
+          let incomingAdded = 0;
+          let incomingUpdated = 0;
+          const localById = new Map(state.tasks.map((task) => [task.id, task]));
+          imported.tasks.forEach((task) => {
+            const localTask = localById.get(task.id);
+            if (!localTask) {
+              incomingAdded++;
+              return;
+            }
+
+            if (taskFreshnessScore(task) > taskFreshnessScore(localTask)) {
+              incomingUpdated++;
+            }
+          });
+
+          const merged = mergeStates(state, imported);
+          const mergedStateSerialized = JSON.stringify(merged);
+          const hasNetChanges = mergedStateSerialized !== previousStateSerialized;
+
+          if (!hasNetChanges) {
+            showToast({ type: "info", icon: "i", title: "No changes imported", text: "This code matches your current tracker state." });
+            return;
+          }
+
+          state = merged;
           await saveState(state);
           closeModal("import-modal");
           renderAll();
-          showToast({ type: "success", icon: "✓", title: "Data imported", text: "Your tasks have been merged." });
+
+          const unchangedIncoming = Math.max(0, imported.tasks.length - incomingAdded - incomingUpdated);
+          showToast({
+            type: "success",
+            icon: "✓",
+            title: "Import merged",
+            text: `Added ${incomingAdded}, updated ${incomingUpdated}${unchangedIncoming > 0 ? `, unchanged ${unchangedIncoming}` : ""}.`,
+          });
+
+          if (unchangedIncoming > 0) {
+            showToast({ type: "info", icon: "i", title: "Partial merge", text: "Some imported tasks were already up to date, so no changes were applied for those items." });
+          }
+
+          const importedTaskCount = imported.tasks.length;
+          if (code.length > LARGE_IMPORT_CODE_THRESHOLD || importedTaskCount > LARGE_IMPORT_TASK_THRESHOLD) {
+            showToast({ type: "info", icon: "!", title: "Large import", text: "Large imports can create long share links. Use code export if URL import becomes unreliable." });
+          }
         });
 
         // ===========================================================

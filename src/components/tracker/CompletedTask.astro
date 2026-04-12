@@ -145,7 +145,8 @@ const { id, title, completedAtLabel, xp } = Astro.props;
     padding: $space-sm $space-md;
 
     @include respond-to(sm) {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto 1fr auto;
+      gap: $space-sm;
     }
 
     &__check {
@@ -209,10 +210,6 @@ const { id, title, completedAtLabel, xp } = Astro.props;
     &__actions {
       display: flex;
       gap: $space-xs;
-
-      @include respond-to(sm) {
-        display: none;
-      }
     }
 
     &__action-btn {
@@ -224,7 +221,7 @@ const { id, title, completedAtLabel, xp } = Astro.props;
       color: $color-danger-text;
       cursor: pointer;
       display: inline-flex;
-      height: 30px;
+      height: 34px;
       justify-content: center;
       padding: 0;
       @include tracker-transition(all);
