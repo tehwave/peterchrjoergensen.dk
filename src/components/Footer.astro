@@ -5,15 +5,20 @@
  * Combines social links with a call-to-action, avoiding a separate contact page.
  * rel="me" on social links enables IndieWeb identity verification.
  */
-type Props = Record<string, never>;
+interface Props {
+  label?: string;
+  heading?: string;
+}
+
+const { label = "I'm open to talk shop", heading = "Got something worth building?" } = Astro.props;
 ---
 
 <footer class="footer" id="contact">
   <div class="footer__container">
     <div class="footer__content">
       <div class="footer__heading-group">
-        <span class="footer__label">I'm open to talk shop</span>
-        <h2 class="footer__heading">Got something worth building?</h2>
+        <span class="footer__label">{label}</span>
+        <h2 class="footer__heading">{heading}</h2>
       </div>
       <div class="footer__info">
         <p class="footer__text">

@@ -1,0 +1,251 @@
+---
+/**
+ * Completed task card component.
+ *
+ * This component renders one completed-task item and emits semantic
+ * intents (`tracker-completed-task-uncomplete`, `tracker-completed-task-archive`).
+ * It intentionally does not mutate canonical tracker state itself.
+ *
+ * Render payload for a single completed-task card.
+ */
+interface Props {
+  id: string;
+  title: string;
+  typeLabel?: string;
+  completedAtLabel: string;
+  xp: number;
+}
+
+const { id, title, completedAtLabel, xp } = Astro.props;
+---
+
+<tracker-completed-task class="completed-item" role="listitem" data-completed-id={id}>
+  <span
+    class="completed-item__check"
+    aria-hidden="true"
+    style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:none;border:none;overflow:visible;pointer-events:none;user-select:none;cursor:default;"
+  >
+    <svg viewBox="0 0 640 640" fill="currentColor" style="display:block;width:36px;height:36px;flex:none;">
+      <path
+        d="M372.9 113.4C378.1 106.3 376.5 96.3 369.4 91C362.3 85.7 352.3 87.4 347 94.5L218 271.4L163.2 216.6C157 210.4 146.8 210.4 140.6 216.6C134.4 222.8 134.4 233 140.6 239.2L208.6 307.2C211.9 310.5 216.5 312.2 221.2 311.8C225.9 311.4 230.1 309.1 232.9 305.3L372.9 113.3zM504.9 245.4C510.1 238.3 508.5 228.3 501.4 223C494.3 217.7 484.3 219.4 479 226.5L280 499.4L191.2 410.6C185 404.4 174.8 404.4 168.6 410.6C162.4 416.8 162.4 427 168.6 433.2L270.6 535.2C273.9 538.5 278.5 540.2 283.2 539.8C287.9 539.4 292.1 537.1 294.9 533.3L504.9 245.3z"
+      ></path>
+    </svg>
+  </span>
+  <div class="completed-item__info">
+    <span class="completed-item__title" data-completed-title>{title}</span>
+    <div class="completed-item__meta">
+      <span data-completed-date>{completedAtLabel}</span>
+      <span class="completed-item__xp" data-completed-xp>+{xp} XP</span>
+    </div>
+  </div>
+  <div class="completed-item__actions">
+    <button class="completed-item__action-btn completed-item__action-btn--uncomplete" data-action="uncomplete-task" type="button" aria-label="Mark task as active again">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        style="display:block;width:15px;height:15px;flex:none;"
+      >
+        <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+        <path d="M3 4v5h5"></path>
+      </svg>
+    </button>
+    <button class="completed-item__action-btn" data-action="archive-completed" type="button" aria-label="Archive completed task">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        style="display:block;width:15px;height:15px;flex:none;"
+      >
+        <path d="M3 6h18"></path>
+        <path d="M8 6V4h8v2"></path>
+        <path d="M19 6l-1 14H6L5 6"></path>
+        <path d="M10 11v6"></path>
+        <path d="M14 11v6"></path>
+      </svg>
+    </button>
+  </div>
+</tracker-completed-task>
+
+<script is:inline>
+  /**
+   * Card-local controller for completed-task interactions.
+   *
+   * This component only emits semantic intent events and leaves
+   * canonical state mutation to `tracker.astro`.
+   */
+  class TrackerCompletedTask extends HTMLElement {
+    /**
+     * Wires one delegated click listener once per element instance.
+     */
+    connectedCallback() {
+      if (this.dataset.completedTaskInitialized === "true") return;
+      this.dataset.completedTaskInitialized = "true";
+
+      this.addEventListener("click", (event) => {
+        const target = event.target;
+        const uncompleteBtn = target instanceof Element ? target.closest("[data-action='uncomplete-task']") : null;
+        const archiveBtn = target instanceof Element ? target.closest("[data-action='archive-completed']") : null;
+        if (!uncompleteBtn && !archiveBtn) return;
+
+        const id = this.dataset.completedId ?? "";
+        if (!id) return;
+
+        if (uncompleteBtn) {
+          this.dispatchEvent(
+            new CustomEvent("tracker-completed-task-uncomplete", {
+              bubbles: true,
+              detail: { id },
+            }),
+          );
+          return;
+        }
+
+        // Bubble intent upward so the page-level orchestrator can mutate state.
+        this.dispatchEvent(
+          new CustomEvent("tracker-completed-task-archive", {
+            bubbles: true,
+            detail: { id },
+          }),
+        );
+      });
+    }
+  }
+
+  if (!customElements.get("tracker-completed-task")) {
+    customElements.define("tracker-completed-task", TrackerCompletedTask);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-completed-task {
+    display: block;
+  }
+
+  .completed-item {
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    align-items: center;
+    backdrop-filter: blur(2px);
+    border-radius: $radius-md;
+    display: grid;
+    gap: $space-md;
+    grid-template-columns: auto 1fr auto;
+    min-height: 0;
+    padding: $space-sm $space-md;
+
+    @include respond-to(sm) {
+      grid-template-columns: auto 1fr auto;
+      gap: $space-sm;
+    }
+
+    &__check {
+      align-items: center;
+      color: rgba(5, 150, 105, 0.85);
+      cursor: default;
+      display: inline-flex;
+      height: 24px;
+      justify-content: center;
+      overflow: visible;
+      pointer-events: none;
+      user-select: none;
+      width: 24px;
+
+      svg {
+        height: 36px;
+        width: 36px;
+      }
+    }
+
+    &__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    &__title {
+      color: $color-text-primary;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      opacity: 0.7;
+      text-decoration: line-through;
+    }
+
+    &__meta {
+      color: $tracker-soft-text;
+      display: flex;
+      flex-wrap: wrap;
+      font-size: $font-size-xs;
+      gap: $space-sm;
+
+      > span + span {
+        align-items: center;
+        display: inline-flex;
+
+        &::before {
+          color: $tracker-soft-text;
+          content: "•";
+          margin-right: $space-sm;
+          opacity: 0.55;
+        }
+      }
+    }
+
+    &__xp {
+      color: $color-orange;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+    }
+
+    &__actions {
+      display: flex;
+      gap: $space-xs;
+    }
+
+    &__action-btn {
+      align-items: center;
+      aspect-ratio: 1;
+      background: $color-danger-bg;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 999px;
+      color: $color-danger-text;
+      cursor: pointer;
+      display: inline-flex;
+      height: 34px;
+      justify-content: center;
+      padding: 0;
+      @include tracker-transition(all);
+      @include focus-ring;
+
+      svg {
+        height: 15px;
+        width: 15px;
+      }
+
+      &:hover {
+        background: $color-danger-bg-hover;
+        transform: translateY(-1px);
+      }
+
+      &--uncomplete {
+        background: rgba(10, 73, 177, 0.12);
+        border-color: rgba(10, 73, 177, 0.24);
+        color: $color-blue;
+
+        &:hover {
+          background: rgba(10, 73, 177, 0.2);
+        }
+      }
+    }
+  }
+</style>

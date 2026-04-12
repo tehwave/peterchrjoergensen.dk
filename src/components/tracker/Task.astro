@@ -1,0 +1,957 @@
+---
+/**
+ * Task card component (markup + card-local interaction controller).
+ *
+ * Responsibilities:
+ * - Local interactions: drag visuals, inline title editing, keyboard move intents
+ * - Visual decay affordances: decay progress bar + fire/stink particle rendering
+ * - Emitting semantic events (`tracker-task-*`) for page-level orchestration
+ *
+ * Canonical state mutation remains in `src/pages/tracker.astro`.
+ */
+import type { DecayLevel, TaskType } from "../../types/tracker";
+
+interface Props {
+  id: string;
+  title: string;
+  type: TaskType;
+  decay: DecayLevel;
+  decayProgress?: number;
+  isDragging?: boolean;
+  isDropTarget?: boolean;
+}
+
+const { id, title, type, decay, decayProgress = 0, isDragging = false, isDropTarget = false } = Astro.props;
+const safeDecayProgress = Math.min(100, Math.max(0, decayProgress));
+---
+
+<tracker-task-card-v2
+  class:list={[
+    "task-card",
+    `task-card--${decay}`,
+    {
+      "task-card--dragging": isDragging,
+      "task-card--drop-target": isDropTarget,
+    },
+  ]}
+  role="listitem"
+  draggable="true"
+  tabindex="0"
+  data-id={id}
+  data-title={title}
+  data-type={type}
+  data-decay={decay}
+>
+  <div class="task-card__row">
+    <span class="task-card__drag-handle" aria-hidden="true">⋮⋮</span>
+
+    <button class="task-card__action-btn task-card__action-btn--done" data-action="complete" type="button" aria-label="Complete task">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m5 12 5 5 9-9"></path>
+      </svg>
+    </button>
+
+    <div class="task-card__title-wrap">
+      <p class="task-card__title" data-task-title title="Double-click to rename">{title}</p>
+      <input class="task-card__title-input" data-task-title-input type="text" maxlength="120" aria-label="Edit task title" hidden />
+    </div>
+
+    <div class="task-card__items" role="group" aria-label="Task status and actions">
+      <span class="task-card__decay-label task-card__decay-label--stale" data-task-decay-label="stale">Stale</span>
+      <span class="task-card__decay-label task-card__decay-label--rotten" data-task-decay-label="rotten">Old</span>
+      <button class="task-card__action-btn task-card__action-btn--delete" data-action="delete" type="button" aria-label="Delete task">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18"></path>
+          <path d="M8 6V4h8v2"></path>
+          <path d="M19 6l-1 14H6L5 6"></path>
+          <path d="M10 11v6"></path>
+          <path d="M14 11v6"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="task-card__decay-bar" data-task-decay-bar style={`width: ${safeDecayProgress}%`} hidden={decay === "fresh"}></div>
+
+  <div class:list={["fire-particles", `fire-particles--${decay}`]} data-task-particles aria-hidden="true">
+    <canvas class="fire-particles__canvas" data-task-particles-canvas></canvas>
+  </div>
+</tracker-task-card-v2>
+
+<script is:inline>
+  const TITLE_MIN_LENGTH = 1;
+    /** Particle behavior presets by decay severity. */
+  const PARTICLE_VARIANTS = {
+    stale: {
+      count: 10,
+      speedMin: 9,
+      speedMax: 18,
+      sizeMin: 16,
+      sizeMax: 24,
+      ttlMin: 1200,
+      ttlMax: 1900,
+      hueMin: 22,
+      hueMax: 42,
+      alpha: 0.9,
+    },
+    rotten: {
+      count: 15,
+      speedMin: 12,
+      speedMax: 24,
+      sizeMin: 18,
+      sizeMax: 28,
+      ttlMin: 1000,
+      ttlMax: 1650,
+      hueMin: 10,
+      hueMax: 30,
+      alpha: 1,
+    },
+  };
+  /** Particle renderer cadence cap for a stable CPU budget. */
+  const PARTICLE_FRAME_INTERVAL_MS = 1000 / 24;
+
+  /** Returns a random number in `[min, max]`. */
+  function pick(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  /**
+   * Custom element powering task-card local UX.
+   * Emits intents only; state writes happen upstream.
+   */
+  class TrackerTaskCardV2 extends HTMLElement {
+    constructor() {
+      super();
+      this.titleEl = null;
+      this.titleInputEl = null;
+      this.particlesContainerEl = null;
+      this.isEditing = false;
+      this.particleCanvasEl = null;
+      this.particleCtx = null;
+      this.particles = [];
+      this.activeParticleVariant = null;
+      this.particleFrameId = 0;
+      this.lastParticleFrameAt = 0;
+      this.cardWidth = 0;
+      this.cardHeight = 0;
+      this.resizeObserver = null;
+      this.motionMediaQuery = null;
+      this.handleMotionChange = () => {
+        this.syncParticles();
+      };
+      this.dragGhostEl = null;
+      this.accumulatedParticleMs = 0;
+      this.boundDocumentDragStart = () => {
+        this.syncParticles();
+      };
+      this.boundDocumentDragEnd = () => {
+        this.syncParticles();
+      };
+      this.boundParticlesResume = () => {
+        this.syncParticles();
+      };
+    }
+
+    /** Initializes card-local listeners and visual subsystems once. */
+    connectedCallback() {
+      if (this.dataset.taskCardInitialized === "true") return;
+      this.dataset.taskCardInitialized = "true";
+
+      this.titleEl = this.querySelector("[data-task-title]");
+      this.titleInputEl = this.querySelector("[data-task-title-input]");
+      this.particlesContainerEl = this.querySelector("[data-task-particles]");
+
+      this.syncTitleFromDataset();
+      this.syncParticlesContainerClass();
+      this.setupInlineEditing();
+      this.setupActionButtons();
+      this.setupParticles();
+      document.addEventListener("tracker-task-dragstart", this.boundDocumentDragStart);
+      document.addEventListener("tracker-task-dragend", this.boundDocumentDragEnd);
+      document.addEventListener("tracker-particles-resume", this.boundParticlesResume);
+
+      this.addEventListener("dragstart", (event) => {
+        if (this.isEditing) {
+          event.preventDefault();
+          return;
+        }
+
+        this.classList.add("task-card--dragging");
+        event.dataTransfer?.setData("text/plain", this.dataset.id ?? "");
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = "move";
+          this.configureDragImage(event.dataTransfer);
+        }
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-task-dragstart", {
+            bubbles: true,
+            detail: {
+              id: this.dataset.id ?? "",
+              title: this.dataset.title ?? "",
+            },
+          }),
+        );
+      });
+
+      this.addEventListener("dragend", () => {
+        this.classList.remove("task-card--dragging");
+        document.querySelectorAll(".task-grid.drag-over").forEach((grid) => grid.classList.remove("drag-over"));
+        document.querySelectorAll(".task-card--drop-target").forEach((card) => card.classList.remove("task-card--drop-target"));
+        this.cleanupDragGhost();
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-task-dragend", {
+            bubbles: true,
+          }),
+        );
+      });
+
+      this.addEventListener("dragover", (event) => {
+        if (this.isEditing) return;
+
+        event.preventDefault();
+
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = "move";
+        }
+
+        const activeDragging = document.querySelector(".task-card--dragging");
+        document.querySelectorAll(".task-card--drop-target").forEach((card) => {
+          if (card !== this) {
+            card.classList.remove("task-card--drop-target");
+          }
+        });
+
+        if (activeDragging?.dataset.id !== this.dataset.id) {
+          this.classList.add("task-card--drop-target");
+        }
+      });
+
+      this.addEventListener("keydown", (event) => {
+        if (!(event instanceof KeyboardEvent)) return;
+        if (!event.altKey || this.isEditing) return;
+
+        const moveDirectionByKey = {
+          ArrowLeft: "left",
+          ArrowRight: "right",
+          ArrowUp: "up",
+          ArrowDown: "down",
+        };
+
+        const direction = moveDirectionByKey[event.key];
+        if (!direction) return;
+
+        event.preventDefault();
+        this.emitMoveIntent(direction);
+      });
+    }
+
+    /** Cleans listeners, observers, and animation loops on detach. */
+    disconnectedCallback() {
+      this.stopParticles();
+      document.removeEventListener("tracker-task-dragstart", this.boundDocumentDragStart);
+      document.removeEventListener("tracker-task-dragend", this.boundDocumentDragEnd);
+      document.removeEventListener("tracker-particles-resume", this.boundParticlesResume);
+      if (this.motionMediaQuery) {
+        this.motionMediaQuery.removeEventListener("change", this.handleMotionChange);
+      }
+    }
+
+    /** Bootstraps particle canvas, media query hooks, and initial sync. */
+    setupParticles() {
+      this.particleCanvasEl = this.querySelector("[data-task-particles-canvas]");
+      if (!(this.particleCanvasEl instanceof HTMLCanvasElement)) return;
+
+      this.particleCtx = this.particleCanvasEl.getContext("2d", { alpha: true });
+      if (!this.particleCtx) return;
+
+      this.motionMediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      this.motionMediaQuery.addEventListener("change", this.handleMotionChange);
+
+      this.syncParticles();
+    }
+
+    /** Syncs decay modifier class on the particle container wrapper. */
+    syncParticlesContainerClass() {
+      const particlesContainer = this.particlesContainerEl;
+      if (!(particlesContainer instanceof HTMLElement)) return;
+
+      const decayState = this.dataset.decay ?? "fresh";
+      particlesContainer.classList.remove("fire-particles--fresh", "fire-particles--stale", "fire-particles--rotten");
+      particlesContainer.classList.add(`fire-particles--${decayState}`);
+      particlesContainer.hidden = false;
+    }
+
+    /** Starts/stops particles based on decay state, motion prefs, and drag state. */
+    syncParticles() {
+      this.syncParticlesContainerClass();
+
+      const decayState = this.dataset.decay ?? "fresh";
+      const variant = decayState === "stale" || decayState === "rotten" ? decayState : null;
+      const canAnimate = !this.motionMediaQuery?.matches;
+      const isDraggingAnyTask = document.querySelector(".task-card--dragging") !== null;
+
+      if (!variant || !canAnimate || isDraggingAnyTask) {
+        this.stopParticles();
+        return;
+      }
+
+      this.startParticles(variant);
+    }
+
+    /** Starts particle simulation/rendering for the given variant profile. */
+    startParticles(variant) {
+      if (!this.particleCanvasEl || !this.particleCtx) return;
+
+      const shouldRebuild = this.activeParticleVariant !== variant || this.particles.length === 0;
+
+      this.activeParticleVariant = variant;
+      this.syncParticleCanvasSize();
+
+      if (shouldRebuild) {
+        this.rebuildParticles();
+      }
+
+      if (!this.resizeObserver) {
+        this.resizeObserver = new ResizeObserver(() => {
+          this.syncParticleCanvasSize();
+          this.rebuildParticles();
+        });
+        this.resizeObserver.observe(this);
+      }
+
+      if (this.particleFrameId) return;
+
+      this.lastParticleFrameAt = performance.now();
+      this.accumulatedParticleMs = 0;
+      const frame = (time) => {
+        const deltaMs = Math.min(48, time - this.lastParticleFrameAt);
+        this.lastParticleFrameAt = time;
+
+        this.accumulatedParticleMs += deltaMs;
+        if (this.accumulatedParticleMs >= PARTICLE_FRAME_INTERVAL_MS) {
+          const renderDeltaSeconds = this.accumulatedParticleMs / 1000;
+          this.accumulatedParticleMs = 0;
+          this.renderParticles(renderDeltaSeconds);
+        }
+
+        this.particleFrameId = requestAnimationFrame(frame);
+      };
+
+      this.particleFrameId = requestAnimationFrame(frame);
+    }
+
+    /** Stops particle rendering and tears down related observers/resources. */
+    stopParticles() {
+      if (this.particleFrameId) {
+        cancelAnimationFrame(this.particleFrameId);
+        this.particleFrameId = 0;
+      }
+
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
+
+      this.particles = [];
+      this.activeParticleVariant = null;
+
+      if (this.particleCtx) {
+        this.particleCtx.clearRect(0, 0, this.cardWidth, this.cardHeight);
+      }
+    }
+
+    /** Resizes high-DPI canvas to match card bounds and device pixel ratio. */
+    syncParticleCanvasSize() {
+      if (!this.particleCanvasEl || !this.particleCtx) return;
+
+      const rect = this.getBoundingClientRect();
+      this.cardWidth = Math.max(0, rect.width);
+      this.cardHeight = Math.max(0, rect.height);
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.particleCanvasEl.width = Math.max(1, Math.floor(this.cardWidth * dpr));
+      this.particleCanvasEl.height = Math.max(1, Math.floor(this.cardHeight * dpr));
+      this.particleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    /** Re-seeds particle pool for current variant and card dimensions. */
+    rebuildParticles() {
+      const config = this.activeParticleVariant ? PARTICLE_VARIANTS[this.activeParticleVariant] : null;
+      if (!config || !this.cardWidth || !this.cardHeight) {
+        this.particles = [];
+        return;
+      }
+
+      this.particles = Array.from({ length: config.count }, () => this.createParticle(config, true));
+    }
+
+    /** Creates one particle with randomized motion/lifetime properties. */
+    createParticle(config, randomizeAge = false) {
+      const ttl = pick(config.ttlMin, config.ttlMax);
+      const life = randomizeAge ? pick(0, ttl) : 0;
+      const variantBoost = this.activeParticleVariant === "rotten" ? 1.12 : 1;
+      const travelRatio = pick(0.2, 0.42) * variantBoost;
+      const usableWidth = Math.max(20, this.cardWidth - 12);
+
+      return {
+        baseX: 6 + Math.random() * usableWidth,
+        startY: this.cardHeight + pick(-6, 8),
+        rise: Math.max(28, this.cardHeight * travelRatio),
+        drift: pick(-26, 26),
+        wobbleAmp: pick(2.5, 11),
+        wobbleFreq: pick(0.65, 1.9),
+        wobblePhase: pick(0, Math.PI * 2),
+        size: pick(config.sizeMin, config.sizeMax),
+        hue: pick(config.hueMin, config.hueMax),
+        life,
+        ttl,
+        spawnDelay: randomizeAge ? 0 : pick(0, ttl * 0.2),
+        spin: pick(-0.28, 0.28),
+        tilt: pick(-0.2, 0.2),
+      };
+    }
+
+    /** Advances particle simulation and paints the frame to canvas. */
+    renderParticles(deltaSeconds) {
+      if (!this.particleCtx || !this.activeParticleVariant) return;
+
+      const config = PARTICLE_VARIANTS[this.activeParticleVariant];
+      this.particleCtx.clearRect(0, 0, this.cardWidth, this.cardHeight);
+
+      for (let index = 0; index < this.particles.length; index += 1) {
+        const particle = this.particles[index];
+
+        if (particle.spawnDelay > 0) {
+          particle.spawnDelay -= deltaSeconds * 1000;
+          continue;
+        }
+
+        particle.life += deltaSeconds * 1000;
+        const progress = Math.max(0, Math.min(1, particle.life / particle.ttl));
+
+        if (progress >= 1) {
+          this.particles[index] = this.createParticle(config);
+          continue;
+        }
+
+        const eased = 1 - (1 - progress) * (1 - progress);
+        const drawX = particle.baseX + particle.drift * eased + Math.sin(progress * Math.PI * 2 * particle.wobbleFreq + particle.wobblePhase) * particle.wobbleAmp;
+        const drawY = particle.startY - particle.rise * eased;
+
+        if (drawY < -22 || drawX < -22 || drawX > this.cardWidth + 22) {
+          this.particles[index] = this.createParticle(config);
+          continue;
+        }
+
+        const alpha = (1 - progress) * config.alpha;
+        const rotation = particle.tilt + particle.spin * progress;
+
+        this.particleCtx.save();
+        this.particleCtx.translate(drawX, drawY);
+        this.particleCtx.rotate(rotation);
+        this.particleCtx.globalAlpha = alpha;
+
+        this.particleCtx.beginPath();
+        this.particleCtx.fillStyle = "rgba(255, 120, 32, 0.28)";
+        this.particleCtx.arc(0, 0, particle.size * 0.38, 0, Math.PI * 2);
+        this.particleCtx.fill();
+
+        this.particleCtx.font = `${particle.size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        this.particleCtx.textAlign = "center";
+        this.particleCtx.textBaseline = "middle";
+        this.particleCtx.fillText("🔥", 0, 0);
+        this.particleCtx.restore();
+      }
+    }
+
+    /** Synchronizes title text/input from card dataset attributes. */
+    syncTitleFromDataset() {
+      if (!this.titleEl || !this.titleInputEl) return;
+      const title = (this.dataset.title ?? "").trim();
+      if (!title) return;
+      this.titleEl.textContent = title;
+      this.titleInputEl.value = title;
+    }
+
+    /** Delegates action-button clicks and emits semantic task intents. */
+    setupActionButtons() {
+      this.addEventListener("click", (event) => {
+        const target = event.target;
+        const btn = target instanceof Element ? target.closest("[data-action]") : null;
+        if (!btn) return;
+
+        const id = this.dataset.id ?? "";
+        if (!id) return;
+
+        const action = btn.dataset.action;
+        if (action === "complete") {
+          this.dispatchEvent(
+            new CustomEvent("tracker-task-complete", {
+              bubbles: true,
+              detail: { id },
+            }),
+          );
+        }
+
+        if (action === "delete") {
+          this.dispatchEvent(
+            new CustomEvent("tracker-task-delete", {
+              bubbles: true,
+              detail: { id },
+            }),
+          );
+        }
+
+        if (action === "move-left") {
+          this.emitMoveIntent("left");
+        }
+
+        if (action === "move-right") {
+          this.emitMoveIntent("right");
+        }
+
+        if (action === "move-up") {
+          this.emitMoveIntent("up");
+        }
+
+        if (action === "move-down") {
+          this.emitMoveIntent("down");
+        }
+      });
+    }
+
+    /** Emits directional move intent for keyboard and button navigation paths. */
+    emitMoveIntent(direction) {
+      const id = this.dataset.id ?? "";
+      if (!id) return;
+
+      this.dispatchEvent(
+        new CustomEvent("tracker-task-move", {
+          bubbles: true,
+          detail: { id, direction },
+        }),
+      );
+    }
+
+    /** Builds a temporary drag ghost used as custom drag image. */
+    configureDragImage(dataTransfer) {
+      this.cleanupDragGhost();
+
+      const ghost = this.cloneNode(true);
+      if (!(ghost instanceof HTMLElement)) return;
+
+      ghost.classList.remove("task-card--drop-target", "task-card--landed");
+      ghost.classList.add("task-card--ghost");
+      ghost.style.width = `${this.offsetWidth}px`;
+      ghost.style.maxWidth = `${this.offsetWidth}px`;
+      ghost.style.position = "fixed";
+      ghost.style.top = "-10000px";
+      ghost.style.left = "-10000px";
+      ghost.style.pointerEvents = "none";
+
+      document.body.appendChild(ghost);
+      this.dragGhostEl = ghost;
+
+      const offsetX = Math.max(16, Math.floor(this.offsetWidth * 0.2));
+      const offsetY = Math.max(16, Math.floor(this.offsetHeight * 0.4));
+      dataTransfer.setDragImage(ghost, offsetX, offsetY);
+
+      requestAnimationFrame(() => {
+        this.cleanupDragGhost();
+      });
+    }
+
+    /** Removes temporary drag ghost from the DOM if present. */
+    cleanupDragGhost() {
+      if (!(this.dragGhostEl instanceof HTMLElement)) return;
+      this.dragGhostEl.remove();
+      this.dragGhostEl = null;
+    }
+
+    /** Wires inline title editing interactions (dblclick, enter/escape, blur). */
+    setupInlineEditing() {
+      if (!this.titleEl || !this.titleInputEl) return;
+
+      this.titleEl.addEventListener("dblclick", (event) => {
+        event.preventDefault();
+        this.startInlineEdit();
+      });
+
+      this.titleInputEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          this.commitInlineEdit();
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.cancelInlineEdit();
+        }
+      });
+
+      this.titleInputEl.addEventListener("blur", () => {
+        if (!this.isEditing) return;
+        this.commitInlineEdit();
+      });
+    }
+
+    /** Enters inline-edit mode and moves focus into the title input. */
+    startInlineEdit() {
+      if (!this.titleEl || !this.titleInputEl || this.isEditing) return;
+
+      this.isEditing = true;
+      this.classList.add("task-card--editing");
+      this.titleInputEl.value = this.dataset.title ?? this.titleEl.textContent ?? "";
+      this.titleEl.setAttribute("hidden", "true");
+      this.titleInputEl.hidden = false;
+      this.titleInputEl.focus();
+      this.titleInputEl.select();
+    }
+
+    /** Commits inline title edit and emits rename event when value changed. */
+    commitInlineEdit() {
+      if (!this.titleEl || !this.titleInputEl || !this.isEditing) return;
+
+      const nextTitle = this.titleInputEl.value.trim();
+      if (nextTitle.length < TITLE_MIN_LENGTH) {
+        this.cancelInlineEdit();
+        return;
+      }
+
+      const previousTitle = this.dataset.title ?? this.titleEl.textContent ?? "";
+      this.finishInlineEdit(nextTitle);
+
+      if (nextTitle !== previousTitle) {
+        this.dispatchEvent(
+          new CustomEvent("tracker-task-titlechange", {
+            bubbles: true,
+            detail: { id: this.dataset.id ?? "", title: nextTitle },
+          }),
+        );
+      }
+    }
+
+    /** Cancels inline edit and restores previous title value. */
+    cancelInlineEdit() {
+      if (!this.titleEl || !this.titleInputEl) return;
+      const fallback = this.dataset.title ?? this.titleEl.textContent ?? "";
+      this.finishInlineEdit(fallback);
+    }
+
+    /** Finalizes inline edit UI state and writes the final title to dataset/DOM. */
+    finishInlineEdit(finalTitle) {
+      if (!this.titleEl || !this.titleInputEl) return;
+
+      const next = finalTitle.trim();
+      this.dataset.title = next;
+      this.titleEl.textContent = next;
+      this.titleInputEl.value = next;
+
+      this.titleInputEl.hidden = true;
+      this.titleEl.removeAttribute("hidden");
+      this.isEditing = false;
+      this.classList.remove("task-card--editing");
+    }
+  }
+
+  if (!customElements.get("tracker-task-card-v2")) {
+    customElements.define("tracker-task-card-v2", TrackerTaskCardV2);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-task-card-v2 {
+    display: block;
+  }
+
+  .task-card {
+    @include elevated-panel($color-white, $tracker-card-stroke, $shadow-sm);
+    border-radius: $radius-md;
+    padding: $space-sm $space-md;
+    cursor: grab;
+    position: relative;
+    overflow: hidden;
+    @include tracker-transition(all);
+
+    &:hover {
+      box-shadow: $shadow-lg;
+      transform: translateY(-2px);
+      border-color: $tracker-card-stroke;
+      background: $color-white;
+
+      .task-card__drag-handle {
+        opacity: 0.9;
+      }
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--dragging {
+      opacity: 0.52;
+      transform: rotate(0.65deg) scale(0.985);
+      box-shadow: 0 14px 28px rgba(17, 24, 39, 0.22);
+    }
+
+    &--drop-target {
+      box-shadow: 0 0 0 3px rgba(41, 136, 250, 0.28);
+    }
+
+    &--editing {
+      cursor: text;
+    }
+
+    &--landed {
+      animation: card-land-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &--stale {
+      background: $color-decay-stale-bg;
+
+      .task-card__decay-label--stale {
+        display: inline-flex;
+      }
+    }
+
+    &--rotten {
+      background: linear-gradient(165deg, rgba(249, 115, 22, 0.12), rgba(239, 68, 68, 0.12)), #fff5f5;
+      filter: saturate(1.15);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(239, 68, 68, 0.1) 8px, rgba(249, 115, 22, 0.1) 16px);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .task-card__decay-label--rotten {
+        display: inline-flex;
+      }
+    }
+
+    &__row {
+      align-items: center;
+      display: grid;
+      gap: $space-sm;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
+      min-height: 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__drag-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: $tracker-muted-text;
+      font-size: 0.95rem;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      opacity: 0.35;
+      user-select: none;
+      @include tracker-transition(opacity);
+    }
+
+    &__title {
+      color: $color-text-primary;
+      cursor: text;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      line-height: $leading-snug;
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      user-select: none;
+    }
+
+    &__title-wrap {
+      min-width: 0;
+      width: 100%;
+    }
+
+    &__title-input {
+      background: $color-white;
+      border: 1px solid $tracker-card-stroke;
+      border-radius: $radius-sm;
+      color: $color-text-primary;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      line-height: $leading-snug;
+      margin: 0;
+      padding: 4px 8px;
+      width: 100%;
+
+      @include focus-ring;
+    }
+
+    &__items {
+      align-items: center;
+      display: inline-flex;
+      gap: $space-xs;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+
+    &__decay-label {
+      align-items: center;
+      background: rgba(17, 24, 39, 0.08);
+      border: 1px solid rgba(17, 24, 39, 0.15);
+      border-radius: 999px;
+      color: $color-text-secondary;
+      display: none;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-bold;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      padding: 0.2rem 0.45rem;
+      text-transform: uppercase;
+
+      &--stale {
+        color: $color-text-primary;
+      }
+
+      &--rotten {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(220, 38, 38, 0.32);
+        color: $color-text-primary;
+      }
+    }
+
+    &__action-btn {
+      align-items: center;
+      aspect-ratio: 1;
+      background: $tracker-card-bg;
+      border: 1px solid $tracker-card-stroke;
+      border-radius: 999px;
+      color: $tracker-muted-text;
+      cursor: pointer;
+      display: inline-flex;
+      height: 30px;
+      justify-content: center;
+      padding: 0;
+      @include tracker-transition(all);
+      @include focus-ring;
+
+      svg {
+        height: 15px;
+        width: 15px;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+
+      &--done {
+        background: $color-success-bg;
+        border-color: rgba(5, 150, 105, 0.25);
+        color: $color-success-dark;
+
+        &:hover {
+          background: $color-success-bg-hover;
+        }
+      }
+
+      &--delete {
+        background: $color-danger-bg;
+        border-color: rgba(220, 38, 38, 0.2);
+        color: $color-danger-text;
+
+        &:hover {
+          background: $color-danger-bg-hover;
+        }
+      }
+    }
+
+    &__decay-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #fb923c, #ef4444, #b91c1c);
+      @include transition(width, 0.5s);
+    }
+  }
+
+  .task-card:focus-visible {
+    @include focus-ring($tracker-focus-ring-accent);
+  }
+
+  .task-card--ghost {
+    transform: rotate(1.3deg) scale(0.96);
+    opacity: 0.88;
+    filter: drop-shadow(0 14px 20px rgba(17, 24, 39, 0.28));
+
+    .fire-particles {
+      display: none;
+    }
+  }
+
+  @keyframes card-land-bounce {
+    0% {
+      transform: translateY(0) scale(0.94);
+    }
+    45% {
+      transform: translateY(-4px) scale(1.04);
+    }
+    70% {
+      transform: translateY(1px) scale(0.985);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .fire-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+
+    @include reduced-motion {
+      display: none;
+    }
+
+    &--fresh {
+      opacity: 0;
+    }
+
+    &--stale {
+      opacity: 0.82;
+    }
+
+    &--rotten {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task-card {
+      &--dragging,
+      &--landed {
+        animation: none;
+        transform: none;
+      }
+    }
+
+    .task-card--ghost {
+      transform: none;
+      filter: none;
+    }
+  }
+
+  .fire-particles__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

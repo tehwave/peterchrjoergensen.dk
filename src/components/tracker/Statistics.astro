@@ -1,0 +1,97 @@
+---
+import Achievement from "./Achievement.astro";
+import Metric from "./Metric.astro";
+
+/**
+ * Statistics section shell.
+ *
+ * Provides semantic mount points for runtime-rendered metric and achievement cards.
+ * Canonical data prep/render orchestration is handled in `src/pages/tracker.astro`.
+ * This file focuses on structure and styles only.
+ */
+type Props = Record<string, never>;
+
+const {} = Astro.props;
+---
+
+<section class="full-stats-section" aria-labelledby="stats-title">
+  <h2 class="section-heading" id="stats-title">Statistics</h2>
+  <!-- Metric cards are cloned from `#metric-template` and mounted here by JS. -->
+  <div class="full-stats-grid" id="full-stats-grid">
+    <!-- rendered by JS -->
+  </div>
+  <!-- Achievement cards are cloned from `#achievement-template` and mounted here by JS. -->
+  <div class="achievement-grid" id="achievement-grid">
+    <!-- rendered by JS -->
+  </div>
+  <!-- Hidden templates used by the tracker script for DOM cloning. -->
+  <Metric />
+  <Achievement />
+</section>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  // Card container: elevated panel + subtle animated paper/grid texture.
+  .full-stats-section {
+    @include elevated-panel($tracker-surface-bg-elevated, 0, none);
+    border-radius: $radius-xl;
+    padding: $space-lg;
+    height: 100%;
+    background:
+      linear-gradient(180deg, rgba(10, 73, 177, 0.08) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.09) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      22px 22px,
+      22px 22px;
+    animation:
+      panel-enter 0.75s var(--ease-out) both;
+
+    @include respond-to(md) {
+      padding: $space-md;
+    }
+  }
+
+  .section-heading {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  .full-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-md;
+    margin-top: $space-lg;
+    margin-bottom: $space-xl;
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: $space-md;
+    margin-top: $space-lg;
+  }
+
+  :global(.full-stats__achievements-title) {
+    grid-column: 1 / -1;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    margin: 0 0 $space-xs;
+    color: $color-text-primary;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    // Respect reduced-motion preference by disabling background drift.
+    .full-stats-section {
+      animation: none;
+    }
+  }
+</style>

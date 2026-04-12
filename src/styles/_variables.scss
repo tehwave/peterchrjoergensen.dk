@@ -22,9 +22,41 @@ $color-border: #c8c0be;
 $color-shadow: rgba(0, 0, 0, 0.1);
 $color-shadow-hover: rgba(0, 0, 0, 0.15);
 
+// Neutral surface palette (Radix-inspired)
+$color-neutral-50: #fcfcfd;
+$color-neutral-100: #f7f8fa;
+$color-neutral-200: #eff1f5;
+$color-neutral-300: #e4e7ee;
+$color-neutral-400: #cfd5df;
+$color-neutral-500: #97a1b2;
+$color-neutral-600: #6b7687;
+$color-neutral-700: #4b5565;
+$color-neutral-800: #2f3847;
+$color-neutral-900: #1f2733;
+
 // Code block colors
 $color-code-bg: #1e1e1e;
 $color-code-text: #d4d4d4;
+$color-code-border: #444;
+
+// Success / positive feedback colors
+$color-success: #059669;
+$color-success-dark: #065f46;
+$color-success-bg: #d1fae5;
+$color-success-bg-hover: #a7f3d0;
+
+// Decay state colors (for visual rot/stale effects)
+$color-decay-stale: #fb923c;
+$color-decay-stale-bg: #fff7ed;
+$color-decay-rotten: #ef4444;
+$color-decay-rotten-bg: #fff1f2;
+$color-decay-overdue: #c0392b;
+
+// Purple accent (for long-term section)
+$color-purple: #7c3aed;
+$color-danger-bg: #fee2e2;
+$color-danger-bg-hover: #fecaca;
+$color-danger-text: #c0392b;
 
 // Semantic aliases
 $color-accent: $color-orange;
@@ -101,6 +133,38 @@ $space-4xl: 6rem;
 $max-width: 1200px;
 $max-width-text: 65ch;
 $header-height: 80px;
+$tracker-surface-radius: 18px;
+$tracker-surface-bg: rgba(251, 251, 251, 0.76);
+$tracker-surface-shadow: 0 12px 30px rgba(9, 16, 87, 0.08);
+$tracker-card-radius: 14px;
+$tracker-card-border: rgba(200, 192, 190, 0.7);
+
+// Unified radii
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$radius-xl: 18px;
+$radius-full: 9999px;
+
+// Elevation tokens
+$shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+$shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+$shadow-md: 0 10px 24px rgba(15, 23, 42, 0.1);
+$shadow-lg: 0 18px 38px rgba(15, 23, 42, 0.12);
+
+// Tracker semantic tokens
+$tracker-bg-gradient-top: rgba(10, 73, 177, 0.06);
+$tracker-bg-gradient-bottom: rgba(124, 58, 237, 0.06);
+$tracker-surface-bg-elevated: rgba(252, 252, 253, 0.88);
+$tracker-surface-stroke: rgba(47, 56, 71, 0.12);
+$tracker-card-bg: rgba(252, 252, 253, 0.92);
+$tracker-card-bg-subtle: rgba(247, 248, 250, 0.88);
+$tracker-card-stroke: rgba(75, 85, 101, 0.16);
+$tracker-card-stroke-strong: rgba(47, 56, 71, 0.2);
+$tracker-muted-text: $color-neutral-700;
+$tracker-soft-text: $color-neutral-600;
+$tracker-focus-ring: rgba(10, 73, 177, 0.45);
+$tracker-focus-ring-accent: rgba(236, 131, 5, 0.42);
 
 // Breakpoints
 $breakpoint-sm: 640px;

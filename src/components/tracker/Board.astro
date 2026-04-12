@@ -1,0 +1,809 @@
+---
+/**
+ * Tracker board shell + controller mount.
+ *
+ * Responsibilities in this component:
+ * - Render three task columns (week / month / quarter)
+ * - Maintain board-local interaction state (drop preview + edge autoscroll)
+ * - Emit semantic intent events for task creation and drop outcomes
+ *
+ * Non-responsibilities:
+ * - Mutating canonical task/game state (owned by `src/pages/tracker.astro`)
+ * - Persistence, XP progression, or history updates
+ */
+import TaskTemplate from "./Task.astro";
+---
+
+<tracker-board class="tracker__board">
+  <section class="task-section task-section--short" aria-labelledby="section-short-title">
+    <div class="task-section__header">
+      <div>
+        <h2 class="task-section__title" id="section-short-title">Tasks for you this week</h2>
+        <p class="task-section__meta"><strong>10 XP</strong> · <span data-period-meta="short">This week</span></p>
+      </div>
+      <button class="btn btn--ghost add-section-btn" data-type="short" type="button" aria-label="Add weekly task">＋</button>
+    </div>
+    <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Tasks for this week">
+      <div class="task-empty-state" data-type="short">
+        <p>
+          No tasks for this week yet.
+          <a class="add-task-link" href="#" data-type="short">Add one</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="task-sections-row">
+    <section class="task-section task-section--medium" aria-labelledby="section-medium-title">
+      <div class="task-section__header">
+        <div>
+          <h2 class="task-section__title" id="section-medium-title">By the end of month</h2>
+          <p class="task-section__meta"><strong>25 XP</strong> · <span data-period-meta="medium">This month</span></p>
+        </div>
+        <button class="btn btn--ghost add-section-btn" data-type="medium" type="button" aria-label="Add monthly task">＋</button>
+      </div>
+      <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Tasks for this month">
+        <div class="task-empty-state" data-type="medium">
+          <p>
+            No must-do tasks for this month yet.
+            <a class="add-task-link" href="#" data-type="medium">Add one</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="task-section task-section--long" aria-labelledby="section-long-title">
+      <div class="task-section__header">
+        <div>
+          <h2 class="task-section__title" id="section-long-title">Before the quarter ends</h2>
+          <p class="task-section__meta"><strong>50 XP</strong> · <span data-period-meta="long">This quarter</span></p>
+        </div>
+        <button class="btn btn--ghost add-section-btn" data-type="long" type="button" aria-label="Add quarterly task">＋</button>
+      </div>
+      <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Tasks for this quarter">
+        <div class="task-empty-state" data-type="long">
+          <p>
+            No tasks for this quarter yet.
+            <a class="add-task-link" href="#" data-type="long">Add one</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <template data-task-card-template>
+    <TaskTemplate id="__TASK_ID__" title="__TASK_TITLE__" type="short" decay="fresh" decayProgress={0} />
+  </template>
+
+  <div hidden aria-hidden="true">
+    <TaskTemplate id="__BOOTSTRAP__" title="Bootstrap" type="short" decay="fresh" decayProgress={0} />
+  </div>
+</tracker-board>
+
+<script>
+  /** Supported board columns that map to week, month, and quarter scopes. */
+  type TaskType = "short" | "medium" | "long";
+
+  /** Visual decay buckets used by `Task.astro` styling and progress UI. */
+  type DecayLevel = "fresh" | "stale" | "rotten";
+
+  /**
+   * Minimal task payload consumed by the board renderer.
+   * Canonical state still lives in `src/pages/tracker.astro`.
+   */
+  interface TaskSnapshot {
+    id: string;
+    title: string;
+    type: TaskType;
+    decay: DecayLevel;
+    decayProgress: number;
+    order: number;
+  }
+
+  /** Event detail emitted when a drag-drop operation targets a board column. */
+  interface BoardDropDetail {
+    targetType: TaskType;
+    dropTaskId: string | null;
+    dropPosition: "before" | "after" | "end";
+    draggedTaskId: string | null;
+  }
+
+  /** Inclusive date range used for period metadata labels. */
+  interface PeriodRange {
+    start: Date;
+    end: Date;
+  }
+
+  /** Milliseconds per day, used for simple date-diff math in local time. */
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+  /** Normalizes a date to local midnight for calendar-only calculations. */
+  function getStartOfDay(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  /** Returns Monday→Sunday range for the provided date. */
+  function getWeekRange(date: Date): PeriodRange {
+    const today = getStartOfDay(date);
+    const mondayOffset = (today.getDay() + 6) % 7;
+    const start = new Date(today);
+    start.setDate(today.getDate() - mondayOffset);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return { start, end };
+  }
+
+  /** Returns the first and last day of the current month. */
+  function getMonthRange(date: Date): PeriodRange {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return { start, end };
+  }
+
+  /** Returns the first and last day of the current quarter. */
+  function getQuarterRange(date: Date): PeriodRange {
+    const quarterStartMonth = Math.floor(date.getMonth() / 3) * 3;
+    const start = new Date(date.getFullYear(), quarterStartMonth, 1);
+    const end = new Date(date.getFullYear(), quarterStartMonth + 3, 0);
+    return { start, end };
+  }
+
+  /**
+   * Computes inclusive remaining days from `today` to `endDate`.
+   * The value is clamped to zero to avoid negative labels for past periods.
+   */
+  function getDaysLeft(endDate: Date, today: Date): number {
+    const end = getStartOfDay(endDate);
+    const start = getStartOfDay(today);
+    return Math.max(0, Math.floor((end.getTime() - start.getTime()) / MS_PER_DAY) + 1);
+  }
+
+  /** Formats human-friendly range text (e.g. `Apr 1–7` or `Mar 30–Apr 5`). */
+  function formatRange(startDate: Date, endDate: Date): string {
+    const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
+
+    if (sameMonth) {
+      const month = startDate.toLocaleDateString("en-US", { month: "short" });
+      return `${month} ${startDate.getDate()}–${endDate.getDate()}`;
+    }
+
+    const start = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const end = endDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${start}–${end}`;
+  }
+
+  /** Column-specific copy for empty states rendered by `render()`. */
+  const EMPTY_STATE_LABELS: Record<TaskType, string> = {
+    short: "No tasks for this week yet.",
+    medium: "No must-do tasks for this month yet.",
+    long: "No tasks for this quarter yet.",
+  };
+
+  /** Creates the per-column empty-state add link. */
+  function createAddTaskLink(type: TaskType): HTMLAnchorElement {
+    const link = document.createElement("a");
+    link.className = "add-task-link";
+    link.href = "#";
+    link.dataset.type = type;
+    link.textContent = "Add one";
+    return link;
+  }
+
+  /**
+   * Board web component responsible for board-local UI behavior:
+   * - rendering task snapshots supplied via `setTasks(...)`
+   * - dispatching semantic intent events for add/drop actions
+   * - updating period metadata labels
+   */
+  class TrackerBoard extends HTMLElement {
+    /** Last validated task snapshot pushed from parent orchestration. */
+    private tasks: TaskSnapshot[] = [];
+
+    /** Astro's generated scoping attribute (e.g. `data-astro-cid-*`) if present. */
+    private astroScopeAttributeName: string | null = null;
+    /** Task id currently being dragged (mirrors task-card drag lifecycle). */
+    private draggingTaskId: string | null = null;
+    /** Drop-preview target column while pointer hovers over a grid. */
+    private previewTargetType: TaskType | null = null;
+    /** Drop-preview target task id when hovering a concrete card target. */
+    private previewDropTaskId: string | null = null;
+    /** Preview placement around target card (`before`/`after`) or list end. */
+    private previewDropPosition: "before" | "after" | "end" = "end";
+    /** RAF id for edge auto-scroll loop during drag interactions. */
+    private autoScrollFrameId = 0;
+    /** Current vertical auto-scroll velocity in pixels/frame. */
+    private autoScrollDeltaY = 0;
+    private boundDragStartListener = (event: Event) => {
+      const dragEvent = event as CustomEvent<{ id?: string; title?: string }>;
+      this.draggingTaskId = dragEvent.detail?.id ?? null;
+    };
+    private boundDragEndListener = () => {
+      this.draggingTaskId = null;
+      this.clearDropPreview();
+      this.stopAutoScroll();
+      this.querySelectorAll<HTMLElement>(".task-grid").forEach((grid) => {
+        grid.classList.remove("drag-over");
+      });
+    };
+
+    /**
+     * Initializes one-time listeners and performs initial paint.
+     * Guarded to avoid duplicate setup if the element reconnects.
+     */
+    connectedCallback() {
+      if (this.dataset.boardInitialized === "true") return;
+      this.dataset.boardInitialized = "true";
+      this.astroScopeAttributeName = this.getAttributeNames().find((name) => name.startsWith("data-astro-cid-")) ?? null;
+      document.addEventListener("tracker-task-dragstart", this.boundDragStartListener);
+      document.addEventListener("tracker-task-dragend", this.boundDragEndListener);
+
+      this.addEventListener("click", (event) => {
+        const target = event.target;
+        const addTrigger = target instanceof Element ? target.closest<HTMLElement>(".add-section-btn, .add-task-link") : null;
+        if (!addTrigger) return;
+
+        if (addTrigger.matches(".add-task-link")) {
+          event.preventDefault();
+        }
+
+        const type = addTrigger.dataset.type;
+        if (type !== "short" && type !== "medium" && type !== "long") return;
+
+        this.dispatchEvent(
+          new CustomEvent("tracker-board-add-task", {
+            bubbles: true,
+            detail: { type },
+          }),
+        );
+      });
+
+      this.querySelectorAll<HTMLElement>(".task-grid").forEach((grid) => {
+        grid.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          grid.classList.add("drag-over");
+
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+
+          const dragEvent = event as DragEvent;
+          const targetType = grid.dataset.type;
+          if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
+
+          const result = this.getDropPreviewFromEvent(dragEvent);
+          const hasPreviewChanged = this.previewTargetType !== targetType || this.previewDropTaskId !== result.dropTaskId || this.previewDropPosition !== result.dropPosition;
+
+          if (hasPreviewChanged) {
+            this.previewTargetType = targetType;
+            this.previewDropTaskId = result.dropTaskId;
+            this.previewDropPosition = result.dropPosition;
+            this.applyDropPreviewState(grid, result.dropTaskId, result.dropPosition);
+          }
+
+          this.updateAutoScroll(dragEvent.clientY);
+        });
+
+        grid.addEventListener("dragleave", (event) => {
+          if (!grid.contains((event as DragEvent).relatedTarget as Node)) {
+            grid.classList.remove("drag-over");
+
+            if (this.previewTargetType === grid.dataset.type) {
+              this.clearDropPreview();
+            }
+          }
+        });
+
+        grid.addEventListener("drop", (event) => {
+          event.preventDefault();
+          grid.classList.remove("drag-over");
+          this.stopAutoScroll();
+
+          const targetType = grid.dataset.type;
+          if (targetType !== "short" && targetType !== "medium" && targetType !== "long") return;
+
+          const result = this.getDropPreviewFromEvent(event as DragEvent);
+          const shouldTrustPreviewState = this.previewTargetType === targetType;
+          const dropTaskId = shouldTrustPreviewState ? this.previewDropTaskId : result.dropTaskId;
+          const dropPosition = shouldTrustPreviewState ? this.previewDropPosition : result.dropPosition;
+
+          const detail: BoardDropDetail = {
+            targetType,
+            dropTaskId,
+            dropPosition,
+            draggedTaskId: this.draggingTaskId,
+          };
+
+          this.clearDropPreview();
+
+          this.dispatchEvent(
+            new CustomEvent<BoardDropDetail>("tracker-board-drop", {
+              bubbles: true,
+              detail,
+            }),
+          );
+        });
+      });
+
+      this.updatePeriodMeta();
+
+      this.render();
+    }
+
+    /** Refreshes period labels with current range + days-left info. */
+    private updatePeriodMeta(): void {
+      const today = new Date();
+
+      const ranges: Record<TaskType, PeriodRange> = {
+        short: getWeekRange(today),
+        medium: getMonthRange(today),
+        long: getQuarterRange(today),
+      };
+
+      (Object.keys(ranges) as TaskType[]).forEach((type) => {
+        const meta = this.querySelector<HTMLElement>(`[data-period-meta="${type}"]`);
+        if (!meta) return;
+
+        const { start, end } = ranges[type];
+        const daysLeft = getDaysLeft(end, today);
+        const dayLabel = daysLeft === 1 ? "day" : "days";
+        meta.textContent = `${formatRange(start, end)} · ${daysLeft} ${dayLabel} left`;
+      });
+    }
+
+    /**
+     * Accepts task snapshots from the page orchestrator, validates shape,
+     * then re-renders each column in `order` sequence.
+     */
+    setTasks(tasks: TaskSnapshot[]): void {
+      this.tasks = tasks.filter((task): task is TaskSnapshot => {
+        return (
+          typeof task?.id === "string" &&
+          typeof task.title === "string" &&
+          (task.type === "short" || task.type === "medium" || task.type === "long") &&
+          (task.decay === "fresh" || task.decay === "stale" || task.decay === "rotten") &&
+          typeof task.decayProgress === "number" &&
+          typeof task.order === "number"
+        );
+      });
+
+      this.render();
+    }
+
+    /** Cleans global listeners/preview artifacts when element unmounts. */
+    disconnectedCallback(): void {
+      document.removeEventListener("tracker-task-dragstart", this.boundDragStartListener);
+      document.removeEventListener("tracker-task-dragend", this.boundDragEndListener);
+      this.clearDropPreview();
+      this.stopAutoScroll();
+    }
+
+    /**
+     * Applies Astro's scope attribute to dynamically created nodes so scoped
+     * component styles continue to match runtime-generated markup.
+     */
+    private applyAstroScope(root: Element): void {
+      if (!this.astroScopeAttributeName) return;
+      root.setAttribute(this.astroScopeAttributeName, "");
+      root.querySelectorAll("*").forEach((node) => {
+        node.setAttribute(this.astroScopeAttributeName!, "");
+      });
+    }
+
+    /**
+     * Calculates intended drop target from pointer position.
+     * Uses a midpoint deadzone to avoid rapid before/after flipping.
+     */
+    private getDropPreviewFromEvent(event: DragEvent): { dropTaskId: string | null; dropPosition: "before" | "after" | "end" } {
+      const eventTarget = event.target;
+      const targetCard = eventTarget instanceof Element ? eventTarget.closest<HTMLElement>(".task-card") : null;
+
+      if (!targetCard) {
+        return {
+          dropTaskId: null,
+          dropPosition: "end",
+        };
+      }
+
+      const targetId = targetCard.dataset.id ?? null;
+      if (!targetId || targetId === this.draggingTaskId) {
+        return {
+          dropTaskId: null,
+          dropPosition: "end",
+        };
+      }
+
+      const rect = targetCard.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const distanceFromMidpoint = event.clientY - midpoint;
+      const midpointDeadzonePx = 8;
+
+      let dropPosition: "before" | "after" = distanceFromMidpoint >= 0 ? "after" : "before";
+
+      // Hysteresis: when hovering around the midpoint of the same card,
+      // keep the last known side to prevent visual flip-flopping.
+      if (Math.abs(distanceFromMidpoint) <= midpointDeadzonePx && this.previewDropTaskId === targetId) {
+        if (this.previewDropPosition === "before" || this.previewDropPosition === "after") {
+          dropPosition = this.previewDropPosition;
+        }
+      }
+
+      return {
+        dropTaskId: targetId,
+        dropPosition,
+      };
+    }
+
+    /** Draws the insertion line in the current drop container. */
+    private applyDropPreviewState(grid: HTMLElement, dropTaskId: string | null, dropPosition: "before" | "after" | "end"): void {
+      this.clearDropLine();
+
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".task-card"));
+      if (cards.length === 0) {
+        this.renderDropLine(grid, 12);
+        return;
+      }
+
+      const gridStyles = getComputedStyle(grid);
+      const rowGap = Number.parseFloat(gridStyles.rowGap || gridStyles.gap || "0") || 0;
+      const halfGap = rowGap / 2;
+
+      let lineTop = 0;
+
+      if (!dropTaskId || dropPosition === "end") {
+        const lastCard = cards[cards.length - 1];
+        lineTop = lastCard.offsetTop + lastCard.offsetHeight + Math.max(2, halfGap);
+      } else {
+        const targetCard = grid.querySelector<HTMLElement>(`.task-card[data-id="${CSS.escape(dropTaskId)}"]`);
+        if (!targetCard) {
+          const lastCard = cards[cards.length - 1];
+          lineTop = lastCard.offsetTop + lastCard.offsetHeight + Math.max(2, halfGap);
+        } else if (dropPosition === "before") {
+          lineTop = targetCard.offsetTop - Math.max(2, halfGap);
+        } else {
+          lineTop = targetCard.offsetTop + targetCard.offsetHeight + Math.max(2, halfGap);
+        }
+      }
+
+      const maxTop = Math.max(2, grid.scrollHeight - 2);
+      const clampedTop = Math.max(2, Math.min(maxTop, lineTop));
+      this.renderDropLine(grid, clampedTop);
+    }
+
+    /** Mounts a visual insertion line at the given y-offset within a grid. */
+    private renderDropLine(grid: HTMLElement, topPx: number): void {
+      const line = document.createElement("div");
+      line.className = "task-drop-line";
+      line.style.top = `${topPx}px`;
+      this.applyAstroScope(line);
+      grid.appendChild(line);
+    }
+
+    /** Removes all insertion line artifacts in this board instance. */
+    private clearDropLine(): void {
+      this.querySelectorAll<HTMLElement>(".task-drop-line").forEach((line) => {
+        line.remove();
+      });
+    }
+
+    /** Resets drop-preview state and removes preview line UI. */
+    private clearDropPreview(): void {
+      this.clearDropLine();
+      this.previewTargetType = null;
+      this.previewDropTaskId = null;
+      this.previewDropPosition = "end";
+    }
+
+    /** Updates edge auto-scroll velocity based on pointer y-position. */
+    private updateAutoScroll(pointerClientY: number): void {
+      const edgeSize = 120;
+      const maxSpeed = 18;
+      const viewportHeight = window.innerHeight;
+
+      if (pointerClientY < edgeSize) {
+        const intensity = 1 - pointerClientY / edgeSize;
+        this.autoScrollDeltaY = -Math.max(2, Math.round(maxSpeed * intensity));
+      } else if (pointerClientY > viewportHeight - edgeSize) {
+        const intensity = 1 - (viewportHeight - pointerClientY) / edgeSize;
+        this.autoScrollDeltaY = Math.max(2, Math.round(maxSpeed * intensity));
+      } else {
+        this.autoScrollDeltaY = 0;
+      }
+
+      if (!this.autoScrollFrameId && this.autoScrollDeltaY !== 0) {
+        this.runAutoScrollFrame();
+      }
+    }
+
+    /** RAF loop that scrolls the viewport while dragging near edges. */
+    private runAutoScrollFrame(): void {
+      if (this.autoScrollDeltaY === 0 || !this.draggingTaskId) {
+        this.autoScrollFrameId = 0;
+        return;
+      }
+
+      window.scrollBy(0, this.autoScrollDeltaY);
+      this.autoScrollFrameId = requestAnimationFrame(() => {
+        this.runAutoScrollFrame();
+      });
+    }
+
+    /** Stops edge auto-scroll and clears any pending animation frame. */
+    private stopAutoScroll(): void {
+      this.autoScrollDeltaY = 0;
+      if (!this.autoScrollFrameId) return;
+      cancelAnimationFrame(this.autoScrollFrameId);
+      this.autoScrollFrameId = 0;
+    }
+
+    /** Builds a task card instance from the component template and task data. */
+    private renderTaskCard(task: TaskSnapshot): HTMLElement | null {
+      const template = this.querySelector("[data-task-card-template]");
+      if (!(template instanceof HTMLTemplateElement)) return null;
+
+      const card = template.content.firstElementChild?.cloneNode(true);
+      if (!(card instanceof HTMLElement)) return null;
+
+      card.dataset.id = task.id;
+      card.dataset.title = task.title;
+      card.dataset.type = task.type;
+      card.dataset.decay = task.decay;
+
+      card.classList.remove("task-card--fresh", "task-card--stale", "task-card--rotten", "task-card--dragging", "task-card--drop-target");
+      card.classList.add(`task-card--${task.decay}`);
+
+      const titleEl = card.querySelector<HTMLElement>("[data-task-title]");
+      const titleInputEl = card.querySelector<HTMLInputElement>("[data-task-title-input]");
+      if (titleEl) titleEl.textContent = task.title;
+      if (titleInputEl) titleInputEl.value = task.title;
+
+      const decayBar = card.querySelector<HTMLElement>("[data-task-decay-bar]");
+      if (decayBar) {
+        decayBar.style.width = `${Math.min(100, Math.max(0, task.decayProgress))}%`;
+        decayBar.hidden = task.decay === "fresh";
+      }
+
+      this.applyAstroScope(card);
+      return card;
+    }
+
+    /**
+     * Renders all board columns from `this.tasks`, including per-column
+     * empty-state fallbacks when no tasks exist.
+     */
+    private render(): void {
+      const types: TaskType[] = ["short", "medium", "long"];
+      types.forEach((type) => {
+        const container = this.querySelector<HTMLElement>(`#tasks-${type}`);
+        if (!container) return;
+
+        const active = this.tasks.filter((task) => task.type === type).sort((a, b) => a.order - b.order);
+
+        container.innerHTML = "";
+
+        if (active.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "task-empty-state";
+          empty.dataset.type = type;
+
+          const label = document.createElement("p");
+          label.append(document.createTextNode(`${EMPTY_STATE_LABELS[type]} `), createAddTaskLink(type));
+
+          empty.append(label);
+          this.applyAstroScope(empty);
+          container.appendChild(empty);
+          return;
+        }
+
+        active.forEach((task) => {
+          const card = this.renderTaskCard(task);
+          if (card) container.appendChild(card);
+        });
+      });
+    }
+  }
+
+  if (!customElements.get("tracker-board")) {
+    customElements.define("tracker-board", TrackerBoard);
+  }
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  tracker-board {
+    display: block;
+  }
+
+  .tracker__board {
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
+    animation: panel-enter 0.55s var(--ease-out) both;
+  }
+
+  .task-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .task-section {
+    @include elevated-panel($tracker-card-bg, 0, none);
+    border-radius: $radius-lg;
+    padding: $space-lg;
+    position: relative;
+    background-image:
+      linear-gradient(180deg, rgba(252, 252, 253, 0.96) 0%, rgba(247, 248, 250, 0.92) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      18px 18px,
+      18px 18px;
+
+    &--short {
+      background-image:
+        linear-gradient(180deg, rgba(41, 136, 250, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &--medium {
+      background-image:
+        linear-gradient(180deg, rgba(236, 131, 5, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &--long {
+      background-image:
+        linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, rgba(252, 252, 253, 0.95) 100%), linear-gradient(rgba(75, 85, 101, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(75, 85, 101, 0.08) 1px, transparent 1px);
+    }
+
+    &__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: $space-lg;
+      gap: $space-md;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin: 0 0 $space-xs;
+    }
+
+    &__meta {
+      font-size: $font-size-xs;
+      color: $tracker-soft-text;
+      margin: 0;
+
+      strong {
+        color: $color-accent;
+      }
+    }
+  }
+
+  .task-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    min-height: 60px;
+    position: relative;
+
+    &--two-col {
+      @media (min-width: #{$breakpoint-lg}) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: $space-sm;
+      }
+    }
+
+    &.drag-over {
+      background: rgba(41, 136, 250, 0.05);
+      border-radius: $radius-md;
+      outline: 1px dashed $tracker-card-stroke;
+      outline-offset: 2px;
+    }
+  }
+
+  .task-drop-line {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    border-radius: 999px;
+    background: $color-blue;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .task-empty-state {
+    padding: $space-lg;
+    text-align: center;
+    color: $tracker-muted-text;
+    font-size: $font-size-sm;
+    border: 1px dashed $tracker-card-stroke;
+    border-radius: $radius-md;
+    background: rgba(247, 248, 250, 0.55);
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .add-task-link {
+    color: $color-blue;
+    font-weight: $font-weight-semibold;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: $color-accent;
+    }
+
+    &:focus-visible {
+      @include focus-ring($tracker-focus-ring-accent);
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    padding: $space-xs $space-md;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    border: 1px solid transparent;
+    @include tracker-transition(all);
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include focus-ring;
+
+    &--ghost {
+      background: transparent;
+      color: $tracker-muted-text;
+      border-color: transparent;
+
+      &:hover {
+        background: rgba(31, 39, 51, 0.07);
+        color: $color-text-primary;
+      }
+    }
+  }
+
+  .add-section-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: $space-xs;
+    background: #fff;
+    color: $color-text-primary;
+    border: 2px solid $tracker-card-stroke;
+    border-radius: $radius-md;
+    @include focus-ring($tracker-focus-ring-accent);
+
+    &:hover {
+      background: #fff;
+      border-color: $tracker-card-stroke;
+      color: $color-blue;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task-section,
+    .tracker__board {
+      animation: none;
+    }
+  }
+</style>

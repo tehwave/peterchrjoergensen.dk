@@ -1,0 +1,248 @@
+---
+/**
+ * Metric card template component.
+ *
+ * Exposes a hidden template (`#metric-template`) cloned by tracker runtime
+ * to render statistics cards with Astro-scoped styling preserved.
+ */
+type Props = Record<string, never>;
+
+const {} = Astro.props;
+---
+
+<!-- Hidden template cloned into `.full-stats-grid` at runtime. -->
+<template id="metric-template">
+  <div class="full-stat-card">
+    <!-- Decorative icon; runtime script injects SVG and keeps it out of the accessibility tree. -->
+    <span class="full-stat-card__icon" data-metric-icon aria-hidden="true"></span>
+    <!-- Numeric value and label are populated by tracker state updates. -->
+    <span class="full-stat-card__value" data-metric-value></span>
+    <span class="full-stat-card__label" data-metric-label></span>
+  </div>
+</template>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  // Keep template markup available for cloning but not visible in layout.
+  :global(#metric-template) {
+    display: none;
+  }
+
+  // Two-column card with a decorative left lane and right-aligned value.
+  :global(.full-stat-card) {
+    @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
+    border-radius: $radius-lg;
+    padding: $space-sm $space-md;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: $space-md;
+    align-items: center;
+    min-height: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  // Color wash layer across the left side of the card.
+  :global(.full-stat-card::before) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 72%;
+    border-radius: $radius-lg 0 0 $radius-lg;
+    background: linear-gradient(90deg, rgba(10, 73, 177, 0.78) 0%, rgba(10, 73, 177, 0.52) 46%, rgba(10, 73, 177, 0.22) 74%, rgba(10, 73, 177, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Subtle stripe texture over the gradient layer.
+  :global(.full-stat-card::after) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 72%;
+    border-radius: $radius-lg 0 0 $radius-lg;
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 2px, rgba(255, 255, 255, 0) 2px 8px);
+    opacity: 0.28;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :global(.full-stat-card:hover) {
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+    @include tracker-transition(all);
+  }
+
+  // Icon sits behind content and acts as an ambient motif.
+  :global(.full-stat-card__icon) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: rgba(255, 255, 255, 0.92);
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-9deg);
+    transform-origin: center;
+    opacity: 0.72;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :global(.full-stat-card__icon svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.full-stat-card__value) {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-black;
+    color: $color-blue;
+    line-height: 1;
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    position: relative;
+    z-index: 1;
+    min-width: 2ch;
+    text-align: right;
+  }
+
+  // Label is the primary left-aligned token and stays legible over gradient layers.
+  :global(.full-stat-card__label) {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: $tracking-wide;
+    color: rgba(255, 255, 255, 0.96);
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    z-index: 2;
+    justify-self: start;
+    display: inline-block;
+    padding-inline-start: $space-sm;
+    padding-inline-end: $space-xs;
+    text-align: left;
+    background: rgba(8, 46, 115, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: $radius-sm;
+    text-shadow: 0 1px 1px rgba(10, 14, 24, 0.32);
+  }
+
+  :global(.full-stat-card__value),
+  :global(.full-stat-card__label) {
+    align-self: center;
+  }
+
+  @supports (animation-timeline: view()) {
+    // Progressive enhancement: entrance animations are scroll-driven when supported.
+    :global(.full-stats-grid .full-stat-card) {
+      animation-name: metric-card-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 8% cover 32%;
+    }
+
+    :global(.full-stats-grid .full-stat-card__icon) {
+      animation-name: metric-icon-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out-back);
+      animation-timeline: view(block);
+      animation-range: entry 14% cover 34%;
+    }
+
+    :global(.full-stats-grid .full-stat-card__value) {
+      animation-name: metric-value-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 18% cover 40%;
+    }
+
+    :global(.full-stats-grid .full-stat-card__label) {
+      animation-name: metric-label-in;
+      animation-duration: 1ms;
+      animation-fill-mode: both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: view(block);
+      animation-range: entry 14% cover 36%;
+    }
+
+    :global(.full-stats-grid .full-stat-card:nth-child(2n)) {
+      animation-range: entry 12% cover 36%;
+    }
+  }
+
+  @keyframes metric-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes metric-icon-in {
+    from {
+      opacity: 0;
+      transform: translateY(calc(-50% + 6px)) rotate(-13deg) scale(0.88);
+    }
+
+    to {
+      opacity: 0.72;
+      transform: translateY(-50%) rotate(-9deg) scale(1);
+    }
+  }
+
+  @keyframes metric-value-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes metric-label-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    // Accessibility fallback: disable motion for users requesting reduced animation.
+    :global(.full-stats-grid .full-stat-card),
+    :global(.full-stats-grid .full-stat-card__icon),
+    :global(.full-stats-grid .full-stat-card__value),
+    :global(.full-stats-grid .full-stat-card__label) {
+      animation: none;
+    }
+  }
+</style>
