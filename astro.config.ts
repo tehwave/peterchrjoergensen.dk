@@ -91,6 +91,8 @@ export default defineConfig({
 
   // Automatic responsive image styles
   image: {
+    // Allow optimized remote images used in MDX content
+    domains: ["images.unsplash.com"],
     responsiveStyles: true,
   },
 
