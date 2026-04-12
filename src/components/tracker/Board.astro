@@ -13,7 +13,10 @@ import TaskTemplate from "./Task.astro";
     </div>
     <div class="task-grid task-grid--two-col" id="tasks-short" data-type="short" role="list" aria-label="Tasks for this week">
       <div class="task-empty-state" data-type="short">
-        <p>No tasks for this week yet. Add one!</p>
+        <p>
+          No tasks for this week yet.
+          <a class="add-task-link" href="#" data-type="short">Add one</a>
+        </p>
       </div>
     </div>
   </section>
@@ -29,7 +32,10 @@ import TaskTemplate from "./Task.astro";
       </div>
       <div class="task-grid" id="tasks-medium" data-type="medium" role="list" aria-label="Tasks for this month">
         <div class="task-empty-state" data-type="medium">
-          <p>No must-do tasks for this month yet. Add one!</p>
+          <p>
+            No must-do tasks for this month yet.
+            <a class="add-task-link" href="#" data-type="medium">Add one</a>
+          </p>
         </div>
       </div>
     </section>
@@ -44,7 +50,10 @@ import TaskTemplate from "./Task.astro";
       </div>
       <div class="task-grid" id="tasks-long" data-type="long" role="list" aria-label="Tasks for this quarter">
         <div class="task-empty-state" data-type="long">
-          <p>No tasks for this quarter yet. Add one!</p>
+          <p>
+            No tasks for this quarter yet.
+            <a class="add-task-link" href="#" data-type="long">Add one</a>
+          </p>
         </div>
       </div>
     </section>
@@ -153,10 +162,20 @@ import TaskTemplate from "./Task.astro";
 
   /** Column-specific copy for empty states rendered by `render()`. */
   const EMPTY_STATE_LABELS: Record<TaskType, string> = {
-    short: "No tasks for this week yet. Add one!",
-    medium: "No must-do tasks for this month yet. Add one!",
-    long: "No tasks for this quarter yet. Add one!",
+    short: "No tasks for this week yet.",
+    medium: "No must-do tasks for this month yet.",
+    long: "No tasks for this quarter yet.",
   };
+
+  /** Creates the per-column empty-state add link. */
+  function createAddTaskLink(type: TaskType): HTMLAnchorElement {
+    const link = document.createElement("a");
+    link.className = "add-task-link";
+    link.href = "#";
+    link.dataset.type = type;
+    link.textContent = "Add one";
+    return link;
+  }
 
   /**
    * Board web component responsible for board-local UI behavior:
@@ -182,10 +201,14 @@ import TaskTemplate from "./Task.astro";
 
       this.addEventListener("click", (event) => {
         const target = event.target;
-        const addButton = target instanceof Element ? target.closest<HTMLButtonElement>(".add-section-btn") : null;
-        if (!addButton) return;
+        const addTrigger = target instanceof Element ? target.closest<HTMLElement>(".add-section-btn, .add-task-link") : null;
+        if (!addTrigger) return;
 
-        const type = addButton.dataset.type;
+        if (addTrigger.matches(".add-task-link")) {
+          event.preventDefault();
+        }
+
+        const type = addTrigger.dataset.type;
         if (type !== "short" && type !== "medium" && type !== "long") return;
 
         this.dispatchEvent(
@@ -340,7 +363,7 @@ import TaskTemplate from "./Task.astro";
           empty.dataset.type = type;
 
           const label = document.createElement("p");
-          label.textContent = EMPTY_STATE_LABELS[type];
+          label.append(document.createTextNode(`${EMPTY_STATE_LABELS[type]} `), createAddTaskLink(type));
 
           empty.append(label);
           this.applyAstroScope(empty);
@@ -477,6 +500,21 @@ import TaskTemplate from "./Task.astro";
 
     p {
       margin: 0;
+    }
+  }
+
+  .add-task-link {
+    color: $color-blue;
+    font-weight: $font-weight-semibold;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: $color-accent;
+    }
+
+    &:focus-visible {
+      @include focus-ring($tracker-focus-ring-accent);
     }
   }
 

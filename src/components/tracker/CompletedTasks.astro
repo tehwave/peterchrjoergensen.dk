@@ -13,7 +13,9 @@ import { XP_VALUES } from "../../types/tracker";
         <option value="medium">Medium-term</option>
         <option value="long">Long-term</option>
       </select>
-      <button class="btn btn--ghost btn--sm" id="clear-completed-btn" type="button">Clear completed</button>
+      <button class="btn btn--ghost btn--sm" id="archive-completed-btn" type="button">Archive all</button>
+      <button class="btn btn--ghost btn--sm" id="restore-archived-btn" type="button" hidden>Restore all archived</button>
+      <button class="btn btn--ghost btn--sm" id="clear-history-btn" type="button" hidden>Clear history</button>
     </div>
   </div>
   <div class="completed-list" id="completed-list" role="list" aria-label="Completed tasks">
@@ -55,6 +57,7 @@ import { XP_VALUES } from "../../types/tracker";
     title: string;
     type: TaskType;
     completedAt: number;
+    archivedAt: number | null;
   }
 
   /** Number of completed cards shown per page. */
@@ -91,17 +94,38 @@ import { XP_VALUES } from "../../types/tracker";
         this.requestRender();
       });
 
-      // Surface clear intent to the page orchestrator; this component does not mutate canonical state directly.
+      // Surface completed history intents to the page orchestrator; this component does not mutate canonical state directly.
       this.addEventListener("click", (event) => {
         const target = event.target;
-        const clearButton = target instanceof Element ? target.closest("#clear-completed-btn") : null;
-        if (!clearButton) return;
+        const archiveAllButton = target instanceof Element ? target.closest("#archive-completed-btn") : null;
+        const restoreAllButton = target instanceof Element ? target.closest("#restore-archived-btn") : null;
+        const clearHistoryButton = target instanceof Element ? target.closest("#clear-history-btn") : null;
 
-        this.dispatchEvent(
-          new CustomEvent("tracker-completed-clear", {
-            bubbles: true,
-          }),
-        );
+        if (archiveAllButton) {
+          this.dispatchEvent(
+            new CustomEvent("tracker-completed-archive-all", {
+              bubbles: true,
+            }),
+          );
+          return;
+        }
+
+        if (restoreAllButton) {
+          this.dispatchEvent(
+            new CustomEvent("tracker-completed-restore-all", {
+              bubbles: true,
+            }),
+          );
+          return;
+        }
+
+        if (clearHistoryButton) {
+          this.dispatchEvent(
+            new CustomEvent("tracker-completed-clear-history", {
+              bubbles: true,
+            }),
+          );
+        }
       });
 
       this.requestRender();
@@ -112,10 +136,17 @@ import { XP_VALUES } from "../../types/tracker";
      */
     setCompletedTasks(tasks: CompletedTaskData[]): void {
       this.completedTasks = tasks.filter((task): task is CompletedTaskData => {
-        return typeof task?.id === "string" && typeof task.title === "string" && (task.type === "short" || task.type === "medium" || task.type === "long") && typeof task.completedAt === "number";
+        const hasValidArchivedAt = task.archivedAt === null || typeof task.archivedAt === "number";
+        return (
+          typeof task?.id === "string" &&
+          typeof task.title === "string" &&
+          (task.type === "short" || task.type === "medium" || task.type === "long") &&
+          typeof task.completedAt === "number" &&
+          hasValidArchivedAt
+        );
       });
 
-      const totalPages = Math.max(1, Math.ceil(this.getFilteredCompletedTasks().length / PAGE_SIZE));
+      const totalPages = Math.max(1, Math.ceil(this.getVisibleCompletedTasks().length / PAGE_SIZE));
       if (this.currentPage > totalPages) {
         this.currentPage = totalPages;
       }
@@ -126,6 +157,16 @@ import { XP_VALUES } from "../../types/tracker";
     /** Applies the current type filter and keeps newest completions first. */
     private getFilteredCompletedTasks(): CompletedTaskData[] {
       return this.completedTasks.filter((task) => this.completedFilterType === "all" || task.type === this.completedFilterType).sort((a, b) => b.completedAt - a.completedAt);
+    }
+
+    /** Returns completed tasks that are not archived (visible list). */
+    private getVisibleCompletedTasks(): CompletedTaskData[] {
+      return this.getFilteredCompletedTasks().filter((task) => task.archivedAt === null);
+    }
+
+    /** Returns archived completed tasks count for header control visibility. */
+    private getArchivedCompletedCount(): number {
+      return this.completedTasks.filter((task) => task.archivedAt !== null).length;
     }
 
     /** Formats completion timestamps for UI labels. */
@@ -242,7 +283,8 @@ import { XP_VALUES } from "../../types/tracker";
      */
     private async render(): Promise<void> {
       this.transitionInProgress = true;
-      const filtered = this.getFilteredCompletedTasks();
+      const filtered = this.getVisibleCompletedTasks();
+      const archivedCount = this.getArchivedCompletedCount();
       const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
       if (this.currentPage > totalPages) {
         this.currentPage = totalPages;
@@ -265,10 +307,20 @@ import { XP_VALUES } from "../../types/tracker";
 
       container.innerHTML = "";
 
+      const restoreButton = this.querySelector<HTMLButtonElement>("#restore-archived-btn");
+      const clearHistoryButton = this.querySelector<HTMLButtonElement>("#clear-history-btn");
+      if (restoreButton) {
+        restoreButton.hidden = archivedCount === 0;
+        restoreButton.textContent = `Restore all archived (${archivedCount})`;
+      }
+      if (clearHistoryButton) {
+        clearHistoryButton.hidden = archivedCount === 0;
+      }
+
       if (page.length === 0) {
         const empty = document.createElement("p");
         empty.className = "empty-completed";
-        empty.textContent = "No completed tasks yet — get going.";
+        empty.textContent = archivedCount > 0 ? "No visible completed tasks. Archived history is hidden." : "No completed tasks yet — get going.";
         this.applyAstroScope(empty);
         container.appendChild(empty);
       } else {

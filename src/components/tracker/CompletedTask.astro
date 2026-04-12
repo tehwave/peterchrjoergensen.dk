@@ -33,7 +33,7 @@ const { id, title, completedAtLabel, xp } = Astro.props;
     </div>
   </div>
   <div class="completed-item__actions">
-    <button class="completed-item__action-btn" data-action="delete-completed" type="button" aria-label="Delete completed task">
+    <button class="completed-item__action-btn" data-action="archive-completed" type="button" aria-label="Archive completed task">
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -71,7 +71,7 @@ const { id, title, completedAtLabel, xp } = Astro.props;
 
       this.addEventListener("click", (event) => {
         const target = event.target;
-        const btn = target instanceof Element ? target.closest("[data-action='delete-completed']") : null;
+        const btn = target instanceof Element ? target.closest("[data-action='archive-completed']") : null;
         if (!btn) return;
 
         const id = this.dataset.completedId ?? "";
@@ -79,7 +79,7 @@ const { id, title, completedAtLabel, xp } = Astro.props;
 
         // Bubble intent upward so the page-level orchestrator can mutate state.
         this.dispatchEvent(
-          new CustomEvent("tracker-completed-task-delete", {
+          new CustomEvent("tracker-completed-task-archive", {
             bubbles: true,
             detail: { id },
           }),

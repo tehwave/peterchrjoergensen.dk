@@ -4,7 +4,7 @@
  *
  * A single-page productivity app with:
  * - Three task sections: Short-term (weekly), Medium-term (monthly), Long-term (quarterly)
- * - Gamification: XP, levels, streaks
+ * - LocalStorage persistence + compact base64url export/import for cross-device sync
  * - Visual decay for overdue tasks with stink particles
  * - Drag-and-drop reordering within and between sections
  * - LocalStorage persistence + base64 export/import for cross-device sync
@@ -57,14 +57,14 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
     <script is:inline src="https://analytics.ahrefs.com/analytics.js" data-key="PQ2PVfAM4xEKb65ihHICUQ" defer></script>
     <!-- / Ahrefs Analytics -->
   </head>
-  <body class="tracker-layout">
-    <style
-      define:vars={{
-        "texture-avif": `url(${textureAVIF.src})`,
-        "texture-webp": `url(${textureWebP.src})`,
-        "texture-fallback": `url(${textureFallback.src})`,
-      }}
-    ></style>
+  <body
+    class="tracker-layout"
+    style={{
+      "--texture-avif": `url(${textureAVIF.src})`,
+      "--texture-webp": `url(${textureWebP.src})`,
+      "--texture-fallback": `url(${textureFallback.src})`,
+    }}
+  >
     <!-- 
       Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
       Allows keyboard users to skip navigation and jump directly to main content.
@@ -348,11 +348,11 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
 
         // Stats bar
         .stats-bar {
-          margin-bottom: $space-md;
+          margin-bottom: $space-sm;
           display: grid;
           grid-template-columns: 2fr 1fr 1fr 1fr;
 
-          gap: $space-md;
+          gap: $space-sm;
 
           @include respond-to(lg) {
             grid-template-columns: 1fr 1fr;
@@ -370,10 +370,10 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         .stat-card {
           @include elevated-panel($tracker-card-bg, $tracker-card-stroke, $shadow-xs);
           border-radius: $radius-lg;
-          padding: $space-md $space-lg;
+          padding: $space-xs $space-sm;
           display: flex;
           flex-direction: column;
-          gap: $space-xs;
+          gap: 2px;
           position: relative;
           overflow: hidden;
 
@@ -385,34 +385,35 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           }
 
           &__value {
-            font-size: $font-size-2xl;
+            font-size: $font-size-xl;
             font-weight: $font-weight-black;
             color: $color-text-primary;
             line-height: 1;
           }
 
           &__label {
-            font-size: $font-size-xs;
+            font-size: 0.6875rem;
             text-transform: uppercase;
             letter-spacing: $tracking-wider;
             color: $tracker-soft-text;
             font-weight: $font-weight-semibold;
+            line-height: 1.2;
           }
 
           &__icon {
             position: absolute;
-            top: $space-md;
-            right: $space-md;
-            width: 28px;
-            height: 28px;
+            top: $space-xs;
+            right: $space-xs;
+            width: 18px;
+            height: 18px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.2;
+            opacity: 0.16;
 
             svg {
-              width: 28px;
-              height: 28px;
+              width: 18px;
+              height: 18px;
             }
           }
         }
@@ -421,22 +422,22 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         .level-badge {
           display: flex;
           align-items: center;
-          gap: $space-sm;
-          margin-bottom: $space-sm;
+          gap: $space-xs;
+          margin-bottom: 2px;
 
           &__icon {
-            font-size: 1.5rem;
+            font-size: 0.9rem;
           }
 
           &__label {
-            font-size: $font-size-xs;
+            font-size: 0.625rem;
             text-transform: uppercase;
             letter-spacing: $tracking-wider;
             color: rgba(255, 255, 255, 0.7);
           }
 
           &__number {
-            font-size: $font-size-2xl;
+            font-size: $font-size-xl;
             font-weight: $font-weight-black;
             color: $color-text-light;
           }
@@ -445,21 +446,21 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         .xp-area {
           display: flex;
           align-items: center;
-          gap: $space-sm;
+          gap: 6px;
         }
 
         .xp-bar {
           flex: 1;
-          height: 10px;
+          height: 6px;
           background: rgba(255, 255, 255, 0.2);
-          border-radius: 5px;
+          border-radius: 4px;
           overflow: hidden;
           position: relative;
 
           &__fill {
             height: 100%;
             background: linear-gradient(90deg, $color-orange-light, $color-orange);
-            border-radius: 5px;
+            border-radius: 4px;
             @include transition(width, 0.5s, ease-out);
           }
 
@@ -481,16 +482,26 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         }
 
         .xp-text {
-          font-size: $font-size-xs;
+          font-size: 0.6875rem;
           color: rgba(255, 255, 255, 0.85);
           white-space: nowrap;
           font-weight: $font-weight-semibold;
+          line-height: 1.1;
         }
 
         .total-xp {
-          font-size: $font-size-xs;
-          color: rgba(255, 255, 255, 0.6);
-          margin-top: $space-xs;
+          display: none;
+        }
+
+        @media (max-width: 560px) {
+          .stat-card {
+            padding: $space-sm;
+          }
+
+          .stat-card__value,
+          .level-badge__number {
+            font-size: $font-size-lg;
+          }
         }
 
         // Buttons
@@ -901,6 +912,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (typeof task.id !== "string" || typeof task.title !== "string" || !isTaskType(task.type)) return null;
           if (typeof task.createdAt !== "number") return null;
           const completedAt = typeof task.completedAt === "number" ? task.completedAt : null;
+          const archivedAt = typeof task.archivedAt === "number" ? task.archivedAt : null;
 
           return {
             id: task.id,
@@ -910,6 +922,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             createdAt: task.createdAt,
             dueDate: typeof task.dueDate === "string" ? task.dueDate : null,
             completedAt,
+            archivedAt,
             order: typeof task.order === "number" ? task.order : index,
           };
         }
@@ -987,20 +1000,164 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           syncShareUrl(state, pushHistory);
         }
 
-        function encodeState(state: AppState): string {
-          const json = JSON.stringify(state);
-          const bytes = new TextEncoder().encode(json);
+        type CompactTaskType = 0 | 1 | 2;
+        type CompactTask = [id: string, title: string, type: CompactTaskType, createdAt: number, order: number, description?: string, dueDate?: string, completedAt?: number, archivedAt?: number];
+        type CompactGame = [
+          level: number,
+          xp: number,
+          totalXP: number,
+          completedThisMonth: number,
+          completedThisYear: number,
+          streak: number,
+          lastActivityDate: string,
+          monthKey: string,
+          yearKey: string,
+        ];
+        type CompactStatePayload = [version: 2, tasks: CompactTask[], game: CompactGame];
+
+        function toCompactTaskType(type: TaskType): CompactTaskType {
+          if (type === "short") return 0;
+          if (type === "medium") return 1;
+          return 2;
+        }
+
+        function fromCompactTaskType(type: unknown): TaskType | null {
+          if (type === 0) return "short";
+          if (type === 1) return "medium";
+          if (type === 2) return "long";
+          return null;
+        }
+
+        function taskToCompact(task: Task): CompactTask {
+          const compact: CompactTask = [task.id, task.title, toCompactTaskType(task.type), task.createdAt, task.order];
+
+          if (task.description || task.dueDate !== null || task.completedAt !== null || task.archivedAt !== null) {
+            compact[5] = task.description;
+          }
+
+          if (task.dueDate !== null || task.completedAt !== null || task.archivedAt !== null) {
+            compact[6] = task.dueDate ?? "";
+          }
+
+          if (task.completedAt !== null || task.archivedAt !== null) {
+            compact[7] = task.completedAt ?? -1;
+          }
+
+          if (task.archivedAt !== null) {
+            compact[8] = task.archivedAt;
+          }
+
+          return compact;
+        }
+
+        function taskFromCompact(value: unknown, index: number): Task | null {
+          if (!Array.isArray(value) || value.length < 5) return null;
+
+          const [id, title, compactType, createdAt, order, description, dueDate, completedAt, archivedAt] = value;
+          if (typeof id !== "string" || typeof title !== "string") return null;
+
+          const type = fromCompactTaskType(compactType);
+          if (!type) return null;
+          if (typeof createdAt !== "number" || typeof order !== "number") return null;
+
+          const normalizedDueDate = typeof dueDate === "string" && dueDate !== "" ? dueDate : null;
+          const normalizedCompletedAt = typeof completedAt === "number" && completedAt >= 0 ? completedAt : null;
+          const normalizedArchivedAt = typeof archivedAt === "number" ? archivedAt : null;
+
+          return {
+            id,
+            title,
+            description: typeof description === "string" ? description : "",
+            type,
+            createdAt,
+            dueDate: normalizedDueDate,
+            completedAt: normalizedCompletedAt,
+            archivedAt: normalizedArchivedAt,
+            order: Number.isFinite(order) ? order : index,
+          };
+        }
+
+        function gameToCompact(game: GameState): CompactGame {
+          return [game.level, game.xp, game.totalXP, game.completedThisMonth, game.completedThisYear, game.streak, game.lastActivityDate, game.monthKey, game.yearKey];
+        }
+
+        function gameFromCompact(value: unknown): GameState | null {
+          if (!Array.isArray(value) || value.length !== 9) return null;
+
+          const [level, xp, totalXP, completedThisMonth, completedThisYear, streak, lastActivityDate, monthKey, yearKey] = value;
+          if (
+            typeof level !== "number" ||
+            typeof xp !== "number" ||
+            typeof totalXP !== "number" ||
+            typeof completedThisMonth !== "number" ||
+            typeof completedThisYear !== "number" ||
+            typeof streak !== "number" ||
+            typeof lastActivityDate !== "string" ||
+            typeof monthKey !== "string" ||
+            typeof yearKey !== "string"
+          ) {
+            return null;
+          }
+
+          return {
+            level,
+            xp,
+            totalXP,
+            completedThisMonth,
+            completedThisYear,
+            streak,
+            lastActivityDate,
+            monthKey,
+            yearKey,
+          };
+        }
+
+        function encodeBase64Url(bytes: Uint8Array): string {
           let binary = "";
-          bytes.forEach((b) => (binary += String.fromCharCode(b)));
-          return btoa(binary);
+          bytes.forEach((byte) => {
+            binary += String.fromCharCode(byte);
+          });
+
+          return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        }
+
+        function decodeBase64Url(input: string): Uint8Array {
+          const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+          const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+          const binary = atob(padded);
+          return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        }
+
+        function encodeState(state: AppState): string {
+          const payload: CompactStatePayload = [2, state.tasks.map(taskToCompact), gameToCompact(state.game)];
+          const json = JSON.stringify(payload);
+          const bytes = new TextEncoder().encode(json);
+          return encodeBase64Url(bytes);
         }
 
         function decodeState(encoded: string): AppState | null {
           try {
-            const binary = atob(encoded);
-            const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+            const bytes = decodeBase64Url(encoded);
             const json = new TextDecoder().decode(bytes);
-            return normalizeStatePayload(JSON.parse(json));
+            const parsed = JSON.parse(json);
+            if (!Array.isArray(parsed) || parsed.length !== 3 || parsed[0] !== 2 || !Array.isArray(parsed[1])) {
+              return null;
+            }
+
+            const compactTasks = parsed[1] as unknown[];
+            const compactGame = parsed[2] as unknown;
+
+            const tasks: Task[] = [];
+            for (const [index, taskValue] of compactTasks.entries()) {
+              const task = taskFromCompact(taskValue, index);
+              if (!task) return null;
+              tasks.push(task);
+            }
+
+            const game = gameFromCompact(compactGame);
+            if (!game) return null;
+
+            return normalizeStatePayload({ tasks, game, version: 2 });
           } catch {
             return null;
           }
@@ -1021,9 +1178,13 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
         function mergeStates(local: AppState, imported: AppState): AppState {
           // Merge tasks: prefer the most recently completed/updated version
           const taskMap = new Map<string, Task>();
+          const taskFreshnessScore = (task: Task): number => {
+            return Math.max(task.createdAt, task.completedAt ?? 0, task.archivedAt ?? 0);
+          };
+
           [...local.tasks, ...imported.tasks].forEach((t) => {
             const existing = taskMap.get(t.id);
-            if (!existing || (t.completedAt ?? 0) > (existing.completedAt ?? 0)) {
+            if (!existing || taskFreshnessScore(t) > taskFreshnessScore(existing)) {
               taskMap.set(t.id, t);
             }
           });
@@ -1168,6 +1329,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           title: string;
           type: TaskType;
           completedAt: number;
+          archivedAt: number | null;
         }
 
         interface CompletedTasksElement extends HTMLElement {
@@ -1232,6 +1394,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
               title: task.title,
               type: task.type,
               completedAt: task.completedAt,
+              archivedAt: task.archivedAt,
             }));
 
           const completedRoot = document.querySelector<CompletedTasksElement>("tracker-completed-tasks");
@@ -1451,6 +1614,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
             createdAt: Date.now(),
             dueDate: null,
             completedAt: null,
+            archivedAt: null,
             order: maxOrder + 1,
           };
           state.tasks.push(task);
@@ -1481,6 +1645,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 1 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1491,6 +1656,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 4 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 1,
               },
               {
@@ -1501,6 +1667,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 9 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1511,6 +1678,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 17 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 1,
               },
               {
@@ -1521,6 +1689,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 24 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1531,6 +1700,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 65 * day,
                 dueDate: null,
                 completedAt: null,
+                archivedAt: null,
                 order: 1,
               },
               {
@@ -1541,6 +1711,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 8 * day,
                 dueDate: null,
                 completedAt: now - 2 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1551,6 +1722,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 18 * day,
                 dueDate: null,
                 completedAt: now - 6 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1561,6 +1733,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 14 * day,
                 dueDate: null,
                 completedAt: now - 12 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1571,6 +1744,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 13 * day,
                 dueDate: null,
                 completedAt: now - 11 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1581,6 +1755,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 10 * day,
                 dueDate: null,
                 completedAt: now - 9 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1591,6 +1766,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 8 * day,
                 dueDate: null,
                 completedAt: now - 7 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1601,6 +1777,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 6 * day,
                 dueDate: null,
                 completedAt: now - 5 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1611,6 +1788,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 26 * day,
                 dueDate: null,
                 completedAt: now - 24 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1621,6 +1799,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 23 * day,
                 dueDate: null,
                 completedAt: now - 21 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1631,6 +1810,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 19 * day,
                 dueDate: null,
                 completedAt: now - 17 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1641,6 +1821,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 16 * day,
                 dueDate: null,
                 completedAt: now - 14 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1651,6 +1832,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 12 * day,
                 dueDate: null,
                 completedAt: now - 10 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1661,6 +1843,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 90 * day,
                 dueDate: null,
                 completedAt: now - 72 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1671,6 +1854,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 86 * day,
                 dueDate: null,
                 completedAt: now - 63 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1681,6 +1865,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 80 * day,
                 dueDate: null,
                 completedAt: now - 55 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1691,6 +1876,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 75 * day,
                 dueDate: null,
                 completedAt: now - 48 * day,
+                archivedAt: null,
                 order: 0,
               },
               {
@@ -1701,6 +1887,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
                 createdAt: now - 68 * day,
                 dueDate: null,
                 completedAt: now - 39 * day,
+                archivedAt: null,
                 order: 0,
               },
             ],
@@ -1727,6 +1914,7 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           const task = state.tasks.find((t) => t.id === id);
           if (!task || task.completedAt) return;
           task.completedAt = Date.now();
+          task.archivedAt = null;
 
           recordActivity();
           state.game.completedThisMonth++;
@@ -1741,6 +1929,62 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           state.tasks = state.tasks.filter((t) => t.id !== id);
           saveState(state);
           renderAll();
+        }
+
+        function archiveCompletedTask(id: string): void {
+          const task = state.tasks.find((t) => t.id === id);
+          if (!task || task.completedAt === null || task.archivedAt !== null) return;
+          task.archivedAt = Date.now();
+          saveState(state);
+          renderAll();
+        }
+
+        function archiveAllCompleted(): number {
+          let archivedCount = 0;
+          const archivedAt = Date.now();
+          state.tasks.forEach((task) => {
+            if (task.completedAt !== null && task.archivedAt === null) {
+              task.archivedAt = archivedAt;
+              archivedCount++;
+            }
+          });
+
+          if (archivedCount > 0) {
+            saveState(state);
+            renderAll();
+          }
+
+          return archivedCount;
+        }
+
+        function restoreAllArchived(): number {
+          let restoredCount = 0;
+          state.tasks.forEach((task) => {
+            if (task.completedAt !== null && task.archivedAt !== null) {
+              task.archivedAt = null;
+              restoredCount++;
+            }
+          });
+
+          if (restoredCount > 0) {
+            saveState(state);
+            renderAll();
+          }
+
+          return restoredCount;
+        }
+
+        function clearArchivedHistory(): number {
+          const previousCount = state.tasks.length;
+          state.tasks = state.tasks.filter((task) => !(task.completedAt !== null && task.archivedAt !== null));
+          const clearedCount = previousCount - state.tasks.length;
+
+          if (clearedCount > 0) {
+            saveState(state);
+            renderAll();
+          }
+
+          return clearedCount;
         }
 
         function editTask(id: string, title: string): void {
@@ -1855,21 +2099,44 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           showToast({ type: "info", icon: "i", title: "Task renamed", text: "" });
         });
 
-        document.addEventListener("tracker-completed-task-delete", (event) => {
-          const deleteEvent = event as CustomEvent<{ id: string }>;
-          const id = deleteEvent.detail?.id;
+        document.addEventListener("tracker-completed-task-archive", (event) => {
+          const archiveEvent = event as CustomEvent<{ id: string }>;
+          const id = archiveEvent.detail?.id;
           if (!id) return;
-          if (confirm("Delete this completed task?")) {
-            deleteTask(id);
-          }
+          archiveCompletedTask(id);
+          showToast({ type: "info", icon: "i", title: "Archived", text: "Completed task moved to archived history." });
         });
 
-        document.addEventListener("tracker-completed-clear", () => {
-          if (!confirm("Clear all completed tasks? This cannot be undone.")) return;
-          state.tasks = state.tasks.filter((task) => task.completedAt === null);
-          saveState(state);
-          renderAll();
-          showToast({ type: "info", icon: "i", title: "Cleared", text: "All completed tasks removed." });
+        document.addEventListener("tracker-completed-archive-all", () => {
+          const archivedCount = archiveAllCompleted();
+          if (archivedCount === 0) {
+            showToast({ type: "info", icon: "i", title: "Nothing to archive", text: "No visible completed tasks to archive." });
+            return;
+          }
+
+          showToast({ type: "info", icon: "i", title: "Archived", text: `${archivedCount} completed ${archivedCount === 1 ? "task" : "tasks"} archived.` });
+        });
+
+        document.addEventListener("tracker-completed-restore-all", () => {
+          const restoredCount = restoreAllArchived();
+          if (restoredCount === 0) {
+            showToast({ type: "info", icon: "i", title: "Nothing to restore", text: "There are no archived tasks." });
+            return;
+          }
+
+          showToast({ type: "success", icon: "↺", title: "Restored", text: `${restoredCount} archived ${restoredCount === 1 ? "task" : "tasks"} restored.` });
+        });
+
+        document.addEventListener("tracker-completed-clear-history", () => {
+          if (!confirm("Clear archived history? This permanently removes archived completed tasks.")) return;
+
+          const clearedCount = clearArchivedHistory();
+          if (clearedCount === 0) {
+            showToast({ type: "info", icon: "i", title: "Nothing to clear", text: "No archived tasks found in history." });
+            return;
+          }
+
+          showToast({ type: "info", icon: "i", title: "History cleared", text: `${clearedCount} archived ${clearedCount === 1 ? "task" : "tasks"} removed permanently.` });
         });
 
         // Add task button
