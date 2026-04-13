@@ -1646,6 +1646,20 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           order: number;
         }
 
+        /** Normalized task payload accepted from external integrations (e.g. browser extension). */
+        interface ExternalImportTask {
+          title: string;
+          type: TaskType;
+          description?: string;
+        }
+
+        /** Detail shape for externally-triggered import requests. */
+        interface ExternalImportEventDetail {
+          source?: string;
+          tasks?: ExternalImportTask[];
+          showToasts?: boolean;
+        }
+
         /** Minimal imperative API exposed by `<Board />`. */
         interface BoardElement extends HTMLElement {
           setTasks: (tasks: BoardTaskSnapshot[]) => void;
@@ -2436,6 +2450,89 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           renderAll();
         }
 
+        /**
+         * Imports external tasks into active board columns with simple duplicate prevention.
+         * Duplicate key strategy is intentionally strict: title + description + type (case-insensitive).
+         */
+        function importExternalTasks(rawTasks: ExternalImportTask[], source = "External source", showToasts = true): { added: number; skipped: number } {
+          const typeMaxOrder = {
+            short: state.tasks.filter((task) => task.type === "short" && task.completedAt === null).reduce((max, task) => Math.max(max, task.order), -1),
+            medium: state.tasks.filter((task) => task.type === "medium" && task.completedAt === null).reduce((max, task) => Math.max(max, task.order), -1),
+            long: state.tasks.filter((task) => task.type === "long" && task.completedAt === null).reduce((max, task) => Math.max(max, task.order), -1),
+          };
+
+          const normalizeKeyPart = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+          const taskKey = (title: string, description: string, type: TaskType) => `${type}::${normalizeKeyPart(title)}::${normalizeKeyPart(description)}`;
+
+          const seen = new Set<string>(state.tasks.filter((task) => task.completedAt === null).map((task) => taskKey(task.title, task.description ?? "", task.type)));
+
+          const now = Date.now();
+          let added = 0;
+          let skipped = 0;
+
+          rawTasks.forEach((incomingTask) => {
+            const title = incomingTask.title?.trim();
+            if (!title) {
+              skipped++;
+              return;
+            }
+
+            if (incomingTask.type !== "short" && incomingTask.type !== "medium" && incomingTask.type !== "long") {
+              skipped++;
+              return;
+            }
+
+            const description = typeof incomingTask.description === "string" ? incomingTask.description.trim() : "";
+            const key = taskKey(title, description, incomingTask.type);
+            if (seen.has(key)) {
+              skipped++;
+              return;
+            }
+
+            typeMaxOrder[incomingTask.type] += 1;
+
+            state.tasks.push({
+              id: crypto.randomUUID(),
+              title,
+              description,
+              type: incomingTask.type,
+              createdAt: now,
+              dueDate: null,
+              completedAt: null,
+              archivedAt: null,
+              order: typeMaxOrder[incomingTask.type],
+            });
+
+            seen.add(key);
+            added++;
+          });
+
+          if (added > 0) {
+            void saveState(state);
+            renderAll();
+          }
+
+          if (showToasts) {
+            if (added > 0) {
+              showToast({
+                type: "success",
+                icon: "✓",
+                title: `Imported ${added} ${added === 1 ? "task" : "tasks"}`,
+                text: `${source}${skipped > 0 ? ` • skipped ${skipped} duplicate/invalid` : ""}`,
+              });
+            } else {
+              showToast({
+                type: "info",
+                icon: "i",
+                title: "No tasks imported",
+                text: `${source} did not add new tasks (all duplicates or invalid).`,
+              });
+            }
+          }
+
+          return { added, skipped };
+        }
+
         // ===========================================================
         // Drag & Drop
         // ===========================================================
@@ -2650,6 +2747,20 @@ const textureFallback = await getImage({ src: textureSource, format: "png" });
           if (!id || !title?.trim()) return;
           editTask(id, title);
           showToast({ type: "info", icon: "i", title: "Task renamed", text: "" });
+        });
+
+        document.addEventListener("tracker-external-import", (event) => {
+          const importEvent = event as CustomEvent<ExternalImportEventDetail>;
+          const tasks = Array.isArray(importEvent.detail?.tasks) ? importEvent.detail.tasks : [];
+          const showToasts = importEvent.detail?.showToasts ?? true;
+          if (tasks.length === 0) {
+            if (showToasts) {
+              showToast({ type: "info", icon: "i", title: "No tasks received", text: "External import payload was empty." });
+            }
+            return;
+          }
+
+          importExternalTasks(tasks, importEvent.detail?.source ?? "Browser extension", showToasts);
         });
 
         document.addEventListener("tracker-completed-task-archive", (event) => {
