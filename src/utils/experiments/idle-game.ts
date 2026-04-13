@@ -1,11 +1,4 @@
-import {
-  Application,
-  Assets,
-  Container,
-  Graphics,
-  Sprite,
-  Texture,
-} from "pixi.js";
+import { Application, Assets, Container, Graphics, Sprite, Texture } from "pixi.js";
 
 import animalBeaver from "../../assets/experiments/idle-game/animals/animal-beaver.png";
 import animalBee from "../../assets/experiments/idle-game/animals/animal-bee.png";
@@ -122,7 +115,6 @@ interface AnimalSpriteView {
 
 interface Particle {
   graphic: Graphics;
-  kind: ParticleKind;
   x: number;
   y: number;
   z: number;
@@ -131,7 +123,6 @@ interface Particle {
   vz: number;
   life: number;
   maxLife: number;
-  size: number;
   spin: number;
 }
 
@@ -233,27 +224,33 @@ export function initIdleGame(): void {
   destroyActiveGame();
 
   if (!cleanupRegistered) {
-    document.addEventListener("astro:before-preparation", () => {
-      cleanupRegistered = false;
-      destroyActiveGame();
-    }, { once: true });
+    document.addEventListener(
+      "astro:before-preparation",
+      () => {
+        cleanupRegistered = false;
+        destroyActiveGame();
+      },
+      { once: true },
+    );
     cleanupRegistered = true;
   }
 
-  void mountIdleGame(root).then((game) => {
-    if (mountToken !== activeMountToken) {
-      game.destroy();
-      return;
-    }
+  void mountIdleGame(root)
+    .then((game) => {
+      if (mountToken !== activeMountToken) {
+        game.destroy();
+        return;
+      }
 
-    activeGame = game;
-  }).catch((error: unknown) => {
-    console.error("[IdleGame] Failed to mount idle game", error);
-    const feedback = root.querySelector<HTMLElement>("[data-idle-game-feedback]");
-    if (feedback) {
-      feedback.textContent = "Idle game failed to load. Try refreshing the page.";
-    }
-  });
+      activeGame = game;
+    })
+    .catch((error: unknown) => {
+      console.error("[IdleGame] Failed to mount idle game", error);
+      const feedback = root.querySelector<HTMLElement>("[data-idle-game-feedback]");
+      if (feedback) {
+        feedback.textContent = "Idle game failed to load. Try refreshing the page.";
+      }
+    });
 }
 
 export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
@@ -284,6 +281,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const worldShadow = new Graphics();
 
   worldLayer.sortableChildren = true;
+  particleLayer.sortableChildren = true;
   animalLayer.sortableChildren = true;
 
   worldLayer.addChild(worldShadow);
@@ -330,9 +328,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       y: randomBetween(-1.8, 1.8),
     };
 
-    const nearbyAnimals = [...animals]
-      .sort((a, b) => distanceSq(a.x, a.y, feedPoint.x, feedPoint.y) - distanceSq(b.x, b.y, feedPoint.x, feedPoint.y))
-      .slice(0, Math.min(animals.length, 7));
+    const nearbyAnimals = [...animals].sort((a, b) => distanceSq(a.x, a.y, feedPoint.x, feedPoint.y) - distanceSq(b.x, b.y, feedPoint.x, feedPoint.y)).slice(0, Math.min(animals.length, 7));
 
     nearbyAnimals.forEach((animal, index) => {
       animal.targetX = clamp(feedPoint.x + randomBetween(-0.6, 0.6), minX(), maxX());
@@ -377,16 +373,19 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
 
     const species = weightedChoice(animalDefinitions, Math.random);
-    const baby = createAnimal({
-      id: createAnimalId(),
-      species: species.id,
-      x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
-      y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
-      age: 0,
-      growth: 0.58,
-      hunger: 0.84,
-      happiness: 0.82,
-    }, textures);
+    const baby = createAnimal(
+      {
+        id: createAnimalId(),
+        species: species.id,
+        x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
+        y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
+        age: 0,
+        growth: 0.58,
+        hunger: 0.84,
+        happiness: 0.82,
+      },
+      textures,
+    );
 
     animals.push(baby);
     animalLayer.addChild(baby.view.container);
@@ -407,7 +406,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   const handlePauseToggle = () => {
     state.paused = !state.paused;
-    app.ticker.started = !state.paused;
     if (state.paused) {
       app.ticker.stop();
       updateFeedback("Simulation paused.");
@@ -484,11 +482,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function tickResources(deltaSeconds: number): void {
-    state.resources.food = clamp(
-      state.resources.food + FOOD_REGEN_PER_SECOND * deltaSeconds,
-      0,
-      state.resources.foodCapacity,
-    );
+    state.resources.food = clamp(state.resources.food + FOOD_REGEN_PER_SECOND * deltaSeconds, 0, state.resources.foodCapacity);
   }
 
   function tickAnimals(deltaSeconds: number, prefersReducedMotion: boolean): void {
@@ -498,11 +492,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.age += deltaSeconds;
       animal.growth = clamp(animal.growth + deltaSeconds / BABY_GROWTH_SECONDS, 0.58, 1);
       animal.hunger = clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * deltaSeconds, 0, 1);
-      animal.happiness = clamp(
-        animal.happiness + (animal.hunger - 0.58) * 0.2 * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds,
-        0,
-        1,
-      );
+      animal.happiness = clamp(animal.happiness + (animal.hunger - 0.58) * 0.2 * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds, 0, 1);
 
       animal.wanderCooldown -= deltaSeconds;
       if (animal.feedTargetUntil <= performance.now() && animal.wanderCooldown <= 0) {
@@ -669,7 +659,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       drawParticleShape(graphic, kind, color, 4 + Math.random() * 6);
       const particle: Particle = {
         graphic,
-        kind,
         x: worldX + randomBetween(-0.4, 0.4),
         y: worldY + randomBetween(-0.4, 0.4),
         z: Math.random() * 18,
@@ -678,7 +667,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         vz: randomBetween(0.6, 1.2),
         life: randomBetween(0.7, 1.3),
         maxLife: 1.4,
-        size: randomBetween(4, 9),
         spin: randomBetween(-1.6, 1.6),
       };
 
@@ -694,15 +682,12 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
     ui.population.textContent = `${animals.length}/${state.resources.populationCap}`;
     ui.food.textContent = `${Math.floor(state.resources.food)}/${state.resources.foodCapacity}`;
-    ui.mood.textContent = `${Math.round(averageMood * 100)}%`; 
+    ui.mood.textContent = `${Math.round(averageMood * 100)}%`;
     ui.cooldown.textContent = cooldownMs === 0 ? "Ready" : `${(cooldownMs / 1000).toFixed(1)}s`;
     ui.feedback.textContent = feedbackMessage;
     ui.pauseButton.textContent = state.paused ? "Resume" : "Pause";
     ui.feedButton.disabled = state.resources.food < FEED_COST;
-    ui.populateButton.disabled =
-      state.paused ||
-      animals.length >= state.resources.populationCap ||
-      state.resources.populateCooldownUntil > Date.now();
+    ui.populateButton.disabled = state.paused || animals.length >= state.resources.populationCap || state.resources.populateCooldownUntil > Date.now();
     ui.root.dataset.populationPressure = populationPressure >= 1 ? "full" : populationPressure >= FEEDBACK_LOW_CAP_THRESHOLD ? "warning" : "normal";
   }
 
@@ -889,11 +874,7 @@ function applyOfflineCatchup(state: IdleGameState): IdleGameState {
     age: animal.age + elapsedSeconds,
     growth: clamp(animal.growth + elapsedSeconds / BABY_GROWTH_SECONDS, 0.58, 1),
     hunger: clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
-    happiness: clamp(
-      animal.happiness + (animal.hunger - 0.58) * 0.06 * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds,
-      0,
-      1,
-    ),
+    happiness: clamp(animal.happiness + (animal.hunger - 0.58) * 0.06 * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
   }));
 
   return {
@@ -924,12 +905,7 @@ function validateState(input: unknown): IdleGameState | null {
     .slice(0, 24);
 
   const resources = candidate.resources as Partial<Resources>;
-  if (
-    typeof resources.food !== "number" ||
-    typeof resources.foodCapacity !== "number" ||
-    typeof resources.populationCap !== "number" ||
-    typeof resources.populateCooldownUntil !== "number"
-  ) {
+  if (typeof resources.food !== "number" || typeof resources.foodCapacity !== "number" || typeof resources.populationCap !== "number" || typeof resources.populateCooldownUntil !== "number") {
     return null;
   }
 
@@ -1045,7 +1021,12 @@ function applyMoodTint(animal: Animal): number {
 }
 
 function renderBackground(layer: Container, width: number, height: number): void {
-  layer.removeChildren().forEach((child) => child.destroy());
+  layer.removeChildren().forEach((child) => {
+    if (child instanceof Sprite) {
+      child.texture.destroy(true);
+    }
+    child.destroy();
+  });
 
   const gradientCanvas = document.createElement("canvas");
   gradientCanvas.width = Math.max(1, Math.round(width));
