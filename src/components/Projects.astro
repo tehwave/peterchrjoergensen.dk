@@ -87,16 +87,124 @@ const categories = [
         ))
       }
     </div>
+    <button class="projects__skip-to-end" id="projects-skip-to-end" type="button" aria-label="Skip to end of projects section" aria-hidden="true" tabindex="-1"> Seen enough? Skip ahead </button>
+    <div class="projects__end-anchor" id="projects-end" aria-hidden="true"></div>
   </div>
 </section>
 
 <script>
+  // Skip CTA observers are kept at module scope so we can reliably tear them down
+  // before re-binding (filters + Astro page swaps).
+  let skipThresholdObserver: IntersectionObserver | null = null;
+  let skipEndObserver: IntersectionObserver | null = null;
+
+  function getVisibleProjectItems(projectItems: NodeListOf<HTMLElement>): HTMLElement[] {
+    return Array.from(projectItems).filter((item) => !item.classList.contains("projects__item--hidden") && !item.classList.contains("projects__item--hiding"));
+  }
+
+  function getGridColumnCount(grid: HTMLElement): number {
+    const templateColumns = window.getComputedStyle(grid).gridTemplateColumns;
+    const columns = templateColumns.split(" ").filter(Boolean).length;
+    return Math.max(columns, 1);
+  }
+
+  function setSkipButtonState(button: HTMLButtonElement, shouldShow: boolean): void {
+    button.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+    button.tabIndex = shouldShow ? 0 : -1;
+    button.classList.toggle("projects__skip-to-end--visible", shouldShow);
+  }
+
+  // Ensure observer instances do not stack across re-inits.
+  function disconnectSkipObservers(): void {
+    skipThresholdObserver?.disconnect();
+    skipEndObserver?.disconnect();
+    skipThresholdObserver = null;
+    skipEndObserver = null;
+  }
+
   function initFilters() {
     const filterButtons = document.querySelectorAll<HTMLButtonElement>(".projects__filter");
     const projectItems = document.querySelectorAll<HTMLElement>(".projects__item");
+    const projectsGrid = document.querySelector<HTMLElement>("#projects-grid");
+    const skipToEndButton = document.querySelector<HTMLButtonElement>("#projects-skip-to-end");
+    const projectsEndAnchor = document.querySelector<HTMLElement>("#projects-end");
+
+    // Rebuild skip observers against the current visible grid state.
+    // This must run after filtering because hidden cards change row layout.
+    const observeSkipToEndVisibility = () => {
+      disconnectSkipObservers();
+
+      if (!projectsGrid || !skipToEndButton || !projectsEndAnchor) {
+        return;
+      }
+
+      const visibleItems = getVisibleProjectItems(projectItems);
+      const columns = getGridColumnCount(projectsGrid);
+
+      // Change this multiplier to control when the button appears: 1 = after first row, 2 = after two rows, etc.
+      const thresholdIndex = 1 * columns;
+
+      if (visibleItems.length <= thresholdIndex) {
+        setSkipButtonState(skipToEndButton, false);
+        return;
+      }
+
+      const thresholdItem = visibleItems[thresholdIndex];
+      if (!thresholdItem) {
+        setSkipButtonState(skipToEndButton, false);
+        return;
+      }
+
+      if (!("IntersectionObserver" in window)) {
+        setSkipButtonState(skipToEndButton, false);
+        return;
+      }
+
+      let hasPassedThreshold = thresholdItem.getBoundingClientRect().top < 0;
+      let hasReachedSectionEnd = projectsEndAnchor.getBoundingClientRect().top <= window.innerHeight;
+
+      const syncButton = () => {
+        setSkipButtonState(skipToEndButton, hasPassedThreshold && !hasReachedSectionEnd);
+      };
+
+      // Threshold observer: toggles once the first card of row 2 passes the viewport top.
+      skipThresholdObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) {
+            return;
+          }
+
+          hasPassedThreshold = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+          syncButton();
+        },
+        { threshold: 0 },
+      );
+
+      // End observer: hides CTA when we are effectively at the end of the section.
+      skipEndObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          hasReachedSectionEnd = Boolean(entry && entry.boundingClientRect.top <= window.innerHeight);
+          syncButton();
+        },
+        { threshold: 0.01 },
+      );
+
+      skipThresholdObserver.observe(thresholdItem);
+      skipEndObserver.observe(projectsEndAnchor);
+      syncButton();
+    };
+
+    if (skipToEndButton) {
+      skipToEndButton.onclick = () => {
+        // Jump to the end anchor inside Projects (not footer / next section).
+        projectsEndAnchor?.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+    }
 
     filterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
+      button.onclick = () => {
         const filter = button.dataset.filter;
 
         // Update active button
@@ -130,8 +238,17 @@ const categories = [
             item.addEventListener("transitionend", onTransitionEnd);
           }
         });
-      });
+
+        // Recompute threshold with updated visible items after filter animation.
+        window.requestAnimationFrame(() => {
+          observeSkipToEndVisibility();
+          // Match hide transition duration for stable post-animation measurement.
+          window.setTimeout(observeSkipToEndVisibility, 320);
+        });
+      };
     });
+
+    observeSkipToEndVisibility();
   }
 
   // Store handler to prevent duplicates
@@ -281,6 +398,63 @@ const categories = [
       &--hidden {
         display: none;
       }
+    }
+
+    &__skip-to-end {
+      position: fixed;
+      right: $space-lg;
+      bottom: $space-lg;
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: $space-sm $space-lg;
+      border: 1px solid $color-blue-dark;
+      border-radius: 999px;
+      background-color: $color-blue-dark;
+      color: $color-white;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      line-height: 1;
+      box-shadow: 0 8px 20px rgba($color-black, 0.22);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+      @include focus-visible;
+
+      &:hover {
+        background-color: color.adjust($color-blue-dark, $lightness: 6%);
+        border-color: color.adjust($color-blue-dark, $lightness: 6%);
+        transform: translateY(-2px);
+      }
+
+      &--visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      @include respond-to(sm) {
+        right: $space-md;
+        bottom: $space-md;
+        padding: $space-sm $space-md;
+        font-size: $font-size-sm;
+      }
+
+      @include reduced-motion {
+        transition: none;
+      }
+    }
+
+    &__end-anchor {
+      height: 1px;
+      width: 100%;
+      pointer-events: none;
+      opacity: 0;
     }
   }
 </style>
