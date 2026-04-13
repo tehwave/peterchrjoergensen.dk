@@ -14,6 +14,11 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
 ---
 
 <footer class="footer" id="contact">
+  <div class="footer__wave footer__wave--top" aria-hidden="true">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+      <path class="footer__divider-shape" d="M0,92 C180,66 360,46 540,52 C720,58 900,90 1080,94 C1260,98 1350,88 1440,78 L1440,120 L0,120 Z"></path>
+    </svg>
+  </div>
   <div class="footer__container">
     <div class="footer__content">
       <div class="footer__heading-group">
@@ -45,6 +50,9 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
             </svg>
           </a>
         </div>
+        <p class="footer__text">
+          An experiment: <a href="/experiments/groovy-waves/" class="footer__link">Groovy Waves</a>
+        </p>
       </div>
     </div>
     <div class="footer__meta">
@@ -61,23 +69,261 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
       </p>
     </div>
   </div>
+  <div class="footer__wave footer__wave--bottom" aria-hidden="true">
+    <canvas class="footer__wave-canvas" data-footer-wave="bottom" role="presentation" aria-hidden="true"></canvas>
+  </div>
 </footer>
+
+<script>
+  interface FooterWaveScene {
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    width: number;
+    height: number;
+    dpr: number;
+  }
+
+  let teardownFooterWaves: (() => void) | null = null;
+  let footerWavesInitHandler: (() => void) | null = null;
+
+  function initFooterWaves() {
+    teardownFooterWaves?.();
+    teardownFooterWaves = mountFooterWaves();
+
+    document.addEventListener(
+      "astro:before-preparation",
+      () => {
+        teardownFooterWaves?.();
+        teardownFooterWaves = null;
+      },
+      { once: true },
+    );
+  }
+
+  function mountFooterWaves() {
+    const footer = document.querySelector(".footer");
+    if (!(footer instanceof HTMLElement)) {
+      return () => {};
+    }
+
+    const canvasNodes = Array.from(footer.querySelectorAll("[data-footer-wave]"));
+    const canvases = canvasNodes.filter((node): node is HTMLCanvasElement => node instanceof HTMLCanvasElement);
+    if (canvases.length === 0) {
+      return () => {};
+    }
+
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frameId: number | null = null;
+    let isPageVisible = !document.hidden;
+
+    const scenes: FooterWaveScene[] = [];
+
+    for (const canvas of canvases) {
+      const context = canvas.getContext("2d", { alpha: true });
+      if (!context) continue;
+
+      scenes.push({
+        canvas,
+        context,
+        width: 0,
+        height: 0,
+        dpr: 1,
+      });
+    }
+
+    if (scenes.length === 0) {
+      return () => {};
+    }
+
+    function syncSceneSize(scene: FooterWaveScene) {
+      const rect = scene.canvas.getBoundingClientRect();
+      scene.width = Math.max(120, Math.floor(rect.width));
+      scene.height = Math.max(40, Math.floor(rect.height));
+      scene.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      scene.canvas.width = Math.max(1, Math.floor(scene.width * scene.dpr));
+      scene.canvas.height = Math.max(1, Math.floor(scene.height * scene.dpr));
+      scene.context.setTransform(scene.dpr, 0, 0, scene.dpr, 0, 0);
+    }
+
+    function traceBottomWave(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number) {
+      context.beginPath();
+      context.moveTo(0, height);
+
+      for (let x = 0; x <= width + 2; x += 2) {
+        const y = baseY + Math.sin(x * frequency + phase) * amplitude + Math.cos(x * frequency * 1.9 + phase * 0.82) * (amplitude * harmonicScale);
+        context.lineTo(x, y);
+      }
+
+      context.lineTo(width, height);
+      context.closePath();
+    }
+
+    function drawBottomWave(scene: FooterWaveScene, time: number) {
+      const { context, width, height } = scene;
+      context.clearRect(0, 0, width, height);
+
+      const layers = [
+        { base: height * 0.64, amp: height * 0.075, freq: 0.0104, speed: 0.0011, alpha: 0.36, color: "#2a52be", depth: 1.12 },
+        { base: height * 0.72, amp: height * 0.06, freq: 0.0126, speed: -0.00135, alpha: 0.3, color: "#4d78e6", depth: 0.78 },
+        { base: height * 0.79, amp: height * 0.044, freq: 0.0142, speed: 0.00175, alpha: 0.22, color: "#6f95ff", depth: 0.52 },
+      ];
+
+      for (const [index, layer] of layers.entries()) {
+        context.save();
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = layer.alpha;
+        context.fillStyle = layer.color;
+        traceBottomWave(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
+        context.fill();
+        context.restore();
+      }
+    }
+
+    function drawScene(scene: FooterWaveScene, time: number) {
+      drawBottomWave(scene, time);
+    }
+
+    function stopLoop() {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+    }
+
+    function render(time: number) {
+      for (const scene of scenes) {
+        drawScene(scene, time);
+      }
+
+      frameId = requestAnimationFrame(render);
+    }
+
+    function renderStatic() {
+      for (const scene of scenes) {
+        drawScene(scene, 0);
+      }
+    }
+
+    function updatePlayback() {
+      const shouldAnimate = !reduceMotionQuery.matches && isPageVisible;
+
+      if (!shouldAnimate) {
+        stopLoop();
+        renderStatic();
+        return;
+      }
+
+      if (frameId === null) {
+        frameId = requestAnimationFrame(render);
+      }
+    }
+
+    function handleResize() {
+      for (const scene of scenes) {
+        syncSceneSize(scene);
+      }
+
+      updatePlayback();
+    }
+
+    function handleMotionChange() {
+      updatePlayback();
+    }
+
+    function handleVisibilityChange() {
+      isPageVisible = !document.hidden;
+      updatePlayback();
+    }
+
+    for (const scene of scenes) {
+      syncSceneSize(scene);
+    }
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    reduceMotionQuery.addEventListener("change", handleMotionChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    updatePlayback();
+
+    return () => {
+      stopLoop();
+      window.removeEventListener("resize", handleResize);
+      reduceMotionQuery.removeEventListener("change", handleMotionChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }
+
+  initFooterWaves();
+
+  const ensureFooterWavesHandler = () => {
+    if (footerWavesInitHandler) {
+      document.removeEventListener("astro:page-load", footerWavesInitHandler);
+    }
+
+    footerWavesInitHandler = initFooterWaves;
+    document.addEventListener("astro:page-load", footerWavesInitHandler);
+  };
+
+  ensureFooterWavesHandler();
+</script>
 
 <style lang="scss">
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
 
   .footer {
+    position: relative;
+    isolation: isolate;
     background-color: $color-blue-dark;
-    padding: $space-4xl $space-xl;
+    padding: $space-4xl $space-xl calc($space-4xl + 8.1rem);
 
     @include respond-to(md) {
-      padding: $space-3xl $space-lg;
+      padding: $space-3xl $space-lg calc($space-3xl + 6.2rem);
+    }
+
+    &__wave {
+      position: absolute;
+      inset-inline: 0;
+      width: 100%;
+      pointer-events: none;
+      z-index: 1;
+
+      svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      &-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      &--top {
+        top: 0;
+        height: clamp(3rem, 6vw, 5.75rem);
+        transform: translateY(-96%);
+        z-index: 1;
+      }
+
+      &--bottom {
+        bottom: 0;
+        height: clamp(6.5rem, 13vw, 10.5rem);
+        z-index: 0;
+      }
+    }
+
+    &__divider-shape {
+      fill: $color-blue-dark;
     }
 
     &__container {
       max-width: $max-width;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
     }
 
     &__content {
