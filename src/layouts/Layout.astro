@@ -151,14 +151,13 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- Page-specific head content -->
     <slot name="head" />
   </head>
-  <body>
-    <style
-      define:vars={{
-        "texture-avif": `url(${textureAVIF.src})`,
-        "texture-webp": `url(${textureWebP.src})`,
-        "texture-fallback": `url(${textureFallback.src})`,
-      }}
-    ></style>
+  <body
+    style={{
+      "--texture-avif": `url(${textureAVIF.src})`,
+      "--texture-webp": `url(${textureWebP.src})`,
+      "--texture-fallback": `url(${textureFallback.src})`,
+    }}
+  >
     <!-- 
       Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
       Allows keyboard users to skip navigation and jump directly to main content.
