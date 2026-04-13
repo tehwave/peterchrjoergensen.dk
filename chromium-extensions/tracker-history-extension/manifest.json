@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Productivity Tracker",
+  "description": "Automatically imports recent browser history as tasks when /tracker is opened (without #data=).",
+  "version": "1.0.0",
+  "permissions": ["history", "tabs", "scripting", "storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Productivity Tracker",
+    "default_popup": "popup.html"
+  }
+}

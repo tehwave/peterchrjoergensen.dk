@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productivity Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <h1 class="popup__title">Productivity Tracker</h1>
+      <p class="popup__desc">Auto-imports history when you open <code>/tracker</code> without <code>#data=</code>.</p>
+
+      <label class="field" for="tracker-url">
+        <span class="field__label">Tracker URL</span>
+        <input id="tracker-url" class="field__input" type="url" placeholder="https://peterchrjoergensen.dk/tracker/" />
+      </label>
+
+      <div class="field-grid">
+        <label class="field" for="days-back">
+          <span class="field__label">Days back</span>
+          <input id="days-back" class="field__input" type="number" min="1" max="60" value="7" />
+        </label>
+
+        <label class="field" for="max-items">
+          <span class="field__label">Max tasks</span>
+          <input id="max-items" class="field__input" type="number" min="1" max="100" value="20" />
+        </label>
+      </div>
+
+      <label class="field" for="task-type">
+        <span class="field__label">Task type</span>
+        <select id="task-type" class="field__input">
+          <option value="short">This Week</option>
+          <option value="medium">This Month</option>
+          <option value="long">This Quarter</option>
+        </select>
+      </label>
+
+      <button id="import-btn" class="btn">Import now (manual)</button>
+      <button id="open-tracker-btn" class="btn btn--ghost">Open tracker tab</button>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
