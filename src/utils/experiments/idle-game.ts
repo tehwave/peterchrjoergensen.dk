@@ -160,10 +160,12 @@ const WORLD_PADDING = 0.9;
 const BABY_GROWTH_SECONDS = 28;
 const HUNGER_DECAY_PER_SECOND = 0.009;
 const HAPPINESS_DECAY_PER_SECOND = 0.004;
+const HUNGER_NEUTRAL_POINT = 0.58;
 const IDLE_BOB_AMPLITUDE = 9;
 const RECOMMENDED_MAX_DPR = 2;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FEEDBACK_LOW_CAP_THRESHOLD = 0.8;
+const POPULATION_PRESSURE_MESSAGE = "The meadow is getting cosy — population cap is almost full.";
 
 const animalDefinitions: AnimalDefinition[] = [
   { id: "beaver", label: "Beaver", asset: animalBeaver, weight: 1, baseScale: 0.92 },
@@ -299,6 +301,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   let lastTime = performance.now();
   let lastViewportWidth = 0;
   let lastViewportHeight = 0;
+  let populationPressureState: "normal" | "warning" = "normal";
   const particles: Particle[] = [];
   const animals = state.animals.map((persistedAnimal) => createAnimal(persistedAnimal, textures));
 
@@ -492,7 +495,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.age += deltaSeconds;
       animal.growth = clamp(animal.growth + deltaSeconds / BABY_GROWTH_SECONDS, 0.58, 1);
       animal.hunger = clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * deltaSeconds, 0, 1);
-      animal.happiness = clamp(animal.happiness + (animal.hunger - 0.58) * 0.2 * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds, 0, 1);
+      const happinessDrift = (animal.hunger - HUNGER_NEUTRAL_POINT) * 0.2 * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds;
+      animal.happiness = clamp(animal.happiness + happinessDrift, 0, 1);
 
       animal.wanderCooldown -= deltaSeconds;
       if (animal.feedTargetUntil <= performance.now() && animal.wanderCooldown <= 0) {
@@ -558,11 +562,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.bounceVelocity *= springDamping;
       animal.bounce += animal.bounceVelocity * deltaSeconds * 5;
       animal.turnImpulse *= prefersReducedMotion ? 0.72 : 0.62;
-
-      if (nowMs > state.resources.populateCooldownUntil && animals.length / state.resources.populationCap >= FEEDBACK_LOW_CAP_THRESHOLD) {
-        feedbackMessage = "The meadow is getting cosy — population cap is almost full.";
-      }
     }
+
+    updatePopulationPressureFeedback(nowMs);
   }
 
   function tickParticles(deltaSeconds: number, prefersReducedMotion: boolean): void {
@@ -707,6 +709,21 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function updateFeedback(message: string): void {
     feedbackMessage = message;
     ui.feedback.textContent = message;
+  }
+
+  function updatePopulationPressureFeedback(nowMs: number): void {
+    const isWarning = nowMs > state.resources.populateCooldownUntil && animals.length / state.resources.populationCap >= FEEDBACK_LOW_CAP_THRESHOLD;
+    const nextState = isWarning ? "warning" : "normal";
+
+    if (nextState === populationPressureState) {
+      return;
+    }
+
+    populationPressureState = nextState;
+
+    if (nextState === "warning") {
+      updateFeedback(POPULATION_PRESSURE_MESSAGE);
+    }
   }
 
   function persistSoon(force = false): void {
@@ -874,7 +891,7 @@ function applyOfflineCatchup(state: IdleGameState): IdleGameState {
     age: animal.age + elapsedSeconds,
     growth: clamp(animal.growth + elapsedSeconds / BABY_GROWTH_SECONDS, 0.58, 1),
     hunger: clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
-    happiness: clamp(animal.happiness + (animal.hunger - 0.58) * 0.06 * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
+    happiness: clamp(animal.happiness + (animal.hunger - HUNGER_NEUTRAL_POINT) * 0.06 * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
   }));
 
   return {
@@ -905,7 +922,7 @@ function validateState(input: unknown): IdleGameState | null {
     .slice(0, 24);
 
   const resources = candidate.resources as Partial<Resources>;
-  if (typeof resources.food !== "number" || typeof resources.foodCapacity !== "number" || typeof resources.populationCap !== "number" || typeof resources.populateCooldownUntil !== "number") {
+  if (!hasValidResourceShape(resources)) {
     return null;
   }
 
@@ -952,6 +969,10 @@ function validateAnimal(input: unknown): PersistedAnimal | null {
     hunger: clamp(candidate.hunger, 0, 1),
     happiness: clamp(candidate.happiness, 0, 1),
   };
+}
+
+function hasValidResourceShape(resources: Partial<Resources>): resources is Resources {
+  return typeof resources.food === "number" && typeof resources.foodCapacity === "number" && typeof resources.populationCap === "number" && typeof resources.populateCooldownUntil === "number";
 }
 
 function createAnimal(persistedAnimal: PersistedAnimal, textures: Map<AnimalSpeciesId, Texture>): Animal {
