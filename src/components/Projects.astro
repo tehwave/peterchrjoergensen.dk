@@ -98,6 +98,10 @@ const categories = [
   let skipThresholdObserver: IntersectionObserver | null = null;
   let skipEndObserver: IntersectionObserver | null = null;
 
+  function notifyProjectCardsChanged(): void {
+    document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
+  }
+
   function getVisibleProjectItems(projectItems: NodeListOf<HTMLElement>): HTMLElement[] {
     return Array.from(projectItems).filter((item) => !item.classList.contains("projects__item--hidden") && !item.classList.contains("projects__item--hiding"));
   }
@@ -123,6 +127,8 @@ const categories = [
   }
 
   function initFilters() {
+    notifyProjectCardsChanged();
+
     const filterButtons = document.querySelectorAll<HTMLButtonElement>(".projects__filter");
     const projectItems = document.querySelectorAll<HTMLElement>(".projects__item");
     const projectsGrid = document.querySelector<HTMLElement>("#projects-grid");
@@ -242,8 +248,12 @@ const categories = [
         // Recompute threshold with updated visible items after filter animation.
         window.requestAnimationFrame(() => {
           observeSkipToEndVisibility();
+          notifyProjectCardsChanged();
           // Match hide transition duration for stable post-animation measurement.
-          window.setTimeout(observeSkipToEndVisibility, 320);
+          window.setTimeout(() => {
+            observeSkipToEndVisibility();
+            notifyProjectCardsChanged();
+          }, 320);
         });
       };
     });
