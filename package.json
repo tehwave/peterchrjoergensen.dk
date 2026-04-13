@@ -23,6 +23,7 @@
     "astro": "^5.18.1",
     "astro-seo-schema": "^5.2.0",
     "simple-icons": "^16.16.0",
+    "pixi.js": "^8.17.1",
     "typescript": "^5.9.3",
     "vite-plugin-pwa": "^1.2.0"
   },

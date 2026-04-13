@@ -1,0 +1,295 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Idle Game Experiment | Peter Chr. Jørgensen"
+  description="A pastel PixiJS idle-game experiment with bouncy animal sprites, tiny simulation systems, and local persistence."
+>
+  <section class="idle-game" data-idle-game-root>
+    <div class="idle-game__intro">
+      <p class="idle-game__eyebrow">Experiment · PixiJS</p>
+      <h1 class="idle-game__title">Pastel idle meadow</h1>
+      <p class="idle-game__description">
+        Feed a tiny parade of animals, keep the meadow happy, and let the population grow in a soft fixed-perspective toybox.
+      </p>
+    </div>
+
+    <div class="idle-game__shell">
+      <div class="idle-game__playfield">
+        <div class="idle-game__stage" data-idle-game-stage></div>
+        <p class="idle-game__summary" data-idle-game-summary aria-live="polite">
+          Loading the meadow...
+        </p>
+      </div>
+
+      <aside class="idle-game__panel" aria-label="Idle game controls and status">
+        <dl class="idle-game__hud">
+          <div class="idle-game__hud-item">
+            <dt>Population</dt>
+            <dd data-idle-game-population>0/0</dd>
+          </div>
+          <div class="idle-game__hud-item">
+            <dt>Food</dt>
+            <dd data-idle-game-food>0/0</dd>
+          </div>
+          <div class="idle-game__hud-item">
+            <dt>Mood</dt>
+            <dd data-idle-game-mood>0%</dd>
+          </div>
+          <div class="idle-game__hud-item">
+            <dt>Populate</dt>
+            <dd data-idle-game-cooldown>Ready</dd>
+          </div>
+        </dl>
+
+        <p class="idle-game__feedback" data-idle-game-feedback aria-live="polite">
+          The meadow wakes up with a gentle bounce.
+        </p>
+
+        <div class="idle-game__controls">
+          <button class="idle-game__button idle-game__button--feed" data-idle-game-action="feed" type="button">
+            Feed
+          </button>
+          <button class="idle-game__button idle-game__button--populate" data-idle-game-action="populate" type="button">
+            Populate
+          </button>
+          <button class="idle-game__button idle-game__button--pause" data-idle-game-action="pause" type="button">
+            Pause
+          </button>
+        </div>
+
+        <p class="idle-game__hint">
+          Food regenerates over time, population is capped, and the meadow state persists in your browser.
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+    import { initIdleGame } from "../../utils/experiments/idle-game";
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initIdleGame, { once: true });
+    } else {
+      initIdleGame();
+    }
+
+    document.addEventListener("astro:page-load", initIdleGame);
+  </script>
+</Layout>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .idle-game {
+    @include container;
+    padding-block: calc($header-height + $space-2xl) $space-4xl;
+    display: grid;
+    gap: $space-xl;
+
+    &[data-population-pressure="warning"] {
+      .idle-game__panel {
+        border-color: rgba(236, 131, 5, 0.45);
+      }
+    }
+
+    &[data-population-pressure="full"] {
+      .idle-game__panel {
+        border-color: rgba(192, 57, 43, 0.35);
+      }
+    }
+
+    @include respond-to(md) {
+      padding-inline: $space-lg;
+      padding-block: calc($header-height + $space-xl) $space-3xl;
+    }
+
+    &__intro {
+      max-width: 50rem;
+      display: grid;
+      gap: $space-md;
+    }
+
+    &__eyebrow {
+      @include section-label;
+      margin: 0;
+    }
+
+    &__title {
+      margin: 0;
+      font-size: clamp(2.8rem, 6vw, 4.8rem);
+      line-height: $leading-tight;
+      color: $color-text-primary;
+    }
+
+    &__description {
+      margin: 0;
+      max-width: 42rem;
+      font-size: $font-size-lg;
+      line-height: $leading-relaxed;
+      color: $color-text-secondary;
+    }
+
+    &__shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 0.9fr);
+      gap: $space-xl;
+      align-items: start;
+
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &__playfield,
+    &__panel {
+      @include elevated-panel(rgba(251, 251, 251, 0.82), rgba(41, 39, 35, 0.1), $shadow-md);
+      border-radius: 28px;
+      backdrop-filter: blur(16px);
+    }
+
+    &__playfield {
+      padding: $space-md;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.56), transparent 45%),
+        linear-gradient(180deg, rgba(245, 255, 244, 0.96), rgba(224, 247, 217, 0.96));
+    }
+
+    &__stage {
+      position: relative;
+      min-height: 32rem;
+      overflow: hidden;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.7), transparent 32%),
+        linear-gradient(180deg, #e6f9df 0%, #bce0b7 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+      :global(canvas) {
+        width: 100%;
+        height: 100%;
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      @include respond-to(md) {
+        min-height: 24rem;
+      }
+    }
+
+    &__summary {
+      margin: $space-md 0 0;
+      padding: $space-md $space-lg;
+      border-radius: $radius-lg;
+      background: rgba(255, 255, 255, 0.55);
+      color: $color-text-secondary;
+      font-size: $font-size-sm;
+      line-height: $leading-relaxed;
+    }
+
+    &__panel {
+      padding: $space-lg;
+      display: grid;
+      gap: $space-lg;
+      background:
+        linear-gradient(180deg, rgba(255, 247, 250, 0.94), rgba(251, 251, 251, 0.9)),
+        rgba(255, 255, 255, 0.85);
+    }
+
+    &__hud {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: $space-sm;
+      margin: 0;
+    }
+
+    &__hud-item {
+      padding: $space-md;
+      border-radius: $radius-lg;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(41, 39, 35, 0.08);
+
+      dt {
+        margin: 0 0 $space-xs;
+        font-size: $font-size-xs;
+        letter-spacing: $tracking-widest;
+        text-transform: uppercase;
+        color: $color-text-secondary;
+      }
+
+      dd {
+        margin: 0;
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+        color: $color-text-primary;
+      }
+    }
+
+    &__feedback,
+    &__hint {
+      margin: 0;
+      font-size: $font-size-sm;
+      line-height: $leading-relaxed;
+      color: $color-text-secondary;
+    }
+
+    &__feedback {
+      padding: $space-md $space-lg;
+      border-radius: $radius-lg;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    &__controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: $space-sm;
+
+      @include respond-to(sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &__button {
+      @include tracker-transition(transform, background-color, box-shadow);
+      @include focus-ring;
+      border: 0;
+      border-radius: $radius-full;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+      color: $color-text-primary;
+      box-shadow: $shadow-sm;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+        transform: none;
+      }
+
+      &--feed {
+        background: linear-gradient(180deg, #fff1d1, #ffdca3);
+      }
+
+      &--populate {
+        background: linear-gradient(180deg, #efe3ff, #d8c2ff);
+      }
+
+      &--pause {
+        background: linear-gradient(180deg, #dff6e7, #b6e7c3);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &__button {
+        transition: none;
+      }
+    }
+  }
+</style>
