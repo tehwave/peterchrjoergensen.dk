@@ -146,7 +146,7 @@ interface UIRefs {
 
 const STORAGE_KEY = "idle-game";
 const ROOT_SELECTOR = "[data-idle-game-root]";
-const MAX_OFFLINE_MS = 1000 * 60 * 60 * 6;
+const MAX_OFFLINE_MS = 6 * 60 * 60 * 1000;
 const FEED_COST = 10;
 const FOOD_REGEN_PER_SECOND = 1.45;
 const POPULATE_COOLDOWN_MS = 18000;
@@ -161,6 +161,8 @@ const BABY_GROWTH_SECONDS = 28;
 const HUNGER_DECAY_PER_SECOND = 0.009;
 const HAPPINESS_DECAY_PER_SECOND = 0.004;
 const HUNGER_NEUTRAL_POINT = 0.58;
+const HAPPINESS_HUNGER_COUPLING = 0.2;
+const OFFLINE_HAPPINESS_HUNGER_COUPLING = 0.06;
 const IDLE_BOB_AMPLITUDE = 9;
 const RECOMMENDED_MAX_DPR = 2;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -275,7 +277,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   app.canvas.className = "idle-game__canvas";
   app.canvas.setAttribute("aria-hidden", "true");
 
-  const backgroundLayer = new Container();
   const worldLayer = new Container();
   const particleLayer = new Container();
   const animalLayer = new Container();
@@ -289,7 +290,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   worldLayer.addChild(worldShadow);
   worldLayer.addChild(ground);
   worldLayer.addChild(animalLayer);
-  app.stage.addChild(backgroundLayer);
   app.stage.addChild(worldLayer);
   app.stage.addChild(particleLayer);
 
@@ -304,8 +304,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   let populationPressureState: "normal" | "warning" = "normal";
   const particles: Particle[] = [];
   const animals = state.animals.map((persistedAnimal) => createAnimal(persistedAnimal, textures));
+  const project = (worldX: number, worldY: number, elevation = 0) =>
+    projectWithViewport(lastViewportWidth || ui.stage.clientWidth || 960, lastViewportHeight || ui.stage.clientHeight || 560, worldX, worldY, elevation);
 
-  renderBackground(backgroundLayer, ui.stage.clientWidth, ui.stage.clientHeight);
   rebuildGround();
   animals.forEach((animal) => animalLayer.addChild(animal.view.container));
   updateFeedback(feedbackMessage);
@@ -331,9 +332,15 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       y: randomBetween(-1.8, 1.8),
     };
 
-    const nearbyAnimals = [...animals].sort((a, b) => distanceSq(a.x, a.y, feedPoint.x, feedPoint.y) - distanceSq(b.x, b.y, feedPoint.x, feedPoint.y)).slice(0, Math.min(animals.length, 7));
+    const nearbyAnimals = animals
+      .map((animal) => ({
+        animal,
+        distance: distanceSq(animal.x, animal.y, feedPoint.x, feedPoint.y),
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, Math.min(animals.length, 7));
 
-    nearbyAnimals.forEach((animal, index) => {
+    nearbyAnimals.forEach(({ animal }, index) => {
       animal.targetX = clamp(feedPoint.x + randomBetween(-0.6, 0.6), minX(), maxX());
       animal.targetY = clamp(feedPoint.y + randomBetween(-0.6, 0.6), minY(), maxY());
       animal.feedTargetUntil = performance.now() + 3200 + index * 60;
@@ -450,7 +457,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
 
     if (ui.stage.clientWidth !== lastViewportWidth || ui.stage.clientHeight !== lastViewportHeight) {
-      renderBackground(backgroundLayer, ui.stage.clientWidth, ui.stage.clientHeight);
       rebuildGround();
       lastViewportWidth = ui.stage.clientWidth;
       lastViewportHeight = ui.stage.clientHeight;
@@ -495,7 +501,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.age += deltaSeconds;
       animal.growth = clamp(animal.growth + deltaSeconds / BABY_GROWTH_SECONDS, 0.58, 1);
       animal.hunger = clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * deltaSeconds, 0, 1);
-      const happinessDrift = (animal.hunger - HUNGER_NEUTRAL_POINT) * 0.2 * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds;
+      const happinessDrift = (animal.hunger - HUNGER_NEUTRAL_POINT) * HAPPINESS_HUNGER_COUPLING * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds;
       animal.happiness = clamp(animal.happiness + happinessDrift, 0, 1);
 
       animal.wanderCooldown -= deltaSeconds;
@@ -617,7 +623,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const height = Math.max(ui.stage.clientHeight, 420);
     lastViewportWidth = width;
     lastViewportHeight = height;
-    renderBackground(backgroundLayer, width, height);
 
     ground.clear();
     worldShadow.clear();
@@ -891,7 +896,7 @@ function applyOfflineCatchup(state: IdleGameState): IdleGameState {
     age: animal.age + elapsedSeconds,
     growth: clamp(animal.growth + elapsedSeconds / BABY_GROWTH_SECONDS, 0.58, 1),
     hunger: clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
-    happiness: clamp(animal.happiness + (animal.hunger - HUNGER_NEUTRAL_POINT) * 0.06 * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
+    happiness: clamp(animal.happiness + (animal.hunger - HUNGER_NEUTRAL_POINT) * OFFLINE_HAPPINESS_HUNGER_COUPLING * elapsedSeconds - HAPPINESS_DECAY_PER_SECOND * elapsedSeconds, 0, 1),
   }));
 
   return {
@@ -1041,41 +1046,7 @@ function applyMoodTint(animal: Animal): number {
   return 0xf6e3d4;
 }
 
-function renderBackground(layer: Container, width: number, height: number): void {
-  layer.removeChildren().forEach((child) => {
-    if (child instanceof Sprite) {
-      child.texture.destroy(true);
-    }
-    child.destroy();
-  });
-
-  const gradientCanvas = document.createElement("canvas");
-  gradientCanvas.width = Math.max(1, Math.round(width));
-  gradientCanvas.height = Math.max(1, Math.round(height));
-
-  const context = gradientCanvas.getContext("2d");
-  if (!context) {
-    return;
-  }
-
-  const gradient = context.createLinearGradient(0, 0, 0, gradientCanvas.height);
-  gradient.addColorStop(0, "#dff6dc");
-  gradient.addColorStop(0.45, "#c5e9bf");
-  gradient.addColorStop(1, "#97c796");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, gradientCanvas.width, gradientCanvas.height);
-
-  const texture = Texture.from(gradientCanvas);
-  const sprite = new Sprite(texture);
-  sprite.width = width;
-  sprite.height = height;
-  layer.addChild(sprite);
-}
-
-function project(worldX: number, worldY: number, elevation = 0): { x: number; y: number } {
-  const stage = document.querySelector<HTMLElement>("[data-idle-game-stage]");
-  const width = stage?.clientWidth ?? 960;
-  const height = stage?.clientHeight ?? 560;
+function projectWithViewport(width: number, height: number, worldX: number, worldY: number, elevation = 0): { x: number; y: number } {
   const isoX = Math.min(width / 16, 42);
   const isoY = isoX * 0.48;
 
