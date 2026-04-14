@@ -106,7 +106,8 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
 
       &__card {
         position: relative;
-        display: block;
+        display: flex;
+        flex-direction: column;
         min-height: clamp(430px, 62vw, 560px);
         padding: 0;
         background: $color-white;
@@ -190,19 +191,16 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
       }
 
       &__details {
-        position: absolute;
-        left: $space-xl;
-        right: $space-xl;
-        bottom: $space-xl;
+        position: relative;
         z-index: 2;
         display: flex;
         flex-direction: column;
         gap: $space-md;
+        margin-top: auto;
+        padding: $space-xl;
 
         @include respond-to(md) {
-          left: $space-lg;
-          right: $space-lg;
-          bottom: $space-lg;
+          padding: $space-lg;
         }
       }
 
