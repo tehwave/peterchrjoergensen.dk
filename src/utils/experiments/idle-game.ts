@@ -186,6 +186,8 @@ const HUNGER_NEUTRAL_POINT = 0.58;
 const HAPPINESS_HUNGER_COUPLING = 0.2;
 const OFFLINE_HAPPINESS_HUNGER_COUPLING = 0.06;
 const IDLE_BOB_AMPLITUDE = 9;
+const DEFAULT_VIEWPORT_WIDTH = 420;
+const DEFAULT_VIEWPORT_HEIGHT = 560;
 const RECOMMENDED_MAX_DPR = 2;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FEEDBACK_LOW_CAP_THRESHOLD = 0.8;
@@ -416,7 +418,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const animals = state.animals.map((p) => createAnimal(p, textures));
 
   const project = (worldX: number, worldY: number, elevation = 0) =>
-    projectWithViewport(lastViewportWidth || ui.stage.clientWidth || 420, lastViewportHeight || ui.stage.clientHeight || 560, worldX, worldY, elevation);
+    projectWithViewport(lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH, lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT, worldX, worldY, elevation);
 
   rebuildGround();
   animals.forEach((a) => animalLayer.addChild(a.view.container));
@@ -649,7 +651,22 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
       const info = document.createElement("div");
       info.className = "shop-item__info";
-      info.innerHTML = `<div class="shop-item__name">${def.label}</div><div class="shop-item__rarity shop-item__rarity--${def.rarity}">${def.rarity}</div><div class="shop-item__stats">+${def.coinsPerSecond}/s coins</div>`;
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "shop-item__name";
+      nameEl.textContent = def.label;
+      info.appendChild(nameEl);
+
+      const rarityEl = document.createElement("div");
+      rarityEl.className = `shop-item__rarity shop-item__rarity--${def.rarity}`;
+      rarityEl.textContent = def.rarity;
+      info.appendChild(rarityEl);
+
+      const statsEl = document.createElement("div");
+      statsEl.className = "shop-item__stats";
+      statsEl.textContent = `+${def.coinsPerSecond}/s coins`;
+      info.appendChild(statsEl);
+
       item.appendChild(info);
 
       const btn = document.createElement("button");
@@ -878,9 +895,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const direction = animal.vx >= 0 ? 1 : -1;
 
       // Rarity glow
-      const rarityColor = RARITY_COLORS[animal.definition.rarity];
       if (animal.definition.rarity !== "common" && !isSleeping) {
-        animal.view.shadow.tint = rarityColor;
+        animal.view.shadow.tint = RARITY_COLORS[animal.definition.rarity];
+      } else {
+        animal.view.shadow.tint = 0xffffff;
       }
 
       animal.view.container.position.set(screen.x, screen.y - bob - bounce);
@@ -895,8 +913,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   // --- Background ---
   function renderBackground(): void {
-    const w = lastViewportWidth || ui.stage.clientWidth || 420;
-    const h = lastViewportHeight || ui.stage.clientHeight || 560;
+    const w = lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH;
+    const h = lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT;
     const progress = state.dayCycleTime / DAY_CYCLE_DURATION;
     const pal = interpolateDayPalette(progress);
 
@@ -910,7 +928,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   function rebuildGround(): void {
     const width = ui.stage.clientWidth;
-    const height = Math.max(ui.stage.clientHeight, 420);
+    const height = Math.max(ui.stage.clientHeight, DEFAULT_VIEWPORT_WIDTH);
     lastViewportWidth = width;
     lastViewportHeight = height;
 
@@ -1375,7 +1393,13 @@ function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number,
 }
 
 function pickParticleColor(kind: ParticleKind): number {
-  const colors = kind === "heart" ? basePalette.heart : kind === "sparkle" ? basePalette.sparkle : kind === "zzz" ? basePalette.zzz : basePalette.confetti;
+  const colorMap: Record<ParticleKind, number[]> = {
+    heart: basePalette.heart,
+    sparkle: basePalette.sparkle,
+    zzz: basePalette.zzz,
+    dot: basePalette.confetti,
+  };
+  const colors = colorMap[kind];
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
