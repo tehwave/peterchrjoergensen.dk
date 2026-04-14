@@ -1,0 +1,372 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Idle Game Experiment | Peter Chr. Jørgensen" description="A pastel PixiJS idle-game experiment with bouncy animal sprites, day/night cycles, rarity tiers, and local persistence.">
+  <section class="idle-game" data-idle-game-root>
+    <div class="idle-game__card">
+      <div class="idle-game__playfield">
+        <div class="idle-game__stage" data-idle-game-stage></div>
+        <div class="idle-game__overlay-hud" aria-label="Game status">
+          <span class="idle-game__hud-pill" data-idle-game-population title="Population">🐾 <b>0/0</b></span>
+          <span class="idle-game__hud-pill" data-idle-game-food title="Food">🌿 <b>0/0</b></span>
+          <span class="idle-game__hud-pill" data-idle-game-coins title="Coins">✨ <b>0</b></span>
+          <span class="idle-game__hud-pill" data-idle-game-mood title="Mood">💛 <b>0%</b></span>
+        </div>
+        <p class="idle-game__feedback" data-idle-game-feedback aria-live="polite">The meadow wakes up with a gentle bounce.</p>
+      </div>
+
+      <div class="idle-game__bottom-bar">
+        <div class="idle-game__controls">
+          <button class="idle-game__button idle-game__button--feed" data-idle-game-action="feed" type="button">🍎 Feed</button>
+          <button class="idle-game__button idle-game__button--populate" data-idle-game-action="populate" type="button">�� Hatch</button>
+          <button class="idle-game__button idle-game__button--shop" data-idle-game-action="shop" type="button">🏪 Shop</button>
+          <button class="idle-game__button idle-game__button--pause" data-idle-game-action="pause" type="button">⏸ Pause</button>
+        </div>
+      </div>
+
+      <div class="idle-game__shop-drawer" data-idle-game-shop hidden>
+        <div class="idle-game__shop-header">
+          <h2 class="idle-game__shop-title">🏪 Exotic Shop</h2>
+          <button class="idle-game__shop-close" data-idle-game-shop-close type="button" aria-label="Close shop">✕</button>
+        </div>
+        <p class="idle-game__shop-hint">Rare animals generate bonus coins per second!</p>
+        <div class="idle-game__shop-list" data-idle-game-shop-list></div>
+      </div>
+    </div>
+
+    <p class="idle-game__summary" data-idle-game-summary aria-live="polite">Loading the meadow...</p>
+  </section>
+
+  <script>
+    import { initIdleGame } from "../../utils/experiments/idle-game";
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initIdleGame, { once: true });
+    } else {
+      initIdleGame();
+    }
+
+    document.addEventListener("astro:page-load", initIdleGame);
+  </script>
+</Layout>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .idle-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100dvh;
+    padding: calc($header-height + $space-md) $space-md $space-md;
+    box-sizing: border-box;
+
+    &__card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: $shadow-lg;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: linear-gradient(180deg, rgba(245, 255, 244, 0.96), rgba(224, 247, 217, 0.96));
+
+      @include respond-to(sm) {
+        max-width: 100%;
+        border-radius: 22px;
+      }
+    }
+
+    &__playfield {
+      position: relative;
+      flex: 1 1 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    &__stage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+
+      :global(canvas) {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        image-rendering: pixelated;
+      }
+    }
+
+    &__overlay-hud {
+      position: absolute;
+      top: $space-sm;
+      left: $space-sm;
+      right: $space-sm;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    &__hud-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: $radius-full;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(8px);
+      font-size: 0.8rem;
+      color: $color-text-primary;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      line-height: 1.3;
+      pointer-events: auto;
+
+      b {
+        font-weight: $font-weight-bold;
+      }
+    }
+
+    &__feedback {
+      position: absolute;
+      bottom: $space-sm;
+      left: $space-sm;
+      right: $space-sm;
+      margin: 0;
+      padding: 6px 12px;
+      border-radius: $radius-lg;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(8px);
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      line-height: $leading-relaxed;
+      z-index: 2;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    &__bottom-bar {
+      padding: $space-sm $space-md;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    &__controls {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    &__button {
+      @include focus-ring;
+      border: 0;
+      border-radius: $radius-full;
+      padding: 10px 6px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+      color: $color-text-primary;
+      box-shadow: $shadow-xs;
+      transition:
+        transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1),
+        background-color 0.18s cubic-bezier(0.2, 0.7, 0.3, 1),
+        box-shadow 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+      white-space: nowrap;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.96);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        transform: none;
+      }
+
+      &--feed {
+        background: linear-gradient(180deg, #fff1d1, #ffdca3);
+      }
+
+      &--populate {
+        background: linear-gradient(180deg, #efe3ff, #d8c2ff);
+      }
+
+      &--shop {
+        background: linear-gradient(180deg, #d1f0ff, #a3d8ff);
+      }
+
+      &--pause {
+        background: linear-gradient(180deg, #dff6e7, #b6e7c3);
+      }
+    }
+
+    &__shop-drawer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 60%;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 22px 22px 0 0;
+      padding: $space-md;
+      z-index: 10;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    &__shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $space-sm;
+    }
+
+    &__shop-title {
+      margin: 0;
+      font-size: $font-size-lg;
+      color: $color-text-primary;
+    }
+
+    &__shop-close {
+      @include focus-ring;
+      border: 0;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: $radius-full;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $color-text-secondary;
+    }
+
+    &__shop-hint {
+      margin: 0 0 $space-sm;
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+    }
+
+    &__shop-list {
+      display: grid;
+      gap: 6px;
+
+      :global(.shop-item) {
+        display: flex;
+        align-items: center;
+        gap: $space-sm;
+        padding: 8px 12px;
+        border-radius: $radius-lg;
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+      }
+
+      :global(.shop-item__icon) {
+        width: 36px;
+        height: 36px;
+        image-rendering: pixelated;
+        border-radius: 8px;
+      }
+
+      :global(.shop-item__info) {
+        flex: 1;
+        min-width: 0;
+      }
+
+      :global(.shop-item__name) {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+      }
+
+      :global(.shop-item__rarity) {
+        font-size: $font-size-xs;
+        text-transform: uppercase;
+        letter-spacing: $tracking-wider;
+      }
+
+      :global(.shop-item__rarity--common) {
+        color: #6b7687;
+      }
+      :global(.shop-item__rarity--uncommon) {
+        color: #2ecc71;
+      }
+      :global(.shop-item__rarity--rare) {
+        color: #3498db;
+      }
+      :global(.shop-item__rarity--epic) {
+        color: #9b59b6;
+      }
+      :global(.shop-item__rarity--legendary) {
+        color: #f39c12;
+      }
+
+      :global(.shop-item__stats) {
+        font-size: $font-size-xs;
+        color: $color-text-secondary;
+      }
+
+      :global(.shop-item__buy) {
+        @include focus-ring;
+        border: 0;
+        border-radius: $radius-full;
+        padding: 6px 14px;
+        font: inherit;
+        font-size: $font-size-xs;
+        font-weight: $font-weight-semibold;
+        cursor: pointer;
+        background: linear-gradient(180deg, #fff1d1, #ffdca3);
+        color: $color-text-primary;
+        white-space: nowrap;
+        box-shadow: $shadow-xs;
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+        }
+      }
+    }
+
+    &__summary {
+      max-width: 420px;
+      width: 100%;
+      margin: $space-sm auto 0;
+      padding: $space-sm $space-md;
+      border-radius: $radius-lg;
+      background: rgba(255, 255, 255, 0.55);
+      color: $color-text-secondary;
+      font-size: $font-size-xs;
+      line-height: $leading-relaxed;
+      text-align: center;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &__button {
+        transition: none;
+      }
+    }
+  }
+</style>
