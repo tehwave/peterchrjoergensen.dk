@@ -163,21 +163,54 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
       const { context, width, height } = scene;
       context.clearRect(0, 0, width, height);
 
+      const palette = ["#58e6ff", "#6a8bff", "#b06bff", "#ff7ca8", "#ff8f5e"];
+
       const layers = [
-        { base: height * 0.64, amp: height * 0.075, freq: 0.0104, speed: 0.0011, alpha: 0.36, color: "#2a52be", depth: 1.12 },
-        { base: height * 0.72, amp: height * 0.06, freq: 0.0126, speed: -0.00135, alpha: 0.3, color: "#4d78e6", depth: 0.78 },
-        { base: height * 0.79, amp: height * 0.044, freq: 0.0142, speed: 0.00175, alpha: 0.22, color: "#6f95ff", depth: 0.52 },
+        { base: height * 0.44, amp: height * 0.098, freq: 0.0101, speed: 0.0011, alpha: 0.72, depth: 1.2 },
+        { base: height * 0.55, amp: height * 0.082, freq: 0.0122, speed: -0.0013, alpha: 0.62, depth: 0.94 },
+        { base: height * 0.66, amp: height * 0.066, freq: 0.0137, speed: 0.00156, alpha: 0.52, depth: 0.74 },
+        { base: height * 0.75, amp: height * 0.052, freq: 0.015, speed: -0.00188, alpha: 0.44, depth: 0.56 },
       ];
 
+      const baseWash = context.createLinearGradient(0, height * 0.22, 0, height);
+      baseWash.addColorStop(0, "rgba(88, 230, 255, 0)");
+      baseWash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
+      baseWash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
+      baseWash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
+      baseWash.addColorStop(1, "rgba(255, 143, 94, 0.38)");
+
+      context.save();
+      context.globalCompositeOperation = "source-over";
+      context.globalAlpha = 1;
+      context.fillStyle = baseWash;
+      context.fillRect(0, height * 0.22, width, height * 0.84);
+      context.restore();
+
       for (const [index, layer] of layers.entries()) {
+        const gradient = context.createLinearGradient(0, 0, width, 0);
+        for (let colorIndex = 0; colorIndex < palette.length; colorIndex += 1) {
+          gradient.addColorStop(colorIndex / (palette.length - 1), palette[(colorIndex + index) % palette.length]);
+        }
+
         context.save();
-        context.globalCompositeOperation = "screen";
+        context.globalCompositeOperation = "source-over";
         context.globalAlpha = layer.alpha;
-        context.fillStyle = layer.color;
+        context.fillStyle = gradient;
         traceBottomWave(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
         context.fill();
         context.restore();
       }
+
+      const shimmer = context.createLinearGradient(0, height * 0.34, 0, height);
+      shimmer.addColorStop(0, "rgba(255, 255, 255, 0)");
+      shimmer.addColorStop(1, "rgba(255, 255, 255, 0.16)");
+
+      context.save();
+      context.globalCompositeOperation = "screen";
+      context.globalAlpha = 0.5;
+      context.fillStyle = shimmer;
+      context.fillRect(0, height * 0.34, width, height * 0.66);
+      context.restore();
     }
 
     function drawScene(scene: FooterWaveScene, time: number) {
