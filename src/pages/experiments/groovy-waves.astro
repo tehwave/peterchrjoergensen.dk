@@ -1702,8 +1702,14 @@ const placementVariants = [
     background: rgba($color-white, 0.98);
     color: $color-blue-dark;
     border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    box-shadow:
+      0 10px 20px rgba(15, 23, 42, 0.06),
+      inset 0 1.2px 0 rgba($color-white, 0.88),
+      inset 0 -2.8px 8px rgba($color-blue-dark, 0.08);
     cursor: pointer;
+    transition:
+      box-shadow 260ms var(--ease-out),
+      background-color 260ms var(--ease-out);
 
     &--bottom {
       overflow: clip;
@@ -1715,7 +1721,10 @@ const placementVariants = [
 
     &--active {
       background: rgba($color-white, 0.98);
-      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+      box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.08),
+        inset 0 1.2px 0 rgba($color-white, 0.9),
+        inset 0 -4px 10px rgba($color-blue-dark, 0.12);
     }
 
     &__field {
