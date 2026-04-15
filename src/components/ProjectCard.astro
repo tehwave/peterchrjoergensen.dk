@@ -133,249 +133,47 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
 }
 
 <script>
-  interface ProjectWaveScene {
-    canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-    width: number;
-    height: number;
-    dpr: number;
-    visible: boolean;
-    phaseOffset: number;
-  }
+  import { mountWaveEngine, syncCanvasSceneSize } from "../utils/wave-engine";
+  import { ensureScopedDocumentListener, setupWaveLifecycle } from "../utils/wave-lifecycle";
+  import { createProjectCardWaveScene, drawProjectCardWaveScene } from "../utils/wave-renderers/project-card";
 
-  const PROJECT_WAVE_PALETTE = ["#57e3ff", "#4f8cff", "#9560ff", "#ff63cf", "#ff9a68"] as const;
+  let projectCardWaveCleanup: (() => void) | null = null;
 
-  let projectWaveObserver: IntersectionObserver | null = null;
-  let projectWaveScenes: ProjectWaveScene[] = [];
-  let projectWaveFrameId: number | null = null;
-  let projectWaveResizeHandler: (() => void) | null = null;
-  let projectWaveVisibilityHandler: (() => void) | null = null;
-  let projectWaveMotionQuery: MediaQueryList | null = null;
-  let projectWaveMotionChangeHandler: ((event: MediaQueryListEvent) => void) | null = null;
-  let projectWaveSyncHandler: (() => void) | null = null;
-  let projectWavePageLoadHandler: (() => void) | null = null;
-
-  function teardownProjectCardWaves(): void {
-    if (projectWaveFrameId !== null) {
-      window.cancelAnimationFrame(projectWaveFrameId);
-      projectWaveFrameId = null;
-    }
-
-    projectWaveObserver?.disconnect();
-    projectWaveObserver = null;
-
-    if (projectWaveResizeHandler) {
-      window.removeEventListener("resize", projectWaveResizeHandler);
-      projectWaveResizeHandler = null;
-    }
-
-    if (projectWaveVisibilityHandler) {
-      document.removeEventListener("visibilitychange", projectWaveVisibilityHandler);
-      projectWaveVisibilityHandler = null;
-    }
-
-    if (projectWaveMotionQuery && projectWaveMotionChangeHandler) {
-      projectWaveMotionQuery.removeEventListener("change", projectWaveMotionChangeHandler);
-    }
-
-    projectWaveMotionQuery = null;
-    projectWaveMotionChangeHandler = null;
-    projectWaveScenes = [];
-  }
-
-  function syncProjectWaveSceneSize(scene: ProjectWaveScene): void {
-    const rect = scene.canvas.getBoundingClientRect();
-    scene.width = Math.max(120, Math.floor(rect.width));
-    scene.height = Math.max(72, Math.floor(rect.height));
-    scene.dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    scene.canvas.width = Math.max(1, Math.floor(scene.width * scene.dpr));
-    scene.canvas.height = Math.max(1, Math.floor(scene.height * scene.dpr));
-    scene.context.setTransform(scene.dpr, 0, 0, scene.dpr, 0, 0);
-  }
-
-  function drawProjectWave(scene: ProjectWaveScene, time: number): void {
-    const { context, width, height, phaseOffset } = scene;
-    const baseY = height * 0.7;
-    const maxAmplitude = 10;
-
-    context.clearRect(0, 0, width, height);
-
-    for (let layer = 0; layer < 3; layer += 1) {
-      const gradient = context.createLinearGradient(0, 0, width, 0);
-      for (let index = 0; index < PROJECT_WAVE_PALETTE.length; index += 1) {
-        gradient.addColorStop(index / (PROJECT_WAVE_PALETTE.length - 1), PROJECT_WAVE_PALETTE[(index + layer) % PROJECT_WAVE_PALETTE.length]);
-      }
-
-      const amplitude = maxAmplitude - layer * 2;
-      const frequency = 0.012 + layer * 0.0018;
-      const phase = time * (0.00022 + layer * 0.00005) + phaseOffset + layer * 0.8;
-
-      context.save();
-      context.globalCompositeOperation = "screen";
-      context.globalAlpha = 0.5 - layer * 0.09;
-      context.strokeStyle = gradient;
-      context.fillStyle = gradient;
-      context.lineWidth = 1.5;
-      context.beginPath();
-
-      for (let x = 0; x <= width + 2; x += 3) {
-        const waveY = baseY + Math.sin(x * frequency + phase) * amplitude + Math.cos(x * frequency * 1.76 + phase * 0.84) * (amplitude * 0.34);
-        if (x === 0) {
-          context.moveTo(x, waveY);
-        } else {
-          context.lineTo(x, waveY);
-        }
-      }
-
-      context.lineTo(width, height + 4);
-      context.lineTo(0, height + 4);
-      context.closePath();
-      context.fill();
-      context.restore();
-    }
-  }
-
-  function renderProjectWaves(time: number): void {
-    for (const scene of projectWaveScenes) {
-      if (!scene.visible) {
-        continue;
-      }
-      drawProjectWave(scene, time);
-    }
-
-    projectWaveFrameId = window.requestAnimationFrame(renderProjectWaves);
-  }
-
-  function updateProjectWavePlayback(): void {
-    const hasVisibleScene = projectWaveScenes.some((scene) => scene.visible);
-    const shouldAnimate = Boolean(!projectWaveMotionQuery?.matches && !document.hidden && hasVisibleScene);
-
-    if (!shouldAnimate) {
-      if (projectWaveFrameId !== null) {
-        window.cancelAnimationFrame(projectWaveFrameId);
-        projectWaveFrameId = null;
-      }
-
-      for (const scene of projectWaveScenes) {
-        drawProjectWave(scene, 0);
-      }
-      return;
-    }
-
-    if (projectWaveFrameId === null) {
-      projectWaveFrameId = window.requestAnimationFrame(renderProjectWaves);
-    }
-  }
-
-  function initProjectCardWaves(): void {
-    teardownProjectCardWaves();
-
-    const canvases = Array.from(document.querySelectorAll("[data-project-card-wave]"));
-    const waveCanvases = canvases.filter((canvas): canvas is HTMLCanvasElement => canvas instanceof HTMLCanvasElement);
-
-    if (waveCanvases.length === 0) {
-      return;
-    }
-
-    projectWaveScenes = waveCanvases
-      .map((canvas, index) => {
-        const context = canvas.getContext("2d", { alpha: true });
-        if (!context) {
-          return null;
-        }
-
-        const scene: ProjectWaveScene = {
-          canvas,
-          context,
-          width: 0,
-          height: 0,
-          dpr: 1,
-          visible: true,
-          phaseOffset: index * 0.65,
-        };
-
-        syncProjectWaveSceneSize(scene);
-        return scene;
-      })
-      .filter((scene): scene is ProjectWaveScene => Boolean(scene));
-
-    if (projectWaveScenes.length === 0) {
-      return;
-    }
-
-    projectWaveObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const target = entry.target;
-          if (!(target instanceof HTMLCanvasElement)) {
-            continue;
-          }
-
-          const scene = projectWaveScenes.find((item) => item.canvas === target);
-          if (!scene) {
-            continue;
-          }
-
-          scene.visible = entry.isIntersecting;
-        }
-
-        updateProjectWavePlayback();
+  function mountProjectCardWaves(): () => void {
+    return mountWaveEngine({
+      canvasSelector: "[data-project-card-wave]",
+      createScene: ({ canvas, context, index }) => createProjectCardWaveScene(canvas, context, index),
+      drawScene: drawProjectCardWaveScene,
+      syncSceneSize: (scene) => {
+        syncCanvasSceneSize(scene, { minWidth: 120, minHeight: 72, maxDpr: 2 });
       },
-      { threshold: 0.05 },
-    );
-
-    projectWaveScenes.forEach((scene) => {
-      projectWaveObserver?.observe(scene.canvas);
+      intersectionThreshold: 0.05,
+      staticTime: 0,
     });
-
-    projectWaveResizeHandler = () => {
-      projectWaveScenes.forEach((scene) => syncProjectWaveSceneSize(scene));
-      updateProjectWavePlayback();
-    };
-
-    projectWaveVisibilityHandler = () => {
-      updateProjectWavePlayback();
-    };
-
-    projectWaveMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    projectWaveMotionChangeHandler = () => {
-      updateProjectWavePlayback();
-    };
-
-    window.addEventListener("resize", projectWaveResizeHandler, { passive: true });
-    document.addEventListener("visibilitychange", projectWaveVisibilityHandler);
-    projectWaveMotionQuery.addEventListener("change", projectWaveMotionChangeHandler);
-
-    updateProjectWavePlayback();
   }
 
-  function ensureProjectCardWaveHandlers(): void {
-    if (projectWaveSyncHandler) {
-      document.removeEventListener("project-card:waves-sync", projectWaveSyncHandler);
-    }
+  function initProjectCardWaves(): () => void {
+    projectCardWaveCleanup?.();
+    projectCardWaveCleanup = mountProjectCardWaves();
 
-    if (projectWavePageLoadHandler) {
-      document.removeEventListener("astro:page-load", projectWavePageLoadHandler);
-    }
-
-    projectWaveSyncHandler = initProjectCardWaves;
-    projectWavePageLoadHandler = initProjectCardWaves;
-
-    document.addEventListener("project-card:waves-sync", projectWaveSyncHandler);
-    document.addEventListener("astro:page-load", projectWavePageLoadHandler);
+    return () => {
+      projectCardWaveCleanup?.();
+      projectCardWaveCleanup = null;
+    };
   }
 
-  initProjectCardWaves();
-  ensureProjectCardWaveHandlers();
+  setupWaveLifecycle({
+    scopeKey: "project-card-waves",
+    init: initProjectCardWaves,
+  });
 
-  document.addEventListener(
-    "astro:before-preparation",
-    () => {
-      teardownProjectCardWaves();
+  ensureScopedDocumentListener({
+    scopeKey: "project-card-waves",
+    event: "project-card:waves-sync",
+    handler: () => {
+      initProjectCardWaves();
     },
-    { once: true },
-  );
+  });
 </script>
 
 <style lang="scss">
