@@ -270,15 +270,17 @@ const placementVariants = [
                   <p class="button-showcase__eyebrow">Active / toggled</p>
                   <h3 class="button-showcase__title">The expressive state, still trimmed for usability</h3>
                 </div>
-                <button class="button-sample button-sample--halo button-sample--active" type="button" aria-pressed="true">
+                <button class="button-sample button-sample--bottom button-sample--locked button-sample--active" type="button" aria-pressed="true">
                   <canvas
-                    class="button-sample__field button-sample__field--halo button-sample__field--halo-tight"
+                    class="button-sample__field button-sample__field--bottom"
                     data-wave-canvas
-                    data-wave-variant="chromatic"
-                    data-wave-role="outside"
-                    data-wave-intensity="0.16"
+                    data-wave-variant="ribbon"
+                    data-wave-role="bottom"
+                    data-wave-hover-fill="1"
+                    data-wave-fill-locked="1"
+                    data-wave-paused="1"
                     role="img"
-                    aria-label="Active toggled button with edge-bleed wave halo"></canvas>
+                    aria-label="Active toggled button with paused full-fill wave"></canvas>
                   <span class="button-sample__label">Toggled on</span>
                 </button>
                 <p class="button-showcase__note">
@@ -314,6 +316,8 @@ const placementVariants = [
     fillProgress: number;
     targetFillProgress: number;
     phaseTime: number;
+    fillLocked: boolean;
+    paused: boolean;
   }
 
   let teardownGroovyWaves: (() => void) | null = null;
@@ -395,6 +399,8 @@ const placementVariants = [
       const hoverSpeedRaw = Number(canvas.dataset.waveHoverSpeed ?? "1");
       const hoverSpeedMultiplier = Number.isFinite(hoverSpeedRaw) ? Math.min(Math.max(hoverSpeedRaw, 1), 4) : 1;
       const hoverFillEnabled = canvas.dataset.waveHoverFill === "1";
+      const fillLocked = canvas.dataset.waveFillLocked === "1";
+      const paused = canvas.dataset.wavePaused === "1";
       const context = canvas.getContext("2d", { alpha: true });
 
       if (!context) continue;
@@ -412,9 +418,11 @@ const placementVariants = [
         dpr: 1,
         visible: true,
         hoverFillEnabled,
-        fillProgress: 0,
-        targetFillProgress: 0,
+        fillProgress: fillLocked ? 1 : 0,
+        targetFillProgress: fillLocked ? 1 : 0,
         phaseTime: 0,
+        fillLocked,
+        paused,
       });
     }
 
@@ -758,7 +766,9 @@ const placementVariants = [
           scene.fillProgress = scene.targetFillProgress;
         }
 
-        scene.phaseTime += deltaTime * scene.speedMultiplier;
+        if (!scene.paused) {
+          scene.phaseTime += deltaTime * scene.speedMultiplier;
+        }
         drawScene(scene, scene.phaseTime);
       }
 
@@ -839,7 +849,7 @@ const placementVariants = [
       syncSceneSize(scene);
       sceneObserver.observe(scene.canvas);
 
-      if (scene.hoverSpeedMultiplier > 1 || scene.hoverFillEnabled) {
+      if ((scene.hoverSpeedMultiplier > 1 || scene.hoverFillEnabled) && !scene.fillLocked) {
         const hoverTarget = scene.canvas.closest(".button-sample");
 
         if (hoverTarget instanceof HTMLElement) {
@@ -1665,7 +1675,8 @@ const placementVariants = [
       max-width: 34ch;
     }
 
-    .button-sample--hover {
+    .button-sample--hover,
+    .button-sample--locked {
       .button-sample__field--bottom {
         inset: 0;
         width: 100%;
