@@ -32,8 +32,9 @@ const {
 const isLink = as === "a";
 const isCircle = shape === "circle";
 
-const waveLabel =
-  ariaLabel ?? (waveState === "hover" ? "Hover-amplified button wave" : waveState === "active" ? "Active toggled button with paused full-fill wave" : "Contained bottom lip button wave");
+if (isCircle && !ariaLabel) {
+  throw new Error('Button.astro: `ariaLabel` is required when shape="circle".');
+}
 
 const classes = [
   "button-sample",
@@ -53,9 +54,9 @@ const classes = [
 
 {
   isLink ? (
-    <a class:list={classes} href={href} aria-label={ariaLabel} aria-pressed={ariaPressed} target={target} rel={rel}>
+    <a class:list={classes} href={disabled ? undefined : href} aria-label={ariaLabel} aria-disabled={disabled || undefined} tabindex={disabled ? -1 : undefined} target={target} rel={rel}>
       {waveState === "default" ? (
-        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" role="img" aria-label={waveLabel} />
+        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
         <canvas
           class="button-sample__field button-sample__field--bottom"
@@ -64,8 +65,7 @@ const classes = [
           data-wave-role="bottom"
           data-wave-hover-speed="1.9"
           data-wave-hover-fill="1"
-          role="img"
-          aria-label={waveLabel}
+          aria-hidden="true"
         />
       ) : (
         <canvas
@@ -76,8 +76,7 @@ const classes = [
           data-wave-hover-fill="1"
           data-wave-fill-locked="1"
           data-wave-paused="1"
-          role="img"
-          aria-label={waveLabel}
+          aria-hidden="true"
         />
       )}
 
@@ -96,7 +95,7 @@ const classes = [
   ) : (
     <button class:list={classes} type={type} aria-label={ariaLabel} aria-pressed={ariaPressed} disabled={disabled}>
       {waveState === "default" ? (
-        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" role="img" aria-label={waveLabel} />
+        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
         <canvas
           class="button-sample__field button-sample__field--bottom"
@@ -105,8 +104,7 @@ const classes = [
           data-wave-role="bottom"
           data-wave-hover-speed="1.9"
           data-wave-hover-fill="1"
-          role="img"
-          aria-label={waveLabel}
+          aria-hidden="true"
         />
       ) : (
         <canvas
@@ -117,8 +115,7 @@ const classes = [
           data-wave-hover-fill="1"
           data-wave-fill-locked="1"
           data-wave-paused="1"
-          role="img"
-          aria-label={waveLabel}
+          aria-hidden="true"
         />
       )}
 
@@ -163,11 +160,12 @@ const classes = [
     text-decoration: none;
 
     &:focus-visible {
-      outline: 2px solid rgba($color-orange, 0.62);
+      outline: 2px solid $color-blue;
       outline-offset: 3px;
     }
 
-    &:disabled {
+    &:disabled,
+    &[aria-disabled="true"] {
       cursor: not-allowed;
       opacity: 0.72;
     }
@@ -208,8 +206,8 @@ const classes = [
     }
 
     &--circle-sm {
-      inline-size: 40px;
-      block-size: 40px;
+      inline-size: 44px;
+      block-size: 44px;
     }
 
     &--circle-md {
