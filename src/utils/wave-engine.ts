@@ -184,7 +184,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
   const cleanupCallbacks: Array<() => void> = [];
   const sceneShouldAnimate = shouldAnimateScene ?? ((scene: Scene) => scene.visible);
   let frameId: number | null = null;
-  let previousFrameTime: number | null = null;
+  let lastFrameTimestamp: number | null = null;
   let pageVisible = !document.hidden;
   let observer: IntersectionObserver | null = null;
 
@@ -194,7 +194,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
       frameId = null;
     }
 
-    previousFrameTime = null;
+    lastFrameTimestamp = null;
   };
 
   const renderStatic = () => {
@@ -220,8 +220,8 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
   };
 
   const renderFrame = (timestamp: number) => {
-    const deltaTime = previousFrameTime === null ? BASELINE_FRAME_MS : Math.min(MAX_FRAME_MS, Math.max(0, timestamp - previousFrameTime));
-    previousFrameTime = timestamp;
+    const deltaTime = lastFrameTimestamp === null ? BASELINE_FRAME_MS : Math.min(MAX_FRAME_MS, Math.max(0, timestamp - lastFrameTimestamp));
+    lastFrameTimestamp = timestamp;
 
     for (const scene of scenes) {
       if (!sceneShouldAnimate(scene)) continue;

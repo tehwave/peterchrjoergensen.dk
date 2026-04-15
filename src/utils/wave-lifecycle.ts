@@ -73,8 +73,9 @@ export function setupWaveLifecycle({ scopeKey, init }: SetupWaveLifecycleOptions
     state.cleanup = noop;
   };
 
+  // Scope suffix isolates lifecycle listeners from custom component listeners (for example `project-card:waves-sync`)
+  // so `ensureScopedDocumentListener` can dedupe each channel independently.
   const removePageLoadListener = ensureScopedDocumentListener({
-    // Scope suffix isolates lifecycle listeners from other scoped listeners under the same base key.
     scopeKey: `${scopeKey}:lifecycle`,
     event: "astro:page-load",
     handler: handleInit,

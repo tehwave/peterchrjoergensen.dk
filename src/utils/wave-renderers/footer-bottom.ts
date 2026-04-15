@@ -35,7 +35,8 @@ export function drawFooterBottomScene(scene: FooterBottomScene, time: number): v
   context.clearRect(0, 0, width, height);
 
   const layers = [
-    // base: vertical position, amp: wave height, freq: oscillation density, speed: phase velocity, alpha: layer opacity
+    // base: vertical position, amp: wave height, freq: oscillation density, speed: phase velocity, alpha: layer opacity.
+    // The previous local implementation also carried an unused `depth` key, intentionally omitted here.
     { base: height * 0.44, amp: height * 0.098, freq: 0.0101, speed: 0.0011, alpha: 0.72 },
     { base: height * 0.55, amp: height * 0.082, freq: 0.0122, speed: -0.0013, alpha: 0.62 },
     { base: height * 0.66, amp: height * 0.066, freq: 0.0137, speed: 0.00156, alpha: 0.52 },
