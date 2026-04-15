@@ -1,0 +1,259 @@
+---
+interface Props {
+  as?: "button" | "a";
+  href?: string;
+  type?: "button" | "submit" | "reset";
+  shape?: "pill" | "circle";
+  waveState?: "default" | "hover" | "active";
+  circleSize?: "sm" | "md" | "lg";
+  ariaLabel?: string;
+  ariaPressed?: boolean;
+  disabled?: boolean;
+  class?: string;
+  target?: string;
+  rel?: string;
+}
+
+const {
+  as = "button",
+  href = "#",
+  type = "button",
+  shape = "pill",
+  waveState = "default",
+  circleSize = "md",
+  ariaLabel,
+  ariaPressed,
+  disabled = false,
+  class: className = "",
+  target,
+  rel,
+}: Props = Astro.props;
+
+const isLink = as === "a";
+const isCircle = shape === "circle";
+
+const waveLabel =
+  ariaLabel ?? (waveState === "hover" ? "Hover-amplified button wave" : waveState === "active" ? "Active toggled button with paused full-fill wave" : "Contained bottom lip button wave");
+
+const classes = [
+  "button-sample",
+  {
+    "button-sample--bottom": true,
+    "button-sample--hover": waveState === "hover",
+    "button-sample--locked": waveState === "active",
+    "button-sample--active": waveState === "active",
+    "button-sample--circle": isCircle,
+    "button-sample--circle-sm": isCircle && circleSize === "sm",
+    "button-sample--circle-md": isCircle && circleSize === "md",
+    "button-sample--circle-lg": isCircle && circleSize === "lg",
+  },
+  className,
+];
+---
+
+{
+  isLink ? (
+    <a class:list={classes} href={href} aria-label={ariaLabel} aria-pressed={ariaPressed} target={target} rel={rel}>
+      {waveState === "default" ? (
+        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" role="img" aria-label={waveLabel} />
+      ) : waveState === "hover" ? (
+        <canvas
+          class="button-sample__field button-sample__field--bottom"
+          data-wave-canvas
+          data-wave-variant="ribbon"
+          data-wave-role="bottom"
+          data-wave-hover-speed="1.9"
+          data-wave-hover-fill="1"
+          role="img"
+          aria-label={waveLabel}
+        />
+      ) : (
+        <canvas
+          class="button-sample__field button-sample__field--bottom"
+          data-wave-canvas
+          data-wave-variant="ribbon"
+          data-wave-role="bottom"
+          data-wave-hover-fill="1"
+          data-wave-fill-locked="1"
+          data-wave-paused="1"
+          role="img"
+          aria-label={waveLabel}
+        />
+      )}
+
+      {isCircle ? (
+        <span class="button-sample__icon" aria-hidden="true">
+          <slot name="icon">
+            <slot />
+          </slot>
+        </span>
+      ) : (
+        <span class="button-sample__label">
+          <slot />
+        </span>
+      )}
+    </a>
+  ) : (
+    <button class:list={classes} type={type} aria-label={ariaLabel} aria-pressed={ariaPressed} disabled={disabled}>
+      {waveState === "default" ? (
+        <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" role="img" aria-label={waveLabel} />
+      ) : waveState === "hover" ? (
+        <canvas
+          class="button-sample__field button-sample__field--bottom"
+          data-wave-canvas
+          data-wave-variant="ribbon"
+          data-wave-role="bottom"
+          data-wave-hover-speed="1.9"
+          data-wave-hover-fill="1"
+          role="img"
+          aria-label={waveLabel}
+        />
+      ) : (
+        <canvas
+          class="button-sample__field button-sample__field--bottom"
+          data-wave-canvas
+          data-wave-variant="ribbon"
+          data-wave-role="bottom"
+          data-wave-hover-fill="1"
+          data-wave-fill-locked="1"
+          data-wave-paused="1"
+          role="img"
+          aria-label={waveLabel}
+        />
+      )}
+
+      {isCircle ? (
+        <span class="button-sample__icon" aria-hidden="true">
+          <slot name="icon">
+            <slot />
+          </slot>
+        </span>
+      ) : (
+        <span class="button-sample__label">
+          <slot />
+        </span>
+      )}
+    </button>
+  )
+}
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .button-sample {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 0 1.3rem;
+    border: 0;
+    background: rgba($color-white, 0.98);
+    color: $color-blue-dark;
+    border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
+    box-shadow:
+      0 10px 20px rgba(15, 23, 42, 0.06),
+      inset 0 1.2px 0 rgba($color-white, 0.88),
+      inset 0 -2.8px 8px rgba($color-blue-dark, 0.08);
+    cursor: pointer;
+    transition:
+      box-shadow 260ms var(--ease-out),
+      background-color 260ms var(--ease-out);
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: 2px solid rgba($color-orange, 0.62);
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    &--bottom {
+      overflow: clip;
+    }
+
+    &--active {
+      background: rgba($color-white, 0.98);
+      box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.08),
+        inset 0 1.2px 0 rgba($color-white, 0.9),
+        inset 0 -4px 10px rgba($color-blue-dark, 0.12);
+    }
+
+    &--hover,
+    &--locked {
+      .button-sample__field--bottom {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform: none;
+      }
+
+      &:hover .button-sample__field--bottom,
+      &:focus-visible .button-sample__field--bottom {
+        filter: saturate(1.12);
+      }
+    }
+
+    &--circle {
+      padding: 0.68rem;
+      min-height: 0;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: clip;
+    }
+
+    &--circle-sm {
+      inline-size: 40px;
+      block-size: 40px;
+    }
+
+    &--circle-md {
+      inline-size: 52px;
+      block-size: 52px;
+    }
+
+    &--circle-lg {
+      inline-size: 62px;
+      block-size: 62px;
+    }
+
+    &__field {
+      position: absolute;
+      display: block;
+      pointer-events: none;
+      transition:
+        transform 260ms var(--ease-out),
+        filter 260ms var(--ease-out),
+        opacity 260ms var(--ease-out);
+
+      &--bottom {
+        inset: auto -8px -10px -8px;
+        width: calc(100% + 16px);
+        height: 78px;
+        transform-origin: center bottom;
+      }
+    }
+
+    &__label {
+      position: relative;
+      z-index: 1;
+      font-weight: $font-weight-semibold;
+      padding: 0.3rem 0.15rem;
+    }
+
+    &__icon {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-size: 1.15rem;
+    }
+  }
+</style>

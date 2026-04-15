@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import Button from "../../components/Button.astro";
 
 const waveExperiments = [
   {
@@ -219,16 +220,7 @@ const placementVariants = [
                   <p class="button-showcase__eyebrow">Default / contained</p>
                   <h3 class="button-showcase__title">A quiet state that keeps the label in charge</h3>
                 </div>
-                <button class="button-sample button-sample--bottom" type="button">
-                  <canvas
-                    class="button-sample__field button-sample__field--bottom"
-                    data-wave-canvas
-                    data-wave-variant="tidal"
-                    data-wave-role="bottom"
-                    role="img"
-                    aria-label="Contained bottom lip button wave"></canvas>
-                  <span class="button-sample__label">Default action</span>
-                </button>
+                <Button waveState="default">Default action</Button>
                 <p class="button-showcase__note">
                   This is the safe default. The wave is clipped inside the button shell, so the identity is there, but the button still behaves like normal UI instead of a special effect.
                 </p>
@@ -243,18 +235,7 @@ const placementVariants = [
                   <p class="button-showcase__eyebrow">Hover / intent</p>
                   <h3 class="button-showcase__title">Same structure, faster motion when intent is clear</h3>
                 </div>
-                <button class="button-sample button-sample--bottom button-sample--hover" type="button">
-                  <canvas
-                    class="button-sample__field button-sample__field--bottom"
-                    data-wave-canvas
-                    data-wave-variant="ribbon"
-                    data-wave-role="bottom"
-                    data-wave-hover-speed="1.9"
-                    data-wave-hover-fill="1"
-                    role="img"
-                    aria-label="Hover-amplified button wave"></canvas>
-                  <span class="button-sample__label">Hover me</span>
-                </button>
+                <Button waveState="hover">Hover me</Button>
                 <p class="button-showcase__note">
                   On hover, the wave grows and animates faster, but only on the button itself. That keeps the interaction crisp, avoids accidental triggers from nearby text, and still respects reduced
                   motion when the OS asks for less animation.
@@ -270,19 +251,7 @@ const placementVariants = [
                   <p class="button-showcase__eyebrow">Active / toggled</p>
                   <h3 class="button-showcase__title">The expressive state, still trimmed for usability</h3>
                 </div>
-                <button class="button-sample button-sample--bottom button-sample--locked button-sample--active" type="button" aria-pressed="true">
-                  <canvas
-                    class="button-sample__field button-sample__field--bottom"
-                    data-wave-canvas
-                    data-wave-variant="ribbon"
-                    data-wave-role="bottom"
-                    data-wave-hover-fill="1"
-                    data-wave-fill-locked="1"
-                    data-wave-paused="1"
-                    role="img"
-                    aria-label="Active toggled button with paused full-fill wave"></canvas>
-                  <span class="button-sample__label">Toggled on</span>
-                </button>
+                <Button waveState="active" ariaPressed={true}>Toggled on</Button>
                 <p class="button-showcase__note">
                   This is the loudest state, but it is still constrained. The edge bleed is intentional, the amplitude is tuned down, and the renderer stays on the same lightweight canvas path as the
                   rest of the experiment.
