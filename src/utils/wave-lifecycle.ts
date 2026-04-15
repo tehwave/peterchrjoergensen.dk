@@ -73,8 +73,8 @@ export function setupWaveLifecycle({ scopeKey, init }: SetupWaveLifecycleOptions
     state.cleanup = noop;
   };
 
-  // Scope suffix isolates lifecycle listeners from custom component listeners (for example `project-card:waves-sync`)
-  // so `ensureScopedDocumentListener` can dedupe each channel independently.
+  // Scope suffix is only for Astro transition events in this helper, so custom component events
+  // can keep their base scope key while still using `ensureScopedDocumentListener` deduping.
   const removePageLoadListener = ensureScopedDocumentListener({
     scopeKey: `${scopeKey}:lifecycle`,
     event: "astro:page-load",

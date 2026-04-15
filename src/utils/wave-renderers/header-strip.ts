@@ -25,6 +25,7 @@ const HEADER_WAVE_PALETTES = {
   ribbon: HEADER_RIBBON_WAVE_PALETTE,
   tidal: HEADER_TIDAL_WAVE_PALETTE,
 } satisfies Record<HeaderWaveVariant, readonly string[]>;
+// Time constant (τ) used by 1 - exp(-Δt/τ) smoothing for fill transitions.
 const FILL_TRANSITION_TIME_CONSTANT_MS = 90;
 
 export function parseHeaderStripSceneOptions(canvas: HTMLCanvasElement): HeaderStripSceneOptions {
