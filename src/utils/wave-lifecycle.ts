@@ -74,6 +74,7 @@ export function setupWaveLifecycle({ scopeKey, init }: SetupWaveLifecycleOptions
   };
 
   const removePageLoadListener = ensureScopedDocumentListener({
+    // Scope suffix isolates lifecycle listeners from other scoped listeners under the same base key.
     scopeKey: `${scopeKey}:lifecycle`,
     event: "astro:page-load",
     handler: handleInit,

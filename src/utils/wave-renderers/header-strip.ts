@@ -25,6 +25,7 @@ const HEADER_WAVE_PALETTES = {
   ribbon: HEADER_RIBBON_WAVE_PALETTE,
   tidal: HEADER_TIDAL_WAVE_PALETTE,
 } satisfies Record<HeaderWaveVariant, readonly string[]>;
+const FILL_TRANSITION_TIME_CONSTANT_MS = 90;
 
 export function parseHeaderStripSceneOptions(canvas: HTMLCanvasElement): HeaderStripSceneOptions {
   const variantRaw = canvas.dataset.waveVariant;
@@ -65,7 +66,7 @@ export function createHeaderStripScene(canvas: HTMLCanvasElement, context: Canva
 
 export function updateHeaderStripScene(scene: HeaderStripScene, deltaTime: number): void {
   const fillDelta = scene.targetFillProgress - scene.fillProgress;
-  const fillLerp = 1 - Math.exp(-deltaTime / 90);
+  const fillLerp = 1 - Math.exp(-deltaTime / FILL_TRANSITION_TIME_CONSTANT_MS);
 
   if (Math.abs(fillDelta) > 0.001) {
     scene.fillProgress += fillDelta * fillLerp;

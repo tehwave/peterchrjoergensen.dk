@@ -63,6 +63,8 @@ interface WaveHoverInteractionOptions {
 }
 
 const noop = () => {};
+const BASELINE_FRAME_MS = 16.67;
+const MAX_FRAME_MS = 40;
 
 export function discoverWaveCanvases({ root, rootSelector, canvasSelector }: CanvasDiscoveryOptions): HTMLCanvasElement[] {
   const rootNode = root ?? document;
@@ -218,7 +220,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
   };
 
   const renderFrame = (timestamp: number) => {
-    const deltaTime = previousFrameTime === null ? 16.67 : Math.min(40, Math.max(0, timestamp - previousFrameTime));
+    const deltaTime = previousFrameTime === null ? BASELINE_FRAME_MS : Math.min(MAX_FRAME_MS, Math.max(0, timestamp - previousFrameTime));
     previousFrameTime = timestamp;
 
     for (const scene of scenes) {
