@@ -23,44 +23,7 @@ type Props = Record<string, never>;
 </header>
 
 <script>
-  import { attachWaveHoverInteraction, mountWaveEngine, syncCanvasSceneSize } from "../utils/wave-engine";
   import { setupWaveLifecycle } from "../utils/wave-lifecycle";
-  import { createHeaderStripScene, drawHeaderStripScene, updateHeaderStripScene } from "../utils/wave-renderers/header-strip";
-
-  function mountHeaderLogoWaves(): () => void {
-    return mountWaveEngine({
-      rootSelector: ".header",
-      canvasSelector: "[data-wave-canvas]",
-      createScene: ({ canvas, context }) => createHeaderStripScene(canvas, context),
-      drawScene: drawHeaderStripScene,
-      updateScene: updateHeaderStripScene,
-      syncSceneSize: (scene) => {
-        syncCanvasSceneSize(scene, { minWidth: 120, minHeight: 80, maxDpr: 2 });
-      },
-      onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
-        // Header logo waves consume Button's data-wave-* contract for hover speed/fill behavior.
-        const cleanupHover = attachWaveHoverInteraction({
-          canvas: scene.canvas,
-          hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
-          hoverFillEnabled: scene.hoverFillEnabled,
-          fillLocked: scene.fillLocked,
-          setSpeedMultiplier: (value) => {
-            scene.speedMultiplier = value;
-          },
-          setTargetFillProgress: (value) => {
-            scene.targetFillProgress = value;
-          },
-          setFillProgress: (value) => {
-            scene.fillProgress = value;
-          },
-          isReducedMotion: () => reduceMotionQuery.matches,
-          renderStatic,
-        });
-
-        registerCleanup(cleanupHover);
-      },
-    });
-  }
 
   class HeaderManager {
     private header: HTMLElement | null;
@@ -196,12 +159,7 @@ type Props = Record<string, never>;
   function initHeader(): () => void {
     cleanup?.();
     const manager = new HeaderManager();
-    const managerCleanup = manager.init();
-    const waveCleanup = mountHeaderLogoWaves();
-    cleanup = () => {
-      managerCleanup();
-      waveCleanup();
-    };
+    cleanup = manager.init();
     return cleanup;
   }
 

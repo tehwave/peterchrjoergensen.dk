@@ -1,11 +1,11 @@
 import type { WaveSceneBase } from "../wave-engine";
 import { readWaveInteractionAttributes } from "../wave-engine";
-import { HEADER_RIBBON_WAVE_PALETTE, HEADER_TIDAL_WAVE_PALETTE } from "../wave-palettes";
+import { RIBBON_WAVE_PALETTE, TIDAL_WAVE_PALETTE } from "../wave-palettes";
 
-export type HeaderWaveVariant = "ribbon" | "tidal";
+export type StripWaveVariant = "ribbon" | "tidal";
 
-export interface HeaderStripScene extends WaveSceneBase {
-  variant: HeaderWaveVariant;
+export interface StripWaveScene extends WaveSceneBase {
+  variant: StripWaveVariant;
   hoverSpeedMultiplier: number;
   hoverFillEnabled: boolean;
   fillLocked: boolean;
@@ -13,24 +13,25 @@ export interface HeaderStripScene extends WaveSceneBase {
   targetFillProgress: number;
 }
 
-export interface HeaderStripSceneOptions {
-  variant: HeaderWaveVariant;
+interface StripWaveSceneOptions {
+  variant: StripWaveVariant;
   hoverSpeedMultiplier: number;
   hoverFillEnabled: boolean;
   fillLocked: boolean;
   paused: boolean;
 }
 
-const HEADER_WAVE_PALETTES = {
-  ribbon: HEADER_RIBBON_WAVE_PALETTE,
-  tidal: HEADER_TIDAL_WAVE_PALETTE,
-} satisfies Record<HeaderWaveVariant, readonly string[]>;
+const STRIP_WAVE_PALETTES = {
+  ribbon: RIBBON_WAVE_PALETTE,
+  tidal: TIDAL_WAVE_PALETTE,
+} satisfies Record<StripWaveVariant, readonly string[]>;
+
 // Time constant (τ) used by 1 - exp(-Δt/τ) smoothing for fill transitions.
 const FILL_TRANSITION_TIME_CONSTANT_MS = 90;
 
-export function parseHeaderStripSceneOptions(canvas: HTMLCanvasElement): HeaderStripSceneOptions {
+function parseStripWaveSceneOptions(canvas: HTMLCanvasElement): StripWaveSceneOptions {
   const variantRaw = canvas.dataset.waveVariant;
-  const variant: HeaderWaveVariant = variantRaw === "ribbon" || variantRaw === "tidal" ? variantRaw : "tidal";
+  const variant: StripWaveVariant = variantRaw === "ribbon" || variantRaw === "tidal" ? variantRaw : "tidal";
   const interactions = readWaveInteractionAttributes(canvas);
 
   return {
@@ -42,8 +43,8 @@ export function parseHeaderStripSceneOptions(canvas: HTMLCanvasElement): HeaderS
   };
 }
 
-export function createHeaderStripScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): HeaderStripScene {
-  const options = parseHeaderStripSceneOptions(canvas);
+export function createStripWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): StripWaveScene {
+  const options = parseStripWaveSceneOptions(canvas);
   const fillProgress = options.fillLocked ? 1 : 0;
 
   return {
@@ -65,7 +66,7 @@ export function createHeaderStripScene(canvas: HTMLCanvasElement, context: Canva
   };
 }
 
-export function updateHeaderStripScene(scene: HeaderStripScene, deltaTime: number): void {
+export function updateStripWaveScene(scene: StripWaveScene, deltaTime: number): void {
   const fillDelta = scene.targetFillProgress - scene.fillProgress;
   const fillLerp = 1 - Math.exp(-deltaTime / FILL_TRANSITION_TIME_CONSTANT_MS);
 
@@ -76,7 +77,7 @@ export function updateHeaderStripScene(scene: HeaderStripScene, deltaTime: numbe
   }
 }
 
-function drawWaveStrip(context: CanvasRenderingContext2D, width: number, height: number, palette: readonly string[], time: number, fillProgress = 0, dynamicCoverage = false): void {
+function drawStripWave(context: CanvasRenderingContext2D, width: number, height: number, palette: readonly string[], time: number, fillProgress = 0, dynamicCoverage = false): void {
   const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
   const boostedFillProgress = Math.min(1.3, clampedFillProgress * 1.3);
   const coverageProgress = Math.pow(clampedFillProgress, 0.84);
@@ -153,8 +154,8 @@ function drawWaveStrip(context: CanvasRenderingContext2D, width: number, height:
   context.restore();
 }
 
-export function drawHeaderStripScene(scene: HeaderStripScene, time: number): void {
-  const palette = HEADER_WAVE_PALETTES[scene.variant];
+export function drawStripWaveScene(scene: StripWaveScene, time: number): void {
+  const palette = STRIP_WAVE_PALETTES[scene.variant];
   scene.context.clearRect(0, 0, scene.width, scene.height);
-  drawWaveStrip(scene.context, scene.width, scene.height, palette, time, scene.fillProgress, scene.hoverFillEnabled);
+  drawStripWave(scene.context, scene.width, scene.height, palette, time, scene.fillProgress, scene.hoverFillEnabled);
 }

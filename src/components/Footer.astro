@@ -75,19 +75,17 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
 </footer>
 
 <script>
-  import { mountWaveEngine, syncCanvasSceneSize } from "../utils/wave-engine";
+  import { mountWaveEngine } from "../utils/wave-engine";
   import { setupWaveLifecycle } from "../utils/wave-lifecycle";
-  import { createFooterBottomScene, drawFooterBottomScene } from "../utils/wave-renderers/footer-bottom";
+  import { createStackedWaveScene, drawStackedWaveScene } from "../utils/wave-renderers/stacked-waves";
 
   function mountFooterWaves(): () => void {
     return mountWaveEngine({
       rootSelector: ".footer",
       canvasSelector: "[data-footer-wave]",
-      createScene: ({ canvas, context }) => createFooterBottomScene(canvas, context),
-      drawScene: drawFooterBottomScene,
-      syncSceneSize: (scene) => {
-        syncCanvasSceneSize(scene, { minWidth: 120, minHeight: 40, maxDpr: 2 });
-      },
+      createScene: ({ canvas, context }) => createStackedWaveScene(canvas, context),
+      drawScene: drawStackedWaveScene,
+      size: { minWidth: 120, minHeight: 40, maxDpr: 2 },
       staticTime: 0,
     });
   }

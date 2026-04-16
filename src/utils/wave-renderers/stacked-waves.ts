@@ -1,9 +1,9 @@
 import type { WaveSceneBase } from "../wave-engine";
-import { FOOTER_BOTTOM_WAVE_PALETTE } from "../wave-palettes";
+import { SUNSET_WAVE_PALETTE } from "../wave-palettes";
 
-export type FooterBottomScene = WaveSceneBase;
+export type StackedWaveScene = WaveSceneBase;
 
-export function createFooterBottomScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): FooterBottomScene {
+export function createStackedWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): StackedWaveScene {
   return {
     canvas,
     context,
@@ -17,7 +17,7 @@ export function createFooterBottomScene(canvas: HTMLCanvasElement, context: Canv
   };
 }
 
-function traceBottomWave(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number): void {
+function traceWaveFill(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number): void {
   context.beginPath();
   context.moveTo(0, height);
 
@@ -30,7 +30,7 @@ function traceBottomWave(context: CanvasRenderingContext2D, width: number, heigh
   context.closePath();
 }
 
-export function drawFooterBottomScene(scene: FooterBottomScene, time: number): void {
+export function drawStackedWaveScene(scene: StackedWaveScene, time: number): void {
   const { context, width, height } = scene;
   context.clearRect(0, 0, width, height);
 
@@ -58,15 +58,15 @@ export function drawFooterBottomScene(scene: FooterBottomScene, time: number): v
 
   for (const [index, layer] of layers.entries()) {
     const gradient = context.createLinearGradient(0, 0, width, 0);
-    for (let colorIndex = 0; colorIndex < FOOTER_BOTTOM_WAVE_PALETTE.length; colorIndex += 1) {
-      gradient.addColorStop(colorIndex / (FOOTER_BOTTOM_WAVE_PALETTE.length - 1), FOOTER_BOTTOM_WAVE_PALETTE[(colorIndex + index) % FOOTER_BOTTOM_WAVE_PALETTE.length]);
+    for (let colorIndex = 0; colorIndex < SUNSET_WAVE_PALETTE.length; colorIndex += 1) {
+      gradient.addColorStop(colorIndex / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(colorIndex + index) % SUNSET_WAVE_PALETTE.length]);
     }
 
     context.save();
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = layer.alpha;
     context.fillStyle = gradient;
-    traceBottomWave(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
+    traceWaveFill(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
     context.fill();
     context.restore();
   }

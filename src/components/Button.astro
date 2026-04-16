@@ -5,6 +5,7 @@ interface Props {
   type?: "button" | "submit" | "reset";
   shape?: "pill" | "circle";
   waveState?: "default" | "hover" | "active";
+  waveMount?: "self" | "external";
   circleSize?: "sm" | "md" | "lg";
   ariaLabel?: string;
   ariaPressed?: boolean;
@@ -20,6 +21,7 @@ const {
   type = "button",
   shape = "pill",
   waveState = "default",
+  waveMount = "self",
   circleSize = "md",
   ariaLabel,
   ariaPressed,
@@ -54,7 +56,16 @@ const classes = [
 
 {
   isLink ? (
-    <a class:list={classes} href={disabled ? undefined : href} aria-label={ariaLabel} aria-disabled={disabled || undefined} tabindex={disabled ? -1 : undefined} target={target} rel={rel}>
+    <a
+      class:list={classes}
+      href={disabled ? undefined : href}
+      aria-label={ariaLabel}
+      aria-disabled={disabled || undefined}
+      tabindex={disabled ? -1 : undefined}
+      target={target}
+      rel={rel}
+      data-wave-mount={waveMount === "external" ? "external" : undefined}
+    >
       {waveState === "default" ? (
         <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
@@ -93,7 +104,7 @@ const classes = [
       )}
     </a>
   ) : (
-    <button class:list={classes} type={type} aria-label={ariaLabel} aria-pressed={ariaPressed} disabled={disabled}>
+    <button class:list={classes} type={type} aria-label={ariaLabel} aria-pressed={ariaPressed} disabled={disabled} data-wave-mount={waveMount === "external" ? "external" : undefined}>
       {waveState === "default" ? (
         <canvas class="button-sample__field button-sample__field--bottom" data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
@@ -133,6 +144,48 @@ const classes = [
     </button>
   )
 }
+
+<script>
+  import { attachWaveHoverInteraction, mountWaveEngine } from "../utils/wave-engine";
+  import { setupWaveLifecycle } from "../utils/wave-lifecycle";
+  import { createStripWaveScene, drawStripWaveScene, updateStripWaveScene } from "../utils/wave-renderers/strip-wave";
+
+  function mountButtonWaves(): () => void {
+    return mountWaveEngine({
+      canvasSelector: '.button-sample:not([data-wave-mount="external"]) [data-wave-canvas]',
+      createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
+      drawScene: drawStripWaveScene,
+      updateScene: updateStripWaveScene,
+      size: { minWidth: 120, minHeight: 80, maxDpr: 2 },
+      onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
+        const cleanupHover = attachWaveHoverInteraction({
+          canvas: scene.canvas,
+          hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
+          hoverFillEnabled: scene.hoverFillEnabled,
+          fillLocked: scene.fillLocked,
+          setSpeedMultiplier: (value) => {
+            scene.speedMultiplier = value;
+          },
+          setTargetFillProgress: (value) => {
+            scene.targetFillProgress = value;
+          },
+          setFillProgress: (value) => {
+            scene.fillProgress = value;
+          },
+          isReducedMotion: () => reduceMotionQuery.matches,
+          renderStatic,
+        });
+
+        registerCleanup(cleanupHover);
+      },
+    });
+  }
+
+  setupWaveLifecycle({
+    scopeKey: "button-component",
+    init: mountButtonWaves,
+  });
+</script>
 
 <style lang="scss">
   @use "../styles/variables" as *;

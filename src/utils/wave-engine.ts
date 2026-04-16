@@ -40,6 +40,7 @@ interface WaveEngineSceneMountContext<Scene extends WaveSceneBase> {
 interface MountWaveEngineOptions<Scene extends WaveSceneBase> extends CanvasDiscoveryOptions {
   createScene: (options: { canvas: HTMLCanvasElement; context: CanvasRenderingContext2D; index: number }) => Scene | null;
   drawScene: (scene: Scene, time: number) => void;
+  size?: SyncCanvasSceneSizeOptions;
   syncSceneSize?: (scene: Scene) => void;
   updateScene?: (scene: Scene, deltaTime: number) => void;
   onSceneMount?: (context: WaveEngineSceneMountContext<Scene>) => void;
@@ -159,6 +160,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
   canvasSelector,
   createScene,
   drawScene,
+  size,
   syncSceneSize,
   updateScene,
   onSceneMount,
@@ -179,6 +181,14 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
     .filter((scene): scene is Scene => Boolean(scene));
 
   if (scenes.length === 0) return noop;
+
+  const syncSceneDimensions =
+    syncSceneSize ??
+    (size
+      ? (scene: Scene) => {
+          syncCanvasSceneSize(scene, size);
+        }
+      : undefined);
 
   const reduceMotionMediaQuery = window.matchMedia(reducedMotionQuery);
   const cleanupCallbacks: Array<() => void> = [];
@@ -239,7 +249,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
   };
 
   for (const [sceneIndex, scene] of scenes.entries()) {
-    syncSceneSize?.(scene);
+    syncSceneDimensions?.(scene);
 
     onSceneMount?.({
       scene,
@@ -278,7 +288,7 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
 
   const handleResize = () => {
     for (const scene of scenes) {
-      syncSceneSize?.(scene);
+      syncSceneDimensions?.(scene);
     }
 
     updatePlayback();
