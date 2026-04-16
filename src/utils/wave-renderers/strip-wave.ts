@@ -29,22 +29,17 @@ const STRIP_WAVE_PALETTES = {
 // Time constant (τ) used by 1 - exp(-Δt/τ) smoothing for fill transitions.
 const FILL_TRANSITION_TIME_CONSTANT_MS = 90;
 
-function parseStripWaveSceneOptions(canvas: HTMLCanvasElement): StripWaveSceneOptions {
+export function createStripWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): StripWaveScene {
   const variantRaw = canvas.dataset.waveVariant;
   const variant: StripWaveVariant = variantRaw === "ribbon" || variantRaw === "tidal" ? variantRaw : "tidal";
   const interactions = readWaveInteractionAttributes(canvas);
-
-  return {
+  const options: StripWaveSceneOptions = {
     variant,
     hoverSpeedMultiplier: interactions.hoverSpeedMultiplier,
     hoverFillEnabled: interactions.hoverFillEnabled,
     fillLocked: interactions.fillLocked,
     paused: canvas.dataset.wavePaused === "1",
   };
-}
-
-export function createStripWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): StripWaveScene {
-  const options = parseStripWaveSceneOptions(canvas);
   const fillProgress = options.fillLocked ? 1 : 0;
 
   return {
