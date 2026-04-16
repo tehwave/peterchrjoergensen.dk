@@ -75,230 +75,25 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
 </footer>
 
 <script>
-  interface FooterWaveScene {
-    canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-    width: number;
-    height: number;
-    dpr: number;
+  import { mountWaveEngine } from "../utils/wave-engine";
+  import { setupWaveLifecycle } from "../utils/wave-lifecycle";
+  import { createStackedWaveScene, drawStackedWaveScene } from "../utils/wave-renderers/stacked-waves";
+
+  function mountFooterWaves(): () => void {
+    return mountWaveEngine({
+      rootSelector: ".footer",
+      canvasSelector: "[data-footer-wave]",
+      createScene: ({ canvas, context }) => createStackedWaveScene(canvas, context),
+      drawScene: drawStackedWaveScene,
+      size: { minWidth: 120, minHeight: 40, maxDpr: 2 },
+      staticTime: 0,
+    });
   }
 
-  let teardownFooterWaves: (() => void) | null = null;
-  let footerWavesInitHandler: (() => void) | null = null;
-
-  function initFooterWaves() {
-    teardownFooterWaves?.();
-    teardownFooterWaves = mountFooterWaves();
-
-    document.addEventListener(
-      "astro:before-preparation",
-      () => {
-        teardownFooterWaves?.();
-        teardownFooterWaves = null;
-      },
-      { once: true },
-    );
-  }
-
-  function mountFooterWaves() {
-    const footer = document.querySelector(".footer");
-    if (!(footer instanceof HTMLElement)) {
-      return () => {};
-    }
-
-    const canvasNodes = Array.from(footer.querySelectorAll("[data-footer-wave]"));
-    const canvases = canvasNodes.filter((node): node is HTMLCanvasElement => node instanceof HTMLCanvasElement);
-    if (canvases.length === 0) {
-      return () => {};
-    }
-
-    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frameId: number | null = null;
-    let isPageVisible = !document.hidden;
-
-    const scenes: FooterWaveScene[] = [];
-
-    for (const canvas of canvases) {
-      const context = canvas.getContext("2d", { alpha: true });
-      if (!context) continue;
-
-      scenes.push({
-        canvas,
-        context,
-        width: 0,
-        height: 0,
-        dpr: 1,
-      });
-    }
-
-    if (scenes.length === 0) {
-      return () => {};
-    }
-
-    function syncSceneSize(scene: FooterWaveScene) {
-      const rect = scene.canvas.getBoundingClientRect();
-      scene.width = Math.max(120, Math.floor(rect.width));
-      scene.height = Math.max(40, Math.floor(rect.height));
-      scene.dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      scene.canvas.width = Math.max(1, Math.floor(scene.width * scene.dpr));
-      scene.canvas.height = Math.max(1, Math.floor(scene.height * scene.dpr));
-      scene.context.setTransform(scene.dpr, 0, 0, scene.dpr, 0, 0);
-    }
-
-    function traceBottomWave(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number) {
-      context.beginPath();
-      context.moveTo(0, height);
-
-      for (let x = 0; x <= width + 2; x += 2) {
-        const y = baseY + Math.sin(x * frequency + phase) * amplitude + Math.cos(x * frequency * 1.9 + phase * 0.82) * (amplitude * harmonicScale);
-        context.lineTo(x, y);
-      }
-
-      context.lineTo(width, height);
-      context.closePath();
-    }
-
-    function drawBottomWave(scene: FooterWaveScene, time: number) {
-      const { context, width, height } = scene;
-      context.clearRect(0, 0, width, height);
-
-      const palette = ["#58e6ff", "#6a8bff", "#b06bff", "#ff7ca8", "#ff8f5e"];
-
-      const layers = [
-        { base: height * 0.44, amp: height * 0.098, freq: 0.0101, speed: 0.0011, alpha: 0.72, depth: 1.2 },
-        { base: height * 0.55, amp: height * 0.082, freq: 0.0122, speed: -0.0013, alpha: 0.62, depth: 0.94 },
-        { base: height * 0.66, amp: height * 0.066, freq: 0.0137, speed: 0.00156, alpha: 0.52, depth: 0.74 },
-        { base: height * 0.75, amp: height * 0.052, freq: 0.015, speed: -0.00188, alpha: 0.44, depth: 0.56 },
-      ];
-
-      const baseWash = context.createLinearGradient(0, height * 0.22, 0, height);
-      baseWash.addColorStop(0, "rgba(88, 230, 255, 0)");
-      baseWash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
-      baseWash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
-      baseWash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
-      baseWash.addColorStop(1, "rgba(255, 143, 94, 0.38)");
-
-      context.save();
-      context.globalCompositeOperation = "source-over";
-      context.globalAlpha = 1;
-      context.fillStyle = baseWash;
-      context.fillRect(0, height * 0.22, width, height * 0.84);
-      context.restore();
-
-      for (const [index, layer] of layers.entries()) {
-        const gradient = context.createLinearGradient(0, 0, width, 0);
-        for (let colorIndex = 0; colorIndex < palette.length; colorIndex += 1) {
-          gradient.addColorStop(colorIndex / (palette.length - 1), palette[(colorIndex + index) % palette.length]);
-        }
-
-        context.save();
-        context.globalCompositeOperation = "source-over";
-        context.globalAlpha = layer.alpha;
-        context.fillStyle = gradient;
-        traceBottomWave(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
-        context.fill();
-        context.restore();
-      }
-
-      const shimmer = context.createLinearGradient(0, height * 0.34, 0, height);
-      shimmer.addColorStop(0, "rgba(255, 255, 255, 0)");
-      shimmer.addColorStop(1, "rgba(255, 255, 255, 0.16)");
-
-      context.save();
-      context.globalCompositeOperation = "screen";
-      context.globalAlpha = 0.5;
-      context.fillStyle = shimmer;
-      context.fillRect(0, height * 0.34, width, height * 0.66);
-      context.restore();
-    }
-
-    function drawScene(scene: FooterWaveScene, time: number) {
-      drawBottomWave(scene, time);
-    }
-
-    function stopLoop() {
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-        frameId = null;
-      }
-    }
-
-    function render(time: number) {
-      for (const scene of scenes) {
-        drawScene(scene, time);
-      }
-
-      frameId = requestAnimationFrame(render);
-    }
-
-    function renderStatic() {
-      for (const scene of scenes) {
-        drawScene(scene, 0);
-      }
-    }
-
-    function updatePlayback() {
-      const shouldAnimate = !reduceMotionQuery.matches && isPageVisible;
-
-      if (!shouldAnimate) {
-        stopLoop();
-        renderStatic();
-        return;
-      }
-
-      if (frameId === null) {
-        frameId = requestAnimationFrame(render);
-      }
-    }
-
-    function handleResize() {
-      for (const scene of scenes) {
-        syncSceneSize(scene);
-      }
-
-      updatePlayback();
-    }
-
-    function handleMotionChange() {
-      updatePlayback();
-    }
-
-    function handleVisibilityChange() {
-      isPageVisible = !document.hidden;
-      updatePlayback();
-    }
-
-    for (const scene of scenes) {
-      syncSceneSize(scene);
-    }
-
-    window.addEventListener("resize", handleResize, { passive: true });
-    reduceMotionQuery.addEventListener("change", handleMotionChange);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    updatePlayback();
-
-    return () => {
-      stopLoop();
-      window.removeEventListener("resize", handleResize);
-      reduceMotionQuery.removeEventListener("change", handleMotionChange);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }
-
-  initFooterWaves();
-
-  const ensureFooterWavesHandler = () => {
-    if (footerWavesInitHandler) {
-      document.removeEventListener("astro:page-load", footerWavesInitHandler);
-    }
-
-    footerWavesInitHandler = initFooterWaves;
-    document.addEventListener("astro:page-load", footerWavesInitHandler);
-  };
-
-  ensureFooterWavesHandler();
+  setupWaveLifecycle({
+    scopeKey: "footer-waves",
+    init: mountFooterWaves,
+  });
 </script>
 
 <style lang="scss">
