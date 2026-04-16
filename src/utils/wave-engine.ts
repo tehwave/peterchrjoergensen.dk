@@ -182,13 +182,19 @@ export function mountWaveEngine<Scene extends WaveSceneBase>({
 
   if (scenes.length === 0) return noop;
 
-  const syncSceneDimensions =
-    syncSceneSize ??
-    (size
-      ? (scene: Scene) => {
-          syncCanvasSceneSize(scene, size);
-        }
-      : undefined);
+  const syncSceneDimensions = (() => {
+    if (syncSceneSize) {
+      return syncSceneSize;
+    }
+
+    if (!size) {
+      return undefined;
+    }
+
+    return (scene: Scene) => {
+      syncCanvasSceneSize(scene, size);
+    };
+  })();
 
   const reduceMotionMediaQuery = window.matchMedia(reducedMotionQuery);
   const cleanupCallbacks: Array<() => void> = [];

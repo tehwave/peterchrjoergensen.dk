@@ -152,7 +152,7 @@ const classes = [
 
   function mountButtonWaves(): () => void {
     return mountWaveEngine({
-      canvasSelector: '.button-sample:not([data-wave-mount="external"]) [data-wave-canvas]',
+      canvasSelector: '.button-sample:not([data-wave-mount="external"]) canvas.button-sample__field[data-wave-canvas]',
       createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
       drawScene: drawStripWaveScene,
       updateScene: updateStripWaveScene,
