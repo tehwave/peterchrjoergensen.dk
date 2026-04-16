@@ -1,9 +1,35 @@
+/**
+ * Strip wave renderer.
+ *
+ * Draws three stacked sine-based bands across the bottom of a canvas,
+ * sweeping a gradient from one of two palettes. Used for the button/header
+ * surfaces where the wave must respond to hover and focus:
+ *
+ * - `tidal` variant: idle state, brighter palette.
+ * - `ribbon` variant: hover/active state, cooler palette.
+ *
+ * Scene state mirrors the `data-wave-*` contract parsed by
+ * {@link readWaveInteractionAttributes}, so hover wiring in
+ * `attachWaveHoverInteraction` only needs to mutate `speedMultiplier` and
+ * `targetFillProgress` — {@link updateStripWaveScene} handles the smoothing.
+ */
 import type { WaveSceneBase } from "../wave-engine";
 import { readWaveInteractionAttributes } from "../wave-engine";
 import { RIBBON_WAVE_PALETTE, TIDAL_WAVE_PALETTE } from "../wave-palettes";
 
 export type StripWaveVariant = "ribbon" | "tidal";
 
+/**
+ * Strip-wave scene state extending the base engine shape.
+ *
+ * `fillProgress` is the currently-rendered fill value in `[0..1]` and is
+ * smoothed toward `targetFillProgress` each frame; hover code should flip
+ * `targetFillProgress` only and let the lerp settle.
+ *
+ * When `fillLocked` is `true` the scene initializes with
+ * `fillProgress === 1` and stays there regardless of hover — used for the
+ * permanently-active state of `Button.astro` (`waveState="active"`).
+ */
 export interface StripWaveScene extends WaveSceneBase {
   variant: StripWaveVariant;
   hoverSpeedMultiplier: number;
@@ -29,6 +55,11 @@ const STRIP_WAVE_PALETTES = {
 // Time constant (τ) used by 1 - exp(-Δt/τ) smoothing for fill transitions.
 const FILL_TRANSITION_TIME_CONSTANT_MS = 90;
 
+/**
+ * Builds a strip-wave scene from a canvas, reading variant and interaction
+ * attributes off `data-wave-*`. Unknown variants fall back to `tidal` so
+ * typos in templates never produce a blank surface.
+ */
 export function createStripWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): StripWaveScene {
   const variantRaw = canvas.dataset.waveVariant;
   const variant: StripWaveVariant = variantRaw === "ribbon" || variantRaw === "tidal" ? variantRaw : "tidal";
@@ -61,6 +92,15 @@ export function createStripWaveScene(canvas: HTMLCanvasElement, context: CanvasR
   };
 }
 
+/**
+ * Per-frame update hook passed to `mountWaveEngine`. Exponentially eases
+ * `fillProgress` toward `targetFillProgress` using a time-constant-based
+ * lerp, which makes the animation framerate-independent and stable after
+ * long deltas are clamped by the engine.
+ *
+ * Snaps to the target when the remaining distance is below a small epsilon
+ * to avoid a perpetually-animating scene keeping the rAF loop alive.
+ */
 export function updateStripWaveScene(scene: StripWaveScene, deltaTime: number): void {
   const fillDelta = scene.targetFillProgress - scene.fillProgress;
   const fillLerp = 1 - Math.exp(-deltaTime / FILL_TRANSITION_TIME_CONSTANT_MS);
@@ -72,6 +112,15 @@ export function updateStripWaveScene(scene: StripWaveScene, deltaTime: number): 
   }
 }
 
+/**
+ * Draws a single strip-wave frame.
+ *
+ * `dynamicCoverage` is enabled on scenes whose canvas opted into
+ * `data-wave-hover-fill`: it adds a gradient wash that grows with
+ * `fillProgress`, producing the "ink filling the button" effect on hover.
+ * Scenes without hover-fill render the bands only, which is cheaper and
+ * visually quieter for idle surfaces.
+ */
 function renderStripWaveFrame(context: CanvasRenderingContext2D, width: number, height: number, palette: readonly string[], time: number, fillProgress = 0, dynamicCoverage = false): void {
   const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
   const boostedFillProgress = Math.min(1.3, clampedFillProgress * 1.3);

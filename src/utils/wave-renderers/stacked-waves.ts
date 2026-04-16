@@ -1,3 +1,11 @@
+/**
+ * Stacked waves renderer (sunset variant).
+ *
+ * Used by the footer divider. Paints a fixed gradient wash and four
+ * sine-based fill layers stacked vertically, plus a soft shimmer on top.
+ * Unlike the strip renderer there is no hover/fill state — the footer wave
+ * is purely ambient, so the scene shape is just `WaveSceneBase`.
+ */
 import type { WaveSceneBase } from "../wave-engine";
 import { SUNSET_WAVE_PALETTE } from "../wave-palettes";
 

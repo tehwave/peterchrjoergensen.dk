@@ -1,3 +1,29 @@
+/**
+ * Shared canvas wave engine.
+ *
+ * Provides the scene shape, canvas discovery/sizing helpers, hover-interaction
+ * wiring, and a `requestAnimationFrame` driver used by every wave surface on
+ * the site (header logo button, footer wave, standalone `Button.astro`
+ * instances, and the Groovy Waves experiment). Renderers stay pure: each
+ * renderer owns a `createScene` / `drawScene` pair and plugs into
+ * `mountWaveEngine` through the generic `Scene extends WaveSceneBase` slot.
+ *
+ * Responsibilities kept in this module:
+ * - Honor `prefers-reduced-motion`, tab visibility, and viewport intersection
+ *   so offscreen / hidden scenes do not burn frames.
+ * - Clamp delta-time to avoid huge jumps after a tab resumes from background.
+ * - Standardize the `data-wave-*` attribute contract emitted by `Button.astro`
+ *   and consumed by `wave-renderers/strip-wave.ts`.
+ */
+
+/**
+ * Minimal shape every wave scene must satisfy so the shared loop can size,
+ * schedule, and throttle it without knowing renderer-specific state.
+ *
+ * `phaseTime` is a monotonically-increasing scene clock driven by the loop
+ * (scaled by `speedMultiplier`); renderers read it as their `time` input and
+ * must not mutate it directly — toggle `paused` instead.
+ */
 export interface WaveSceneBase {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
@@ -10,6 +36,12 @@ export interface WaveSceneBase {
   paused: boolean;
 }
 
+/**
+ * Normalized values read off the `data-wave-*` attributes authored in
+ * `Button.astro`. Produced by {@link readWaveInteractionAttributes} and
+ * stored on strip-wave scenes so {@link attachWaveHoverInteraction} can wire
+ * hover/focus behavior without re-parsing the DOM.
+ */
 export interface WaveInteractionAttributes {
   hoverSpeedMultiplier: number;
   hoverFillEnabled: boolean;
@@ -64,9 +96,21 @@ interface WaveHoverInteractionOptions {
 }
 
 const noop = () => {};
+// Assumed ~60fps baseline used when we have no previous timestamp to diff
+// against (first frame, or right after a pause). Keeps the first update from
+// integrating a 0ms or multi-second delta.
 const BASELINE_FRAME_MS = 16.67;
+// Upper bound on per-frame delta. When a tab is backgrounded rAF pauses but
+// `performance.now()` keeps counting, so the first frame after resume can
+// report hundreds of ms. Capping avoids phase jumps and fill-lerp overshoot.
 const MAX_FRAME_MS = 40;
 
+/**
+ * Collects every `<canvas>` matching `canvasSelector` inside an optional
+ * scope (`root` element or `rootSelector` lookup). Returns an empty array
+ * when the scope is missing so `mountWaveEngine` can early-exit on pages
+ * that do not render the component.
+ */
 export function discoverWaveCanvases({ root, rootSelector, canvasSelector }: CanvasDiscoveryOptions): HTMLCanvasElement[] {
   const rootNode = root ?? document;
   const scope = rootSelector ? rootNode.querySelector(rootSelector) : rootNode;
@@ -76,6 +120,15 @@ export function discoverWaveCanvases({ root, rootSelector, canvasSelector }: Can
   return nodes.filter((node): node is HTMLCanvasElement => node instanceof HTMLCanvasElement);
 }
 
+/**
+ * Resizes a scene's backing canvas to match its CSS box, accounting for
+ * device pixel ratio. Clamps to a sensible floor (`minWidth`/`minHeight`)
+ * so zero-sized layouts during hydration still produce a valid context,
+ * and caps DPR (default 2) to keep fill-rate reasonable on HiDPI displays.
+ *
+ * Applies `setTransform(dpr, 0, 0, dpr, 0, 0)` so renderers can draw in CSS
+ * pixels without manually scaling every coordinate.
+ */
 export function syncCanvasSceneSize<Scene extends WaveSceneBase>(scene: Scene, options: SyncCanvasSceneSizeOptions): void {
   const rect = scene.canvas.getBoundingClientRect();
   const maxDpr = options.maxDpr ?? 2;
@@ -103,6 +156,18 @@ export function readWaveInteractionAttributes(canvas: HTMLCanvasElement): WaveIn
   };
 }
 
+/**
+ * Wires `mouseenter` / `mouseleave` / `focusin` / `focusout` on the closest
+ * `targetSelector` ancestor so hover and keyboard focus share behavior.
+ *
+ * Returns a noop when nothing interactive is configured (neither a speed
+ * boost nor a fill toggle) or when the ancestor cannot be located, so
+ * callers can register the result unconditionally.
+ *
+ * Under `prefers-reduced-motion` the transition is skipped: `setFillProgress`
+ * is called directly with the target value and a static frame is rendered,
+ * preserving the visual state change without the lerp animation.
+ */
 export function attachWaveHoverInteraction({
   canvas,
   hoverSpeedMultiplier,
@@ -154,6 +219,25 @@ export function attachWaveHoverInteraction({
   };
 }
 
+/**
+ * Discovers canvases, creates per-scene state, and runs a single shared
+ * `requestAnimationFrame` loop that draws each scene. Returns a teardown
+ * function that cancels the loop, detaches observers/listeners, and invokes
+ * any per-scene cleanups registered via `onSceneMount`.
+ *
+ * The loop is self-throttling and only runs when all of the following hold:
+ * - the document is visible (`visibilitychange`),
+ * - `prefers-reduced-motion` is not set,
+ * - at least one scene reports `shouldAnimateScene` (defaults to `scene.visible`).
+ *
+ * When animation is paused the engine renders a single static frame so the
+ * surface never goes blank. Pass `staticTime` to pin that static frame to a
+ * deterministic phase (used by the footer to avoid a random first paint).
+ *
+ * Pass `intersectionThreshold` to opt into `IntersectionObserver`-driven
+ * visibility tracking; omit it (e.g. the footer, which is always onscreen
+ * when mounted) to keep scenes animating regardless of viewport position.
+ */
 export function mountWaveEngine<Scene extends WaveSceneBase>({
   root,
   rootSelector,
