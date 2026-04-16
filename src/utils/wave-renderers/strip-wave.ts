@@ -77,7 +77,7 @@ export function updateStripWaveScene(scene: StripWaveScene, deltaTime: number): 
   }
 }
 
-function drawStripWave(context: CanvasRenderingContext2D, width: number, height: number, palette: readonly string[], time: number, fillProgress = 0, dynamicCoverage = false): void {
+function renderStripWaveFrame(context: CanvasRenderingContext2D, width: number, height: number, palette: readonly string[], time: number, fillProgress = 0, dynamicCoverage = false): void {
   const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
   const boostedFillProgress = Math.min(1.3, clampedFillProgress * 1.3);
   const coverageProgress = Math.pow(clampedFillProgress, 0.84);
@@ -157,5 +157,5 @@ function drawStripWave(context: CanvasRenderingContext2D, width: number, height:
 export function drawStripWaveScene(scene: StripWaveScene, time: number): void {
   const palette = STRIP_WAVE_PALETTES[scene.variant];
   scene.context.clearRect(0, 0, scene.width, scene.height);
-  drawStripWave(scene.context, scene.width, scene.height, palette, time, scene.fillProgress, scene.hoverFillEnabled);
+  renderStripWaveFrame(scene.context, scene.width, scene.height, palette, time, scene.fillProgress, scene.hoverFillEnabled);
 }

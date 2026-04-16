@@ -17,7 +17,7 @@ export function createStackedWaveScene(canvas: HTMLCanvasElement, context: Canva
   };
 }
 
-function traceWaveFill(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number): void {
+function buildWaveFillPath(context: CanvasRenderingContext2D, width: number, height: number, baseY: number, amplitude: number, frequency: number, phase: number, harmonicScale: number): void {
   context.beginPath();
   context.moveTo(0, height);
 
@@ -66,7 +66,7 @@ export function drawStackedWaveScene(scene: StackedWaveScene, time: number): voi
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = layer.alpha;
     context.fillStyle = gradient;
-    traceWaveFill(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
+    buildWaveFillPath(context, width, height, layer.base, layer.amp, layer.freq, time * layer.speed + index * 1.6, 0.22);
     context.fill();
     context.restore();
   }

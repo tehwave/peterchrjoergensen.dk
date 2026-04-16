@@ -33,7 +33,6 @@ const {
 
 const isLink = as === "a";
 const isCircle = shape === "circle";
-const buttonWaveOwnership = waveMount === "external" ? "external" : "self";
 
 if (isCircle && !ariaLabel) {
   throw new Error('Button.astro: `ariaLabel` is required when shape="circle".');
@@ -59,18 +58,11 @@ const classes = [
   isLink ? (
     <a class:list={classes} href={disabled ? undefined : href} aria-label={ariaLabel} aria-disabled={disabled || undefined} tabindex={disabled ? -1 : undefined} target={target} rel={rel}>
       {waveState === "default" ? (
-        <canvas
-          class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
-          data-wave-canvas
-          data-wave-variant="tidal"
-          data-wave-role="bottom"
-          aria-hidden="true"
-        />
+        <canvas class="button-sample__field button-sample__field--bottom" data-button-wave={waveMount} data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
         <canvas
           class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
+          data-button-wave={waveMount}
           data-wave-canvas
           data-wave-variant="ribbon"
           data-wave-role="bottom"
@@ -81,7 +73,7 @@ const classes = [
       ) : (
         <canvas
           class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
+          data-button-wave={waveMount}
           data-wave-canvas
           data-wave-variant="ribbon"
           data-wave-role="bottom"
@@ -107,18 +99,11 @@ const classes = [
   ) : (
     <button class:list={classes} type={type} aria-label={ariaLabel} aria-pressed={ariaPressed} disabled={disabled}>
       {waveState === "default" ? (
-        <canvas
-          class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
-          data-wave-canvas
-          data-wave-variant="tidal"
-          data-wave-role="bottom"
-          aria-hidden="true"
-        />
+        <canvas class="button-sample__field button-sample__field--bottom" data-button-wave={waveMount} data-wave-canvas data-wave-variant="tidal" data-wave-role="bottom" aria-hidden="true" />
       ) : waveState === "hover" ? (
         <canvas
           class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
+          data-button-wave={waveMount}
           data-wave-canvas
           data-wave-variant="ribbon"
           data-wave-role="bottom"
@@ -129,7 +114,7 @@ const classes = [
       ) : (
         <canvas
           class="button-sample__field button-sample__field--bottom"
-          data-button-wave={buttonWaveOwnership}
+          data-button-wave={waveMount}
           data-wave-canvas
           data-wave-variant="ribbon"
           data-wave-role="bottom"
