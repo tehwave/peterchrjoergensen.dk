@@ -251,7 +251,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
   .project-card {
     background-color: $color-white;
-    border-radius: 8px;
+    border-radius: $radius-2xl;
     overflow: hidden;
     box-shadow: 0 2px 8px $color-shadow;
     @include transition(all, 0.3s);
@@ -339,7 +339,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       height: auto;
       aspect-ratio: 16 / 10;
       object-fit: cover;
-      border-radius: 16px;
+      border-radius: calc(#{$radius-2xl} - #{$space-sm});
       // Bleed into the content area below
       margin-bottom: -14px;
       transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
@@ -354,7 +354,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       justify-content: center;
       width: 100%;
       aspect-ratio: 16 / 10;
-      border-radius: 16px;
+      border-radius: calc(#{$radius-2xl} - #{$space-xs});
       margin-bottom: -14px;
       background: linear-gradient(135deg, rgba($color-white, 0.22) 0%, rgba($color-black, 0.18) 100%);
       transition:
