@@ -34,15 +34,11 @@ const roles = [
       <div class="hero__content" style="max-height: 223px">
         <h1 class="hero__title hero__title--handwriting">Hello!</h1>
         <div class="hero__intro">
-          <!-- Hidden strings for SEO crawlers and typed.js source -->
-          <div id="typed-strings" class="sr-only">
-            {roles.map((role) => <p>{role}</p>)}
-          </div>
           <p>
             I'm <strong>Peter</strong>
             <span>—{" "}</span>
             <br class="mobile-break" />
-            <strong class="hero__role-wrapper">
+            <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
               <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
             </strong>{" "}
             from <strong>Denmark.</strong>
@@ -72,16 +68,24 @@ const roles = [
 
   async function initTypedAnimation() {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
-    const stringsElement = document.querySelector("#typed-strings") as HTMLElement;
+    const roleWrapper = document.querySelector(".hero__role-wrapper") as HTMLElement;
     const heroElement = document.querySelector(".hero") as HTMLElement;
 
-    if (!typedElement || !stringsElement || !heroElement) return;
+    if (!typedElement || !roleWrapper || !heroElement) return;
+
+    let roles: string[] = [];
+    try {
+      roles = JSON.parse(roleWrapper.dataset.roles || "[]");
+    } catch {
+      roles = [];
+    }
+    if (roles.length === 0) return;
 
     // Respect reduced motion preference
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
-      typedElement.textContent = "Web Developer";
+      typedElement.textContent = roles[0];
       return;
     }
 
@@ -101,7 +105,7 @@ const roles = [
 
       // Initialize typing animation
       typedInstance = new Typed("#typed-roles", {
-        stringsElement: "#typed-strings",
+        strings: roles,
         typeSpeed: 50,
         backSpeed: 30,
         backDelay: 2000,
@@ -418,7 +422,11 @@ const roles = [
       margin: 0 auto;
       width: 100%;
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      // minmax(0, Nfr) prevents intrinsic text width (nowrap roles) from
+      // pushing the image column to shrink. Without minmax(0,...) the
+      // default `min-width: auto` on fr tracks would cause the profile
+      // picture to scale as role text changes length.
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
       gap: $space-4xl;
       align-items: center;
 
