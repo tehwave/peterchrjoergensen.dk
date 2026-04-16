@@ -7,6 +7,7 @@
 import { getCollection } from "astro:content";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
 import BlogPostCard from "./BlogPostCard.astro";
+import Button from "./Button.astro";
 import { getReadingTime } from "../utils/reading-time";
 
 type Props = Record<string, never>;
@@ -55,9 +56,9 @@ const remainingMinutes = remainingPosts.reduce((total, post) => {
 
     <div class="blog__footer">
       <p class="blog__thanks">Thanks for reading this far.</p>
-      <a href="/blog/" class="blog__view-all">
+      <Button as="a" href="/blog/" waveState="hover" class="blog__view-all">
         {remainingMinutes > 0 ? `There's ${remainingMinutes} more minutes of blog posts in here →` : "View all posts →"}
-      </a>
+      </Button>
     </div>
   </div>
 </section>
@@ -127,27 +128,19 @@ const remainingMinutes = remainingPosts.reduce((total, post) => {
       font-size: $font-size-base;
     }
 
-    &__view-all {
-      display: inline-block;
-      padding: $space-sm $space-lg;
-      border: 1px solid $color-border;
-      border-radius: 100px;
-      background-color: $color-white;
+    :global(.blog__view-all.button-sample) {
+      min-height: 52px;
+      padding: 0 $space-lg;
       color: $color-text-dark;
-      font-family: inherit;
-      font-size: $font-size-base;
-      font-weight: $font-weight-semibold;
-      text-decoration: none;
-      cursor: pointer;
-      @include transition(all, 0.2s);
-      @include focus-visible;
+    }
 
-      &:hover {
-        background-color: $color-white;
-        border-color: $color-orange;
-        color: $color-orange;
-        transform: translateY(-2px);
-      }
+    :global(.blog__view-all.button-sample:hover),
+    :global(.blog__view-all.button-sample:focus-visible) {
+      color: $color-orange;
+    }
+
+    :global(.blog__view-all.button-sample .button-sample__label) {
+      color: inherit;
     }
   }
 
