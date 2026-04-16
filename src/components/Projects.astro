@@ -81,7 +81,16 @@ const categories = [
         randomizedProjects.map((project) => (
           <div class:list={["projects__item"]} data-category={project.category}>
             <AnimateOnScroll>
-              <ProjectCard title={project.title} description={project.description} alt={project.alt} tags={project.tags} image={project.image} link={project.link} hasPage={project.hasPage} />
+              <ProjectCard
+                title={project.title}
+                description={project.description}
+                alt={project.alt}
+                tags={project.tags}
+                image={project.image}
+                link={project.link}
+                hasPage={project.hasPage}
+                category={project.category}
+              />
             </AnimateOnScroll>
           </div>
         ))
