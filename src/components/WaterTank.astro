@@ -20,8 +20,8 @@ type Props = Record<string, never>;
 <div class="water-tank" aria-hidden="true">
   <div class="water-tank__frame">
     <canvas class="water-tank__canvas" data-water-tank-canvas></canvas>
-    <span class="water-tank__hint">click · drag the duck</span>
   </div>
+  <span class="water-tank__hint">click · drag the duck</span>
 </div>
 
 <script>
@@ -182,58 +182,37 @@ type Props = Record<string, never>;
   .water-tank {
     width: 100%;
     max-width: 520px;
+    margin-top: $space-lg;
+    position: sticky;
+    top: 140px;
 
     @include respond-to(lg) {
       max-width: 100%;
+      position: static;
     }
 
     &__frame {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 22px;
+      aspect-ratio: 1 / 1;
+      border-radius: 43% 57% 61% 39% / 54% 39% 61% 46%;
       overflow: hidden;
-      background: linear-gradient(160deg, #091057 0%, #1c2f8a 55%, #3a52b8 100%);
-      box-shadow:
-        0 20px 44px rgba(9, 16, 87, 0.35),
-        0 2px 6px rgba(9, 16, 87, 0.2),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-        inset 0 18px 40px rgba(0, 0, 0, 0.3);
+      background-color: $color-blue-dark;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
       isolation: isolate;
-      transition:
-        transform 260ms ease-out,
-        box-shadow 260ms ease-out;
+      transition: border-radius 2s ease-in-out, transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: blob-morph 8s ease-in-out infinite alternate;
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow:
-          0 26px 54px rgba(9, 16, 87, 0.42),
-          0 2px 6px rgba(9, 16, 87, 0.24),
-          inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-          inset 0 18px 40px rgba(0, 0, 0, 0.3);
+        transform: translateY(-4px) scale(1.02);
       }
+    }
 
-      &::before {
-        // Soft glass highlight across the top edge.
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 22%);
-        mix-blend-mode: screen;
-        z-index: 2;
-      }
-
-      &::after {
-        // Thin aquarium-window frame.
-        content: "";
-        position: absolute;
-        inset: 6px;
-        border-radius: 16px;
-        pointer-events: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        z-index: 2;
-      }
+    @keyframes blob-morph {
+      0% { border-radius: 43% 57% 61% 39% / 54% 39% 61% 46%; }
+      33% { border-radius: 51% 49% 48% 52% / 37% 55% 45% 63%; }
+      66% { border-radius: 41% 59% 49% 51% / 58% 39% 61% 42%; }
+      100% { border-radius: 43% 57% 61% 39% / 54% 39% 61% 46%; }
     }
 
     &__canvas {
@@ -255,39 +234,25 @@ type Props = Record<string, never>;
     }
 
     &__hint {
-      position: absolute;
-      left: 14px;
-      bottom: 12px;
-      z-index: 3;
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.6);
+      display: block;
+      text-align: center;
+      margin-top: $space-md;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      color: rgba($color-text-light, 0.45);
       pointer-events: none;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-      opacity: 0;
-      transform: translateY(4px);
-      transition:
-        opacity 220ms ease-out,
-        transform 220ms ease-out;
-    }
-
-    &__frame:hover &__hint {
-      opacity: 1;
-      transform: translateY(0);
+      user-select: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
       &__frame {
         transition: none;
+        animation: none;
 
         &:hover {
           transform: none;
         }
-      }
-
-      &__hint {
-        transition: none;
       }
     }
   }

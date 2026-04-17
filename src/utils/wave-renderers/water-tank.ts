@@ -13,6 +13,7 @@
  * agnostic about input sources.
  */
 import type { WaveSceneBase } from "../wave-engine";
+import { SUNSET_WAVE_PALETTE } from "../wave-palettes";
 
 interface WaterPoint {
   // Vertical offset from the rest water line (CSS px). Positive = below rest.
@@ -72,18 +73,18 @@ export interface WaterTankScene extends WaveSceneBase {
 // Point spacing in CSS px.
 const POINT_SPACING = 6;
 // Hooke's-law spring constant pulling each point back to rest.
-const SURFACE_TENSION = 0.012;
+const SURFACE_TENSION = 0.024;
 // Per-frame velocity damping for water points.
-const SURFACE_DAMPING = 0.992;
+const SURFACE_DAMPING = 0.996;
 // Neighbor coupling: how strongly a point drags its neighbors along.
-const NEIGHBOR_SPREAD = 0.28;
+const NEIGHBOR_SPREAD = 0.32;
 // Integration timestep normalized to a 60fps frame.
 const BASELINE_FRAME_MS = 16.67;
 // Duck physics.
-const GRAVITY = 0.11;
-const BUOYANCY_SPRING = 0.095;
-const DUCK_DAMPING = 0.94;
-const DUCK_DRIFT_MAX = 0.14;
+const GRAVITY = 0.07;
+const BUOYANCY_SPRING = 0.06;
+const DUCK_DAMPING = 0.985;
+const DUCK_DRIFT_MAX = 0.07;
 // Cheap cap so spam clicks don't compound.
 const MAX_PARTICLES = 48;
 
@@ -143,8 +144,8 @@ export function syncWaterTankSceneLayout(scene: WaterTankScene): void {
   // Water rests at ~55% down so the duck has breathing room above.
   scene.restWaterY = scene.height * 0.55;
 
-  // Larger, more readable duck.
-  const duckRadius = Math.max(16, Math.min(scene.height * 0.22, scene.width * 0.11));
+  // Larger, more readable duck. -> Wait, scaled down 50%
+  const duckRadius = Math.max(8, Math.min(scene.height * 0.11, scene.width * 0.055));
   scene.duck.radius = duckRadius;
 
   if (scene.duck.x === 0 && scene.duck.y === 0) {
@@ -184,10 +185,10 @@ export function splashAt(scene: WaterTankScene, x: number, strength: number, rad
 }
 
 export function dunkDuck(scene: WaterTankScene, clickX: number, strength: number): void {
-  scene.duck.vy += strength;
+  scene.duck.vy += strength * 0.5; // Scale animation for smaller duck
   const offsetFromClick = scene.duck.x - clickX;
   const direction = offsetFromClick === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(offsetFromClick);
-  scene.duck.vx += direction * 0.45;
+  scene.duck.vx += direction * 0.22;
   scene.duck.excitement = Math.min(1, scene.duck.excitement + 0.9);
   scene.duck.squash = Math.max(0.6, scene.duck.squash - 0.25);
   spawnHearts(scene, scene.duck.x, scene.duck.y - scene.duck.radius * 0.4, 3);
@@ -235,9 +236,9 @@ export function releaseDuck(scene: WaterTankScene): void {
   if (!duck.grabbed) return;
   duck.grabbed = false;
   // Clamp release velocity so an aggressive flick doesn't launch the duck out of bounds.
-  duck.vx = Math.max(-2.4, Math.min(2.4, duck.vx));
-  duck.vy = Math.max(-6, Math.min(6, duck.vy));
-  splashAt(scene, duck.x, Math.max(2, 1.8 + Math.abs(duck.vy) * 0.6), duck.radius * 1.6);
+  duck.vx = Math.max(-1.2, Math.min(1.2, duck.vx));
+  duck.vy = Math.max(-3, Math.min(3, duck.vy));
+  splashAt(scene, duck.x, Math.max(1, 0.9 + Math.abs(duck.vy) * 0.6), duck.radius * 1.6);
   scene.duck.excitement = Math.min(1, scene.duck.excitement + 0.5);
   scene.duck.squash = Math.max(0.7, scene.duck.squash - 0.1);
   spawnSparkles(scene, duck.x, sampleWaterY(scene, duck.x), 4);
@@ -346,6 +347,16 @@ function simulateWaterStep(scene: WaterTankScene, frameScale: number): void {
   const wiggle = Math.sin(scene.duck.idleClock * 0.04) * 0.02;
   points[0].velocity += wiggle * frameScale;
   points[count - 1].velocity -= wiggle * frameScale;
+
+  // Add ambient traveling sine wave motion
+  // Use `sceneClockMs` to create a continuous right-to-left wave.
+  const waveSpeed = scene.sceneClockMs * 0.0005;
+  const waveFreq = 0.015;
+  for (let i = 0; i < count; i += 1) {
+    const x = i * POINT_SPACING;
+    const travelingSwell = Math.sin(x * waveFreq - waveSpeed) * 0.025;
+    points[i].velocity += travelingSwell * frameScale;
+  }
 }
 
 function simulateDuckStep(scene: WaterTankScene, frameScale: number): void {
@@ -430,140 +441,112 @@ function updateParticles(scene: WaterTankScene, deltaTime: number): void {
   }
 }
 
-/**
- * Site-aligned palette: deep navy atmosphere fading into the pastel sunset
- * water gradient used elsewhere on the site.
- */
-const SKY_STOPS = [
-  { offset: 0, color: "#091057" }, // $color-blue-dark
-  { offset: 0.55, color: "#1c2f8a" },
-  { offset: 1, color: "#3a52b8" },
-] as const;
-
-const WATER_STOPS = [
-  { offset: 0, color: "#9fd6ff" }, // soft sky pastel at surface
-  { offset: 0.35, color: "#8ea7ff" }, // periwinkle
-  { offset: 0.7, color: "#b89cff" }, // pastel violet
-  { offset: 1, color: "#1a1f6a" }, // deep navy floor
-] as const;
-
 export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
-  const { context, width, height, points, restWaterY } = scene;
+  const { context, width, height, points, restWaterY, sceneClockMs } = scene;
   context.clearRect(0, 0, width, height);
 
-  // Sky: deep navy fading to a slightly warmer purple-blue, matching the site background.
-  const skyGradient = context.createLinearGradient(0, 0, 0, restWaterY + 6);
-  for (const stop of SKY_STOPS) skyGradient.addColorStop(stop.offset, stop.color);
-  context.fillStyle = skyGradient;
-  context.fillRect(0, 0, width, restWaterY + 6);
+  // 1. Base Gradient Wash (matching footer aesthetic)
+  const baseWash = context.createLinearGradient(0, restWaterY * 0.5, 0, height);
+  baseWash.addColorStop(0, "rgba(88, 230, 255, 0)");
+  baseWash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
+  baseWash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
+  baseWash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
+  baseWash.addColorStop(1, "rgba(255, 143, 94, 0.45)");
 
-  // Soft pastel clouds for warmth.
-  drawCloud(context, width * 0.18, restWaterY * 0.32, restWaterY * 0.22, "rgba(255, 209, 232, 0.28)");
-  drawCloud(context, width * 0.72, restWaterY * 0.22, restWaterY * 0.18, "rgba(193, 218, 255, 0.32)");
+  context.save();
+  context.globalCompositeOperation = "source-over";
+  context.fillStyle = baseWash;
+  context.fillRect(0, restWaterY * 0.5, width, height - restWaterY * 0.5);
+  context.restore();
 
-  // Sun glow near top-right.
-  const sunX = width * 0.82;
-  const sunY = restWaterY * 0.28;
-  const sunRadius = Math.min(width, height) * 0.09;
-  const sunGlow = context.createRadialGradient(sunX, sunY, 1, sunX, sunY, sunRadius * 3.6);
-  sunGlow.addColorStop(0, "rgba(255, 226, 200, 0.85)");
-  sunGlow.addColorStop(0.25, "rgba(255, 186, 210, 0.35)");
-  sunGlow.addColorStop(1, "rgba(255, 186, 210, 0)");
-  context.fillStyle = sunGlow;
-  context.fillRect(0, 0, width, restWaterY + 6);
-  const sunDisk = context.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
-  sunDisk.addColorStop(0, "#fff2d6");
-  sunDisk.addColorStop(1, "rgba(255, 210, 186, 0)");
-  context.fillStyle = sunDisk;
-  context.beginPath();
-  context.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
-  context.fill();
+  // 2. Background math layers synced to Footer specs
+  const layerAmpScale = height * 0.05;
+  const bgLayers = [
+    { base: restWaterY - height * 0.1, amp: layerAmpScale * 1.5, freq: 0.0101, speed: 0.0006, alpha: 0.72 },
+    { base: restWaterY - height * 0.05, amp: layerAmpScale * 1.1, freq: 0.0122, speed: -0.0008, alpha: 0.62 },
+    { base: restWaterY - height * 0.01, amp: layerAmpScale * 0.8, freq: 0.0137, speed: 0.0010, alpha: 0.52 },
+  ] as const;
 
-  // Water body.
-  const waterGradient = context.createLinearGradient(0, restWaterY - 8, 0, height);
-  for (const stop of WATER_STOPS) waterGradient.addColorStop(stop.offset, stop.color);
+  for (const [index, layer] of bgLayers.entries()) {
+    const gradient = context.createLinearGradient(0, 0, width, 0);
+    for (let c = 0; c < SUNSET_WAVE_PALETTE.length; c += 1) {
+      gradient.addColorStop(c / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(c + index) % SUNSET_WAVE_PALETTE.length]);
+    }
 
+    context.save();
+    context.globalCompositeOperation = "source-over";
+    context.globalAlpha = layer.alpha;
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.moveTo(0, height);
+    for (let x = 0; x <= width + 5; x += 5) {
+      // Gentle math waves for backgrounds
+      const y = layer.base + Math.sin(x * layer.freq + sceneClockMs * layer.speed + index * 1.6) * layer.amp;
+      context.lineTo(x, y);
+    }
+    context.lineTo(width, height);
+    context.closePath();
+    context.fill();
+    context.restore();
+  }
+
+  // 3. Foreground Physics Layer (Duck floats strictly on this layer)
+  const frontIndex = bgLayers.length;
+  const frontGradient = context.createLinearGradient(0, 0, width, 0);
+  for (let c = 0; c < SUNSET_WAVE_PALETTE.length; c += 1) {
+    frontGradient.addColorStop(c / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(c + frontIndex) % SUNSET_WAVE_PALETTE.length]);
+  }
+
+  context.save();
+  context.globalCompositeOperation = "source-over";
+  context.globalAlpha = 0.95;
+  context.fillStyle = frontGradient;
   context.beginPath();
   context.moveTo(0, height);
+
   if (points.length > 0) {
     const segmentWidth = width / (points.length - 1);
     context.lineTo(0, restWaterY + points[0].offset);
     for (let i = 1; i < points.length; i += 1) {
       const x = i * segmentWidth;
-      const prev = points[i - 1];
-      const current = points[i];
+      const prevX = (i - 1) * segmentWidth;
+      const prevY = restWaterY + points[i - 1].offset;
+      const currY = restWaterY + points[i].offset;
       const controlX = x - segmentWidth * 0.5;
-      const controlY = restWaterY + (prev.offset + current.offset) * 0.5;
-      context.quadraticCurveTo(controlX, controlY, x, restWaterY + current.offset);
+      const controlY = (prevY + currY) * 0.5;
+      context.quadraticCurveTo(controlX, controlY, x, currY);
     }
   } else {
     context.lineTo(0, restWaterY);
     context.lineTo(width, restWaterY);
   }
+  
   context.lineTo(width, height);
   context.closePath();
-
-  context.save();
-  context.fillStyle = waterGradient;
   context.fill();
 
-  // Pink pastel bloom along the surface (nods to the site's sunset palette).
-  context.save();
-  context.globalCompositeOperation = "screen";
-  const pinkBloom = context.createLinearGradient(0, restWaterY - 6, 0, restWaterY + 40);
-  pinkBloom.addColorStop(0, "rgba(255, 186, 210, 0.55)");
-  pinkBloom.addColorStop(0.6, "rgba(184, 156, 255, 0.18)");
-  pinkBloom.addColorStop(1, "rgba(184, 156, 255, 0)");
-  context.fillStyle = pinkBloom;
-  context.fill();
-  context.restore();
-
-  // Glossy surface highlight band.
-  context.save();
-  context.globalCompositeOperation = "screen";
-  const surfaceHighlight = context.createLinearGradient(0, restWaterY - 4, 0, restWaterY + 14);
-  surfaceHighlight.addColorStop(0, "rgba(255, 255, 255, 0.5)");
-  surfaceHighlight.addColorStop(1, "rgba(255, 255, 255, 0)");
-  context.fillStyle = surfaceHighlight;
-  context.fill();
-  context.restore();
-
-  context.restore();
-
-  // Crisp water line.
+  // Subtle bright rim on the physics layer
   if (points.length > 0) {
-    context.save();
-    context.strokeStyle = "rgba(255, 255, 255, 0.45)";
+    context.strokeStyle = "rgba(255, 255, 255, 0.4)";
     context.lineWidth = 1.2;
-    context.beginPath();
-    const segmentWidth = width / (points.length - 1);
-    context.moveTo(0, restWaterY + points[0].offset);
-    for (let i = 1; i < points.length; i += 1) {
-      const x = i * segmentWidth;
-      const prev = points[i - 1];
-      const current = points[i];
-      const controlX = x - segmentWidth * 0.5;
-      const controlY = restWaterY + (prev.offset + current.offset) * 0.5;
-      context.quadraticCurveTo(controlX, controlY, x, restWaterY + current.offset);
-    }
     context.stroke();
-    context.restore();
   }
+  context.restore();
+
+  // 4. Shimmer from Footer
+  const shimmer = context.createLinearGradient(0, restWaterY * 0.8, 0, height);
+  shimmer.addColorStop(0, "rgba(255, 255, 255, 0)");
+  shimmer.addColorStop(1, "rgba(255, 255, 255, 0.2)");
+
+  context.save();
+  context.globalCompositeOperation = "screen";
+  context.globalAlpha = 0.4;
+  context.fillStyle = shimmer;
+  context.fillRect(0, restWaterY * 0.8, width, height - restWaterY * 0.8);
+  context.restore();
 
   drawDuck(scene);
   drawParticles(scene);
-}
-
-function drawCloud(context: CanvasRenderingContext2D, x: number, y: number, radius: number, color: string): void {
-  context.save();
-  context.fillStyle = color;
-  context.beginPath();
-  context.arc(x - radius * 0.6, y, radius * 0.7, 0, Math.PI * 2);
-  context.arc(x, y - radius * 0.25, radius * 0.85, 0, Math.PI * 2);
-  context.arc(x + radius * 0.7, y, radius * 0.7, 0, Math.PI * 2);
-  context.arc(x + radius * 0.2, y + radius * 0.3, radius * 0.75, 0, Math.PI * 2);
-  context.fill();
-  context.restore();
 }
 
 function drawDuck(scene: WaterTankScene): void {
