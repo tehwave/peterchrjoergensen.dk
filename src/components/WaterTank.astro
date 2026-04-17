@@ -21,7 +21,26 @@ type Props = Record<string, never>;
   <div class="water-tank__frame">
     <canvas class="water-tank__canvas" data-water-tank-canvas></canvas>
   </div>
-  <span class="water-tank__hint">click · drag the duck</span>
+  <svg class="water-tank__outline-text" viewBox="0 0 110 110" preserveAspectRatio="xMidYMid meet">
+    <path id="water-tank-text-path" fill="none" d="M 12,50 C 12,25 25,12 50,12 C 75,12 88,25 88,50 C 88,75 75,88 50,88 C 25,88 12,75 12,50 Z">
+      <animate 
+        attributeName="d" 
+        dur="8s" 
+        repeatCount="indefinite" 
+        calcMode="spline" 
+        keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+        values="
+          M 13,55 C 13,29 27,15 54,15 C 81,15 96,29 96,55 C 96,81 81,96 54,96 C 27,96 13,81 13,55 Z;
+          M 17,49 C 17,23 31,11 58,11 C 88,11 93,27 93,49 C 93,79 88,88 58,88 C 31,88 17,79 17,49 Z;
+          M 11,58 C 11,31 29,18 51,18 C 79,18 99,31 99,58 C 99,86 79,99 51,99 C 29,99 11,86 11,58 Z;
+          M 13,55 C 13,29 27,15 54,15 C 81,15 96,29 96,55 C 96,81 81,96 54,96 C 27,96 13,81 13,55 Z" />
+    </path>
+    <text>
+      <textPath href="#water-tank-text-path" startOffset="50%" text-anchor="middle">
+        click · drag the duck
+      </textPath>
+    </text>
+  </svg>
 </div>
 
 <script>
@@ -233,16 +252,38 @@ type Props = Record<string, never>;
       }
     }
 
-    &__hint {
-      display: block;
-      text-align: center;
-      margin-top: $space-md;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: lowercase;
-      color: rgba($color-text-light, 0.45);
+    &__outline-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 115%;
+      height: 115%;
+      transform: translate(-50%, -50%);
       pointer-events: none;
-      user-select: none;
+      z-index: -1;
+      animation:
+        blob-morph-scale 8s ease-in-out infinite alternate,
+        slow-spin 40s linear infinite;
+      
+      text {
+        font-family: var(--font-caveat), cursive;
+        font-size: 10px;
+        fill: #000;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+    }
+
+    @keyframes blob-morph-scale {
+      0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+      33% { transform: translate(-50%, -50%) scale(1.02) rotate(15deg); }
+      66% { transform: translate(-50%, -50%) scale(0.98) rotate(-5deg); }
+      100% { transform: translate(-50%, -50%) scale(1.01) rotate(10deg); }
+    }
+
+    @keyframes slow-spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -253,6 +294,11 @@ type Props = Record<string, never>;
         &:hover {
           transform: none;
         }
+      }
+
+      &__outline-text {
+        animation: none;
+        transform: translate(-50%, -50%);
       }
     }
   }

@@ -85,6 +85,11 @@ const GRAVITY = 0.07;
 const BUOYANCY_SPRING = 0.06;
 const DUCK_DAMPING = 0.985;
 const DUCK_DRIFT_MAX = 0.07;
+
+// Ambient sine wave added to the physical points so the duck rides it continuously
+const PHYSICS_WAVE_FREQ = 0.015;
+const PHYSICS_WAVE_SPEED = -0.001;
+
 // Cheap cap so spam clicks don't compound.
 const MAX_PARTICLES = 48;
 
@@ -158,8 +163,11 @@ export function syncWaterTankSceneLayout(scene: WaterTankScene): void {
 }
 
 function sampleWaterY(scene: WaterTankScene, x: number): number {
-  const { points, restWaterY, width } = scene;
-  if (points.length === 0) return restWaterY;
+  const { points, restWaterY, width, height, sceneClockMs } = scene;
+  const mathAmp = height * 0.035;
+  const mathWave = Math.sin(x * PHYSICS_WAVE_FREQ + sceneClockMs * PHYSICS_WAVE_SPEED) * mathAmp;
+
+  if (points.length === 0) return restWaterY + mathWave;
   const clampedX = Math.min(width, Math.max(0, x));
   const segmentWidth = width / (points.length - 1);
   const index = clampedX / segmentWidth;
@@ -167,7 +175,7 @@ function sampleWaterY(scene: WaterTankScene, x: number): number {
   const i1 = Math.min(points.length - 1, i0 + 1);
   const t = index - i0;
   const offset = points[i0].offset * (1 - t) + points[i1].offset * t;
-  return restWaterY + offset;
+  return restWaterY + offset + mathWave;
 }
 
 export function splashAt(scene: WaterTankScene, x: number, strength: number, radius = 36): void {
@@ -504,14 +512,22 @@ export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
   context.beginPath();
   context.moveTo(0, height);
 
+  const mathAmp = height * 0.035;
   if (points.length > 0) {
     const segmentWidth = width / (points.length - 1);
-    context.lineTo(0, restWaterY + points[0].offset);
+    
+    // Add the physics math wave to the visual rendering of the physics layer
+    const getPhysicsY = (i: number) => {
+      const x = i * segmentWidth;
+      const mathWave = Math.sin(x * PHYSICS_WAVE_FREQ + sceneClockMs * PHYSICS_WAVE_SPEED) * mathAmp;
+      return restWaterY + points[i].offset + mathWave;
+    };
+
+    context.lineTo(0, getPhysicsY(0));
     for (let i = 1; i < points.length; i += 1) {
       const x = i * segmentWidth;
-      const prevX = (i - 1) * segmentWidth;
-      const prevY = restWaterY + points[i - 1].offset;
-      const currY = restWaterY + points[i].offset;
+      const prevY = getPhysicsY(i - 1);
+      const currY = getPhysicsY(i);
       const controlX = x - segmentWidth * 0.5;
       const controlY = (prevY + currY) * 0.5;
       context.quadraticCurveTo(controlX, controlY, x, currY);
@@ -531,6 +547,28 @@ export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
     context.lineWidth = 1.2;
     context.stroke();
   }
+  context.restore();
+
+  drawDuck(scene);
+
+  const fgFreq = 0.018;
+  const fgSpeedScale = 0.0012;
+  const fgWaveHeight = height * 0.045;
+
+  // Single Foreground Overlay Wave (overlaps the duck for depth)
+  context.save();
+  context.globalCompositeOperation = "source-over";
+  context.globalAlpha = 0.85;
+  context.fillStyle = SUNSET_WAVE_PALETTE[(frontIndex + 1) % SUNSET_WAVE_PALETTE.length];
+  context.beginPath();
+  context.moveTo(0, height);
+  for (let x = 0; x <= width + 5; x += 5) {
+    const y = restWaterY + height * 0.06 + Math.sin(x * fgFreq + sceneClockMs * fgSpeedScale) * fgWaveHeight;
+    context.lineTo(x, y);
+  }
+  context.lineTo(width, height);
+  context.closePath();
+  context.fill();
   context.restore();
 
   // 4. Shimmer from Footer
