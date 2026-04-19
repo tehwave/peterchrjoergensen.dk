@@ -7,20 +7,9 @@
  * a handful of charm passes: idle body wobble, blinking eyes, a smile,
  * rosy cheeks, impact squash when the duck hits the water hard, and tiny
  * heart/sparkle particles emitted on interaction.
- *
- * Interaction state lives on the scene so pointer handlers in the component
- * can drag/dunk/splash by mutating fields directly — the engine loop stays
- * agnostic about input sources.
  */
 import type { WaveSceneBase } from "../wave-engine";
 import { SUNSET_WAVE_PALETTE } from "../wave-palettes";
-
-interface WaterPoint {
-  // Vertical offset from the rest water line (CSS px). Positive = below rest.
-  offset: number;
-  // Vertical velocity of this surface column.
-  velocity: number;
-}
 
 interface Particle {
   kind: "heart" | "sparkle" | "droplet";
@@ -51,17 +40,10 @@ interface Duck {
   nextBlinkIn: number;
   // Active blink phase ms; when > 0 the duck is mid-blink.
   blinkPhase: number;
-  grabbed: boolean;
-  grabOffsetX: number;
-  grabOffsetY: number;
-  lastPointerX: number;
-  lastPointerY: number;
-  lastPointerAt: number;
   idleClock: number;
 }
 
 export interface WaterTankScene extends WaveSceneBase {
-  points: WaterPoint[];
   duck: Duck;
   restWaterY: number;
   particles: Particle[];
@@ -69,15 +51,6 @@ export interface WaterTankScene extends WaveSceneBase {
   sceneClockMs: number;
   hoverDuck: boolean;
 }
-
-// Point spacing in CSS px.
-const POINT_SPACING = 6;
-// Hooke's-law spring constant pulling each point back to rest.
-const SURFACE_TENSION = 0.024;
-// Per-frame velocity damping for water points.
-const SURFACE_DAMPING = 0.996;
-// Neighbor coupling: how strongly a point drags its neighbors along.
-const NEIGHBOR_SPREAD = 0.32;
 // Integration timestep normalized to a 60fps frame.
 const BASELINE_FRAME_MS = 16.67;
 // Duck physics.
@@ -86,9 +59,14 @@ const BUOYANCY_SPRING = 0.06;
 const DUCK_DAMPING = 0.985;
 const DUCK_DRIFT_MAX = 0.07;
 
-// Ambient sine wave added to the physical points so the duck rides it continuously
-const PHYSICS_WAVE_FREQ = 0.015;
-const PHYSICS_WAVE_SPEED = -0.001;
+const FOOTER_WAVE_LAYERS = [
+  { base: 0.44, amp: 0.098, freq: 0.0101, speed: 0.0011, alpha: 0.72, phaseOffset: 0 },
+  { base: 0.55, amp: 0.082, freq: 0.0122, speed: -0.0013, alpha: 0.62, phaseOffset: 1.6 },
+  { base: 0.66, amp: 0.066, freq: 0.0137, speed: 0.00156, alpha: 0.52, phaseOffset: 3.2 },
+  { base: 0.75, amp: 0.052, freq: 0.015, speed: -0.00188, alpha: 0.44, phaseOffset: 4.8 },
+] as const;
+const FOOTER_WAVE_HARMONIC_SCALE = 0.22;
+const FOOTER_FRONT_LAYER = FOOTER_WAVE_LAYERS[FOOTER_WAVE_LAYERS.length - 1];
 
 // Cheap cap so spam clicks don't compound.
 const MAX_PARTICLES = 48;
@@ -104,7 +82,6 @@ export function createWaterTankScene(canvas: HTMLCanvasElement, context: CanvasR
     phaseTime: 0,
     speedMultiplier: 1,
     paused: false,
-    points: [],
     duck: {
       x: 0,
       y: 0,
@@ -117,12 +94,6 @@ export function createWaterTankScene(canvas: HTMLCanvasElement, context: CanvasR
       blink: 0,
       nextBlinkIn: 1800 + Math.random() * 2200,
       blinkPhase: 0,
-      grabbed: false,
-      grabOffsetX: 0,
-      grabOffsetY: 0,
-      lastPointerX: 0,
-      lastPointerY: 0,
-      lastPointerAt: 0,
       idleClock: 0,
     },
     restWaterY: 0,
@@ -133,21 +104,7 @@ export function createWaterTankScene(canvas: HTMLCanvasElement, context: CanvasR
 }
 
 export function syncWaterTankSceneLayout(scene: WaterTankScene): void {
-  const pointCount = Math.max(12, Math.round(scene.width / POINT_SPACING));
-  const previous = scene.points;
-
-  const nextPoints: WaterPoint[] = new Array(pointCount);
-  for (let i = 0; i < pointCount; i += 1) {
-    const sampleIndex = previous.length > 0 ? Math.round((i / (pointCount - 1)) * (previous.length - 1)) : -1;
-    nextPoints[i] = {
-      offset: sampleIndex >= 0 ? previous[sampleIndex].offset : 0,
-      velocity: sampleIndex >= 0 ? previous[sampleIndex].velocity : 0,
-    };
-  }
-  scene.points = nextPoints;
-
-  // Water rests at ~55% down so the duck has breathing room above.
-  scene.restWaterY = scene.height * 0.55;
+  scene.restWaterY = scene.height * FOOTER_FRONT_LAYER.base;
 
   // Larger, more readable duck. -> Wait, scaled down 50%
   const duckRadius = Math.max(8, Math.min(scene.height * 0.11, scene.width * 0.055));
@@ -163,33 +120,14 @@ export function syncWaterTankSceneLayout(scene: WaterTankScene): void {
 }
 
 function sampleWaterY(scene: WaterTankScene, x: number): number {
-  const { points, restWaterY, width, height, sceneClockMs } = scene;
-  const mathAmp = height * 0.035;
-  const mathWave = Math.sin(x * PHYSICS_WAVE_FREQ + sceneClockMs * PHYSICS_WAVE_SPEED) * mathAmp;
-
-  if (points.length === 0) return restWaterY + mathWave;
-  const clampedX = Math.min(width, Math.max(0, x));
-  const segmentWidth = width / (points.length - 1);
-  const index = clampedX / segmentWidth;
-  const i0 = Math.floor(index);
-  const i1 = Math.min(points.length - 1, i0 + 1);
-  const t = index - i0;
-  const offset = points[i0].offset * (1 - t) + points[i1].offset * t;
-  return restWaterY + offset + mathWave;
+  return sampleFooterWaveY(scene, FOOTER_FRONT_LAYER, x);
 }
 
 export function splashAt(scene: WaterTankScene, x: number, strength: number, radius = 36): void {
-  if (scene.points.length === 0) return;
-  const segmentWidth = scene.width / (scene.points.length - 1);
-  const centerIndex = x / segmentWidth;
-  const indexRadius = Math.max(1, radius / segmentWidth);
-
-  for (let i = 0; i < scene.points.length; i += 1) {
-    const distance = Math.abs(i - centerIndex);
-    if (distance > indexRadius) continue;
-    const falloff = 0.5 + 0.5 * Math.cos((distance / indexRadius) * Math.PI);
-    scene.points[i].velocity += strength * falloff;
-  }
+  void scene;
+  void x;
+  void strength;
+  void radius;
 }
 
 export function dunkDuck(scene: WaterTankScene, clickX: number, strength: number): void {
@@ -208,50 +146,6 @@ export function pointHitsDuck(scene: WaterTankScene, x: number, y: number): bool
   return dx * dx + dy * dy <= scene.duck.radius * scene.duck.radius * 1.6;
 }
 
-export function grabDuck(scene: WaterTankScene, pointerX: number, pointerY: number, nowMs: number): void {
-  const { duck } = scene;
-  duck.grabbed = true;
-  duck.grabOffsetX = duck.x - pointerX;
-  duck.grabOffsetY = duck.y - pointerY;
-  duck.lastPointerX = pointerX;
-  duck.lastPointerY = pointerY;
-  duck.lastPointerAt = nowMs;
-  duck.vx *= 0.3;
-  duck.vy = 0;
-  duck.excitement = Math.min(1, duck.excitement + 0.6);
-  spawnHearts(scene, duck.x, duck.y - duck.radius * 0.6, 2);
-}
-
-export function dragDuck(scene: WaterTankScene, pointerX: number, pointerY: number, nowMs: number): void {
-  const { duck } = scene;
-  if (!duck.grabbed) return;
-  const margin = duck.radius;
-  duck.x = Math.min(scene.width - margin, Math.max(margin, pointerX + duck.grabOffsetX));
-  duck.y = Math.min(scene.height - margin * 0.4, Math.max(margin * 0.4, pointerY + duck.grabOffsetY));
-
-  const dt = Math.max(1, nowMs - duck.lastPointerAt);
-  const instantVx = ((pointerX - duck.lastPointerX) / dt) * BASELINE_FRAME_MS;
-  const instantVy = ((pointerY - duck.lastPointerY) / dt) * BASELINE_FRAME_MS;
-  duck.vx = duck.vx * 0.5 + instantVx * 0.5;
-  duck.vy = duck.vy * 0.5 + instantVy * 0.5;
-  duck.lastPointerX = pointerX;
-  duck.lastPointerY = pointerY;
-  duck.lastPointerAt = nowMs;
-}
-
-export function releaseDuck(scene: WaterTankScene): void {
-  const { duck } = scene;
-  if (!duck.grabbed) return;
-  duck.grabbed = false;
-  // Clamp release velocity so an aggressive flick doesn't launch the duck out of bounds.
-  duck.vx = Math.max(-1.2, Math.min(1.2, duck.vx));
-  duck.vy = Math.max(-3, Math.min(3, duck.vy));
-  splashAt(scene, duck.x, Math.max(1, 0.9 + Math.abs(duck.vy) * 0.6), duck.radius * 1.6);
-  scene.duck.excitement = Math.min(1, scene.duck.excitement + 0.5);
-  scene.duck.squash = Math.max(0.7, scene.duck.squash - 0.1);
-  spawnSparkles(scene, duck.x, sampleWaterY(scene, duck.x), 4);
-}
-
 function spawnHearts(scene: WaterTankScene, x: number, y: number, count: number): void {
   for (let i = 0; i < count; i += 1) {
     pushParticle(scene, {
@@ -264,24 +158,6 @@ function spawnHearts(scene: WaterTankScene, x: number, y: number, count: number)
       maxLife: 900,
       size: 7 + Math.random() * 4,
       rotation: (Math.random() - 0.5) * 0.6,
-    });
-  }
-}
-
-function spawnSparkles(scene: WaterTankScene, x: number, y: number, count: number): void {
-  for (let i = 0; i < count; i += 1) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 1 + Math.random() * 1.5;
-    pushParticle(scene, {
-      kind: "sparkle",
-      x,
-      y,
-      vx: Math.cos(angle) * speed,
-      vy: -Math.abs(Math.sin(angle) * speed) - 0.3,
-      life: 600,
-      maxLife: 600,
-      size: 4 + Math.random() * 3,
-      rotation: Math.random() * Math.PI,
     });
   }
 }
@@ -301,74 +177,16 @@ export function updateWaterTankScene(scene: WaterTankScene, deltaTime: number): 
   const frameScale = stepDelta / BASELINE_FRAME_MS;
 
   for (let step = 0; step < steps; step += 1) {
-    simulateWaterStep(scene, frameScale);
-    if (!scene.duck.grabbed) {
-      simulateDuckStep(scene, frameScale);
-    } else {
-      // While grabbed, still update rotation so the body tilts as it moves.
-      const leftY = sampleWaterY(scene, scene.duck.x - scene.duck.radius);
-      const rightY = sampleWaterY(scene, scene.duck.x + scene.duck.radius);
-      const slope = (rightY - leftY) / (scene.duck.radius * 2);
-      const targetRotation = Math.atan(slope) * 0.4 + Math.sin(scene.sceneClockMs * 0.004) * 0.08;
-      scene.duck.rotation += (targetRotation - scene.duck.rotation) * Math.min(1, 0.2 * frameScale);
-    }
+    simulateDuckStep(scene, frameScale);
     updateCharmState(scene, stepDelta, frameScale);
   }
 
   updateParticles(scene, deltaTime);
 }
 
-function simulateWaterStep(scene: WaterTankScene, frameScale: number): void {
-  const { points } = scene;
-  const count = points.length;
-  if (count === 0) return;
-
-  for (let i = 0; i < count; i += 1) {
-    const point = points[i];
-    const acceleration = -SURFACE_TENSION * point.offset;
-    point.velocity = (point.velocity + acceleration * frameScale) * Math.pow(SURFACE_DAMPING, frameScale);
-    point.offset += point.velocity * frameScale;
-  }
-
-  const deltas = new Float32Array(count);
-  for (let pass = 0; pass < 2; pass += 1) {
-    for (let i = 0; i < count; i += 1) {
-      if (i > 0) {
-        const diff = points[i].offset - points[i - 1].offset;
-        deltas[i - 1] += diff * NEIGHBOR_SPREAD * frameScale;
-        points[i].velocity -= diff * NEIGHBOR_SPREAD * 0.5 * frameScale;
-      }
-      if (i < count - 1) {
-        const diff = points[i].offset - points[i + 1].offset;
-        deltas[i + 1] += diff * NEIGHBOR_SPREAD * frameScale;
-        points[i].velocity -= diff * NEIGHBOR_SPREAD * 0.5 * frameScale;
-      }
-    }
-    for (let i = 0; i < count; i += 1) {
-      points[i].offset += deltas[i];
-      deltas[i] = 0;
-    }
-  }
-
-  // Ambient swell so the surface never looks frozen even when idle.
-  scene.duck.idleClock += frameScale;
-  const wiggle = Math.sin(scene.duck.idleClock * 0.04) * 0.02;
-  points[0].velocity += wiggle * frameScale;
-  points[count - 1].velocity -= wiggle * frameScale;
-
-  // Add ambient traveling sine wave motion
-  // Use `sceneClockMs` to create a continuous right-to-left wave.
-  const waveSpeed = scene.sceneClockMs * 0.0005;
-  const waveFreq = 0.015;
-  for (let i = 0; i < count; i += 1) {
-    const x = i * POINT_SPACING;
-    const travelingSwell = Math.sin(x * waveFreq - waveSpeed) * 0.025;
-    points[i].velocity += travelingSwell * frameScale;
-  }
-}
-
 function simulateDuckStep(scene: WaterTankScene, frameScale: number): void {
   const { duck } = scene;
+  duck.idleClock += frameScale;
 
   const waterY = sampleWaterY(scene, duck.x);
   const floatTarget = waterY - duck.radius * 0.35;
@@ -450,141 +268,84 @@ function updateParticles(scene: WaterTankScene, deltaTime: number): void {
 }
 
 export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
-  const { context, width, height, points, restWaterY, sceneClockMs } = scene;
+  const { context, width, height } = scene;
   context.clearRect(0, 0, width, height);
 
-  // 1. Base Gradient Wash (matching footer aesthetic)
-  const baseWash = context.createLinearGradient(0, restWaterY * 0.5, 0, height);
+  const baseWash = context.createLinearGradient(0, height * 0.22, 0, height);
   baseWash.addColorStop(0, "rgba(88, 230, 255, 0)");
   baseWash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
   baseWash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
   baseWash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
-  baseWash.addColorStop(1, "rgba(255, 143, 94, 0.45)");
+  baseWash.addColorStop(1, "rgba(255, 143, 94, 0.38)");
 
   context.save();
   context.globalCompositeOperation = "source-over";
+  context.globalAlpha = 1;
   context.fillStyle = baseWash;
-  context.fillRect(0, restWaterY * 0.5, width, height - restWaterY * 0.5);
+  context.fillRect(0, height * 0.22, width, height * 0.84);
   context.restore();
 
-  // 2. Background math layers synced to Footer specs
-  const layerAmpScale = height * 0.05;
-  const bgLayers = [
-    { base: restWaterY - height * 0.1, amp: layerAmpScale * 1.5, freq: 0.0101, speed: 0.0006, alpha: 0.72 },
-    { base: restWaterY - height * 0.05, amp: layerAmpScale * 1.1, freq: 0.0122, speed: -0.0008, alpha: 0.62 },
-    { base: restWaterY - height * 0.01, amp: layerAmpScale * 0.8, freq: 0.0137, speed: 0.0010, alpha: 0.52 },
-  ] as const;
-
-  for (const [index, layer] of bgLayers.entries()) {
-    const gradient = context.createLinearGradient(0, 0, width, 0);
-    for (let c = 0; c < SUNSET_WAVE_PALETTE.length; c += 1) {
-      gradient.addColorStop(c / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(c + index) % SUNSET_WAVE_PALETTE.length]);
-    }
-
-    context.save();
-    context.globalCompositeOperation = "source-over";
-    context.globalAlpha = layer.alpha;
-    context.fillStyle = gradient;
-    context.beginPath();
-    context.moveTo(0, height);
-    for (let x = 0; x <= width + 5; x += 5) {
-      // Gentle math waves for backgrounds
-      const y = layer.base + Math.sin(x * layer.freq + sceneClockMs * layer.speed + index * 1.6) * layer.amp;
-      context.lineTo(x, y);
-    }
-    context.lineTo(width, height);
-    context.closePath();
-    context.fill();
-    context.restore();
+  for (const layer of FOOTER_WAVE_LAYERS.slice(0, -1)) {
+    drawFooterWaveLayer(scene, layer);
   }
-
-  // 3. Foreground Physics Layer (Duck floats strictly on this layer)
-  const frontIndex = bgLayers.length;
-  const frontGradient = context.createLinearGradient(0, 0, width, 0);
-  for (let c = 0; c < SUNSET_WAVE_PALETTE.length; c += 1) {
-    frontGradient.addColorStop(c / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(c + frontIndex) % SUNSET_WAVE_PALETTE.length]);
-  }
-
-  context.save();
-  context.globalCompositeOperation = "source-over";
-  context.globalAlpha = 0.95;
-  context.fillStyle = frontGradient;
-  context.beginPath();
-  context.moveTo(0, height);
-
-  const mathAmp = height * 0.035;
-  if (points.length > 0) {
-    const segmentWidth = width / (points.length - 1);
-    
-    // Add the physics math wave to the visual rendering of the physics layer
-    const getPhysicsY = (i: number) => {
-      const x = i * segmentWidth;
-      const mathWave = Math.sin(x * PHYSICS_WAVE_FREQ + sceneClockMs * PHYSICS_WAVE_SPEED) * mathAmp;
-      return restWaterY + points[i].offset + mathWave;
-    };
-
-    context.lineTo(0, getPhysicsY(0));
-    for (let i = 1; i < points.length; i += 1) {
-      const x = i * segmentWidth;
-      const prevY = getPhysicsY(i - 1);
-      const currY = getPhysicsY(i);
-      const controlX = x - segmentWidth * 0.5;
-      const controlY = (prevY + currY) * 0.5;
-      context.quadraticCurveTo(controlX, controlY, x, currY);
-    }
-  } else {
-    context.lineTo(0, restWaterY);
-    context.lineTo(width, restWaterY);
-  }
-  
-  context.lineTo(width, height);
-  context.closePath();
-  context.fill();
-
-  // Subtle bright rim on the physics layer
-  if (points.length > 0) {
-    context.strokeStyle = "rgba(255, 255, 255, 0.4)";
-    context.lineWidth = 1.2;
-    context.stroke();
-  }
-  context.restore();
 
   drawDuck(scene);
 
-  const fgFreq = 0.018;
-  const fgSpeedScale = 0.0012;
-  const fgWaveHeight = height * 0.045;
+  drawFooterWaveLayer(scene, FOOTER_FRONT_LAYER);
 
-  // Single Foreground Overlay Wave (overlaps the duck for depth)
-  context.save();
-  context.globalCompositeOperation = "source-over";
-  context.globalAlpha = 0.85;
-  context.fillStyle = SUNSET_WAVE_PALETTE[(frontIndex + 1) % SUNSET_WAVE_PALETTE.length];
-  context.beginPath();
-  context.moveTo(0, height);
-  for (let x = 0; x <= width + 5; x += 5) {
-    const y = restWaterY + height * 0.06 + Math.sin(x * fgFreq + sceneClockMs * fgSpeedScale) * fgWaveHeight;
-    context.lineTo(x, y);
-  }
-  context.lineTo(width, height);
-  context.closePath();
-  context.fill();
-  context.restore();
-
-  // 4. Shimmer from Footer
-  const shimmer = context.createLinearGradient(0, restWaterY * 0.8, 0, height);
+  const shimmer = context.createLinearGradient(0, height * 0.34, 0, height);
   shimmer.addColorStop(0, "rgba(255, 255, 255, 0)");
-  shimmer.addColorStop(1, "rgba(255, 255, 255, 0.2)");
+  shimmer.addColorStop(1, "rgba(255, 255, 255, 0.16)");
 
   context.save();
   context.globalCompositeOperation = "screen";
-  context.globalAlpha = 0.4;
+  context.globalAlpha = 0.5;
   context.fillStyle = shimmer;
-  context.fillRect(0, restWaterY * 0.8, width, height - restWaterY * 0.8);
+  context.fillRect(0, height * 0.34, width, height * 0.66);
   context.restore();
 
-  drawDuck(scene);
   drawParticles(scene);
+}
+
+function drawFooterWaveLayer(scene: WaterTankScene, layer: (typeof FOOTER_WAVE_LAYERS)[number]): void {
+  const { context, width } = scene;
+  const layerIndex = FOOTER_WAVE_LAYERS.indexOf(layer);
+  const gradient = context.createLinearGradient(0, 0, width, 0);
+
+  for (let colorIndex = 0; colorIndex < SUNSET_WAVE_PALETTE.length; colorIndex += 1) {
+    gradient.addColorStop(colorIndex / (SUNSET_WAVE_PALETTE.length - 1), SUNSET_WAVE_PALETTE[(colorIndex + layerIndex) % SUNSET_WAVE_PALETTE.length]);
+  }
+
+  context.save();
+  context.globalCompositeOperation = "source-over";
+  context.globalAlpha = layer.alpha;
+  context.fillStyle = gradient;
+  buildFooterWaveFillPath(scene, layer);
+  context.fill();
+  context.restore();
+}
+
+function buildFooterWaveFillPath(scene: WaterTankScene, layer: (typeof FOOTER_WAVE_LAYERS)[number]): void {
+  const { context, width, height } = scene;
+  context.beginPath();
+  context.moveTo(0, height);
+
+  for (let x = 0; x <= width + 2; x += 2) {
+    context.lineTo(x, sampleFooterWaveY(scene, layer, x));
+  }
+
+  context.lineTo(width, height);
+  context.closePath();
+}
+
+function sampleFooterWaveY(scene: WaterTankScene, layer: (typeof FOOTER_WAVE_LAYERS)[number], x: number): number {
+  const { width, height, sceneClockMs } = scene;
+  const normalizedX = Math.min(width, Math.max(0, x));
+  const amplitude = height * layer.amp;
+  const baseY = height * layer.base;
+  const phase = sceneClockMs * layer.speed + layer.phaseOffset;
+
+  return baseY + Math.sin(normalizedX * layer.freq + phase) * amplitude + Math.cos(normalizedX * layer.freq * 1.9 + phase * 0.82) * (amplitude * FOOTER_WAVE_HARMONIC_SCALE);
 }
 
 function drawDuck(scene: WaterTankScene): void {
@@ -658,14 +419,7 @@ function drawDuck(scene: WaterTankScene): void {
   const headX = r * 0.78;
   const headY = -r * 0.65;
   const headRadius = r * 0.68;
-  const headGradient = context.createRadialGradient(
-    headX - headRadius * 0.3,
-    headY - headRadius * 0.3,
-    headRadius * 0.15,
-    headX,
-    headY,
-    headRadius,
-  );
+  const headGradient = context.createRadialGradient(headX - headRadius * 0.3, headY - headRadius * 0.3, headRadius * 0.15, headX, headY, headRadius);
   headGradient.addColorStop(0, "#fffbe0");
   headGradient.addColorStop(1, "#f3bf4a");
   context.fillStyle = headGradient;
