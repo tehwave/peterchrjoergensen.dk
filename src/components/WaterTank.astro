@@ -145,14 +145,8 @@ type Props = Record<string, never>;
       background-color: $color-blue-dark;
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
       isolation: isolate;
-      transition:
-        border-radius 2s ease-in-out,
-        transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: border-radius 2s ease-in-out;
       animation: blob-morph 8s ease-in-out infinite alternate;
-
-      &:hover {
-        transform: translateY(-4px) scale(1.02);
-      }
     }
 
     @keyframes blob-morph {
@@ -188,10 +182,6 @@ type Props = Record<string, never>;
       &__frame {
         transition: none;
         animation: none;
-
-        &:hover {
-          transform: none;
-        }
       }
     }
   }

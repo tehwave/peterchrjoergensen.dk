@@ -353,6 +353,9 @@ function drawDuck(scene: WaterTankScene): void {
   const r = duck.radius;
   const squashX = 1 / duck.squash;
   const squashY = duck.squash;
+  const idleMotion = Math.sin(scene.sceneClockMs * 0.0032 + duck.idleClock * 0.08);
+  const wingSwing = idleMotion * 0.08 + duck.excitement * 0.12;
+  const beakOpen = Math.max(0, 0.025 + idleMotion * 0.018 + duck.excitement * 0.15);
 
   // Soft shadow on the water below the duck.
   context.save();
@@ -403,11 +406,14 @@ function drawDuck(scene: WaterTankScene): void {
 
   // Little wing scallop.
   context.save();
+  context.translate(r * 0.2, r * 0.08);
+  context.rotate(wingSwing);
+  context.translate(-r * 0.2, -r * 0.08);
   context.fillStyle = "rgba(233, 169, 74, 0.65)";
   context.beginPath();
-  context.moveTo(-r * 0.1, -r * 0.1);
-  context.quadraticCurveTo(r * 0.05, r * 0.45, r * 0.55, r * 0.35);
-  context.quadraticCurveTo(r * 0.3, r * 0.05, -r * 0.1, -r * 0.1);
+  context.moveTo(-r * 0.1, -r * 0.14);
+  context.quadraticCurveTo(r * 0.12, r * (0.32 + wingSwing * 0.9), r * 0.58, r * (0.24 + wingSwing * 0.55));
+  context.quadraticCurveTo(r * 0.28, r * (0.02 - wingSwing * 0.2), -r * 0.1, -r * 0.14);
   context.closePath();
   context.fill();
   context.strokeStyle = "rgba(180, 120, 30, 0.4)";
@@ -446,8 +452,7 @@ function drawDuck(scene: WaterTankScene): void {
   context.fill();
   context.restore();
 
-  // Beak — pastel orange, opens slightly when excited.
-  const beakOpen = duck.excitement * 0.15;
+  // Beak — pastel orange, gently chatters at idle and opens more when excited.
   context.fillStyle = "#ffb469";
   context.strokeStyle = "rgba(140, 70, 10, 0.35)";
   context.lineWidth = 0.9;
