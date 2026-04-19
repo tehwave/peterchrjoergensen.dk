@@ -41,7 +41,7 @@ const initialRole = roles[0];
             <span>—{" "}</span>
             <br class="mobile-break" />
             <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
-              <span id="typed-roles" aria-live="polite" aria-atomic="true">{initialRole}</span>
+              <span id="typed-roles">{initialRole}</span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
@@ -68,6 +68,13 @@ const initialRole = roles[0];
   let typedInstance: any = null;
   let typedObserver: IntersectionObserver | null = null;
 
+  /**
+   * Defers hero enhancements until after the page has loaded and the browser has
+   * idle time, with a timeout fallback for browsers without requestIdleCallback.
+   *
+   * Returns a cleanup function so pending work can be cancelled during
+   * navigation or re-initialization.
+   */
   function queueEnhancement(task: () => void, timeout = 2500): () => void {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let idleId: number | null = null;

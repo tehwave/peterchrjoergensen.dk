@@ -185,7 +185,8 @@ const socialImageURL = new URL(image, Astro.site);
     </script>
     <script is:inline type="module">
       const createDeferredScript = (src, dataset = {}) => {
-        if (document.querySelector(`script[src="${src}"]`)) return;
+        const alreadyLoaded = Array.from(document.scripts).some((script) => script.src === src);
+        if (alreadyLoaded) return;
 
         const script = document.createElement("script");
         script.src = src;
