@@ -26,6 +26,8 @@ const roles = [
   "Unity3D Developer",
   "VR Developer",
 ];
+
+const initialRole = roles[0];
 ---
 
 <div class="hero-wrapper">
@@ -39,7 +41,7 @@ const roles = [
             <span>—{" "}</span>
             <br class="mobile-break" />
             <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
-              <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
+              <span id="typed-roles" aria-live="polite" aria-atomic="true">{initialRole}</span>
             </strong>{" "}
             from <strong>Denmark.</strong>
           </p>
@@ -65,6 +67,44 @@ const roles = [
 
   let typedInstance: any = null;
   let typedObserver: IntersectionObserver | null = null;
+
+  function queueEnhancement(task: () => void, timeout = 2500): () => void {
+    let timeoutId: number | null = null;
+    let idleId: number | null = null;
+    let cancelled = false;
+
+    const runTask = () => {
+      if (cancelled) return;
+
+      if ("requestIdleCallback" in window) {
+        idleId = requestIdleCallback(() => {
+          if (!cancelled) task();
+        }, { timeout });
+        return;
+      }
+
+      timeoutId = window.setTimeout(() => {
+        if (!cancelled) task();
+      }, 1200);
+    };
+
+    if (document.readyState === "complete") {
+      runTask();
+    } else {
+      window.addEventListener("load", runTask, { once: true });
+    }
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", runTask);
+      if (idleId !== null && "cancelIdleCallback" in window) {
+        cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }
 
   async function initTypedAnimation() {
     const typedElement = document.querySelector("#typed-roles") as HTMLElement;
@@ -135,11 +175,7 @@ const roles = [
   }
 
   function startTypedAnimation() {
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => initTypedAnimation());
-    } else {
-      setTimeout(() => initTypedAnimation(), 1);
-    }
+    initTypedAnimation();
   }
 
   function cleanupTypedAnimation() {
@@ -312,11 +348,15 @@ const roles = [
     const heroExists = document.querySelector("#typed-roles") !== null;
     if (!heroExists) return;
 
-    startTypedAnimation();
-    const cleanupTilt = initTiltEffect();
+    let cleanupTilt: (() => void) | void;
+    const cancelEnhancementQueue = queueEnhancement(() => {
+      startTypedAnimation();
+      cleanupTilt = initTiltEffect();
+    });
 
     // Cleanup handler for view transitions
     const cleanup = () => {
+      cancelEnhancementQueue();
       cleanupTypedAnimation();
       if (cleanupTilt) cleanupTilt();
     };
