@@ -8,6 +8,7 @@
  */
 import SkillTag from "./SkillTag.astro";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
+import WaterTank from "./WaterTank.astro";
 
 type Props = Record<string, never>;
 
@@ -37,8 +38,11 @@ const skills = [
 <section class="about" id="about">
   <div class="about__container">
     <div class="about__left">
-      <span class="about__label">ABOUT ME</span>
-      <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      <div class="about__header">
+        <span class="about__label">ABOUT ME</span>
+        <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      </div>
+      <WaterTank />
     </div>
     <div class="about__right">
       <div class="about__content">
@@ -102,6 +106,26 @@ const skills = [
         display: flex;
         flex-direction: column;
         gap: $space-lg;
+
+        @include respond-to(lg) {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          gap: $space-xl;
+        }
+
+        @include respond-to(sm) {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: $space-lg;
+        }
+      }
+
+      &__header {
+        display: flex;
+        flex-direction: column;
+        gap: $space-lg;
       }
 
       &__label {
@@ -124,12 +148,9 @@ const skills = [
       }
 
       &__content {
-        border-left: 3px solid $color-orange;
         padding-left: $space-xl;
 
         @include respond-to(lg) {
-          border-left: none;
-          border-top: 3px solid $color-orange;
           padding-left: 0;
           padding-top: $space-lg;
         }
