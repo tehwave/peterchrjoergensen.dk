@@ -7,7 +7,7 @@
  * palettes — yellow, blue, red, black, white — up to a small cap, so the
  * tank fills with a tidy little rainbow. On top of the physics every duck
  * layers charm passes: idle body wobble, blinking eyes, a smile, rosy
- * cheeks, impact squash, and heart/sparkle particles on interaction.
+ * cheeks, and heart/sparkle particles on interaction.
  */
 import type { WaveSceneBase } from "../wave-engine";
 import { SUNSET_WAVE_PALETTE } from "../wave-palettes";
@@ -61,8 +61,6 @@ interface Duck {
   sizeScale: number;
   // 1 = facing right, -1 = facing left. Mirrors the sprite horizontally.
   facing: 1 | -1;
-  // Body stretch applied on impact; lerps back toward 1.
-  squash: number;
   // 0..1 fade that brightens cheeks/brow after interaction.
   excitement: number;
   // 0 = open, 1 = fully closed.
@@ -91,8 +89,8 @@ export interface WaterTankScene extends WaveSceneBase {
 const BASELINE_FRAME_MS = 16.67;
 
 // Duck physics.
-const GRAVITY = 0.07;
-const BUOYANCY_SPRING = 0.06;
+const GRAVITY = 0.04;
+const BUOYANCY_SPRING = 0.025;
 const DUCK_DAMPING = 0.985;
 const DUCK_DRIFT_DAMPING = 0.992;
 const DUCK_DRIFT_MAX = 0.07;
@@ -258,7 +256,6 @@ function createDuck(x: number, y: number, palette: DuckPalette, baseRadius: numb
     radius: baseRadius * sizeScale,
     sizeScale,
     facing: Math.random() < 0.5 ? -1 : 1,
-    squash: 1,
     excitement: 0,
     blink: 0,
     nextBlinkIn: BLINK_NEXT_MIN_MS + Math.random() * (BLINK_NEXT_RANGE_MS - BLINK_NEXT_MIN_MS),
@@ -322,7 +319,6 @@ export function spawnDuck(scene: WaterTankScene, x?: number): Duck | null {
   duck.y = Math.max(duck.radius, scene.restWaterY - duck.radius * (1.6 + Math.random() * 0.6));
   duck.vy = randRange(1.2, 2.0);
   duck.vx = (Math.random() - 0.5) * 0.3;
-  duck.squash = 0.85;
 
   scene.ducks.push(duck);
 
@@ -347,7 +343,6 @@ export function dunkDuck(scene: WaterTankScene, clickX: number, clickY: number, 
   const direction = offsetFromClick === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(offsetFromClick);
   target.vx += direction * 0.22;
   target.excitement = Math.min(1, target.excitement + 0.9);
-  target.squash = Math.max(0.6, target.squash - 0.25);
   emitHearts(scene, target.x, target.y - target.radius * 0.4, 3);
 }
 
@@ -479,11 +474,6 @@ function simulateDuckStep(scene: WaterTankScene, duck: Duck, frameScale: number)
   duck.vy *= Math.pow(DUCK_DAMPING, frameScale);
   duck.y += duck.vy * frameScale;
 
-  const vyDelta = Math.abs(duck.vy - previousVy);
-  if (vyDelta > DUCK_IMPACT_VY) {
-    duck.squash = Math.max(DUCK_SQUASH_MIN, duck.squash - vyDelta * 0.08);
-  }
-
   // Horizontal: drift + wall bounce, with a tiny impulse so ducks don't
   // stall at a perfect zero velocity.
   const bounceMargin = duck.radius * DUCK_BOUNCE_MARGIN_MULT;
@@ -511,8 +501,7 @@ function simulateDuckStep(scene: WaterTankScene, duck: Duck, frameScale: number)
 }
 
 function updateCharmState(duck: Duck, stepDeltaMs: number, frameScale: number): void {
-  // Squash returns toward 1; excitement fades out over time.
-  duck.squash += (1 - duck.squash) * Math.min(1, 0.12 * frameScale);
+  // Excitement fades out over time.
   duck.excitement = Math.max(0, duck.excitement - 0.008 * frameScale);
 
   // Blink state machine: counting down to next blink, or mid-blink.
@@ -664,7 +653,7 @@ function drawDuck(scene: WaterTankScene, duck: Duck): void {
   // Negate rotation when mirrored so the duck still leans with the waves
   // in world space instead of tilting the wrong way.
   context.rotate(duck.rotation * duck.facing);
-  context.scale(duck.facing / duck.squash, duck.squash);
+  context.scale(duck.facing, 1);
 
   drawDuckBody(context, duck);
   drawDuckHead(context, duck);
