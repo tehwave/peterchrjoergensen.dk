@@ -78,7 +78,6 @@ export interface WaterTankScene extends WaveSceneBase {
   ducks: Duck[];
   restWaterY: number;
   particles: Particle[];
-  sceneClockMs: number;
   // Rotating index into DUCK_PALETTES for the next spawn.
   nextPaletteIndex: number;
 }
@@ -98,8 +97,6 @@ const DUCK_DRIFT_ABS_CAP = DUCK_DRIFT_MAX * 8;
 const DUCK_X_MARGIN_MULT = 1.2;
 const DUCK_BOUNCE_MARGIN_MULT = 1.3;
 const DUCK_FLOAT_OFFSET = 0.35; // fraction of radius above the waterline
-const DUCK_IMPACT_VY = 0.4; // vy jump threshold that triggers squash
-const DUCK_SQUASH_MIN = 0.65;
 // Per-duck radius variance: each duck picks a scale in this range so the
 // tank doesn't look like a cloned assembly line.
 const DUCK_SIZE_MIN = 0.88;
@@ -281,7 +278,6 @@ export function createWaterTankScene(canvas: HTMLCanvasElement, context: CanvasR
     ducks: [],
     restWaterY: 0,
     particles: [],
-    sceneClockMs: 0,
     nextPaletteIndex: 0,
   };
 }
@@ -445,8 +441,6 @@ function emitSparkles(scene: WaterTankScene, x: number, y: number, count: number
 // ---------- Simulation ----------
 
 export function updateWaterTankScene(scene: WaterTankScene, deltaTime: number): void {
-  scene.sceneClockMs += deltaTime;
-
   const steps = clampNum(Math.round(deltaTime / BASELINE_FRAME_MS), 1, 4);
   const stepDelta = deltaTime / steps;
   const frameScale = stepDelta / BASELINE_FRAME_MS;
@@ -495,7 +489,7 @@ function simulateDuckStep(scene: WaterTankScene, duck: Duck, frameScale: number)
   const leftY = sampleWaterY(scene, duck.x - duck.radius);
   const rightY = sampleWaterY(scene, duck.x + duck.radius);
   const slope = (rightY - leftY) / (duck.radius * 2);
-  const idleSway = Math.sin(scene.sceneClockMs * 0.0016 + duck.idleClock * 0.05) * 0.04;
+  const idleSway = Math.sin(scene.phaseTime * 0.0016 + duck.idleClock * 0.05) * 0.04;
   const targetRotation = Math.atan(slope) * 0.8 + idleSway;
   duck.rotation += (targetRotation - duck.rotation) * Math.min(1, 0.2 * frameScale);
 }
@@ -550,11 +544,11 @@ function sampleWaterY(scene: WaterTankScene, x: number): number {
 }
 
 function sampleFooterWaveY(scene: WaterTankScene, layer: FooterWaveLayer, x: number): number {
-  const { width, height, sceneClockMs } = scene;
+  const { width, height, phaseTime } = scene;
   const normalizedX = clampNum(x, 0, width);
   const amplitude = height * layer.amp;
   const baseY = height * layer.base;
-  const phase = sceneClockMs * layer.speed + layer.phaseOffset;
+  const phase = phaseTime * layer.speed + layer.phaseOffset;
 
   return baseY + Math.sin(normalizedX * layer.freq + phase) * amplitude + Math.cos(normalizedX * layer.freq * 1.9 + phase * 0.82) * (amplitude * FOOTER_WAVE_HARMONIC_SCALE);
 }
@@ -745,7 +739,7 @@ function drawDuckFace(scene: WaterTankScene, context: CanvasRenderingContext2D, 
   const hy = -r * 0.65;
   const hr = r * 0.68;
 
-  const idleMotion = Math.sin(scene.sceneClockMs * 0.0032 + duck.idleClock * 0.08);
+  const idleMotion = Math.sin(scene.phaseTime * 0.0032 + duck.idleClock * 0.08);
   const wingSwing = idleMotion * 0.08 + duck.excitement * 0.12;
   const beakOpen = Math.max(0, 0.025 + idleMotion * 0.018 + duck.excitement * 0.15);
 
@@ -883,12 +877,14 @@ function drawHeart(context: CanvasRenderingContext2D, size: number): void {
 function drawSparkle(context: CanvasRenderingContext2D, size: number): void {
   context.fillStyle = SPARKLE_COLOR;
   context.beginPath();
+  const outer = size;
+  const inner = size * 0.35;
+  context.moveTo(outer, 0);
   for (let i = 0; i < 4; i += 1) {
     const angle = (i / 4) * Math.PI * 2;
-    const outer = size;
-    const inner = size * 0.35;
-    context.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+    const nextAngle = ((i + 1) / 4) * Math.PI * 2;
     context.lineTo(Math.cos(angle + Math.PI / 4) * inner, Math.sin(angle + Math.PI / 4) * inner);
+    context.lineTo(Math.cos(nextAngle) * outer, Math.sin(nextAngle) * outer);
   }
   context.closePath();
   context.fill();

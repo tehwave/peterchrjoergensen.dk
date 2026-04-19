@@ -58,6 +58,7 @@ type Props = Record<string, never>;
         const handlePointerDown = (event: PointerEvent) => {
           if (activePointerId !== null) return;
           activePointerId = event.pointerId;
+          canvas.setPointerCapture(event.pointerId);
           const { x, y } = getCanvasPoint(event);
           pointerStartX = x;
           pointerStartY = y;
@@ -80,6 +81,7 @@ type Props = Record<string, never>;
 
         const endPointer = (event: PointerEvent) => {
           if (event.pointerId !== activePointerId) return;
+          canvas.releasePointerCapture(event.pointerId);
           const { x, y } = getCanvasPoint(event);
 
           if (!pointerMoved) {
