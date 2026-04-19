@@ -38,8 +38,10 @@ const skills = [
 <section class="about" id="about">
   <div class="about__container">
     <div class="about__left">
-      <span class="about__label">ABOUT ME</span>
-      <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      <div class="about__header">
+        <span class="about__label">ABOUT ME</span>
+        <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      </div>
       <WaterTank />
     </div>
     <div class="about__right">
@@ -101,6 +103,26 @@ const skills = [
       }
 
       &__left {
+        display: flex;
+        flex-direction: column;
+        gap: $space-lg;
+
+        @include respond-to(lg) {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          gap: $space-xl;
+        }
+
+        @include respond-to(sm) {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: $space-lg;
+        }
+      }
+
+      &__header {
         display: flex;
         flex-direction: column;
         gap: $space-lg;
