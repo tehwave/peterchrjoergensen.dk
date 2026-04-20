@@ -33,8 +33,16 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
+const desktopGridBreakpoint = 1025;
+const mobileGridBreakpoint = 641;
+const featuredCardDesktopWidth = "790px";
+const standardCardDesktopWidth = "380px";
+const featuredCardTabletWidth = "calc(100vw - 3rem)";
+const standardCardTabletWidth = "calc((100vw - 5rem) / 2)";
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
-const imageSizes = hasPage ? "(min-width: 1025px) 790px, (min-width: 641px) calc(100vw - 3rem), 90vw" : "(min-width: 1025px) 380px, (min-width: 641px) calc((100vw - 5rem) / 2), 90vw";
+const imageSizes = hasPage
+  ? `(min-width: ${desktopGridBreakpoint}px) ${featuredCardDesktopWidth}, (min-width: ${mobileGridBreakpoint}px) ${featuredCardTabletWidth}, 90vw`
+  : `(min-width: ${desktopGridBreakpoint}px) ${standardCardDesktopWidth}, (min-width: ${mobileGridBreakpoint}px) ${standardCardTabletWidth}, 90vw`;
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.

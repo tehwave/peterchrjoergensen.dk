@@ -115,9 +115,16 @@ const categories = [
   }
 
   function getProjectItemsInVisualOrder(projectItems: HTMLElement[]): HTMLElement[] {
+    const projectItemBounds = new Map(projectItems.map((projectItem) => [projectItem, projectItem.getBoundingClientRect()]));
+
     return [...projectItems].sort((firstItem, secondItem) => {
-      const firstBounds = firstItem.getBoundingClientRect();
-      const secondBounds = secondItem.getBoundingClientRect();
+      const firstBounds = projectItemBounds.get(firstItem);
+      const secondBounds = projectItemBounds.get(secondItem);
+
+      if (!firstBounds || !secondBounds) {
+        return 0;
+      }
+
       const topDifference = firstBounds.top - secondBounds.top;
 
       if (Math.abs(topDifference) > 1) {
