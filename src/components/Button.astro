@@ -187,6 +187,7 @@ const classes = [
     const mountButtonWaves = async () => {
       if (cancelled || cleanupMountedWaves || isMountingWaves) return;
       isMountingWaves = true;
+      let mountedWaves = false;
 
       try {
         const { attachWaveHoverInteraction, mountWaveEngine, createStripWaveScene, drawStripWaveScene, updateStripWaveScene } = await loadButtonWaveModules();
@@ -221,10 +222,12 @@ const classes = [
             registerCleanup(cleanupHover);
           },
         });
-
-        removeInteractionListeners();
+        mountedWaves = true;
       } finally {
         isMountingWaves = false;
+        if (mountedWaves) {
+          removeInteractionListeners();
+        }
       }
     };
 
