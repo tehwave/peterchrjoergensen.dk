@@ -41,14 +41,13 @@ const tabletMultiColumnMinWidth = 641;
 const desktopGridWidth = "min(calc(100vw - (var(--space-xl) * 2)), var(--max-width))";
 const tabletGridWidth = "calc(100vw - (var(--space-lg) * 2))";
 const gridGap = "var(--space-xl)";
-const featuredCardDesktopWidth = `calc(((${desktopGridWidth} - (${gridGap} * 2)) / 3 * 2) + ${gridGap})`;
 const standardCardDesktopWidth = `calc((${desktopGridWidth} - (${gridGap} * 2)) / 3)`;
 const featuredCardTabletWidth = tabletGridWidth;
 const standardCardTabletWidth = `calc((${tabletGridWidth} - ${gridGap}) / 2)`;
 const mobileCardWidth = tabletGridWidth;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
 const imageSizes = hasPage
-  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${featuredCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
+  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
   : `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${standardCardTabletWidth}, ${mobileCardWidth}`;
 
 // Normalize category into a sorted, space-separated token list so multi-category
@@ -59,7 +58,12 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
 {
   isInternal && hasLink ? (
-    <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--with-wave": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
+    <a
+      href={linkUrl}
+      class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage, "project-card--with-wave": hasPage }]}
+      data-category={dataCategory}
+      aria-label={`View ${title} case study`}
+    >
       <div class="project-card__image-wrapper">
         {image ? (
           <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
@@ -308,6 +312,26 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
         0 10px 24px rgba($color-blue-dark, 0.08);
     }
 
+    &--featured {
+      display: grid;
+      grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.25fr);
+      align-items: stretch;
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+      }
+
+      &:hover {
+        .project-card__image {
+          transform: scale(1.03);
+        }
+
+        .project-card__placeholder {
+          transform: scale(1.03);
+        }
+      }
+    }
+
     &__image-wrapper {
       position: relative;
       z-index: 1;
@@ -330,6 +354,17 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       }
     }
 
+    &--featured &__image-wrapper {
+      display: flex;
+      align-items: center;
+      padding: $space-lg;
+      min-width: 0;
+
+      @include respond-to(md) {
+        padding: $space-md $space-md 0;
+      }
+    }
+
     &__image {
       position: relative;
       z-index: 1;
@@ -343,6 +378,20 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       margin-bottom: -14px;
       transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: transform;
+    }
+
+    &--featured &__image {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      margin-bottom: 0;
+      box-shadow: 0 18px 36px rgba($color-blue-dark, 0.16);
+
+      @include respond-to(md) {
+        aspect-ratio: 16 / 10;
+        margin-bottom: -14px;
+        box-shadow: none;
+      }
     }
 
     &__placeholder {
@@ -366,6 +415,18 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
         color: $color-white;
         opacity: 0.95;
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    &--featured &__placeholder {
+      aspect-ratio: 4 / 3;
+      margin-bottom: 0;
+      box-shadow: 0 18px 36px rgba($color-blue-dark, 0.16);
+
+      @include respond-to(md) {
+        aspect-ratio: 16 / 10;
+        margin-bottom: -14px;
+        box-shadow: none;
       }
     }
 
@@ -423,6 +484,16 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       @include transition(transform, 0.2s);
     }
 
+    &--featured &__image-badge {
+      left: calc(#{$space-lg} + #{$space-sm});
+      top: calc(#{$space-lg} + #{$space-sm});
+
+      @include respond-to(md) {
+        left: calc(#{$space-md} + #{$space-sm});
+        top: calc(#{$space-md} + #{$space-sm});
+      }
+    }
+
     &__content {
       position: relative;
       z-index: 1;
@@ -433,6 +504,16 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       flex-grow: 1;
     }
 
+    &--featured &__content {
+      justify-content: center;
+      padding: $space-2xl $space-2xl calc(#{$space-2xl} + 4.5rem);
+      gap: $space-md;
+
+      @include respond-to(md) {
+        padding: $space-xl $space-xl calc(#{$space-xl} + 4.5rem);
+      }
+    }
+
     &__title {
       font-size: $font-size-lg;
       font-weight: 600;
@@ -441,6 +522,11 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       align-items: center;
       gap: $space-xs;
       @include transition(color, 0.2s);
+    }
+
+    &--featured &__title {
+      font-size: clamp($font-size-xl, 1.5vw + 1rem, $font-size-2xl);
+      line-height: 1.15;
     }
 
     // Arrow icon for internal pages (full card clickable)
@@ -486,6 +572,12 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       }
     }
 
+    &--featured &__description {
+      font-size: $font-size-base;
+      line-height: 1.75;
+      max-width: 58ch;
+    }
+
     &__tags {
       display: flex;
       flex-wrap: wrap;
@@ -510,6 +602,10 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       pointer-events: none;
       z-index: 0;
       opacity: 0.92;
+    }
+
+    &--featured &__wave {
+      height: 96px;
     }
   }
 </style>
