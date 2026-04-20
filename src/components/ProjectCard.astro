@@ -33,6 +33,10 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
+const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
+const imageSizes = hasPage
+  ? "(min-width: 1025px) 790px, (min-width: 641px) calc(100vw - 3rem), 90vw"
+  : "(min-width: 1025px) 380px, (min-width: 641px) calc((100vw - 5rem) / 2), 90vw";
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.
@@ -52,8 +56,8 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
             class="project-card__image"
             loading="lazy"
             quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
+            widths={imageWidths}
+            sizes={imageSizes}
           />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
@@ -105,8 +109,8 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
             class="project-card__image"
             loading="lazy"
             quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
+            widths={imageWidths}
+            sizes={imageSizes}
           />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
@@ -481,6 +485,10 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       color: $color-text-muted;
       line-height: 1.6;
       flex-grow: 1;
+
+      .project-card--with-wave & {
+        max-width: 62ch;
+      }
     }
 
     &__tags {
