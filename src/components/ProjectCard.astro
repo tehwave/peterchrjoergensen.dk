@@ -33,14 +33,15 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
-// These mirror the max-width Sass breakpoints in `_mixins.scss`, so the image
-// source sizing flips when the grid actually changes column count.
+// These must stay aligned with the max-width breakpoints in `respond-to(lg)`
+// and `respond-to(sm)` from `_mixins.scss`, so image source sizing flips when
+// the grid actually changes column count.
 const desktopMultiColumnMinWidth = 1025;
 const tabletMultiColumnMinWidth = 641;
 const desktopGridWidth = "min(calc(100vw - (var(--space-xl) * 2)), var(--max-width))";
 const tabletGridWidth = "calc(100vw - (var(--space-lg) * 2))";
 const gridGap = "var(--space-xl)";
-const featuredCardDesktopWidth = `calc(((((${desktopGridWidth} - (${gridGap} * 2)) / 3)) * 2) + ${gridGap})`;
+const featuredCardDesktopWidth = `calc(((${desktopGridWidth} - (${gridGap} * 2)) / 3 * 2) + ${gridGap})`;
 const standardCardDesktopWidth = `calc((${desktopGridWidth} - (${gridGap} * 2)) / 3)`;
 const featuredCardTabletWidth = tabletGridWidth;
 const standardCardTabletWidth = `calc((${tabletGridWidth} - ${gridGap}) / 2)`;
