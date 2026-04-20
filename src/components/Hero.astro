@@ -1,10 +1,11 @@
 ---
 /**
- * Hero section with animated role text rotation.
+ * Hero section with progressively enhanced role text rotation.
  *
- * Roles cycle automatically to showcase versatility without overwhelming visitors.
- * Uses aria-live for screen reader announcements and aria-hidden to prevent
- * reading all roles at once. Profile image uses Picture for format negotiation.
+ * The first role is server-rendered so the LCP text paints immediately, then
+ * Typed.js/tilt effects enhance the visible UI after load. Screen readers get
+ * a stable, non-animated role announcement instead of the decorative rotation.
+ * Profile image uses Picture for format negotiation.
  */
 import { Picture } from "astro:assets";
 import profileImage from "../assets/peter-profile.png";
@@ -40,9 +41,10 @@ const initialRole = roles[0];
             I'm <strong>Peter</strong>
             <span>—{" "}</span>
             <br class="mobile-break" />
-            <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
+            <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)} aria-hidden="true">
               <span id="typed-roles">{initialRole}</span>
-            </strong>{" "}
+            </strong>
+            <span class="sr-only">{initialRole}</span>{" "}
             from <strong>Denmark.</strong>
           </p>
         </div>
@@ -153,13 +155,15 @@ const initialRole = roles[0];
         typedObserver = null;
       }
 
+      const rotationRoles = roles.length > 1 ? [...roles.slice(1), roles[0]] : roles;
+
       // Initialize typing animation
       typedInstance = new Typed("#typed-roles", {
-        strings: roles,
+        strings: rotationRoles,
         typeSpeed: 50,
         backSpeed: 30,
         backDelay: 2000,
-        startDelay: 1000,
+        startDelay: 1400,
         loop: true,
         showCursor: true,
         cursorChar: "|",
@@ -180,7 +184,7 @@ const initialRole = roles[0];
       typedObserver.observe(heroElement);
     } catch (error) {
       console.error("Failed to initialize Typed.js:", error);
-      typedElement.textContent = "Web Developer";
+      typedElement.textContent = roles[0] ?? initialRole;
     }
   }
 

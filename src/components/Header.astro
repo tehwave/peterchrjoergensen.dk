@@ -6,12 +6,14 @@
  * with smooth enter/exit animations. Active nav link updates based on current
  * scroll position to provide orientation on long pages.
  */
+import Button from "./Button.astro";
+
 type Props = Record<string, never>;
 ---
 
 <header class="header">
   <div class="header__container">
-    <a href="/" class="header__logo-button">Peter Chr. Jørgensen</a>
+    <Button as="a" href="/" waveState="hover" class="header__logo-button">Peter Chr. Jørgensen</Button>
     <nav class="header__nav" aria-label="Main navigation">
       <a href="/#projects" class="header__nav-link">Projects</a>
       <a href="/#ai" class="header__nav-link">AI</a>
@@ -242,28 +244,20 @@ type Props = Record<string, never>;
       }
     }
 
-    &__logo-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    :global(.header__logo-button.button-sample) {
       min-height: 46px;
       padding: 0 1rem;
       font-size: $font-size-sm;
-      font-weight: $font-weight-semibold;
       background: rgba($color-blue-dark, 0.96);
       color: $color-text-light;
-      border-radius: 999px;
       box-shadow:
         inset 0 1.2px 0 rgba($color-white, 0.14),
         inset 0 -2.8px 8px rgba(0, 0, 0, 0.42);
-      text-decoration: none;
-      @include transition(background-color, 0.2s);
-      @include focus-visible;
 
       &:hover,
       &:focus-visible {
         background: rgba($color-blue-dark, 0.98);
-        color: $color-orange;
+        color: rgb(10, 10, 12);
       }
 
       @include respond-to(md) {
@@ -271,6 +265,22 @@ type Props = Record<string, never>;
         padding: 0 0.78rem;
         font-size: $font-size-xs;
       }
+    }
+
+    :global(.header__logo-button.button-sample .button-sample__label) {
+      color: inherit;
+      text-shadow: none;
+    }
+
+    :global(.header__logo-button.button-sample:hover .button-sample__label),
+    :global(.header__logo-button.button-sample:focus-visible .button-sample__label) {
+      color: inherit;
+      text-shadow: none;
+    }
+
+    :global(.header__logo-button.button-sample:hover .button-sample__field--bottom),
+    :global(.header__logo-button.button-sample:focus-visible .button-sample__field--bottom) {
+      filter: saturate(1.08) brightness(1.08) contrast(0.95);
     }
 
     &__nav {
