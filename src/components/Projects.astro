@@ -102,10 +102,9 @@ const categories = [
 </section>
 
 <script>
-  // Skip CTA observers are kept at module scope so we can reliably tear them down
+  // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
-  let skipThresholdObserver: IntersectionObserver | null = null;
-  let skipEndObserver: IntersectionObserver | null = null;
+  let skipVisibilityCleanup: (() => void) | null = null;
 
   function notifyProjectCardsChanged(): void {
     document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
@@ -177,10 +176,8 @@ const categories = [
 
   // Ensure observer instances do not stack across re-inits.
   function disconnectSkipObservers(): void {
-    skipThresholdObserver?.disconnect();
-    skipEndObserver?.disconnect();
-    skipThresholdObserver = null;
-    skipEndObserver = null;
+    skipVisibilityCleanup?.();
+    skipVisibilityCleanup = null;
   }
 
   function initFilters() {
@@ -210,44 +207,31 @@ const categories = [
         return;
       }
 
-      if (!("IntersectionObserver" in window)) {
-        setSkipButtonState(skipToEndButton, false);
-        return;
-      }
-
-      let hasPassedThreshold = thresholdItem.getBoundingClientRect().top < 0;
-      let hasReachedSectionEnd = projectsEndAnchor.getBoundingClientRect().top <= window.innerHeight;
-
       const syncButton = () => {
+        const hasPassedThreshold = thresholdItem.getBoundingClientRect().top < 0;
+        const hasReachedSectionEnd = projectsEndAnchor.getBoundingClientRect().top <= window.innerHeight;
         setSkipButtonState(skipToEndButton, hasPassedThreshold && !hasReachedSectionEnd);
       };
 
-      // Threshold observer: toggles once the first card of row 2 passes the viewport top.
-        skipThresholdObserver = new IntersectionObserver(
-          (entries) => {
-            const entry = entries[0];
-            if (!entry) {
-              return;
-            }
+      let isTicking = false;
+      const handleVisibilityChange = () => {
+        if (isTicking) {
+          return;
+        }
 
-            hasPassedThreshold = entry.boundingClientRect.top < 0;
-            syncButton();
-          },
-          { threshold: 0 },
-        );
-
-      // End observer: hides CTA when we are effectively at the end of the section.
-      skipEndObserver = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          hasReachedSectionEnd = Boolean(entry && entry.boundingClientRect.top <= window.innerHeight);
+        isTicking = true;
+        window.requestAnimationFrame(() => {
+          isTicking = false;
           syncButton();
-        },
-        { threshold: 0.01 },
-      );
+        });
+      };
 
-      skipThresholdObserver.observe(thresholdItem);
-      skipEndObserver.observe(projectsEndAnchor);
+      window.addEventListener("scroll", handleVisibilityChange, { passive: true });
+      window.addEventListener("resize", handleVisibilityChange);
+      skipVisibilityCleanup = () => {
+        window.removeEventListener("scroll", handleVisibilityChange);
+        window.removeEventListener("resize", handleVisibilityChange);
+      };
       syncButton();
     };
 
