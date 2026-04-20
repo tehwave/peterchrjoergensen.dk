@@ -31,25 +31,16 @@ const { title, description, alt, tags = [], image, link, hasPage = false, catego
 const hasLink = link && link !== "#";
 
 // Determine link destination and type
-const isInternal = hasPage;
-const linkUrl = isInternal ? `/projects/${link}/` : link;
+const linkUrl = hasPage ? `/projects/${link}/` : link;
 // These must stay aligned with the max-width breakpoints in `respond-to(lg)`
 // and `respond-to(sm)` from `_mixins.scss`, so image source sizing flips when
 // the grid actually changes column count.
 const desktopMultiColumnMinWidth = 1025;
 const tabletMultiColumnMinWidth = 641;
-const desktopGridWidth = "min(calc(100vw - (var(--space-xl) * 2)), var(--max-width))";
-const tabletGridWidth = "calc(100vw - (var(--space-lg) * 2))";
-const gridGap = "var(--space-xl)";
-const standardCardDesktopWidth = `calc((${desktopGridWidth} - (${gridGap} * 2)) / 3)`;
-const featuredCardDesktopImageWidth = `calc(((${desktopGridWidth} - (${gridGap} * 2)) / 3) * 1.15)`;
-const featuredCardTabletWidth = tabletGridWidth;
-const standardCardTabletWidth = `calc((${tabletGridWidth} - ${gridGap}) / 2)`;
-const mobileCardWidth = tabletGridWidth;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
-const imageSizes = hasPage
-  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${featuredCardDesktopImageWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
-  : `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${standardCardTabletWidth}, ${mobileCardWidth}`;
+const standardImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3), (min-width: ${tabletMultiColumnMinWidth}px) calc((calc(100vw - (var(--space-lg) * 2)) - var(--space-xl)) / 2), calc(100vw - (var(--space-lg) * 2))`;
+const featuredImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc(((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3) * 1.15), (min-width: ${tabletMultiColumnMinWidth}px) calc(100vw - (var(--space-lg) * 2)), calc(100vw - (var(--space-lg) * 2))`;
+const imageSizes = hasPage ? featuredImageSizes : standardImageSizes;
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.
@@ -58,7 +49,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 ---
 
 {
-  isInternal && hasLink ? (
+  hasPage && hasLink ? (
     <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
@@ -213,16 +204,6 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
       @include respond-to(md) {
         grid-template-columns: 1fr;
-      }
-
-      &:hover {
-        .project-card__image {
-          transform: translateY(-5px);
-        }
-
-        .project-card__placeholder {
-          transform: translateY(-5px);
-        }
       }
     }
 
