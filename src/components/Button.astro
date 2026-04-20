@@ -141,155 +141,44 @@ const classes = [
 }
 
 <script>
+  import { attachWaveHoverInteraction, mountWaveEngine } from "../utils/wave-engine";
   import { setupWaveLifecycle } from "../utils/wave-lifecycle";
-  type ButtonWaveModules = typeof import("../utils/wave-engine") & typeof import("../utils/wave-renderers/strip-wave");
+  import { createStripWaveScene, drawStripWaveScene, updateStripWaveScene } from "../utils/wave-renderers/strip-wave";
 
-  let buttonWaveModulesPromise: Promise<ButtonWaveModules> | null = null;
-
-  const getSelfManagedCanvases = (): HTMLCanvasElement[] => {
-    return Array.from(document.querySelectorAll('canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]')).filter(
-      (canvas): canvas is HTMLCanvasElement => canvas instanceof HTMLCanvasElement,
-    );
-  };
-
-  const loadButtonWaveModules = (): Promise<ButtonWaveModules> => {
-    if (!buttonWaveModulesPromise) {
-      buttonWaveModulesPromise = Promise.all([import("../utils/wave-engine"), import("../utils/wave-renderers/strip-wave")]).then(([waveEngine, stripWave]) => ({
-        ...waveEngine,
-        ...stripWave,
-      }));
-    }
-
-    return buttonWaveModulesPromise;
-  };
-
-  const isSelfManagedButtonTarget = (target: EventTarget | null): boolean => {
-    const button = target instanceof Element ? target.closest(".button-sample") : null;
-    if (!(button instanceof HTMLElement)) return false;
-
-    return Boolean(button.querySelector('canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]'));
-  };
-
-  /**
-   * Keeps the button design fully server-rendered, then mounts the decorative
-   * wave engine after load/idle or as soon as a user interacts with a button.
-   */
-  function scheduleButtonWaveMount(): () => void {
-    const canvases = getSelfManagedCanvases();
-    if (canvases.length === 0) return () => {};
-
-    let cancelled = false;
-    let cleanupMountedWaves: (() => void) | null = null;
-    let isMountingWaves = false;
-    let idleId: number | null = null;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const mountButtonWaves = async () => {
-      if (cancelled || cleanupMountedWaves || isMountingWaves) return;
-      isMountingWaves = true;
-      let mountedWaves = false;
-
-      try {
-        const { attachWaveHoverInteraction, mountWaveEngine, createStripWaveScene, drawStripWaveScene, updateStripWaveScene } = await loadButtonWaveModules();
-
-        if (cancelled || cleanupMountedWaves) return;
-
-        cleanupMountedWaves = mountWaveEngine({
-          canvasSelector: 'canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]',
-          createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
-          drawScene: drawStripWaveScene,
-          updateScene: updateStripWaveScene,
-          size: { minWidth: 120, minHeight: 80, maxDpr: 2 },
-          onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
-            const cleanupHover = attachWaveHoverInteraction({
-              canvas: scene.canvas,
-              hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
-              hoverFillEnabled: scene.hoverFillEnabled,
-              fillLocked: scene.fillLocked,
-              setSpeedMultiplier: (value) => {
-                scene.speedMultiplier = value;
-              },
-              setTargetFillProgress: (value) => {
-                scene.targetFillProgress = value;
-              },
-              setFillProgress: (value) => {
-                scene.fillProgress = value;
-              },
-              isReducedMotion: () => reduceMotionQuery.matches,
-              renderStatic,
-            });
-
-            registerCleanup(cleanupHover);
+  function mountButtonWaves(): () => void {
+    return mountWaveEngine({
+      canvasSelector: 'canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]',
+      createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
+      drawScene: drawStripWaveScene,
+      updateScene: updateStripWaveScene,
+      size: { minWidth: 120, minHeight: 80, maxDpr: 2 },
+      onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
+        const cleanupHover = attachWaveHoverInteraction({
+          canvas: scene.canvas,
+          hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
+          hoverFillEnabled: scene.hoverFillEnabled,
+          fillLocked: scene.fillLocked,
+          setSpeedMultiplier: (value) => {
+            scene.speedMultiplier = value;
           },
+          setTargetFillProgress: (value) => {
+            scene.targetFillProgress = value;
+          },
+          setFillProgress: (value) => {
+            scene.fillProgress = value;
+          },
+          isReducedMotion: () => reduceMotionQuery.matches,
+          renderStatic,
         });
-        mountedWaves = true;
-      } finally {
-        isMountingWaves = false;
-        if (mountedWaves) {
-          removeInteractionListeners();
-        }
-      }
-    };
 
-    const delegatedInteractionOptions: AddEventListenerOptions = { passive: true };
-    const handleDelegatedInteraction = (event: Event) => {
-      if (!isSelfManagedButtonTarget(event.target)) return;
-      void mountButtonWaves();
-    };
-
-    document.addEventListener("pointerover", handleDelegatedInteraction, delegatedInteractionOptions);
-    document.addEventListener("focusin", handleDelegatedInteraction);
-    document.addEventListener("touchstart", handleDelegatedInteraction, delegatedInteractionOptions);
-
-    const removeInteractionListeners = () => {
-      document.removeEventListener("pointerover", handleDelegatedInteraction, delegatedInteractionOptions);
-      document.removeEventListener("focusin", handleDelegatedInteraction);
-      document.removeEventListener("touchstart", handleDelegatedInteraction, delegatedInteractionOptions);
-    };
-
-    const runDeferredMount = () => {
-      if (cancelled) return;
-
-      if ("requestIdleCallback" in window) {
-        idleId = requestIdleCallback(
-          () => {
-            void mountButtonWaves();
-          },
-          { timeout: 2500 },
-        );
-        return;
-      }
-
-      timeoutId = setTimeout(() => {
-        void mountButtonWaves();
-      }, 1200);
-    };
-
-    if (document.readyState === "complete") {
-      runDeferredMount();
-    } else {
-      window.addEventListener("load", runDeferredMount, { once: true });
-    }
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener("load", runDeferredMount);
-      removeInteractionListeners();
-      cleanupMountedWaves?.();
-
-      if (idleId !== null && "cancelIdleCallback" in window) {
-        cancelIdleCallback(idleId);
-      }
-
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
-    };
+        registerCleanup(cleanupHover);
+      },
+    });
   }
 
   setupWaveLifecycle({
     scopeKey: "button-component",
-    init: scheduleButtonWaveMount,
+    init: mountButtonWaves,
   });
 </script>
 
