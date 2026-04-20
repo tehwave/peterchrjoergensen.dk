@@ -105,7 +105,6 @@ const categories = [
   // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
-  const PROJECT_ROW_POSITION_TOLERANCE = 1;
 
   function notifyProjectCardsChanged(): void {
     document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
@@ -113,27 +112,6 @@ const categories = [
 
   function getVisibleProjectItems(projectItems: NodeListOf<HTMLElement>): HTMLElement[] {
     return Array.from(projectItems).filter((item) => !item.classList.contains("projects__item--hidden") && !item.classList.contains("projects__item--hiding"));
-  }
-
-  function getProjectItemsInVisualOrder(projectItems: HTMLElement[]): HTMLElement[] {
-    const projectItemBounds = new Map(projectItems.map((projectItem) => [projectItem, projectItem.getBoundingClientRect()]));
-
-    return [...projectItems].sort((firstItem, secondItem) => {
-      const firstBounds = projectItemBounds.get(firstItem);
-      const secondBounds = projectItemBounds.get(secondItem);
-
-      if (!firstBounds || !secondBounds) {
-        return 0;
-      }
-
-      const topDifference = firstBounds.top - secondBounds.top;
-
-      if (Math.abs(topDifference) > PROJECT_ROW_POSITION_TOLERANCE) {
-        return topDifference;
-      }
-
-      return firstBounds.left - secondBounds.left;
-    });
   }
 
   function getGridColumnCount(grid: HTMLElement): number {
@@ -151,11 +129,10 @@ const categories = [
   }
 
   function getThresholdItem(projectItems: HTMLElement[], columns: number): HTMLElement | null {
-    const visibleProjectItems = getProjectItemsInVisualOrder(projectItems);
     let occupiedColumns = 0;
 
-    for (let index = 0; index < visibleProjectItems.length; index += 1) {
-      const projectItem = visibleProjectItems[index];
+    for (let index = 0; index < projectItems.length; index += 1) {
+      const projectItem = projectItems[index];
       if (!projectItem) {
         continue;
       }
@@ -169,7 +146,7 @@ const categories = [
       occupiedColumns += itemSpan;
 
       if (occupiedColumns === columns) {
-        return visibleProjectItems[index + 1] ?? null;
+        return projectItems[index + 1] ?? null;
       }
     }
 
@@ -221,24 +198,41 @@ const categories = [
         setSkipButtonState(skipToEndButton, hasPassedThreshold && !hasReachedSectionEnd);
       };
 
-      let isTicking = false;
-      const handleVisibilityChange = () => {
-        if (isTicking) {
+      let scrollFrame = 0;
+      let resizeFrame = 0;
+      const handleScroll = () => {
+        if (scrollFrame !== 0) {
           return;
         }
 
-        isTicking = true;
-        window.requestAnimationFrame(() => {
-          isTicking = false;
+        scrollFrame = window.requestAnimationFrame(() => {
+          scrollFrame = 0;
           syncButton();
         });
       };
 
-      window.addEventListener("scroll", handleVisibilityChange, { passive: true });
-      window.addEventListener("resize", handleVisibilityChange);
+      const handleResize = () => {
+        if (resizeFrame !== 0) {
+          return;
+        }
+
+        resizeFrame = window.requestAnimationFrame(() => {
+          resizeFrame = 0;
+          observeSkipToEndVisibility();
+        });
+      };
+
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("resize", handleResize);
       skipVisibilityCleanup = () => {
-        window.removeEventListener("scroll", handleVisibilityChange);
-        window.removeEventListener("resize", handleVisibilityChange);
+        if (scrollFrame !== 0) {
+          window.cancelAnimationFrame(scrollFrame);
+        }
+        if (resizeFrame !== 0) {
+          window.cancelAnimationFrame(resizeFrame);
+        }
+        window.removeEventListener("scroll", handleScroll);
+        window.removeEventListener("resize", handleResize);
       };
       syncButton();
     };
@@ -418,7 +412,7 @@ const categories = [
 
     &__grid {
       display: grid;
-      grid-auto-flow: row dense;
+      grid-auto-flow: row;
       grid-template-columns: repeat(3, 1fr);
       gap: $space-xl;
       align-items: stretch;
