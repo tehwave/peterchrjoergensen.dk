@@ -33,12 +33,24 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
+// Must stay aligned with `respond-to(lg)`, `respond-to(md)`, and
+// `respond-to(sm)` in `_mixins.scss`.
 const desktopMultiColumnMinWidth = 1025;
 const sectionPaddingCompactMinWidth = 769;
 const tabletMultiColumnMinWidth = 641;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
-const standardImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3), (min-width: ${sectionPaddingCompactMinWidth}px) calc((calc(100vw - (var(--space-xl) * 2)) - var(--space-xl)) / 2), (min-width: ${tabletMultiColumnMinWidth}px) calc((calc(100vw - (var(--space-lg) * 2)) - var(--space-xl)) / 2), calc(100vw - (var(--space-lg) * 2))`;
-const featuredImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc((((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3) * 2) + var(--space-xl)), (min-width: ${sectionPaddingCompactMinWidth}px) calc(100vw - (var(--space-xl) * 2)), (min-width: ${tabletMultiColumnMinWidth}px) calc(100vw - (var(--space-lg) * 2)), calc(100vw - (var(--space-lg) * 2))`;
+const standardImageSizes = [
+  `(min-width: ${desktopMultiColumnMinWidth}px) calc((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3)`,
+  `(min-width: ${sectionPaddingCompactMinWidth}px) calc((calc(100vw - (var(--space-xl) * 2)) - var(--space-xl)) / 2)`,
+  `(min-width: ${tabletMultiColumnMinWidth}px) calc((calc(100vw - (var(--space-lg) * 2)) - var(--space-xl)) / 2)`,
+  "calc(100vw - (var(--space-lg) * 2))",
+].join(", ");
+const featuredImageSizes = [
+  `(min-width: ${desktopMultiColumnMinWidth}px) calc((((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3) * 2) + var(--space-xl))`,
+  `(min-width: ${sectionPaddingCompactMinWidth}px) calc(100vw - (var(--space-xl) * 2))`,
+  `(min-width: ${tabletMultiColumnMinWidth}px) calc(100vw - (var(--space-lg) * 2))`,
+  "calc(100vw - (var(--space-lg) * 2))",
+].join(", ");
 const imageSizes = hasPage ? featuredImageSizes : standardImageSizes;
 
 // Normalize category into a sorted, space-separated token list so multi-category

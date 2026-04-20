@@ -227,9 +227,11 @@ const categories = [
       skipVisibilityCleanup = () => {
         if (scrollFrame !== 0) {
           window.cancelAnimationFrame(scrollFrame);
+          scrollFrame = 0;
         }
         if (resizeFrame !== 0) {
           window.cancelAnimationFrame(resizeFrame);
+          resizeFrame = 0;
         }
         window.removeEventListener("scroll", handleScroll);
         window.removeEventListener("resize", handleResize);
