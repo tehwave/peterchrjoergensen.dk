@@ -42,12 +42,13 @@ const desktopGridWidth = "min(calc(100vw - (var(--space-xl) * 2)), var(--max-wid
 const tabletGridWidth = "calc(100vw - (var(--space-lg) * 2))";
 const gridGap = "var(--space-xl)";
 const standardCardDesktopWidth = `calc((${desktopGridWidth} - (${gridGap} * 2)) / 3)`;
+const featuredCardDesktopImageWidth = `calc(((${desktopGridWidth} - (${gridGap} * 2)) / 3) * 1.15)`;
 const featuredCardTabletWidth = tabletGridWidth;
 const standardCardTabletWidth = `calc((${tabletGridWidth} - ${gridGap}) / 2)`;
 const mobileCardWidth = tabletGridWidth;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
 const imageSizes = hasPage
-  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
+  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${featuredCardDesktopImageWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
   : `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${standardCardTabletWidth}, ${mobileCardWidth}`;
 
 // Normalize category into a sorted, space-separated token list so multi-category
@@ -58,12 +59,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
 {
   isInternal && hasLink ? (
-    <a
-      href={linkUrl}
-      class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage, "project-card--with-wave": hasPage }]}
-      data-category={dataCategory}
-      aria-label={`View ${title} case study`}
-    >
+    <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
           <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
@@ -75,6 +71,13 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
         <span class="project-card__image-badge" aria-hidden="true">
           View case study
         </span>
+        {tags.length > 0 && (
+          <div class="project-card__tags project-card__tags--featured">
+            {tags.map((tag) => (
+              <span class="project-card__tag">{tag}</span>
+            ))}
+          </div>
+        )}
       </div>
       <div class="project-card__content">
         <h3 class="project-card__title">
@@ -97,14 +100,13 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
         </h3>
         <p class="project-card__description">{description}</p>
         {tags.length > 0 && (
-          <div class="project-card__tags">
+          <div class:list={["project-card__tags", { "project-card__tags--content-featured": hasPage }]}>
             {tags.map((tag) => (
               <span class="project-card__tag">{tag}</span>
             ))}
           </div>
         )}
       </div>
-      <canvas class="project-card__wave" data-project-card-wave aria-hidden="true" />
     </a>
   ) : (
     <article class="project-card" data-category={dataCategory}>
@@ -142,111 +144,6 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     </article>
   )
 }
-
-<script>
-  import type { WaveSceneBase } from "../utils/wave-engine";
-  import { mountWaveEngine } from "../utils/wave-engine";
-  import { ensureScopedDocumentListener, setupWaveLifecycle } from "../utils/wave-lifecycle";
-
-  interface ProjectCardWaveScene extends WaveSceneBase {
-    phaseOffset: number;
-  }
-
-  const PROJECT_CARD_WAVE_PALETTE = ["#57e3ff", "#4f8cff", "#9560ff", "#ff63cf", "#ff9a68"] as const;
-
-  function createProjectCardWaveScene(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, index: number): ProjectCardWaveScene {
-    return {
-      canvas,
-      context,
-      width: 0,
-      height: 0,
-      dpr: 1,
-      visible: true,
-      phaseTime: 0,
-      speedMultiplier: 1,
-      paused: false,
-      phaseOffset: index * 0.65,
-    };
-  }
-
-  function drawProjectCardWaveScene(scene: ProjectCardWaveScene, time: number): void {
-    const { context, width, height, phaseOffset } = scene;
-    const baseY = height * 0.7;
-    const maxAmplitude = 10;
-
-    context.clearRect(0, 0, width, height);
-
-    for (let layer = 0; layer < 3; layer += 1) {
-      const gradient = context.createLinearGradient(0, 0, width, 0);
-      for (let index = 0; index < PROJECT_CARD_WAVE_PALETTE.length; index += 1) {
-        gradient.addColorStop(index / (PROJECT_CARD_WAVE_PALETTE.length - 1), PROJECT_CARD_WAVE_PALETTE[(index + layer) % PROJECT_CARD_WAVE_PALETTE.length]);
-      }
-
-      const amplitude = maxAmplitude - layer * 2;
-      const frequency = 0.012 + layer * 0.0018;
-      const phase = time * (0.00022 + layer * 0.00005) + phaseOffset + layer * 0.8;
-
-      context.save();
-      context.globalCompositeOperation = "screen";
-      context.globalAlpha = 0.5 - layer * 0.09;
-      context.strokeStyle = gradient;
-      context.fillStyle = gradient;
-      context.lineWidth = 1.5;
-      context.beginPath();
-
-      for (let x = 0; x <= width + 2; x += 3) {
-        const waveY = baseY + Math.sin(x * frequency + phase) * amplitude + Math.cos(x * frequency * 1.76 + phase * 0.84) * (amplitude * 0.34);
-        if (x === 0) {
-          context.moveTo(x, waveY);
-        } else {
-          context.lineTo(x, waveY);
-        }
-      }
-
-      context.lineTo(width, height + 4);
-      context.lineTo(0, height + 4);
-      context.closePath();
-      context.fill();
-      context.restore();
-    }
-  }
-
-  let projectCardWaveCleanup: (() => void) | null = null;
-
-  function mountProjectCardWaves(): () => void {
-    return mountWaveEngine({
-      canvasSelector: "[data-project-card-wave]",
-      createScene: ({ canvas, context, index }) => createProjectCardWaveScene(canvas, context, index),
-      drawScene: drawProjectCardWaveScene,
-      size: { minWidth: 120, minHeight: 72, maxDpr: 2 },
-      intersectionThreshold: 0.05,
-      staticTime: 0,
-    });
-  }
-
-  function initProjectCardWaves(): () => void {
-    projectCardWaveCleanup?.();
-    projectCardWaveCleanup = mountProjectCardWaves();
-
-    return () => {
-      projectCardWaveCleanup?.();
-      projectCardWaveCleanup = null;
-    };
-  }
-
-  setupWaveLifecycle({
-    scopeKey: "project-card-waves",
-    init: initProjectCardWaves,
-  });
-
-  ensureScopedDocumentListener({
-    scopeKey: "project-card-waves",
-    event: "project-card:waves-sync",
-    handler: () => {
-      initProjectCardWaves();
-    },
-  });
-</script>
 
 <style lang="scss">
   @use "../styles/variables" as *;
@@ -303,19 +200,16 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       }
     }
 
-    &--with-wave {
+    &--featured {
+      display: grid;
+      grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.25fr);
+      align-items: stretch;
       position: relative;
       border: 1px solid rgba($color-blue-dark, 0.14);
       background-color: $color-white;
       box-shadow:
         0 2px 8px $color-shadow,
         0 10px 24px rgba($color-blue-dark, 0.08);
-    }
-
-    &--featured {
-      display: grid;
-      grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.25fr);
-      align-items: stretch;
 
       @include respond-to(md) {
         grid-template-columns: 1fr;
@@ -323,11 +217,11 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
       &:hover {
         .project-card__image {
-          transform: scale(1.03);
+          transform: translateY(-5px);
         }
 
         .project-card__placeholder {
-          transform: scale(1.03);
+          transform: translateY(-5px);
         }
       }
     }
@@ -356,11 +250,15 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
     &--featured &__image-wrapper {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: $space-lg;
       padding: $space-lg;
       min-width: 0;
 
       @include respond-to(md) {
+        gap: $space-md;
         padding: $space-md $space-md 0;
       }
     }
@@ -381,16 +279,21 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     }
 
     &--featured &__image {
-      width: 100%;
+      width: calc(100% + #{$space-2xl});
+      max-width: none;
       height: auto;
       aspect-ratio: 4 / 3;
-      margin-bottom: 0;
-      box-shadow: 0 18px 36px rgba($color-blue-dark, 0.16);
+      margin-bottom: -#{$space-lg};
+      margin-left: -#{$space-sm};
+      margin-right: -#{$space-xl};
+      object-position: center top;
 
       @include respond-to(md) {
+        width: 100%;
         aspect-ratio: 16 / 10;
         margin-bottom: -14px;
-        box-shadow: none;
+        margin-left: 0;
+        margin-right: 0;
       }
     }
 
@@ -420,13 +323,18 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
     &--featured &__placeholder {
       aspect-ratio: 4 / 3;
-      margin-bottom: 0;
-      box-shadow: 0 18px 36px rgba($color-blue-dark, 0.16);
+      width: calc(100% + #{$space-2xl});
+      max-width: none;
+      margin-bottom: -#{$space-lg};
+      margin-left: -#{$space-sm};
+      margin-right: -#{$space-xl};
 
       @include respond-to(md) {
+        width: 100%;
         aspect-ratio: 16 / 10;
         margin-bottom: -14px;
-        box-shadow: none;
+        margin-left: 0;
+        margin-right: 0;
       }
     }
 
@@ -506,11 +414,11 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
     &--featured &__content {
       justify-content: center;
-      padding: $space-2xl $space-2xl calc(#{$space-2xl} + 4.5rem);
+      padding: $space-2xl $space-2xl $space-2xl $space-xl;
       gap: $space-md;
 
       @include respond-to(md) {
-        padding: $space-xl $space-xl calc(#{$space-xl} + 4.5rem);
+        padding: $space-xl;
       }
     }
 
@@ -566,10 +474,6 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       color: $color-text-muted;
       line-height: 1.6;
       flex-grow: 1;
-
-      .project-card--with-wave & {
-        max-width: 62ch;
-      }
     }
 
     &--featured &__description {
@@ -585,27 +489,53 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       margin-top: auto;
     }
 
+    &__tags--featured {
+      position: relative;
+      z-index: 2;
+      align-self: flex-start;
+      max-width: min(18rem, calc(100% - #{$space-sm}));
+      margin-top: auto;
+      padding-top: $space-md;
+
+      @include respond-to(md) {
+        display: none;
+      }
+    }
+
+    &[data-category~="web"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-blue-dark, 0.92);
+      color: $color-white;
+    }
+
+    &[data-category~="games"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-orange-dark, 0.94);
+      color: $color-white;
+    }
+
+    &[data-category~="creative"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-purple, 0.92);
+      color: $color-white;
+    }
+
+    &[data-category~="web"][data-category~="games"] .project-card__tags--featured .project-card__tag {
+      background: linear-gradient(135deg, rgba($color-blue-dark, 0.96) 0%, rgba($color-orange-dark, 0.96) 100%);
+      color: $color-white;
+    }
+
+    &__tags--content-featured {
+      display: none;
+
+      @include respond-to(md) {
+        display: flex;
+      }
+    }
+
     &__tag {
       font-size: $font-size-xs;
       color: $color-text-muted;
       background-color: $color-blue-pale;
       padding: $space-xs $space-sm;
       border-radius: 4px;
-    }
-
-    &__wave {
-      position: absolute;
-      inset: auto -10px -16px -10px;
-      width: calc(100% + 20px);
-      height: 112px;
-      display: block;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.92;
-    }
-
-    &--featured &__wave {
-      height: 96px;
     }
   }
 </style>
