@@ -155,6 +155,8 @@ const initialRole = roles[0];
         typedObserver = null;
       }
 
+      // The first role is already visible in server-rendered HTML, so the typing
+      // cycle starts with the next role and loops back to the first later.
       const rotationRoles = roles.length > 1 ? [...roles.slice(1), roles[0]] : roles;
 
       // Initialize typing animation

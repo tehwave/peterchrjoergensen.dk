@@ -163,6 +163,13 @@ const classes = [
     return buttonWaveModulesPromise;
   };
 
+  const isSelfManagedButtonTarget = (target: EventTarget | null): boolean => {
+    const button = target instanceof Element ? target.closest(".button-sample") : null;
+    if (!(button instanceof HTMLElement)) return false;
+
+    return Boolean(button.querySelector('canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]'));
+  };
+
   /**
    * Keeps the button design fully server-rendered, then mounts the decorative
    * wave engine after load/idle or as soon as a user interacts with a button.
@@ -173,71 +180,68 @@ const classes = [
 
     let cancelled = false;
     let cleanupMountedWaves: (() => void) | null = null;
+    let isMountingWaves = false;
     let idleId: number | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    const buttonRoots = canvases.map((canvas) => canvas.closest(".button-sample")).filter((button): button is HTMLElement => button instanceof HTMLElement);
-
-    const removeInteractionListeners = (() => {
-      const listeners = buttonRoots.flatMap((button) => {
-        const triggerMount = () => {
-          void mountButtonWaves();
-        };
-
-        const options: AddEventListenerOptions = { passive: true };
-        button.addEventListener("pointerenter", triggerMount, options);
-        button.addEventListener("focusin", triggerMount);
-        button.addEventListener("touchstart", triggerMount, options);
-
-        return [
-          () => button.removeEventListener("pointerenter", triggerMount, options),
-          () => button.removeEventListener("focusin", triggerMount),
-          () => button.removeEventListener("touchstart", triggerMount, options),
-        ];
-      });
-
-      return () => {
-        listeners.forEach((removeListener) => removeListener());
-      };
-    })();
-
     const mountButtonWaves = async () => {
-      if (cancelled || cleanupMountedWaves) return;
+      if (cancelled || cleanupMountedWaves || isMountingWaves) return;
+      isMountingWaves = true;
 
-      const { attachWaveHoverInteraction, mountWaveEngine, createStripWaveScene, drawStripWaveScene, updateStripWaveScene } = await loadButtonWaveModules();
+      try {
+        const { attachWaveHoverInteraction, mountWaveEngine, createStripWaveScene, drawStripWaveScene, updateStripWaveScene } = await loadButtonWaveModules();
 
-      if (cancelled || cleanupMountedWaves) return;
+        if (cancelled || cleanupMountedWaves) return;
 
-      cleanupMountedWaves = mountWaveEngine({
-        canvasSelector: 'canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]',
-        createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
-        drawScene: drawStripWaveScene,
-        updateScene: updateStripWaveScene,
-        size: { minWidth: 120, minHeight: 80, maxDpr: 2 },
-        onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
-          const cleanupHover = attachWaveHoverInteraction({
-            canvas: scene.canvas,
-            hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
-            hoverFillEnabled: scene.hoverFillEnabled,
-            fillLocked: scene.fillLocked,
-            setSpeedMultiplier: (value) => {
-              scene.speedMultiplier = value;
-            },
-            setTargetFillProgress: (value) => {
-              scene.targetFillProgress = value;
-            },
-            setFillProgress: (value) => {
-              scene.fillProgress = value;
-            },
-            isReducedMotion: () => reduceMotionQuery.matches,
-            renderStatic,
-          });
+        cleanupMountedWaves = mountWaveEngine({
+          canvasSelector: 'canvas[data-button-wave]:not([data-button-wave="external"])[data-wave-canvas]',
+          createScene: ({ canvas, context }) => createStripWaveScene(canvas, context),
+          drawScene: drawStripWaveScene,
+          updateScene: updateStripWaveScene,
+          size: { minWidth: 120, minHeight: 80, maxDpr: 2 },
+          onSceneMount: ({ scene, reduceMotionQuery, renderStatic, registerCleanup }) => {
+            const cleanupHover = attachWaveHoverInteraction({
+              canvas: scene.canvas,
+              hoverSpeedMultiplier: scene.hoverSpeedMultiplier,
+              hoverFillEnabled: scene.hoverFillEnabled,
+              fillLocked: scene.fillLocked,
+              setSpeedMultiplier: (value) => {
+                scene.speedMultiplier = value;
+              },
+              setTargetFillProgress: (value) => {
+                scene.targetFillProgress = value;
+              },
+              setFillProgress: (value) => {
+                scene.fillProgress = value;
+              },
+              isReducedMotion: () => reduceMotionQuery.matches,
+              renderStatic,
+            });
 
-          registerCleanup(cleanupHover);
-        },
-      });
+            registerCleanup(cleanupHover);
+          },
+        });
 
-      removeInteractionListeners();
+        removeInteractionListeners();
+      } finally {
+        isMountingWaves = false;
+      }
+    };
+
+    const delegatedInteractionOptions: AddEventListenerOptions = { passive: true };
+    const handleDelegatedInteraction = (event: Event) => {
+      if (!isSelfManagedButtonTarget(event.target)) return;
+      void mountButtonWaves();
+    };
+
+    document.addEventListener("pointerover", handleDelegatedInteraction, delegatedInteractionOptions);
+    document.addEventListener("focusin", handleDelegatedInteraction);
+    document.addEventListener("touchstart", handleDelegatedInteraction, delegatedInteractionOptions);
+
+    const removeInteractionListeners = () => {
+      document.removeEventListener("pointerover", handleDelegatedInteraction, delegatedInteractionOptions);
+      document.removeEventListener("focusin", handleDelegatedInteraction);
+      document.removeEventListener("touchstart", handleDelegatedInteraction, delegatedInteractionOptions);
     };
 
     const runDeferredMount = () => {
