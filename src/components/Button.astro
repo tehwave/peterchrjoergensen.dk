@@ -154,10 +154,7 @@ const classes = [
 
   const loadButtonWaveModules = (): Promise<ButtonWaveModules> => {
     if (!buttonWaveModulesPromise) {
-      buttonWaveModulesPromise = Promise.all([
-        import("../utils/wave-engine"),
-        import("../utils/wave-renderers/strip-wave"),
-      ]).then(([waveEngine, stripWave]) => ({
+      buttonWaveModulesPromise = Promise.all([import("../utils/wave-engine"), import("../utils/wave-renderers/strip-wave")]).then(([waveEngine, stripWave]) => ({
         ...waveEngine,
         ...stripWave,
       }));
@@ -179,9 +176,7 @@ const classes = [
     let idleId: number | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    const buttonRoots = canvases
-      .map((canvas) => canvas.closest(".button-sample"))
-      .filter((button): button is HTMLElement => button instanceof HTMLElement);
+    const buttonRoots = canvases.map((canvas) => canvas.closest(".button-sample")).filter((button): button is HTMLElement => button instanceof HTMLElement);
 
     const removeInteractionListeners = (() => {
       const listeners = buttonRoots.flatMap((button) => {
@@ -189,7 +184,7 @@ const classes = [
           void mountButtonWaves();
         };
 
-        const options = { passive: true } as const;
+        const options: AddEventListenerOptions = { passive: true };
         button.addEventListener("pointerenter", triggerMount, options);
         button.addEventListener("focusin", triggerMount);
         button.addEventListener("touchstart", triggerMount, options);
@@ -209,13 +204,7 @@ const classes = [
     const mountButtonWaves = async () => {
       if (cancelled || cleanupMountedWaves) return;
 
-      const {
-        attachWaveHoverInteraction,
-        mountWaveEngine,
-        createStripWaveScene,
-        drawStripWaveScene,
-        updateStripWaveScene,
-      } = await loadButtonWaveModules();
+      const { attachWaveHoverInteraction, mountWaveEngine, createStripWaveScene, drawStripWaveScene, updateStripWaveScene } = await loadButtonWaveModules();
 
       if (cancelled || cleanupMountedWaves) return;
 
@@ -255,9 +244,12 @@ const classes = [
       if (cancelled) return;
 
       if ("requestIdleCallback" in window) {
-        idleId = requestIdleCallback(() => {
-          void mountButtonWaves();
-        }, { timeout: 2500 });
+        idleId = requestIdleCallback(
+          () => {
+            void mountButtonWaves();
+          },
+          { timeout: 2500 },
+        );
         return;
       }
 

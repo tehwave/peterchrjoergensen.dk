@@ -184,7 +184,7 @@ const initialRole = roles[0];
       typedObserver.observe(heroElement);
     } catch (error) {
       console.error("Failed to initialize Typed.js:", error);
-      typedElement.textContent = roles[0] ?? initialRole;
+      typedElement.textContent = roles[0] ?? "Web Developer";
     }
   }
 
