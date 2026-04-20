@@ -223,18 +223,18 @@ const categories = [
       };
 
       // Threshold observer: toggles once the first card of row 2 passes the viewport top.
-      skipThresholdObserver = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (!entry) {
-            return;
-          }
+        skipThresholdObserver = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0];
+            if (!entry) {
+              return;
+            }
 
-          hasPassedThreshold = !entry.isIntersecting && entry.boundingClientRect.top < 0;
-          syncButton();
-        },
-        { threshold: 0 },
-      );
+            hasPassedThreshold = entry.boundingClientRect.top < 0;
+            syncButton();
+          },
+          { threshold: 0 },
+        );
 
       // End observer: hides CTA when we are effectively at the end of the section.
       skipEndObserver = new IntersectionObserver(

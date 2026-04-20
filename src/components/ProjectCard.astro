@@ -34,9 +34,7 @@ const hasLink = link && link !== "#";
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
-const imageSizes = hasPage
-  ? "(min-width: 1025px) 790px, (min-width: 641px) calc(100vw - 3rem), 90vw"
-  : "(min-width: 1025px) 380px, (min-width: 641px) calc((100vw - 5rem) / 2), 90vw";
+const imageSizes = hasPage ? "(min-width: 1025px) 790px, (min-width: 641px) calc(100vw - 3rem), 90vw" : "(min-width: 1025px) 380px, (min-width: 641px) calc((100vw - 5rem) / 2), 90vw";
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.
@@ -49,16 +47,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--with-wave": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={imageWidths}
-            sizes={imageSizes}
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
@@ -102,16 +91,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     <article class="project-card" data-category={dataCategory}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={imageWidths}
-            sizes={imageSizes}
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
