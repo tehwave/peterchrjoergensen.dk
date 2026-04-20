@@ -105,6 +105,7 @@ const categories = [
   // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
+  const PROJECT_ROW_POSITION_TOLERANCE = 1;
 
   function notifyProjectCardsChanged(): void {
     document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
@@ -127,7 +128,7 @@ const categories = [
 
       const topDifference = firstBounds.top - secondBounds.top;
 
-      if (Math.abs(topDifference) > 1) {
+      if (Math.abs(topDifference) > PROJECT_ROW_POSITION_TOLERANCE) {
         return topDifference;
       }
 

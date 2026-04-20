@@ -33,16 +33,22 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
-const desktopGridBreakpoint = 1025;
-const mobileGridBreakpoint = 641;
-const featuredCardDesktopWidth = "790px";
-const standardCardDesktopWidth = "380px";
-const featuredCardTabletWidth = "calc(100vw - 3rem)";
-const standardCardTabletWidth = "calc((100vw - 5rem) / 2)";
+// These mirror the max-width Sass breakpoints in `_mixins.scss`, so the image
+// source sizing flips when the grid actually changes column count.
+const desktopMultiColumnMinWidth = 1025;
+const tabletMultiColumnMinWidth = 641;
+const desktopGridWidth = "min(calc(100vw - (var(--space-xl) * 2)), var(--max-width))";
+const tabletGridWidth = "calc(100vw - (var(--space-lg) * 2))";
+const gridGap = "var(--space-xl)";
+const featuredCardDesktopWidth = `calc(((((${desktopGridWidth} - (${gridGap} * 2)) / 3)) * 2) + ${gridGap})`;
+const standardCardDesktopWidth = `calc((${desktopGridWidth} - (${gridGap} * 2)) / 3)`;
+const featuredCardTabletWidth = tabletGridWidth;
+const standardCardTabletWidth = `calc((${tabletGridWidth} - ${gridGap}) / 2)`;
+const mobileCardWidth = tabletGridWidth;
 const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
 const imageSizes = hasPage
-  ? `(min-width: ${desktopGridBreakpoint}px) ${featuredCardDesktopWidth}, (min-width: ${mobileGridBreakpoint}px) ${featuredCardTabletWidth}, 90vw`
-  : `(min-width: ${desktopGridBreakpoint}px) ${standardCardDesktopWidth}, (min-width: ${mobileGridBreakpoint}px) ${standardCardTabletWidth}, 90vw`;
+  ? `(min-width: ${desktopMultiColumnMinWidth}px) ${featuredCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${featuredCardTabletWidth}, ${mobileCardWidth}`
+  : `(min-width: ${desktopMultiColumnMinWidth}px) ${standardCardDesktopWidth}, (min-width: ${tabletMultiColumnMinWidth}px) ${standardCardTabletWidth}, ${mobileCardWidth}`;
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.
