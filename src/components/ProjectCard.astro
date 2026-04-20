@@ -33,6 +33,25 @@ const hasLink = link && link !== "#";
 // Determine link destination and type
 const isInternal = hasPage;
 const linkUrl = isInternal ? `/projects/${link}/` : link;
+// Must stay aligned with `respond-to(lg)`, `respond-to(md)`, and
+// `respond-to(sm)` in `_mixins.scss`.
+const desktopMultiColumnMinWidth = 1025;
+const sectionPaddingCompactMinWidth = 769;
+const tabletMultiColumnMinWidth = 641;
+const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
+const standardImageSizes = [
+  `(min-width: ${desktopMultiColumnMinWidth}px) calc((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3)`,
+  `(min-width: ${sectionPaddingCompactMinWidth}px) calc((calc(100vw - (var(--space-xl) * 2)) - var(--space-xl)) / 2)`,
+  `(min-width: ${tabletMultiColumnMinWidth}px) calc((calc(100vw - (var(--space-lg) * 2)) - var(--space-xl)) / 2)`,
+  "calc(100vw - (var(--space-lg) * 2))",
+].join(", ");
+const featuredImageSizes = [
+  `(min-width: ${desktopMultiColumnMinWidth}px) calc((((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3) * 2) + var(--space-xl))`,
+  `(min-width: ${sectionPaddingCompactMinWidth}px) calc(100vw - (var(--space-xl) * 2))`,
+  `(min-width: ${tabletMultiColumnMinWidth}px) calc(100vw - (var(--space-lg) * 2))`,
+  "calc(100vw - (var(--space-lg) * 2))",
+].join(", ");
+const imageSizes = hasPage ? featuredImageSizes : standardImageSizes;
 
 // Normalize category into a sorted, space-separated token list so multi-category
 // cards can be styled with a combined gradient in the future.
@@ -45,16 +64,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--with-wave": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
@@ -98,16 +108,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
     <article class="project-card" data-category={dataCategory}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
@@ -481,6 +482,10 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       color: $color-text-muted;
       line-height: 1.6;
       flex-grow: 1;
+    }
+
+    &--with-wave &__description {
+      max-width: 58ch;
     }
 
     &__tags {
