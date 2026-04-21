@@ -34,6 +34,8 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
   @use "../styles/mixins" as *;
 
   .skill-tag {
+    --skill-tag-icon-current: var(--skill-tag-icon-color, currentColor);
+
     display: inline-block;
     padding: $space-xs $space-md;
     border: 1px solid $color-border;
@@ -44,6 +46,7 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
     @include transition(all, 0.2s);
 
     &:hover {
+      --skill-tag-icon-current: currentColor;
       border-color: $color-orange;
       color: $color-orange;
       transform: translateY(-2px);
@@ -56,22 +59,18 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
       padding: calc($space-xs + 1px) $space-md;
       font-size: $font-size-base;
       font-weight: $font-weight-medium;
-
-      .skill-tag__label {
-        line-height: $leading-none;
-      }
     }
 
     &__icon {
       width: 1.125rem;
       height: 1.125rem;
       flex-shrink: 0;
-      color: var(--skill-tag-icon-color, currentColor);
+      color: var(--skill-tag-icon-current);
       @include transition(color, 0.2s);
+    }
 
-      .skill-tag:hover & {
-        color: currentColor;
-      }
+    &__label {
+      line-height: $leading-none;
     }
   }
 </style>
