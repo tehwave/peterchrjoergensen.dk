@@ -106,6 +106,8 @@ const categories = [
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
   const PROJECT_ROW_POSITION_TOLERANCE = 1;
+  const PROJECT_FILTER_TRANSITION_DURATION_MS = 450;
+  const PROJECT_FILTER_STAGGER_MS = 35;
 
   function notifyProjectCardsChanged(): void {
     document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
@@ -253,6 +255,7 @@ const categories = [
     filterButtons.forEach((button) => {
       button.onclick = () => {
         const filter = button.dataset.filter;
+        const revealedProjectItems: HTMLElement[] = [];
 
         // Update active button
         filterButtons.forEach((btn) => {
@@ -268,15 +271,25 @@ const categories = [
           const shouldShow = filter === "all" || category === filter;
 
           if (shouldShow) {
-            // Show: remove hiding class, set visible
-            item.classList.remove("projects__item--hiding");
-            item.classList.remove("projects__item--hidden");
+            if (item.classList.contains("projects__item--hidden")) {
+              item.style.transitionDelay = "";
+              item.classList.remove("projects__item--hidden");
+              revealedProjectItems.push(item);
+            } else {
+              item.style.transitionDelay = "";
+              item.classList.remove("projects__item--hiding");
+            }
           } else {
             // Hide: add hiding class for animation, then fully hide after transition
+            item.style.transitionDelay = "";
             item.classList.add("projects__item--hiding");
 
             // After transition ends, add hidden class to remove from layout
-            const onTransitionEnd = () => {
+            const onTransitionEnd = (event: TransitionEvent) => {
+              if (event.target !== item) {
+                return;
+              }
+
               if (item.classList.contains("projects__item--hiding")) {
                 item.classList.add("projects__item--hidden");
               }
@@ -284,6 +297,24 @@ const categories = [
             };
             item.addEventListener("transitionend", onTransitionEnd);
           }
+        });
+
+        window.requestAnimationFrame(() => {
+          revealedProjectItems.forEach((item, index) => {
+            item.style.transitionDelay = `${index * PROJECT_FILTER_STAGGER_MS}ms`;
+
+            const onTransitionEnd = (event: TransitionEvent) => {
+              if (event.target !== item) {
+                return;
+              }
+
+              item.style.transitionDelay = "";
+              item.removeEventListener("transitionend", onTransitionEnd);
+            };
+
+            item.addEventListener("transitionend", onTransitionEnd);
+            item.classList.remove("projects__item--hiding");
+          });
         });
 
         // Recompute threshold with updated visible items after filter animation.
@@ -294,7 +325,7 @@ const categories = [
           window.setTimeout(() => {
             observeSkipToEndVisibility();
             notifyProjectCardsChanged();
-          }, 320);
+          }, PROJECT_FILTER_TRANSITION_DURATION_MS + PROJECT_FILTER_STAGGER_MS);
         });
       };
     });
@@ -437,8 +468,8 @@ const categories = [
       display: flex;
       min-width: 0;
       transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
+        opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 
       &--featured {
         grid-column: span 2;
@@ -447,7 +478,7 @@ const categories = [
       // Animating state (fading out, but still in layout)
       &--hiding {
         opacity: 0;
-        transform: scale(0.95);
+        transform: scale(0.88);
         pointer-events: none;
       }
 
@@ -460,6 +491,10 @@ const categories = [
         &--featured {
           grid-column: auto;
         }
+      }
+
+      @include reduced-motion {
+        transition: none;
       }
     }
 
