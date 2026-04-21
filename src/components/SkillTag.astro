@@ -56,6 +56,10 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
       padding: calc($space-xs + 1px) $space-md;
       font-size: $font-size-base;
       font-weight: $font-weight-medium;
+
+      .skill-tag__label {
+        line-height: $leading-none;
+      }
     }
 
     &__icon {
@@ -68,10 +72,6 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
       .skill-tag:hover & {
         color: currentColor;
       }
-    }
-
-    &--large &__label {
-      line-height: $leading-none;
     }
   }
 </style>
