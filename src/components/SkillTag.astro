@@ -1,4 +1,15 @@
 ---
+import {
+  siAlpinedotjs,
+  siBootstrap,
+  siLaravel,
+  siLivewire,
+  siMysql,
+  siPhp,
+  siRedis,
+  type SimpleIcon,
+} from "simple-icons";
+
 /**
  * Simple skill/technology badge.
  *
@@ -7,12 +18,35 @@
  */
 interface Props {
   label: string;
+  variant?: "default" | "large";
 }
 
-const { label } = Astro.props;
+const { label, variant = "default" } = Astro.props;
+
+const skillIcons: Record<string, SimpleIcon> = {
+  "Alpine.js": siAlpinedotjs,
+  Bootstrap: siBootstrap,
+  Laravel: siLaravel,
+  Livewire: siLivewire,
+  MySQL: siMysql,
+  PHP: siPhp,
+  Redis: siRedis,
+};
+
+const icon = variant === "large" ? skillIcons[label] : undefined;
+const iconColor = icon ? `#${icon.hex}` : undefined;
 ---
 
-<span class="skill-tag">{label}</span>
+<span class:list={["skill-tag", `skill-tag--${variant}`]} style={iconColor ? `--skill-tag-icon-color: ${iconColor};` : undefined}>
+  {
+    icon && (
+      <svg class="skill-tag__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d={icon.path}></path>
+      </svg>
+    )
+  }
+  <span class="skill-tag__label">{label}</span>
+</span>
 
 <style lang="scss">
   @use "../styles/variables" as *;
@@ -32,6 +66,31 @@ const { label } = Astro.props;
       border-color: $color-orange;
       color: $color-orange;
       transform: translateY(-2px);
+    }
+
+    &--large {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-xs;
+      padding: calc($space-xs + 1px) $space-md;
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+    }
+
+    &__icon {
+      width: 1.125rem;
+      height: 1.125rem;
+      flex-shrink: 0;
+      color: var(--skill-tag-icon-color, currentColor);
+      @include transition(color, 0.2s);
+    }
+
+    &:hover &__icon {
+      color: currentColor;
+    }
+
+    &__label {
+      line-height: $leading-none;
     }
   }
 </style>
