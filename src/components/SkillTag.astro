@@ -15,7 +15,7 @@ interface Props {
 const { label, variant = "default" } = Astro.props;
 
 const icon = variant === "large" ? getSkillIcon(label) : undefined;
-const iconColor = icon ? `#${icon.hex}` : undefined;
+const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : undefined;
 ---
 
 <span class:list={["skill-tag", `skill-tag--${variant}`]} style={iconColor ? `--skill-tag-icon-color: ${iconColor};` : undefined}>
@@ -26,7 +26,7 @@ const iconColor = icon ? `#${icon.hex}` : undefined;
       </svg>
     )
   }
-  <span class="skill-tag__label">{label}</span>
+  {variant === "large" ? <span class="skill-tag__label">{label}</span> : label}
 </span>
 
 <style lang="scss">
@@ -70,7 +70,7 @@ const iconColor = icon ? `#${icon.hex}` : undefined;
       }
     }
 
-    &__label {
+    &--large &__label {
       line-height: $leading-none;
     }
   }

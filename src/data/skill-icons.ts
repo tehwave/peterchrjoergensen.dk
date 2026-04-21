@@ -1,7 +1,6 @@
 import { siAlpinedotjs, siBootstrap, siLaravel, siLivewire, siMysql, siPhp, siRedis, type SimpleIcon } from "simple-icons";
 
 const skillIcons: Record<string, SimpleIcon> = {
-  "alpine.js": siAlpinedotjs,
   alpinejs: siAlpinedotjs,
   bootstrap: siBootstrap,
   laravel: siLaravel,
@@ -11,6 +10,13 @@ const skillIcons: Record<string, SimpleIcon> = {
   redis: siRedis,
 };
 
+function normalizeSkillLabel(label: string): string {
+  return label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
 export function getSkillIcon(label: string): SimpleIcon | undefined {
-  return skillIcons[label.trim().toLowerCase()];
+  return skillIcons[normalizeSkillLabel(label)];
 }
