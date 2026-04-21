@@ -105,8 +105,10 @@ const categories = [
   // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
+  let activeFilterAnimationToken = 0;
+  let filterPhaseTimeoutId: number | null = null;
+  let filterMeasurementTimeoutId: number | null = null;
   const PROJECT_ROW_POSITION_TOLERANCE = 1;
-  const PROJECT_LAYOUT_SHIFT_TOLERANCE = 0.5;
   const PROJECT_FILTER_STAGGER_MS = 35;
 
   function notifyProjectCardsChanged(): void {
@@ -157,44 +159,6 @@ const categories = [
 
   function getVisibleProjectItems(projectItems: NodeListOf<HTMLElement>): HTMLElement[] {
     return Array.from(projectItems).filter((item) => !item.classList.contains("projects__item--hidden") && !item.classList.contains("projects__item--hiding"));
-  }
-
-  function captureProjectLayoutSnapshot(projectItems: NodeListOf<HTMLElement>): Map<HTMLElement, DOMRect> {
-    return new Map(getVisibleProjectItems(projectItems).map((projectItem) => [projectItem, projectItem.getBoundingClientRect()]));
-  }
-
-  function animateProjectLayoutShift(previousLayoutSnapshot: Map<HTMLElement, DOMRect>, projectItems: NodeListOf<HTMLElement>): void {
-    const shiftedProjectItems: HTMLElement[] = [];
-
-    getVisibleProjectItems(projectItems).forEach((projectItem) => {
-      const previousBounds = previousLayoutSnapshot.get(projectItem);
-      if (!previousBounds) {
-        return;
-      }
-
-      const currentBounds = projectItem.getBoundingClientRect();
-      const deltaX = previousBounds.left - currentBounds.left;
-      const deltaY = previousBounds.top - currentBounds.top;
-
-      if (Math.abs(deltaX) <= PROJECT_LAYOUT_SHIFT_TOLERANCE && Math.abs(deltaY) <= PROJECT_LAYOUT_SHIFT_TOLERANCE) {
-        return;
-      }
-
-      projectItem.style.transition = "none";
-      projectItem.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-      shiftedProjectItems.push(projectItem);
-    });
-
-    if (shiftedProjectItems.length === 0) {
-      return;
-    }
-
-    window.requestAnimationFrame(() => {
-      shiftedProjectItems.forEach((projectItem) => {
-        projectItem.style.transition = "";
-        projectItem.style.transform = "";
-      });
-    });
   }
 
   function getProjectItemsInVisualOrder(projectItems: HTMLElement[]): HTMLElement[] {
@@ -270,6 +234,18 @@ const categories = [
     skipVisibilityCleanup = null;
   }
 
+  function clearPendingFilterAnimationTimers(): void {
+    if (filterPhaseTimeoutId !== null) {
+      window.clearTimeout(filterPhaseTimeoutId);
+      filterPhaseTimeoutId = null;
+    }
+
+    if (filterMeasurementTimeoutId !== null) {
+      window.clearTimeout(filterMeasurementTimeoutId);
+      filterMeasurementTimeoutId = null;
+    }
+  }
+
   function initFilters() {
     notifyProjectCardsChanged();
 
@@ -334,8 +310,13 @@ const categories = [
 
     filterButtons.forEach((button) => {
       button.onclick = () => {
+        clearPendingFilterAnimationTimers();
+        activeFilterAnimationToken += 1;
+        const animationToken = activeFilterAnimationToken;
         const filter = button.dataset.filter;
         const revealedProjectItems: HTMLElement[] = [];
+        const retainedProjectItems: HTMLElement[] = [];
+        const hiddenProjectItems: HTMLElement[] = [];
         const transitionDurationMs = getProjectFilterTransitionDurationMs(projectItems[0]);
         const shouldAnimateProjectItems = !prefersReducedMotion() && transitionDurationMs > 0;
 
@@ -347,56 +328,99 @@ const categories = [
         button.classList.add("projects__filter--active");
         button.setAttribute("aria-pressed", "true");
 
+        // Always normalize transient classes before deriving next animation state.
+        projectItems.forEach((item) => {
+          item.style.transitionDelay = "";
+          item.classList.remove("projects__item--hiding");
+        });
+
         // Filter projects with animation
         projectItems.forEach((item) => {
           const category = item.dataset.category;
           const shouldShow = filter === "all" || category === filter;
-          item.style.transitionDelay = "";
+          const isCurrentlyHidden = item.classList.contains("projects__item--hidden");
 
           if (shouldShow) {
-            if (item.classList.contains("projects__item--hidden")) {
-              item.classList.remove("projects__item--hidden");
+            if (isCurrentlyHidden) {
+              item.classList.add("projects__item--hiding");
               revealedProjectItems.push(item);
             } else {
-              item.classList.remove("projects__item--hiding");
+              retainedProjectItems.push(item);
             }
           } else {
-            if (item.classList.contains("projects__item--hidden")) {
+            if (isCurrentlyHidden) {
               return;
             }
 
-            // Hide: add hiding class for animation, then fully hide after transition
-            item.classList.add("projects__item--hiding");
-
-            if (!shouldAnimateProjectItems) {
-              item.classList.add("projects__item--hidden");
-              return;
-            }
-
-            // After transition ends, add hidden class to remove from layout
-            const onTransitionEnd = (event: TransitionEvent) => {
-              if (event.target !== item) {
-                return;
-              }
-
-              if (item.classList.contains("projects__item--hiding")) {
-                const previousLayoutSnapshot = captureProjectLayoutSnapshot(projectItems);
-                item.classList.add("projects__item--hidden");
-
-                if (shouldAnimateProjectItems) {
-                  animateProjectLayoutShift(previousLayoutSnapshot, projectItems);
-                }
-              }
-              item.removeEventListener("transitionend", onTransitionEnd);
-            };
-            item.addEventListener("transitionend", onTransitionEnd);
+            hiddenProjectItems.push(item);
           }
         });
 
-        if (shouldAnimateProjectItems) {
+        if (!shouldAnimateProjectItems) {
+          hiddenProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hidden");
+            item.classList.remove("projects__item--hiding");
+          });
+
+          retainedProjectItems.forEach((item) => {
+            item.classList.remove("projects__item--hiding");
+          });
+
+          revealedProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hiding");
+            item.classList.remove("projects__item--hidden");
+            item.classList.remove("projects__item--hiding");
+          });
+
+          const measurementDelay = 0;
+
+          // Recompute threshold with updated visible items after filter animation.
           window.requestAnimationFrame(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
+            observeSkipToEndVisibility();
+            notifyProjectCardsChanged();
+            filterMeasurementTimeoutId = window.setTimeout(() => {
+              if (animationToken !== activeFilterAnimationToken) {
+                return;
+              }
+
+              observeSkipToEndVisibility();
+              notifyProjectCardsChanged();
+            }, measurementDelay);
+          });
+
+          return;
+        }
+
+        const allVisibleProjectItems = [...retainedProjectItems, ...hiddenProjectItems];
+        allVisibleProjectItems.forEach((item) => {
+          item.classList.add("projects__item--hiding");
+        });
+
+        filterPhaseTimeoutId = window.setTimeout(() => {
+          if (animationToken !== activeFilterAnimationToken) {
+            return;
+          }
+
+          hiddenProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hidden");
+          });
+
+          window.requestAnimationFrame(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
+            retainedProjectItems.forEach((item) => {
+              item.style.transitionDelay = "";
+            });
+
             revealedProjectItems.forEach((item, index) => {
               item.style.transitionDelay = `${index * PROJECT_FILTER_STAGGER_MS}ms`;
+              item.classList.remove("projects__item--hidden");
 
               const onTransitionEnd = (event: TransitionEvent) => {
                 if (event.target !== item) {
@@ -408,23 +432,42 @@ const categories = [
               };
 
               item.addEventListener("transitionend", onTransitionEnd);
-              item.classList.remove("projects__item--hiding");
+            });
+
+            window.requestAnimationFrame(() => {
+              if (animationToken !== activeFilterAnimationToken) {
+                return;
+              }
+
+              retainedProjectItems.forEach((item) => {
+                item.classList.remove("projects__item--hiding");
+              });
+
+              revealedProjectItems.forEach((item) => {
+                item.classList.remove("projects__item--hiding");
+              });
             });
           });
-        } else {
-          revealedProjectItems.forEach((item) => {
-            item.classList.remove("projects__item--hiding");
-          });
-        }
+        }, transitionDurationMs);
 
-        const measurementDelay = shouldAnimateProjectItems ? transitionDurationMs + Math.max(revealedProjectItems.length - 1, 0) * PROJECT_FILTER_STAGGER_MS : 0;
+        const phaseOneDurationMs = transitionDurationMs;
+        const phaseTwoDurationMs = transitionDurationMs + Math.max(revealedProjectItems.length - 1, 0) * PROJECT_FILTER_STAGGER_MS;
+        const measurementDelay = phaseOneDurationMs + phaseTwoDurationMs;
 
         // Recompute threshold with updated visible items after filter animation.
         window.requestAnimationFrame(() => {
+          if (animationToken !== activeFilterAnimationToken) {
+            return;
+          }
+
           observeSkipToEndVisibility();
           notifyProjectCardsChanged();
           // Match hide transition duration for stable post-animation measurement.
-          window.setTimeout(() => {
+          filterMeasurementTimeoutId = window.setTimeout(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
             observeSkipToEndVisibility();
             notifyProjectCardsChanged();
           }, measurementDelay);
@@ -580,7 +623,7 @@ const categories = [
       // Animating state (fading out, but still in layout)
       &--hiding {
         opacity: 0;
-        transform: scale(0.88);
+        transform: translateY(12px) scale(0.97);
         pointer-events: none;
       }
 
