@@ -317,8 +317,7 @@ const categories = [
           });
         });
 
-        const postFilterMeasurementDelay =
-          PROJECT_FILTER_TRANSITION_DURATION_MS + Math.max(revealedProjectItems.length - 1, 0) * PROJECT_FILTER_STAGGER_MS;
+        const postFilterMeasurementDelay = PROJECT_FILTER_TRANSITION_DURATION_MS + Math.max(revealedProjectItems.length - 1, 0) * PROJECT_FILTER_STAGGER_MS;
 
         // Recompute threshold with updated visible items after filter animation.
         window.requestAnimationFrame(() => {
