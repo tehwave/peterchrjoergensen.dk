@@ -102,13 +102,78 @@ const categories = [
 </section>
 
 <script>
+  /**
+   * Projects filter animation model
+   * -------------------------------
+   * We intentionally run filtering as a two-phase sequence to avoid visible layout
+   * jumps and intermittent "entry animation skipped" glitches:
+   *
+   * 1) Exit phase: cards that are currently visible are put in `--hiding`.
+   * 2) Layout commit: filtered-out cards get `--hidden` while everything is still hidden.
+   * 3) Entry phase: cards for the new filter are unhidden first, then in the next frame
+   *    we remove `--hiding` so the browser always sees a transitionable change.
+   *
+   * This extra frame boundary is deliberate. If unhide + de-hide happen in one frame,
+   * browsers may coalesce style updates and render cards instantly with no fade/pop.
+   */
   // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
+  // Monotonic token used as a cancellation guard for async callbacks.
+  // Every click increments the token; stale callbacks bail out.
+  let activeFilterAnimationToken = 0;
+  // Timeout handles used by the two animation phases + post-animation measurement.
+  // We clear these on every new filter click to prevent old callbacks from mutating
+  // state after a newer interaction has started.
+  let filterPhaseTimeoutId: number | null = null;
+  let filterMeasurementTimeoutId: number | null = null;
   const PROJECT_ROW_POSITION_TOLERANCE = 1;
+  const PROJECT_FILTER_STAGGER_MS = 35;
 
   function notifyProjectCardsChanged(): void {
     document.dispatchEvent(new CustomEvent("project-card:waves-sync"));
+  }
+
+  function parseCssTimeToMs(value: string): number {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      return 0;
+    }
+
+    if (trimmedValue.endsWith("ms")) {
+      return Number.parseFloat(trimmedValue);
+    }
+
+    if (trimmedValue.endsWith("s")) {
+      return Number.parseFloat(trimmedValue) * 1000;
+    }
+
+    return 0;
+  }
+
+  function getProjectFilterTransitionDurationMs(projectItem: HTMLElement | undefined): number {
+    if (!projectItem) {
+      return 0;
+    }
+
+    const computedStyle = window.getComputedStyle(projectItem);
+    const durations = computedStyle.transitionDuration.split(",");
+    const delays = computedStyle.transitionDelay.split(",");
+    const transitionCount = Math.max(durations.length, delays.length);
+    let longestTransitionMs = 0;
+
+    for (let index = 0; index < transitionCount; index += 1) {
+      const duration = parseCssTimeToMs(durations[index] ?? durations[durations.length - 1] ?? "0s");
+      const delay = parseCssTimeToMs(delays[index] ?? delays[delays.length - 1] ?? "0s");
+      longestTransitionMs = Math.max(longestTransitionMs, duration + delay);
+    }
+
+    return longestTransitionMs;
+  }
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
   function getVisibleProjectItems(projectItems: NodeListOf<HTMLElement>): HTMLElement[] {
@@ -188,6 +253,21 @@ const categories = [
     skipVisibilityCleanup = null;
   }
 
+  function clearPendingFilterAnimationTimers(): void {
+    // Defensive cleanup for rapid filter switching.
+    // Without this, late timeout callbacks can reapply stale classes and cause
+    // instant-appear behavior or inconsistent entry animations.
+    if (filterPhaseTimeoutId !== null) {
+      window.clearTimeout(filterPhaseTimeoutId);
+      filterPhaseTimeoutId = null;
+    }
+
+    if (filterMeasurementTimeoutId !== null) {
+      window.clearTimeout(filterMeasurementTimeoutId);
+      filterMeasurementTimeoutId = null;
+    }
+  }
+
   function initFilters() {
     notifyProjectCardsChanged();
 
@@ -252,7 +332,17 @@ const categories = [
 
     filterButtons.forEach((button) => {
       button.onclick = () => {
+        // Cancel any in-flight sequencing from previous clicks before starting
+        // a new animation transaction.
+        clearPendingFilterAnimationTimers();
+        activeFilterAnimationToken += 1;
+        const animationToken = activeFilterAnimationToken;
         const filter = button.dataset.filter;
+        const revealedProjectItems: HTMLElement[] = [];
+        const retainedProjectItems: HTMLElement[] = [];
+        const hiddenProjectItems: HTMLElement[] = [];
+        const transitionDurationMs = getProjectFilterTransitionDurationMs(projectItems[0]);
+        const shouldAnimateProjectItems = !prefersReducedMotion() && transitionDurationMs > 0;
 
         // Update active button
         filterButtons.forEach((btn) => {
@@ -262,39 +352,157 @@ const categories = [
         button.classList.add("projects__filter--active");
         button.setAttribute("aria-pressed", "true");
 
+        // Always normalize transient classes before deriving next animation state.
+        // This guarantees we classify cards from a clean baseline.
+        projectItems.forEach((item) => {
+          item.style.transitionDelay = "";
+          item.classList.remove("projects__item--hiding");
+        });
+
         // Filter projects with animation
         projectItems.forEach((item) => {
           const category = item.dataset.category;
           const shouldShow = filter === "all" || category === filter;
+          const isCurrentlyHidden = item.classList.contains("projects__item--hidden");
 
           if (shouldShow) {
-            // Show: remove hiding class, set visible
-            item.classList.remove("projects__item--hiding");
-            item.classList.remove("projects__item--hidden");
+            if (isCurrentlyHidden) {
+              item.classList.add("projects__item--hiding");
+              revealedProjectItems.push(item);
+            } else {
+              retainedProjectItems.push(item);
+            }
           } else {
-            // Hide: add hiding class for animation, then fully hide after transition
-            item.classList.add("projects__item--hiding");
+            if (isCurrentlyHidden) {
+              return;
+            }
 
-            // After transition ends, add hidden class to remove from layout
-            const onTransitionEnd = () => {
-              if (item.classList.contains("projects__item--hiding")) {
-                item.classList.add("projects__item--hidden");
-              }
-              item.removeEventListener("transitionend", onTransitionEnd);
-            };
-            item.addEventListener("transitionend", onTransitionEnd);
+            hiddenProjectItems.push(item);
           }
         });
 
+        if (!shouldAnimateProjectItems) {
+          // Reduced motion / no transition path:
+          // apply final visibility state immediately and skip staged sequencing.
+          hiddenProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hidden");
+            item.classList.remove("projects__item--hiding");
+          });
+
+          retainedProjectItems.forEach((item) => {
+            item.classList.remove("projects__item--hiding");
+          });
+
+          revealedProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hiding");
+            item.classList.remove("projects__item--hidden");
+            item.classList.remove("projects__item--hiding");
+          });
+
+          const measurementDelay = 0;
+
+          // Recompute threshold with updated visible items after filter animation.
+          window.requestAnimationFrame(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
+            observeSkipToEndVisibility();
+            notifyProjectCardsChanged();
+            filterMeasurementTimeoutId = window.setTimeout(() => {
+              if (animationToken !== activeFilterAnimationToken) {
+                return;
+              }
+
+              observeSkipToEndVisibility();
+              notifyProjectCardsChanged();
+            }, measurementDelay);
+          });
+
+          return;
+        }
+
+        const allVisibleProjectItems = [...retainedProjectItems, ...hiddenProjectItems];
+        // Phase 1: pop/fade all currently visible cards out in place.
+        allVisibleProjectItems.forEach((item) => {
+          item.classList.add("projects__item--hiding");
+        });
+
+        filterPhaseTimeoutId = window.setTimeout(() => {
+          if (animationToken !== activeFilterAnimationToken) {
+            return;
+          }
+
+          hiddenProjectItems.forEach((item) => {
+            item.classList.add("projects__item--hidden");
+          });
+
+          window.requestAnimationFrame(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
+            retainedProjectItems.forEach((item) => {
+              item.style.transitionDelay = "";
+            });
+
+            // Phase 2a: unhide entering cards but keep them visually hidden.
+            // This creates a concrete before/after state for the upcoming transition.
+            revealedProjectItems.forEach((item, index) => {
+              item.style.transitionDelay = `${index * PROJECT_FILTER_STAGGER_MS}ms`;
+              item.classList.remove("projects__item--hidden");
+
+              const onTransitionEnd = (event: TransitionEvent) => {
+                if (event.target !== item) {
+                  return;
+                }
+
+                item.style.transitionDelay = "";
+                item.removeEventListener("transitionend", onTransitionEnd);
+              };
+
+              item.addEventListener("transitionend", onTransitionEnd);
+            });
+
+            window.requestAnimationFrame(() => {
+              if (animationToken !== activeFilterAnimationToken) {
+                return;
+              }
+
+              // Phase 2b: remove `--hiding` in a fresh frame to force entry animation.
+              // This is the key fix for "entry sometimes skipped" timing bugs.
+              retainedProjectItems.forEach((item) => {
+                item.classList.remove("projects__item--hiding");
+              });
+
+              revealedProjectItems.forEach((item) => {
+                item.classList.remove("projects__item--hiding");
+              });
+            });
+          });
+        }, transitionDurationMs);
+
+        const phaseOneDurationMs = transitionDurationMs;
+        const phaseTwoDurationMs = transitionDurationMs + Math.max(revealedProjectItems.length - 1, 0) * PROJECT_FILTER_STAGGER_MS;
+        const measurementDelay = phaseOneDurationMs + phaseTwoDurationMs;
+
         // Recompute threshold with updated visible items after filter animation.
         window.requestAnimationFrame(() => {
+          if (animationToken !== activeFilterAnimationToken) {
+            return;
+          }
+
           observeSkipToEndVisibility();
           notifyProjectCardsChanged();
           // Match hide transition duration for stable post-animation measurement.
-          window.setTimeout(() => {
+          filterMeasurementTimeoutId = window.setTimeout(() => {
+            if (animationToken !== activeFilterAnimationToken) {
+              return;
+            }
+
             observeSkipToEndVisibility();
             notifyProjectCardsChanged();
-          }, 320);
+          }, measurementDelay);
         });
       };
     });
@@ -437,8 +645,8 @@ const categories = [
       display: flex;
       min-width: 0;
       transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
+        opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 
       &--featured {
         grid-column: span 2;
@@ -447,7 +655,7 @@ const categories = [
       // Animating state (fading out, but still in layout)
       &--hiding {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translateY(12px) scale(0.97);
         pointer-events: none;
       }
 
@@ -460,6 +668,10 @@ const categories = [
         &--featured {
           grid-column: auto;
         }
+      }
+
+      @include reduced-motion {
+        transition: none;
       }
     }
 
