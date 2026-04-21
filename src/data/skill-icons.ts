@@ -1,14 +1,14 @@
 import { siAlpinedotjs, siBootstrap, siLaravel, siLivewire, siMysql, siPhp, siRedis, type SimpleIcon } from "simple-icons";
 
-const skillIcons: Record<string, SimpleIcon> = {
-  alpinejs: siAlpinedotjs,
-  bootstrap: siBootstrap,
-  laravel: siLaravel,
-  livewire: siLivewire,
-  mysql: siMysql,
-  php: siPhp,
-  redis: siRedis,
-};
+const skillIcons = new Map<string, SimpleIcon>([
+  ["alpinejs", siAlpinedotjs],
+  ["bootstrap", siBootstrap],
+  ["laravel", siLaravel],
+  ["livewire", siLivewire],
+  ["mysql", siMysql],
+  ["php", siPhp],
+  ["redis", siRedis],
+]);
 
 function normalizeSkillLabel(label: string): string {
   return label
@@ -18,5 +18,5 @@ function normalizeSkillLabel(label: string): string {
 }
 
 export function getSkillIcon(label: string): SimpleIcon | undefined {
-  return skillIcons[normalizeSkillLabel(label)];
+  return skillIcons.get(normalizeSkillLabel(label));
 }
