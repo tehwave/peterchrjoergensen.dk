@@ -1,14 +1,5 @@
 ---
-import {
-  siAlpinedotjs,
-  siBootstrap,
-  siLaravel,
-  siLivewire,
-  siMysql,
-  siPhp,
-  siRedis,
-  type SimpleIcon,
-} from "simple-icons";
+import { siAlpinedotjs, siBootstrap, siLaravel, siLivewire, siMysql, siPhp, siRedis, type SimpleIcon } from "simple-icons";
 
 /**
  * Simple skill/technology badge.
@@ -41,7 +32,7 @@ const iconColor = icon ? `#${icon.hex}` : undefined;
   {
     icon && (
       <svg class="skill-tag__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-        <path d={icon.path}></path>
+        <path d={icon.path} />
       </svg>
     )
   }
