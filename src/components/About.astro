@@ -204,33 +204,37 @@ sortedSkills.forEach((skill, index) => {
           The technical stuff? I've got it. Just look below. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
         </p>
         <div class="about__skills about__skills--desktop" aria-label="Skills">
-          <div class="about__skills-track">
-            {
-              skillRowsDesktop.map((row) => (
-                <div class="about__skills-row">
-                  {row.map((skill) => (
-                    <div class="about__skill-item">
-                      <SkillTag label={skill} variant="large" />
-                    </div>
-                  ))}
-                </div>
-              ))
-            }
+          <div class="about__skills-scroll">
+            <div class="about__skills-track">
+              {
+                skillRowsDesktop.map((row) => (
+                  <div class="about__skills-row">
+                    {row.map((skill) => (
+                      <div class="about__skill-item">
+                        <SkillTag label={skill} variant="large" />
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
           </div>
         </div>
         <div class="about__skills about__skills--mobile" aria-label="Skills">
-          <div class="about__skills-track">
-            {
-              skillRowsMobile.map((row) => (
-                <div class="about__skills-row">
-                  {row.map((skill) => (
-                    <div class="about__skill-item">
-                      <SkillTag label={skill} variant="large" />
-                    </div>
-                  ))}
-                </div>
-              ))
-            }
+          <div class="about__skills-scroll">
+            <div class="about__skills-track">
+              {
+                skillRowsMobile.map((row) => (
+                  <div class="about__skills-row">
+                    {row.map((skill) => (
+                      <div class="about__skill-item">
+                        <SkillTag label={skill} variant="large" />
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -349,24 +353,44 @@ sortedSkills.forEach((skill, index) => {
         margin-top: $space-xl;
         width: calc(100vw - var(--about-skills-left, 0px));
         max-width: calc(100vw - var(--about-skills-left, 0px));
+        --about-skills-bleed-left: 0;
+        --about-skills-bleed-right: 0;
         min-width: 0;
-        overflow-x: auto;
-        overflow-y: visible;
+        overflow: hidden;
         padding-bottom: $space-xs;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
 
+        &::before,
         &::after {
           content: "";
           position: absolute;
-          top: -$space-sm;
-          right: 0;
-          bottom: -$space-sm;
+          top: 0;
+          bottom: $space-xs;
           width: $space-4xl;
           pointer-events: none;
+          transition: opacity 0.2s ease;
+          z-index: 2;
+        }
+
+        &::before {
+          left: 0;
+          opacity: var(--about-skills-bleed-left);
+          background: linear-gradient(to left, rgba($color-orange, 0), rgba($color-orange, 0.16));
+        }
+
+        &::after {
+          right: 0;
+          opacity: var(--about-skills-bleed-right);
           background: linear-gradient(to right, rgba($color-orange, 0), rgba($color-orange, 0.16));
         }
+      }
+
+      &__skills-scroll {
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
 
         &::-webkit-scrollbar {
           display: none;
@@ -420,41 +444,94 @@ sortedSkills.forEach((skill, index) => {
 </section>
 
 <script>
+  function syncAboutSkillsBleed(rail: Element) {
+    if (!(rail instanceof HTMLElement)) {
+      return;
+    }
+
+    const wrapper = rail.closest(".about__skills");
+    if (!(wrapper instanceof HTMLElement)) {
+      return;
+    }
+
+    const maxScrollLeft = rail.scrollWidth - rail.clientWidth;
+    const threshold = 2;
+    const fadeDistance = 56;
+
+    if (maxScrollLeft <= threshold) {
+      wrapper.style.setProperty("--about-skills-bleed-left", "0");
+      wrapper.style.setProperty("--about-skills-bleed-right", "0");
+      return;
+    }
+
+    const leftDistance = Math.max(0, rail.scrollLeft - threshold);
+    const rightDistance = Math.max(0, maxScrollLeft - rail.scrollLeft - threshold);
+
+    const bleedLeft = Math.min(leftDistance / fadeDistance, 1);
+    const bleedRight = Math.min(rightDistance / fadeDistance, 1);
+
+    wrapper.style.setProperty("--about-skills-bleed-left", bleedLeft.toFixed(3));
+    wrapper.style.setProperty("--about-skills-bleed-right", bleedRight.toFixed(3));
+  }
+
   function syncAboutSkillsViewportWidth() {
-    const skillsRails = document.querySelectorAll(".about__skills");
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
     skillsRails.forEach((rail) => {
       if (rail instanceof HTMLElement) {
-        const left = Math.max(0, rail.getBoundingClientRect().left);
-        rail.style.setProperty("--about-skills-left", `${left}px`);
+        const wrapper = rail.closest(".about__skills");
+        if (wrapper instanceof HTMLElement) {
+          const left = Math.max(0, wrapper.getBoundingClientRect().left);
+          wrapper.style.setProperty("--about-skills-left", `${left}px`);
+        }
+        syncAboutSkillsBleed(rail);
       }
     });
   }
 
   function resetAboutSkillsScroll() {
-    const skillsRails = document.querySelectorAll(".about__skills");
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
     skillsRails.forEach((rail) => {
       if (rail instanceof HTMLElement) {
         rail.scrollLeft = 0;
+        syncAboutSkillsBleed(rail);
+      }
+    });
+  }
+
+  function bindAboutSkillsScrollHandlers() {
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement && rail.dataset.aboutSkillsBleedBound !== "true") {
+        rail.addEventListener("scroll", () => {
+          syncAboutSkillsBleed(rail);
+        });
+        rail.dataset.aboutSkillsBleedBound = "true";
+        syncAboutSkillsBleed(rail);
       }
     });
   }
 
   function scheduleAboutSkillsReset() {
+    bindAboutSkillsScrollHandlers();
     syncAboutSkillsViewportWidth();
     resetAboutSkillsScroll();
     requestAnimationFrame(() => {
+      bindAboutSkillsScrollHandlers();
       syncAboutSkillsViewportWidth();
       resetAboutSkillsScroll();
       requestAnimationFrame(() => {
+        bindAboutSkillsScrollHandlers();
         syncAboutSkillsViewportWidth();
         resetAboutSkillsScroll();
       });
     });
     window.setTimeout(() => {
+      bindAboutSkillsScrollHandlers();
       syncAboutSkillsViewportWidth();
       resetAboutSkillsScroll();
     }, 80);
     window.setTimeout(() => {
+      bindAboutSkillsScrollHandlers();
       syncAboutSkillsViewportWidth();
       resetAboutSkillsScroll();
     }, 220);
