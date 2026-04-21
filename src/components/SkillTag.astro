@@ -1,5 +1,5 @@
 ---
-import { siAlpinedotjs, siBootstrap, siLaravel, siLivewire, siMysql, siPhp, siRedis, type SimpleIcon } from "simple-icons";
+import { getSkillIcon } from "../data/skill-icons";
 
 /**
  * Simple skill/technology badge.
@@ -14,17 +14,7 @@ interface Props {
 
 const { label, variant = "default" } = Astro.props;
 
-const skillIcons: Record<string, SimpleIcon> = {
-  "Alpine.js": siAlpinedotjs,
-  Bootstrap: siBootstrap,
-  Laravel: siLaravel,
-  Livewire: siLivewire,
-  MySQL: siMysql,
-  PHP: siPhp,
-  Redis: siRedis,
-};
-
-const icon = variant === "large" ? skillIcons[label] : undefined;
+const icon = variant === "large" ? getSkillIcon(label) : undefined;
 const iconColor = icon ? `#${icon.hex}` : undefined;
 ---
 
@@ -74,10 +64,10 @@ const iconColor = icon ? `#${icon.hex}` : undefined;
       flex-shrink: 0;
       color: var(--skill-tag-icon-color, currentColor);
       @include transition(color, 0.2s);
-    }
 
-    &:hover &__icon {
-      color: currentColor;
+      .skill-tag:hover & {
+        color: currentColor;
+      }
     }
 
     &__label {
