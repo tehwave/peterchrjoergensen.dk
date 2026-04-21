@@ -7,7 +7,6 @@
  * hook from the narrative for better scannability.
  */
 import SkillTag from "./SkillTag.astro";
-import AnimateOnScroll from "./AnimateOnScroll.astro";
 import WaterTank from "./WaterTank.astro";
 
 type Props = Record<string, never>;
@@ -165,6 +164,16 @@ const sortedSkills = [...skills].sort((a, b) => {
 
   return a.localeCompare(b, "en", { sensitivity: "base" });
 });
+
+const skillRowsDesktop = Array.from({ length: 5 }, () => [] as string[]);
+sortedSkills.forEach((skill, index) => {
+  skillRowsDesktop[index % 5].push(skill);
+});
+
+const skillRowsMobile = Array.from({ length: 3 }, () => [] as string[]);
+sortedSkills.forEach((skill, index) => {
+  skillRowsMobile[index % 3].push(skill);
+});
 ---
 
 <section class="about" id="about">
@@ -190,19 +199,40 @@ const sortedSkills = [...skills].sort((a, b) => {
             ><strong>the gm(48)</strong>, a GameMaker game jam</a
           > since 2013, helping hundreds of developers bring their ideas to life. I've optimized VR games for budget phones, architected complex web applications, and shipped projects that real people depend
           on every day.
-          <p class="about__text">
-            The technical stuff? I've got it. Just look below. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
-          </p>
-          <div class="about__skills">
+        </p>
+        <p class="about__text">
+          The technical stuff? I've got it. Just look below. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
+        </p>
+        <div class="about__skills about__skills--desktop" aria-label="Skills">
+          <div class="about__skills-track">
             {
-              sortedSkills.map((skill) => (
-                <AnimateOnScroll>
-                  <SkillTag label={skill} variant="large" />
-                </AnimateOnScroll>
+              skillRowsDesktop.map((row) => (
+                <div class="about__skills-row">
+                  {row.map((skill) => (
+                    <div class="about__skill-item">
+                      <SkillTag label={skill} variant="large" />
+                    </div>
+                  ))}
+                </div>
               ))
             }
           </div>
-        </p>
+        </div>
+        <div class="about__skills about__skills--mobile" aria-label="Skills">
+          <div class="about__skills-track">
+            {
+              skillRowsMobile.map((row) => (
+                <div class="about__skills-row">
+                  {row.map((skill) => (
+                    <div class="about__skill-item">
+                      <SkillTag label={skill} variant="large" />
+                    </div>
+                  ))}
+                </div>
+              ))
+            }
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -277,10 +307,13 @@ const sortedSkills = [...skills].sort((a, b) => {
       &__right {
         display: flex;
         align-items: center;
+        min-width: 0;
       }
 
       &__content {
         padding-left: $space-xl;
+        min-width: 0;
+        width: 100%;
 
         @include respond-to(lg) {
           padding-left: 0;
@@ -311,10 +344,67 @@ const sortedSkills = [...skills].sort((a, b) => {
       }
 
       &__skills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: $space-md;
+        position: relative;
+        display: block;
         margin-top: $space-xl;
+        width: calc(100vw - var(--about-skills-left, 0px));
+        max-width: calc(100vw - var(--about-skills-left, 0px));
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: $space-xs;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        &::after {
+          content: "";
+          position: absolute;
+          top: -$space-sm;
+          right: 0;
+          bottom: -$space-sm;
+          width: $space-4xl;
+          pointer-events: none;
+          background: linear-gradient(to right, rgba($color-orange, 0), rgba($color-orange, 0.16));
+        }
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      &__skills-track {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $space-md;
+        width: max-content;
+      }
+
+      &__skills-row {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: $space-md;
+        width: max-content;
+      }
+
+      &__skills--mobile {
+        display: none;
+
+        @include respond-to(md) {
+          display: flex;
+        }
+      }
+
+      &__skills--desktop {
+        @include respond-to(md) {
+          display: none;
+        }
+      }
+
+      &__skill-item {
+        width: max-content;
+        flex: 0 0 auto;
       }
 
       &__link {
@@ -328,3 +418,54 @@ const sortedSkills = [...skills].sort((a, b) => {
     }
   </style>
 </section>
+
+<script>
+  function syncAboutSkillsViewportWidth() {
+    const skillsRails = document.querySelectorAll(".about__skills");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement) {
+        const left = Math.max(0, rail.getBoundingClientRect().left);
+        rail.style.setProperty("--about-skills-left", `${left}px`);
+      }
+    });
+  }
+
+  function resetAboutSkillsScroll() {
+    const skillsRails = document.querySelectorAll(".about__skills");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement) {
+        rail.scrollLeft = 0;
+      }
+    });
+  }
+
+  function scheduleAboutSkillsReset() {
+    syncAboutSkillsViewportWidth();
+    resetAboutSkillsScroll();
+    requestAnimationFrame(() => {
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+      requestAnimationFrame(() => {
+        syncAboutSkillsViewportWidth();
+        resetAboutSkillsScroll();
+      });
+    });
+    window.setTimeout(() => {
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+    }, 80);
+    window.setTimeout(() => {
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+    }, 220);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleAboutSkillsReset, { once: true });
+  } else {
+    scheduleAboutSkillsReset();
+  }
+
+  document.addEventListener("astro:page-load", scheduleAboutSkillsReset);
+  window.addEventListener("resize", scheduleAboutSkillsReset);
+</script>
