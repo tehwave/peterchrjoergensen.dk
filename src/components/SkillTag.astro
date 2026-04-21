@@ -15,7 +15,27 @@ interface Props {
 const { label, variant = "default" } = Astro.props;
 
 const icon = variant === "large" ? getSkillIcon(label) : undefined;
-const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : undefined;
+
+function toLinearSrgb(channelHex: string): number {
+  const channel = Number.parseInt(channelHex, 16) / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function getRelativeLuminance(hex: string): number {
+  const r = toLinearSrgb(hex.slice(0, 2));
+  const g = toLinearSrgb(hex.slice(2, 4));
+  const b = toLinearSrgb(hex.slice(4, 6));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function hasReadableContrastOnWhite(hex: string, minContrast = 1.8): boolean {
+  const luminance = getRelativeLuminance(hex);
+  const contrastAgainstWhite = 1.05 / (luminance + 0.05);
+  return contrastAgainstWhite >= minContrast;
+}
+
+const isValidIconHex = Boolean(icon && /^[0-9a-f]{6}$/i.test(icon.hex));
+const iconColor = icon && isValidIconHex && hasReadableContrastOnWhite(icon.hex) ? `#${icon.hex}` : undefined;
 ---
 
 <span class:list={["skill-tag", `skill-tag--${variant}`]} style={iconColor ? `--skill-tag-icon-color: ${iconColor};` : undefined}>
@@ -55,10 +75,16 @@ const iconColor = icon && /^[0-9a-f]{6}$/i.test(icon.hex) ? `#${icon.hex}` : und
     &--large {
       display: inline-flex;
       align-items: center;
-      gap: $space-xs;
+      gap: $space-sm;
       padding: calc($space-xs + 1px) $space-md;
       font-size: $font-size-base;
       font-weight: $font-weight-medium;
+
+      @include respond-to(md) {
+        flex-direction: column;
+        gap: $space-xs;
+        justify-content: center;
+      }
     }
 
     &__icon {
