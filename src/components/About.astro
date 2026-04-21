@@ -12,6 +12,8 @@ import WaterTank from "./WaterTank.astro";
 
 type Props = Record<string, never>;
 
+type SkillCategory = "languages" | "framework" | "frontend" | "backend" | "cms" | "devops" | "analytics" | "ai" | "tools" | "platforms" | "creative" | "other";
+
 const skills = [
   "Astro",
   "Laravel",
@@ -64,7 +66,7 @@ const skills = [
   "Hotjar",
   "HTML5",
   "Itch.io",
-  "JSON Web Tokens (JWT)",
+  "JWT",
   "Laravel Horizon",
   "Laravel Nova",
   "Linux",
@@ -94,6 +96,75 @@ const skills = [
   "YouTube",
   "Zapier",
 ];
+
+const skillsByCategory: Record<SkillCategory, string[]> = {
+  languages: ["JavaScript", "TypeScript", "PHP", "C#", "Sass", "HTML5", "Markdown"],
+  framework: ["Astro", "Laravel", "WordPress"],
+  frontend: ["Vue.js", "Alpine.js", "Tailwind CSS", "Bootstrap", "jQuery"],
+  backend: ["Laravel Horizon", "Laravel Nova", "Node.js", "MySQL", "SQLite", "JWT", "n8n", "MinIO"],
+  cms: ["WooCommerce", "Drupal", "Elementor", "Roots Bedrock", "WP Rocket", "Yoast"],
+  devops: [
+    "AWS",
+    "Google Cloud",
+    "Cloudflare",
+    "DigitalOcean",
+    "Linux",
+    "Ubuntu",
+    "macOS",
+    "Nginx",
+    "Apache",
+    "Redis",
+    "Webpack",
+    "npm",
+    "nvm",
+    "Git",
+    "GitHub",
+    "Homebrew",
+    "Packagist",
+    "Grunt",
+    "Gulp",
+  ],
+  analytics: ["Google Analytics", "Google Ads", "Google Search Console", "Google Tag Manager", "Facebook Pixel (Meta)", "Hotjar", "Trustpilot"],
+  ai: ["ChatGPT", "Claude", "Google Gemini", "Model Context Protocol"],
+  tools: ["Figma", "Sublime Text", "OBS Studio", "Mailchimp", "Mailgun", "Mailtrap", "Ghostty", "Trello", "Zapier"],
+  platforms: ["YouTube", "Itch.io", "Arduino", "Algolia", "App Store"],
+  creative: ["Unity", "Unreal Engine", "GameMaker", "Blender", "Maya", "VR", "Dungeons & Dragons"],
+  other: [],
+};
+
+const categoryOrder: Record<SkillCategory, number> = {
+  languages: 1,
+  framework: 2,
+  frontend: 3,
+  backend: 4,
+  cms: 5,
+  devops: 6,
+  analytics: 7,
+  ai: 8,
+  tools: 9,
+  platforms: 10,
+  creative: 11,
+  other: 12,
+};
+
+const skillCategoryByLabel = new Map<string, SkillCategory>();
+for (const [category, labels] of Object.entries(skillsByCategory) as Array<[SkillCategory, string[]]>) {
+  for (const label of labels) {
+    skillCategoryByLabel.set(label, category);
+  }
+}
+
+const sortedSkills = [...skills].sort((a, b) => {
+  const categoryA = skillCategoryByLabel.get(a) ?? "other";
+  const categoryB = skillCategoryByLabel.get(b) ?? "other";
+
+  const categoryDelta = categoryOrder[categoryA] - categoryOrder[categoryB];
+  if (categoryDelta !== 0) {
+    return categoryDelta;
+  }
+
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+});
 ---
 
 <section class="about" id="about">
@@ -124,7 +195,7 @@ const skills = [
           </p>
           <div class="about__skills">
             {
-              skills.map((skill) => (
+              sortedSkills.map((skill) => (
                 <AnimateOnScroll>
                   <SkillTag label={skill} variant="large" />
                 </AnimateOnScroll>

@@ -10,6 +10,7 @@ const skillSlugAliases = new Map<string, string>([
   ["chatgpt", "openaigym"],
   ["c#", "dotnet"],
   ["claude", "claude"],
+  ["jwt", "jsonwebtokens"],
   ["maya", "autodeskmaya"],
   ["scss", "sass"],
   ["vr", "oculus"],
