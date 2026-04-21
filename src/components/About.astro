@@ -12,6 +12,8 @@ import WaterTank from "./WaterTank.astro";
 
 type Props = Record<string, never>;
 
+type SkillCategory = "languages" | "framework" | "frontend" | "backend" | "cms" | "devops" | "analytics" | "ai" | "tools" | "platforms" | "creative" | "other";
+
 const skills = [
   "Astro",
   "Laravel",
@@ -22,7 +24,7 @@ const skills = [
   "JavaScript",
   "TypeScript",
   "C#",
-  "SCSS",
+  "Sass",
   "MySQL",
   "WooCommerce",
   "GameMaker",
@@ -32,7 +34,137 @@ const skills = [
   "AWS",
   "Cloudflare",
   "Redis",
+  "Algolia",
+  "Blender",
+  "GitHub",
+  "Drupal",
+  "Maya",
+  "SQLite",
+  "ChatGPT",
+  "Claude",
+  "Alpine.js",
+  "Apache",
+  "Nginx",
+  "App Store",
+  "Arduino",
+  "DigitalOcean",
+  "Dungeons & Dragons",
+  "Elementor",
+  "Unreal Engine",
+  "Figma",
+  "Ghostty",
+  "Git",
+  "Google Analytics",
+  "Google Ads",
+  "Google Cloud",
+  "Google Gemini",
+  "Google Search Console",
+  "Google Tag Manager",
+  "Grunt",
+  "Gulp",
+  "Homebrew",
+  "Hotjar",
+  "HTML5",
+  "Itch.io",
+  "JWT",
+  "Laravel Horizon",
+  "Laravel Nova",
+  "Linux",
+  "macOS",
+  "Mailchimp",
+  "Mailgun",
+  "Mailtrap",
+  "Markdown",
+  "Facebook Pixel (Meta)",
+  "MinIO",
+  "Model Context Protocol",
+  "n8n",
+  "Node.js",
+  "npm",
+  "nvm",
+  "OBS Studio",
+  "Packagist",
+  "Roots Bedrock",
+  "Sublime Text",
+  "Tailwind CSS",
+  "Trello",
+  "Trustpilot",
+  "Ubuntu",
+  "Webpack",
+  "WP Rocket",
+  "Yoast",
+  "YouTube",
+  "Zapier",
 ];
+
+const skillsByCategory: Record<SkillCategory, string[]> = {
+  languages: ["JavaScript", "TypeScript", "PHP", "C#", "Sass", "HTML5", "Markdown"],
+  framework: ["Astro", "Laravel", "WordPress"],
+  frontend: ["Vue.js", "Alpine.js", "Tailwind CSS", "Bootstrap", "jQuery"],
+  backend: ["Laravel Horizon", "Laravel Nova", "Node.js", "MySQL", "SQLite", "JWT", "n8n", "MinIO"],
+  cms: ["WooCommerce", "Drupal", "Elementor", "Roots Bedrock", "WP Rocket", "Yoast"],
+  devops: [
+    "AWS",
+    "Google Cloud",
+    "Cloudflare",
+    "DigitalOcean",
+    "Linux",
+    "Ubuntu",
+    "macOS",
+    "Nginx",
+    "Apache",
+    "Redis",
+    "Webpack",
+    "npm",
+    "nvm",
+    "Git",
+    "GitHub",
+    "Homebrew",
+    "Packagist",
+    "Grunt",
+    "Gulp",
+  ],
+  analytics: ["Google Analytics", "Google Ads", "Google Search Console", "Google Tag Manager", "Facebook Pixel (Meta)", "Hotjar", "Trustpilot"],
+  ai: ["ChatGPT", "Claude", "Google Gemini", "Model Context Protocol"],
+  tools: ["Figma", "Sublime Text", "OBS Studio", "Mailchimp", "Mailgun", "Mailtrap", "Ghostty", "Trello", "Zapier"],
+  platforms: ["YouTube", "Itch.io", "Arduino", "Algolia", "App Store"],
+  creative: ["Unity", "Unreal Engine", "GameMaker", "Blender", "Maya", "VR", "Dungeons & Dragons"],
+  other: [],
+};
+
+const categoryOrder: Record<SkillCategory, number> = {
+  languages: 1,
+  framework: 2,
+  frontend: 3,
+  backend: 4,
+  cms: 5,
+  devops: 6,
+  analytics: 7,
+  ai: 8,
+  tools: 9,
+  platforms: 10,
+  creative: 11,
+  other: 12,
+};
+
+const skillCategoryByLabel = new Map<string, SkillCategory>();
+for (const [category, labels] of Object.entries(skillsByCategory) as Array<[SkillCategory, string[]]>) {
+  for (const label of labels) {
+    skillCategoryByLabel.set(label, category);
+  }
+}
+
+const sortedSkills = [...skills].sort((a, b) => {
+  const categoryA = skillCategoryByLabel.get(a) ?? "other";
+  const categoryB = skillCategoryByLabel.get(b) ?? "other";
+
+  const categoryDelta = categoryOrder[categoryA] - categoryOrder[categoryB];
+  if (categoryDelta !== 0) {
+    return categoryDelta;
+  }
+
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+});
 ---
 
 <section class="about" id="about">
@@ -59,13 +191,13 @@ const skills = [
           > since 2013, helping hundreds of developers bring their ideas to life. I've optimized VR games for budget phones, architected complex web applications, and shipped projects that real people depend
           on every day.
           <p class="about__text">
-            The technical stuff? I've got it. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
+            The technical stuff? I've got it. Just look below. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
           </p>
           <div class="about__skills">
             {
-              skills.map((skill) => (
+              sortedSkills.map((skill) => (
                 <AnimateOnScroll>
-                  <SkillTag label={skill} />
+                  <SkillTag label={skill} variant="large" />
                 </AnimateOnScroll>
               ))
             }
