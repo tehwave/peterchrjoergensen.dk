@@ -102,10 +102,29 @@ const categories = [
 </section>
 
 <script>
+  /**
+   * Projects filter animation model
+   * -------------------------------
+   * We intentionally run filtering as a two-phase sequence to avoid visible layout
+   * jumps and intermittent "entry animation skipped" glitches:
+   *
+   * 1) Exit phase: cards that are currently visible are put in `--hiding`.
+   * 2) Layout commit: filtered-out cards get `--hidden` while everything is still hidden.
+   * 3) Entry phase: cards for the new filter are unhidden first, then in the next frame
+   *    we remove `--hiding` so the browser always sees a transitionable change.
+   *
+   * This extra frame boundary is deliberate. If unhide + de-hide happen in one frame,
+   * browsers may coalesce style updates and render cards instantly with no fade/pop.
+   */
   // Skip CTA listeners are kept at module scope so we can reliably tear them down
   // before re-binding (filters + Astro page swaps).
   let skipVisibilityCleanup: (() => void) | null = null;
+  // Monotonic token used as a cancellation guard for async callbacks.
+  // Every click increments the token; stale callbacks bail out.
   let activeFilterAnimationToken = 0;
+  // Timeout handles used by the two animation phases + post-animation measurement.
+  // We clear these on every new filter click to prevent old callbacks from mutating
+  // state after a newer interaction has started.
   let filterPhaseTimeoutId: number | null = null;
   let filterMeasurementTimeoutId: number | null = null;
   const PROJECT_ROW_POSITION_TOLERANCE = 1;
@@ -235,6 +254,9 @@ const categories = [
   }
 
   function clearPendingFilterAnimationTimers(): void {
+    // Defensive cleanup for rapid filter switching.
+    // Without this, late timeout callbacks can reapply stale classes and cause
+    // instant-appear behavior or inconsistent entry animations.
     if (filterPhaseTimeoutId !== null) {
       window.clearTimeout(filterPhaseTimeoutId);
       filterPhaseTimeoutId = null;
@@ -310,6 +332,8 @@ const categories = [
 
     filterButtons.forEach((button) => {
       button.onclick = () => {
+        // Cancel any in-flight sequencing from previous clicks before starting
+        // a new animation transaction.
         clearPendingFilterAnimationTimers();
         activeFilterAnimationToken += 1;
         const animationToken = activeFilterAnimationToken;
@@ -329,6 +353,7 @@ const categories = [
         button.setAttribute("aria-pressed", "true");
 
         // Always normalize transient classes before deriving next animation state.
+        // This guarantees we classify cards from a clean baseline.
         projectItems.forEach((item) => {
           item.style.transitionDelay = "";
           item.classList.remove("projects__item--hiding");
@@ -357,6 +382,8 @@ const categories = [
         });
 
         if (!shouldAnimateProjectItems) {
+          // Reduced motion / no transition path:
+          // apply final visibility state immediately and skip staged sequencing.
           hiddenProjectItems.forEach((item) => {
             item.classList.add("projects__item--hidden");
             item.classList.remove("projects__item--hiding");
@@ -396,6 +423,7 @@ const categories = [
         }
 
         const allVisibleProjectItems = [...retainedProjectItems, ...hiddenProjectItems];
+        // Phase 1: pop/fade all currently visible cards out in place.
         allVisibleProjectItems.forEach((item) => {
           item.classList.add("projects__item--hiding");
         });
@@ -418,6 +446,8 @@ const categories = [
               item.style.transitionDelay = "";
             });
 
+            // Phase 2a: unhide entering cards but keep them visually hidden.
+            // This creates a concrete before/after state for the upcoming transition.
             revealedProjectItems.forEach((item, index) => {
               item.style.transitionDelay = `${index * PROJECT_FILTER_STAGGER_MS}ms`;
               item.classList.remove("projects__item--hidden");
@@ -439,6 +469,8 @@ const categories = [
                 return;
               }
 
+              // Phase 2b: remove `--hiding` in a fresh frame to force entry animation.
+              // This is the key fix for "entry sometimes skipped" timing bugs.
               retainedProjectItems.forEach((item) => {
                 item.classList.remove("projects__item--hiding");
               });
