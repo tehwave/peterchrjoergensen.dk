@@ -113,9 +113,19 @@ interface Resources {
   populateCooldownUntil: number;
 }
 
+interface IdleGameUpgrades {
+  meadowExpansion: number;
+  siloStorage: number;
+  goldenRations: number;
+}
+
 interface IdleGameState {
   animals: PersistedAnimal[];
+  owned: Record<AnimalSpeciesId, number>;
   resources: Resources;
+  upgrades: IdleGameUpgrades;
+  totalLifetimeCoins: number;
+  stardust: number;
   paused: boolean;
   lastUpdatedAt: number;
   lastMessage: string;
@@ -201,6 +211,7 @@ interface UIRefs {
   population: HTMLElement;
   food: HTMLElement;
   coins: HTMLElement;
+  stardust: HTMLElement;
   mood: HTMLElement;
   summary: HTMLElement;
   feedback: HTMLElement;
@@ -226,6 +237,13 @@ const POPULATE_COOLDOWN_MS = 18000;
 const STARTING_FOOD = 64;
 const STARTING_COINS = 0;
 const STARTING_POPULATION = 5;
+const BASE_FOOD_CAPACITY = 90;
+const BASE_POPULATION_CAP = 20;
+const MAX_VISUAL_ANIMALS = 48;
+const VISUAL_AGGREGATION_THRESHOLD = 10;
+const ANIMAL_COST_GROWTH = 1.15;
+const PRESTIGE_UNLOCK_COINS = 1_000_000;
+const PRESTIGE_MULTIPLIER_PER_STARDUST = 0.1;
 const WORLD_WIDTH = 12;
 const WORLD_DEPTH = 12;
 const WORLD_TILE_COLUMNS = 9;
@@ -302,6 +320,7 @@ const animalDefinitions: AnimalDefinition[] = [
 ];
 
 const animalDefinitionMap = new Map(animalDefinitions.map((d) => [d.id, d]));
+const animalSpeciesIds = animalDefinitions.map((d) => d.id);
 
 // ---------------------------------------------------------------------------
 // Day/night palette system
@@ -475,6 +494,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   // State
   const state = hydrateState();
+  syncDerivedCapacities(state);
   let feedbackMessage = state.lastMessage || "A tiny cozy meadow is ready.";
   let saveTimer = 0;
   let summaryTimer = 0;
@@ -503,6 +523,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   rebuildGround();
   animals.forEach((a) => animalLayer.addChild(a.view.container));
+  reconcileAnimalViews();
 
   for (let i = 0; i < 110; i++) {
     spawnFoliage(true);
@@ -546,18 +567,75 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     updateFeedback(`${animal.definition.label} woke up with a springy bounce!`);
   }
 
+  function reconcileAnimalViews(): void {
+    syncDerivedCapacities(state);
+
+    for (const speciesId of animalSpeciesIds) {
+      const owned = state.owned[speciesId] || 0;
+      const speciesAnimals = animals.filter((animal) => animal.species === speciesId);
+      const targetVisible = getTargetVisibleCount(speciesId);
+
+      for (let i = speciesAnimals.length - 1; i >= targetVisible; i -= 1) {
+        const animal = speciesAnimals[i];
+        const index = animals.indexOf(animal);
+        if (index >= 0) animals.splice(index, 1);
+        animal.view.container.destroy({ children: true });
+      }
+
+      for (let i = speciesAnimals.length; i < targetVisible && animals.length < MAX_VISUAL_ANIMALS; i += 1) {
+        const animal = createAnimal(createPersistedAnimal(speciesId), textures);
+        animals.push(animal);
+        animalLayer.addChild(animal.view.container);
+      }
+
+      if (owned <= 0) state.owned[speciesId] = 0;
+    }
+  }
+
+  function getTargetVisibleCount(speciesId: AnimalSpeciesId): number {
+    const owned = Math.floor(state.owned[speciesId] || 0);
+    if (owned <= 0) return 0;
+    const visualCount = owned > VISUAL_AGGREGATION_THRESHOLD ? 1 : owned;
+    return Math.min(visualCount, Math.max(0, MAX_VISUAL_ANIMALS - countOtherSpeciesVisuals(speciesId)));
+  }
+
+  function countOtherSpeciesVisuals(speciesId: AnimalSpeciesId): number {
+    return animals.reduce((total, animal) => total + (animal.species === speciesId ? 0 : 1), 0);
+  }
+
+  function getTotalPopulation(): number {
+    return sumOwned(state.owned);
+  }
+
+  function getPrestigeMultiplier(): number {
+    return 1 + state.stardust * PRESTIGE_MULTIPLIER_PER_STARDUST;
+  }
+
+  function getTotalCoinsPerSecond(): number {
+    const baseCps = animalDefinitions.reduce((total, def) => total + (state.owned[def.id] || 0) * def.coinsPerSecond, 0);
+    return baseCps * getPrestigeMultiplier();
+  }
+
+  function getManualPower(): number {
+    const capacityPower = Math.max(1, state.resources.foodCapacity / BASE_FOOD_CAPACITY);
+    const cpsPower = Math.max(1, getTotalCoinsPerSecond());
+    return Math.max(1, Math.floor(Math.pow(capacityPower * cpsPower, 0.35) * getGoldenRationsMultiplier(state.upgrades.goldenRations)));
+  }
+
   // Event handlers
   const handleFeed = () => {
     if (state.paused) {
       updateFeedback("Unpause first, then feed.");
       return;
     }
-    if (state.resources.food < FEED_COST) {
+    const feedPower = getManualPower();
+    const feedCost = Math.min(state.resources.foodCapacity, FEED_COST * feedPower);
+    if (state.resources.food < feedCost) {
       updateFeedback("Not enough food yet — wait for it to refill.");
       return;
     }
 
-    state.resources.food = clamp(state.resources.food - FEED_COST, 0, state.resources.foodCapacity);
+    state.resources.food = clamp(state.resources.food - feedCost, 0, state.resources.foodCapacity);
     const feedPoint = { x: randomBetween(-2.2, 2.2), y: randomBetween(-1.8, 1.8) };
 
     const foodCount = Math.floor(randomBetween(1, 3.99));
@@ -582,14 +660,14 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.targetX = clamp(feedPoint.x + randomBetween(-0.6, 0.6), minX(), maxX());
       animal.targetY = clamp(feedPoint.y + randomBetween(-0.6, 0.6), minY(), maxY());
       animal.feedTargetUntil = performance.now() + 3200 + index * 60;
-      animal.hunger = clamp(animal.hunger + 0.34, 0, 1);
-      animal.happiness = clamp(animal.happiness + 0.18, 0, 1);
+      animal.hunger = clamp(animal.hunger + 0.2 + Math.log10(1 + feedPower) * 0.14, 0, 1);
+      animal.happiness = clamp(animal.happiness + 0.12 + Math.log10(1 + feedPower) * 0.08, 0, 1);
       animal.bounceVelocity += reducedMotion ? 2.5 : 6.0;
       animal.turnImpulse = 1;
     });
 
     spawnParticleBurst(feedPoint.x, feedPoint.y, "heart", reducedMotion ? 5 : 9);
-    updateFeedback(`Snack drop! ${nearbyAnimals.length} animals waddling over.`);
+    updateFeedback(`Snack drop x${formatNumber(feedPower)}! ${nearbyAnimals.length} animals waddling over.`);
     persistSoon();
     updateHUD();
     updateSummary();
@@ -601,7 +679,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       updateFeedback("Unpause first.");
       return;
     }
-    if (animals.length >= state.resources.populationCap) {
+    const totalPopulation = getTotalPopulation();
+    if (totalPopulation >= state.resources.populationCap) {
       updateFeedback("Meadow is full!");
       return;
     }
@@ -617,34 +696,27 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       return;
     }
 
-    const species = weightedChoice(animalDefinitions, Math.random);
-    const baby = createAnimal(
-      {
-        id: createAnimalId(),
-        species: species.id,
-        x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
-        y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
-        age: 0,
-        growth: 0.58,
-        hunger: 0.84,
-        happiness: 0.82,
-        sleeping: false,
-      },
-      textures,
-    );
-
-    animals.push(baby);
-    animalLayer.addChild(baby.view.container);
+    const hatchCount = Math.min(state.resources.populationCap - totalPopulation, getManualPower());
+    const hatchCounts = new Map<AnimalSpeciesId, number>();
+    for (let i = 0; i < hatchCount; i += 1) {
+      const species = weightedChoice(animalDefinitions, Math.random);
+      hatchCounts.set(species.id, (hatchCounts.get(species.id) || 0) + 1);
+      state.owned[species.id] = (state.owned[species.id] || 0) + 1;
+    }
+    reconcileAnimalViews();
+    const featuredSpeciesId = hatchCounts.keys().next().value as AnimalSpeciesId | undefined;
+    const featuredBaby = featuredSpeciesId ? animals.find((animal) => animal.species === featuredSpeciesId) : undefined;
     happyAdults.slice(0, 2).forEach((a) => {
       a.happiness = clamp(a.happiness - 0.08, 0, 1);
       a.bounceVelocity += reducedMotion ? 2.0 : 4.5;
     });
     state.resources.populateCooldownUntil = now + POPULATE_COOLDOWN_MS;
-    spawnParticleBurst(baby.x, baby.y, "star", reducedMotion ? 10 : 16);
-    spawnParticleBurst(baby.x, baby.y, "dot", reducedMotion ? 7 : 10);
+    if (featuredBaby) {
+      spawnParticleBurst(featuredBaby.x, featuredBaby.y, "star", reducedMotion ? 10 : 16);
+      spawnParticleBurst(featuredBaby.x, featuredBaby.y, "dot", reducedMotion ? 7 : 10);
+    }
 
-    const rarityLabel = species.rarity !== "common" ? ` (${species.rarity})` : "";
-    updateFeedback(`A tiny ${species.label.toLowerCase()}${rarityLabel} hatched!`);
+    updateFeedback(`${formatNumber(hatchCount)} tiny animals hatched!`);
     persistSoon();
     updateHUD();
     updateSummary();
@@ -699,36 +771,76 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function handleShopBuy(speciesId: AnimalSpeciesId): void {
     const def = animalDefinitionMap.get(speciesId);
     if (!def) return;
-    if (state.resources.coins < def.shopCost) {
+    const cost = getAnimalCost(def, state.owned[speciesId] || 0);
+    if (state.resources.coins < cost) {
       updateFeedback("Not enough coins!");
       return;
     }
-    if (animals.length >= state.resources.populationCap) {
+    if (getTotalPopulation() >= state.resources.populationCap) {
       updateFeedback("Meadow is full!");
       return;
     }
 
-    state.resources.coins -= def.shopCost;
-    const baby = createAnimal(
-      {
-        id: createAnimalId(),
-        species: def.id,
-        x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
-        y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
-        age: 0,
-        growth: 0.58,
-        hunger: 0.84,
-        happiness: 0.82,
-        sleeping: false,
-      },
-      textures,
-    );
-    animals.push(baby);
-    animalLayer.addChild(baby.view.container);
-    spawnParticleBurst(baby.x, baby.y, "star", 16);
-    spawnParticleBurst(baby.x, baby.y, "heart", 8);
+    state.resources.coins -= cost;
+    state.owned[def.id] = (state.owned[def.id] || 0) + 1;
+    reconcileAnimalViews();
+    const representative = animals.find((animal) => animal.species === def.id);
+    if (representative) {
+      spawnParticleBurst(representative.x, representative.y, "star", 16);
+      spawnParticleBurst(representative.x, representative.y, "heart", 8);
+    }
     updateFeedback(`Bought a ${def.rarity} ${def.label.toLowerCase()}!`);
     persistSoon();
+    updateHUD();
+    updateSummary();
+    renderShopList();
+  }
+
+  function handleUpgradeBuy(upgradeId: keyof IdleGameUpgrades): void {
+    const cost = getUpgradeCost(upgradeId, state.upgrades[upgradeId]);
+    if (state.resources.coins < cost) {
+      updateFeedback("Not enough coins!");
+      return;
+    }
+
+    state.resources.coins -= cost;
+    state.upgrades[upgradeId] += 1;
+    syncDerivedCapacities(state);
+    updateFeedback(`${getUpgradeLabel(upgradeId)} upgraded to level ${formatNumber(state.upgrades[upgradeId])}.`);
+    persistSoon();
+    updateHUD();
+    updateSummary();
+    renderShopList();
+  }
+
+  function handlePrestige(): void {
+    if (state.totalLifetimeCoins < PRESTIGE_UNLOCK_COINS) {
+      updateFeedback(`Prestige unlocks at ${formatNumber(PRESTIGE_UNLOCK_COINS)} lifetime coins.`);
+      return;
+    }
+
+    const earnedStardust = Math.max(1, Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS)));
+    animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
+    animals.length = 0;
+    const freshState = createDefaultState();
+    state.animals = freshState.animals;
+    state.owned = freshState.owned;
+    state.resources = freshState.resources;
+    state.upgrades = freshState.upgrades;
+    state.totalLifetimeCoins = 0;
+    state.stardust += earnedStardust;
+    state.paused = false;
+    state.lastMessage = `Prestiged for ${formatNumber(earnedStardust)} Stardust. Passive production is now x${formatNumber(getPrestigeMultiplier())}.`;
+    feedbackMessage = state.lastMessage;
+    state.dayCycleTime = freshState.dayCycleTime;
+    state.animals.forEach((animal) => {
+      const visual = createAnimal(animal, textures);
+      animals.push(visual);
+      animalLayer.addChild(visual.view.container);
+    });
+    reconcileAnimalViews();
+    spawnParticleBurst(0, 0, "star", reducedMotion ? 16 : 28);
+    persistSoon(true);
     updateHUD();
     updateSummary();
     renderShopList();
@@ -737,7 +849,11 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function renderShopList(): void {
     const buyableSpecies = animalDefinitions.filter((d) => d.shopCost > 0);
     ui.shopList.innerHTML = "";
+    const animalSection = createShopSection("Animals", "Costs grow by 15% for every animal you own.");
+    ui.shopList.appendChild(animalSection);
     for (const def of buyableSpecies) {
+      const owned = state.owned[def.id] || 0;
+      const cost = getAnimalCost(def, owned);
       const item = document.createElement("div");
       item.className = "shop-item";
 
@@ -762,20 +878,98 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
       const statsEl = document.createElement("div");
       statsEl.className = "shop-item__stats";
-      statsEl.textContent = `+${def.coinsPerSecond}/s coins`;
+      statsEl.textContent = `Owned: ${formatNumber(owned)} · +${formatNumber(def.coinsPerSecond * getPrestigeMultiplier())}/s coins`;
       info.appendChild(statsEl);
 
       item.appendChild(info);
 
       const btn = document.createElement("button");
       btn.className = "shop-item__buy";
-      btn.textContent = `✨ ${def.shopCost}`;
-      btn.disabled = state.resources.coins < def.shopCost || animals.length >= state.resources.populationCap;
+      btn.textContent = `✨ ${formatNumber(cost)}`;
+      btn.disabled = state.resources.coins < cost || getTotalPopulation() >= state.resources.populationCap;
       btn.addEventListener("click", () => handleShopBuy(def.id));
       item.appendChild(btn);
 
-      ui.shopList.appendChild(item);
+      animalSection.appendChild(item);
     }
+
+    const upgradeSection = createShopSection("Upgrades", "Permanent for this run. Prestige Stardust survives resets.");
+    ui.shopList.appendChild(upgradeSection);
+    (["meadowExpansion", "siloStorage", "goldenRations"] as const).forEach((upgradeId) => {
+      const level = state.upgrades[upgradeId];
+      const cost = getUpgradeCost(upgradeId, level);
+      const item = document.createElement("div");
+      item.className = "shop-item shop-item--upgrade";
+
+      const icon = document.createElement("div");
+      icon.className = "shop-item__emoji";
+      icon.textContent = getUpgradeIcon(upgradeId);
+      item.appendChild(icon);
+
+      const info = document.createElement("div");
+      info.className = "shop-item__info";
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "shop-item__name";
+      nameEl.textContent = getUpgradeLabel(upgradeId);
+      info.appendChild(nameEl);
+
+      const statsEl = document.createElement("div");
+      statsEl.className = "shop-item__stats";
+      statsEl.textContent = `${getUpgradeDescription(upgradeId, level + 1)} · Level ${formatNumber(level)}`;
+      info.appendChild(statsEl);
+      item.appendChild(info);
+
+      const btn = document.createElement("button");
+      btn.className = "shop-item__buy";
+      btn.textContent = `✨ ${formatNumber(cost)}`;
+      btn.disabled = state.resources.coins < cost;
+      btn.addEventListener("click", () => handleUpgradeBuy(upgradeId));
+      item.appendChild(btn);
+      upgradeSection.appendChild(item);
+    });
+
+    const prestigeSection = createShopSection("Prestige", `Reset this run for Stardust. Each Stardust adds +10% passive production.`);
+    ui.shopList.appendChild(prestigeSection);
+    const prestigeItem = document.createElement("div");
+    prestigeItem.className = "shop-item shop-item--prestige";
+    const prestigeIcon = document.createElement("div");
+    prestigeIcon.className = "shop-item__emoji";
+    prestigeIcon.textContent = "🌠";
+    prestigeItem.appendChild(prestigeIcon);
+    const prestigeInfo = document.createElement("div");
+    prestigeInfo.className = "shop-item__info";
+    const prestigeName = document.createElement("div");
+    prestigeName.className = "shop-item__name";
+    prestigeName.textContent = "Stardust Reset";
+    prestigeInfo.appendChild(prestigeName);
+    const prestigeStats = document.createElement("div");
+    prestigeStats.className = "shop-item__stats";
+    const pendingStardust = state.totalLifetimeCoins >= PRESTIGE_UNLOCK_COINS ? Math.max(1, Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS))) : 0;
+    prestigeStats.textContent = `Lifetime: ${formatNumber(state.totalLifetimeCoins)}/${formatNumber(PRESTIGE_UNLOCK_COINS)} · Reward: ${formatNumber(pendingStardust)} Stardust`;
+    prestigeInfo.appendChild(prestigeStats);
+    prestigeItem.appendChild(prestigeInfo);
+    const prestigeButton = document.createElement("button");
+    prestigeButton.className = "shop-item__buy";
+    prestigeButton.textContent = "Prestige";
+    prestigeButton.disabled = state.totalLifetimeCoins < PRESTIGE_UNLOCK_COINS;
+    prestigeButton.addEventListener("click", handlePrestige);
+    prestigeItem.appendChild(prestigeButton);
+    prestigeSection.appendChild(prestigeItem);
+  }
+
+  function createShopSection(title: string, hint: string): HTMLElement {
+    const section = document.createElement("section");
+    section.className = "shop-section";
+    const heading = document.createElement("h3");
+    heading.className = "shop-section__title";
+    heading.textContent = title;
+    section.appendChild(heading);
+    const description = document.createElement("p");
+    description.className = "shop-section__hint";
+    description.textContent = hint;
+    section.appendChild(description);
+    return section;
   }
 
   // --- Main tick ---
@@ -826,7 +1020,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   // --- Tick functions ---
 
   function tickResources(deltaSeconds: number): void {
-    state.resources.food = clamp(state.resources.food + FOOD_REGEN_PER_SECOND * deltaSeconds, 0, state.resources.foodCapacity);
+    state.resources.food = clamp(state.resources.food + FOOD_REGEN_PER_SECOND * getGoldenRationsMultiplier(state.upgrades.goldenRations) * deltaSeconds, 0, state.resources.foodCapacity);
   }
 
   function tickCoins(deltaSeconds: number): void {
@@ -834,13 +1028,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (coinTimer < COIN_TICK_INTERVAL) return;
     coinTimer -= COIN_TICK_INTERVAL;
 
-    let totalCoinsPerSecond = 0;
-    for (const animal of animals) {
-      if (!animal.sleeping && animal.growth >= 0.96) {
-        totalCoinsPerSecond += animal.definition.coinsPerSecond;
-      }
-    }
-    state.resources.coins += totalCoinsPerSecond * COIN_TICK_INTERVAL;
+    const earnedCoins = getTotalCoinsPerSecond() * COIN_TICK_INTERVAL;
+    state.resources.coins += earnedCoins;
+    state.totalLifetimeCoins += earnedCoins;
   }
 
   /**
@@ -1086,7 +1276,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const bob = Math.sin(time * bobFreq + animal.bobPhase) * bobAmp;
       const bounce = animal.bounce * (reducedMotion ? 3 : 7);
       const screen = project(animal.x, animal.y, 0);
-      const scale = animal.spriteScale * animal.growth;
+      const owned = state.owned[animal.species] || 1;
+      const aggregateScale = owned > VISUAL_AGGREGATION_THRESHOLD ? Math.log10(10 + owned) : 1;
+      const scale = animal.spriteScale * animal.growth * aggregateScale;
       const moodTint = isSleeping ? 0xd8d0e8 : applyMoodTint(animal);
       const speed = Math.hypot(animal.vx, animal.vy);
       const stretch = clamp(speed * 0.09 + Math.abs(animal.bounce) * 0.08, 0, reducedMotion ? 0.05 : 0.14);
@@ -1376,31 +1568,35 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   // --- HUD ---
   function updateHUD(): void {
-    const populationPressure = animals.length / state.resources.populationCap;
+    const totalPopulation = getTotalPopulation();
+    const populationPressure = totalPopulation / state.resources.populationCap;
     const averageMood = animals.length === 0 ? 0 : animals.reduce((s, a) => s + a.happiness, 0) / animals.length;
 
     const popEl = ui.population.querySelector("b");
     const foodEl = ui.food.querySelector("b");
     const coinsEl = ui.coins.querySelector("b");
+    const stardustEl = ui.stardust.querySelector("b");
     const moodEl = ui.mood.querySelector("b");
 
-    if (popEl) popEl.textContent = `${animals.length}/${state.resources.populationCap}`;
-    if (foodEl) foodEl.textContent = `${Math.floor(state.resources.food)}/${state.resources.foodCapacity}`;
-    if (coinsEl) coinsEl.textContent = `${Math.floor(state.resources.coins)}`;
+    if (popEl) popEl.textContent = `${formatNumber(totalPopulation)}/${formatNumber(state.resources.populationCap)}`;
+    if (foodEl) foodEl.textContent = `${formatNumber(Math.floor(state.resources.food))}/${formatNumber(state.resources.foodCapacity)}`;
+    if (coinsEl) coinsEl.textContent = `${formatNumber(Math.floor(state.resources.coins))}`;
+    if (stardustEl) stardustEl.textContent = `${formatNumber(state.stardust)} (x${formatNumber(getPrestigeMultiplier())})`;
     if (moodEl) moodEl.textContent = `${Math.round(averageMood * 100)}%`;
 
     ui.feedback.textContent = feedbackMessage;
     ui.pauseButton.textContent = state.paused ? "▶ Play" : "⏸ Pause";
-    ui.feedButton.disabled = state.resources.food < FEED_COST;
-    ui.populateButton.disabled = state.paused || animals.length >= state.resources.populationCap || state.resources.populateCooldownUntil > Date.now();
+    ui.feedButton.disabled = state.resources.food < Math.min(state.resources.foodCapacity, FEED_COST * getManualPower());
+    ui.populateButton.disabled = state.paused || totalPopulation >= state.resources.populationCap || state.resources.populateCooldownUntil > Date.now();
     ui.root.dataset.populationPressure = populationPressure >= 1 ? "full" : populationPressure >= FEEDBACK_LOW_CAP_THRESHOLD ? "warning" : "normal";
   }
 
   function updateSummary(): void {
     const sleepCount = animals.filter((a) => a.sleeping).length;
-    const totalCps = animals.reduce((s, a) => s + (a.sleeping || a.growth < 0.96 ? 0 : a.definition.coinsPerSecond), 0);
+    const totalPopulation = getTotalPopulation();
+    const totalCps = getTotalCoinsPerSecond();
     const awake = animals.length - sleepCount;
-    ui.summary.textContent = `${animals.length} animals (${awake} awake, ${sleepCount} sleeping), ${Math.floor(state.resources.food)} food, ${Math.floor(state.resources.coins)} coins (+${totalCps.toFixed(1)}/s). Tap sleeping animals to wake them!`;
+    ui.summary.textContent = `${formatNumber(totalPopulation)} animals (${awake} visible awake, ${sleepCount} sleeping), ${formatNumber(Math.floor(state.resources.food))} food, ${formatNumber(Math.floor(state.resources.coins))} coins (+${formatNumber(totalCps)}/s), ${formatNumber(state.stardust)} Stardust.`;
   }
 
   function updateFeedback(message: string): void {
@@ -1409,7 +1605,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function updatePopulationPressureFeedback(nowMs: number): void {
-    const isWarning = nowMs > state.resources.populateCooldownUntil && animals.length / state.resources.populationCap >= FEEDBACK_LOW_CAP_THRESHOLD;
+    const isWarning = nowMs > state.resources.populateCooldownUntil && getTotalPopulation() / state.resources.populationCap >= FEEDBACK_LOW_CAP_THRESHOLD;
     const nextState = isWarning ? "warning" : "normal";
     if (nextState === populationPressureState) return;
     populationPressureState = nextState;
@@ -1432,7 +1628,11 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
           happiness: a.happiness,
           sleeping: a.sleeping,
         })),
+        owned: state.owned,
         resources: state.resources,
+        upgrades: state.upgrades,
+        totalLifetimeCoins: state.totalLifetimeCoins,
+        stardust: state.stardust,
         paused: state.paused,
         lastUpdatedAt: state.lastUpdatedAt,
         lastMessage: state.lastMessage,
@@ -1478,6 +1678,7 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const population = root.querySelector<HTMLElement>("[data-idle-game-population]");
   const food = root.querySelector<HTMLElement>("[data-idle-game-food]");
   const coins = root.querySelector<HTMLElement>("[data-idle-game-coins]");
+  const stardust = root.querySelector<HTMLElement>("[data-idle-game-stardust]");
   const mood = root.querySelector<HTMLElement>("[data-idle-game-mood]");
   const summary = root.querySelector<HTMLElement>("[data-idle-game-summary]");
   const feedback = root.querySelector<HTMLElement>("[data-idle-game-feedback]");
@@ -1489,11 +1690,11 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const shopClose = root.querySelector<HTMLButtonElement>("[data-idle-game-shop-close]");
   const shopList = root.querySelector<HTMLElement>("[data-idle-game-shop-list]");
 
-  if (!stage || !population || !food || !coins || !mood || !summary || !feedback || !feedButton || !populateButton || !shopButton || !pauseButton || !shopDrawer || !shopClose || !shopList) {
+  if (!stage || !population || !food || !coins || !stardust || !mood || !summary || !feedback || !feedButton || !populateButton || !shopButton || !pauseButton || !shopDrawer || !shopClose || !shopList) {
     throw new Error("Idle game mount points are missing.");
   }
 
-  return { root, stage, population, food, coins, mood, summary, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
+  return { root, stage, population, food, coins, stardust, mood, summary, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
 }
 
 /**
@@ -1571,11 +1772,13 @@ function persistState(state: IdleGameState): void {
 }
 
 function createDefaultState(): IdleGameState {
+  const owned = createEmptyOwnedRecord();
   const animals = Array.from({ length: STARTING_POPULATION }, (_, i) => {
     const species = weightedChoice(
       animalDefinitions.filter((d) => d.rarity === "common"),
       seededRandom(`starter-${i}`),
     );
+    owned[species.id] += 1;
     return {
       id: createAnimalId(),
       species: species.id,
@@ -1591,7 +1794,11 @@ function createDefaultState(): IdleGameState {
 
   return {
     animals,
-    resources: { food: STARTING_FOOD, foodCapacity: 90, coins: STARTING_COINS, populationCap: 20, populateCooldownUntil: 0 },
+    owned,
+    resources: { food: STARTING_FOOD, foodCapacity: BASE_FOOD_CAPACITY, coins: STARTING_COINS, populationCap: BASE_POPULATION_CAP, populateCooldownUntil: 0 },
+    upgrades: createDefaultUpgrades(),
+    totalLifetimeCoins: 0,
+    stardust: 0,
     paused: false,
     lastUpdatedAt: Date.now(),
     lastMessage: "A fresh pastel meadow has bloomed.",
@@ -1611,10 +1818,7 @@ function applyOfflineCatchup(state: IdleGameState): IdleGameState {
   const elapsedMs = clamp(now - state.lastUpdatedAt, 0, MAX_OFFLINE_MS);
   const elapsedSeconds = elapsedMs / 1000;
 
-  let offlineCoins = 0;
   const animals = state.animals.map((a) => {
-    const def = animalDefinitionMap.get(a.species);
-    if (def && a.growth >= 0.96 && !a.sleeping) offlineCoins += def.coinsPerSecond * elapsedSeconds;
     return {
       ...a,
       sleeping: false,
@@ -1630,8 +1834,6 @@ function applyOfflineCatchup(state: IdleGameState): IdleGameState {
     animals,
     resources: {
       ...state.resources,
-      food: clamp(state.resources.food + FOOD_REGEN_PER_SECOND * elapsedSeconds, 0, state.resources.foodCapacity),
-      coins: (state.resources.coins || 0) + offlineCoins,
       populateCooldownUntil: Math.max(0, state.resources.populateCooldownUntil - elapsedMs),
     },
     dayCycleTime: ((state.dayCycleTime || 0) + elapsedSeconds) % DAY_CYCLE_DURATION,
@@ -1647,24 +1849,33 @@ function validateState(input: unknown): IdleGameState | null {
   const validatedAnimals = c.animals
     .map((a) => validateAnimal(a))
     .filter((a): a is PersistedAnimal => Boolean(a))
-    .slice(0, 30);
+    .slice(0, MAX_VISUAL_ANIMALS);
   const resources = c.resources as Partial<Resources>;
   if (!hasValidResourceShape(resources)) return null;
-
-  return {
+  const upgrades = validateUpgrades(c.upgrades);
+  const owned = validateOwnedRecord(c.owned, validatedAnimals);
+  const state: IdleGameState = {
     animals: validatedAnimals.length > 0 ? validatedAnimals : createDefaultState().animals,
+    owned,
     resources: {
-      food: clamp(resources.food, 0, resources.foodCapacity),
-      foodCapacity: clamp(resources.foodCapacity, 20, 200),
+      food: Math.max(0, resources.food),
+      foodCapacity: Math.max(BASE_FOOD_CAPACITY, resources.foodCapacity),
       coins: Math.max(0, resources.coins || 0),
-      populationCap: clamp(resources.populationCap, 6, 40),
+      populationCap: Math.max(BASE_POPULATION_CAP, resources.populationCap),
       populateCooldownUntil: Math.max(0, resources.populateCooldownUntil),
     },
+    upgrades,
+    totalLifetimeCoins: Math.max(0, typeof c.totalLifetimeCoins === "number" ? c.totalLifetimeCoins : resources.coins || 0),
+    stardust: Math.max(0, typeof c.stardust === "number" ? c.stardust : 0),
     paused: Boolean(c.paused),
     lastUpdatedAt: typeof c.lastUpdatedAt === "number" ? c.lastUpdatedAt : Date.now(),
     lastMessage: typeof c.lastMessage === "string" ? c.lastMessage : "Welcome back to the meadow.",
     dayCycleTime: typeof c.dayCycleTime === "number" ? c.dayCycleTime % DAY_CYCLE_DURATION : 30,
   };
+
+  syncDerivedCapacities(state);
+  state.resources.food = clamp(state.resources.food, 0, state.resources.foodCapacity);
+  return state;
 }
 
 function validateAnimal(input: unknown): PersistedAnimal | null {
@@ -1697,6 +1908,124 @@ function validateAnimal(input: unknown): PersistedAnimal | null {
 
 function hasValidResourceShape(r: Partial<Resources>): r is Resources {
   return typeof r.food === "number" && typeof r.foodCapacity === "number" && typeof r.populationCap === "number" && typeof r.populateCooldownUntil === "number";
+}
+
+function createDefaultUpgrades(): IdleGameUpgrades {
+  return { meadowExpansion: 0, siloStorage: 0, goldenRations: 0 };
+}
+
+function validateUpgrades(input: unknown): IdleGameUpgrades {
+  if (!input || typeof input !== "object") return createDefaultUpgrades();
+  const c = input as Partial<IdleGameUpgrades>;
+  return {
+    meadowExpansion: Math.max(0, Math.floor(c.meadowExpansion || 0)),
+    siloStorage: Math.max(0, Math.floor(c.siloStorage || 0)),
+    goldenRations: Math.max(0, Math.floor(c.goldenRations || 0)),
+  };
+}
+
+function createEmptyOwnedRecord(): Record<AnimalSpeciesId, number> {
+  return animalSpeciesIds.reduce(
+    (record, speciesId) => {
+      record[speciesId] = 0;
+      return record;
+    },
+    {} as Record<AnimalSpeciesId, number>,
+  );
+}
+
+function validateOwnedRecord(input: unknown, fallbackAnimals: PersistedAnimal[]): Record<AnimalSpeciesId, number> {
+  const owned = createEmptyOwnedRecord();
+  if (input && typeof input === "object") {
+    const record = input as Partial<Record<AnimalSpeciesId, number>>;
+    animalSpeciesIds.forEach((speciesId) => {
+      owned[speciesId] = Math.max(0, Math.floor(record[speciesId] || 0));
+    });
+  }
+
+  if (sumOwned(owned) === 0) {
+    fallbackAnimals.forEach((animal) => {
+      owned[animal.species] += 1;
+    });
+  }
+
+  return owned;
+}
+
+function syncDerivedCapacities(state: IdleGameState): void {
+  state.resources.populationCap = getPopulationCap(state.upgrades.meadowExpansion);
+  state.resources.foodCapacity = getFoodCapacity(state.upgrades.siloStorage);
+  state.resources.food = clamp(state.resources.food, 0, state.resources.foodCapacity);
+}
+
+function getPopulationCap(level: number): number {
+  return Math.floor(BASE_POPULATION_CAP * Math.pow(1.75, level));
+}
+
+function getFoodCapacity(level: number): number {
+  return Math.floor(BASE_FOOD_CAPACITY * Math.pow(1.8, level));
+}
+
+function getAnimalCost(definition: AnimalDefinition, owned: number): number {
+  return Math.ceil(definition.shopCost * Math.pow(ANIMAL_COST_GROWTH, owned));
+}
+
+function getUpgradeCost(upgradeId: keyof IdleGameUpgrades, level: number): number {
+  const baseCosts: Record<keyof IdleGameUpgrades, number> = {
+    meadowExpansion: 120,
+    siloStorage: 90,
+    goldenRations: 150,
+  };
+  return Math.ceil(baseCosts[upgradeId] * Math.pow(1.65, level));
+}
+
+function getGoldenRationsMultiplier(level: number): number {
+  return Math.pow(1.45, level);
+}
+
+function getUpgradeLabel(upgradeId: keyof IdleGameUpgrades): string {
+  const labels: Record<keyof IdleGameUpgrades, string> = {
+    meadowExpansion: "Meadow Expansion",
+    siloStorage: "Silo Storage",
+    goldenRations: "Golden Rations",
+  };
+  return labels[upgradeId];
+}
+
+function getUpgradeIcon(upgradeId: keyof IdleGameUpgrades): string {
+  const icons: Record<keyof IdleGameUpgrades, string> = {
+    meadowExpansion: "🌄",
+    siloStorage: "🏺",
+    goldenRations: "🍯",
+  };
+  return icons[upgradeId];
+}
+
+function getUpgradeDescription(upgradeId: keyof IdleGameUpgrades, nextLevel: number): string {
+  const descriptions: Record<keyof IdleGameUpgrades, string> = {
+    meadowExpansion: `Population cap: ${formatNumber(getPopulationCap(nextLevel))} next`,
+    siloStorage: `Food cap: ${formatNumber(getFoodCapacity(nextLevel))} next`,
+    goldenRations: `Manual multiplier: x${formatNumber(getGoldenRationsMultiplier(nextLevel))} next`,
+  };
+  return descriptions[upgradeId];
+}
+
+function sumOwned(owned: Record<AnimalSpeciesId, number>): number {
+  return animalSpeciesIds.reduce((total, speciesId) => total + (owned[speciesId] || 0), 0);
+}
+
+function createPersistedAnimal(species: AnimalSpeciesId): PersistedAnimal {
+  return {
+    id: createAnimalId(),
+    species,
+    x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
+    y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
+    age: randomBetween(4, 14),
+    growth: 1,
+    hunger: 0.84,
+    happiness: 0.82,
+    sleeping: false,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1946,6 +2275,34 @@ function hexToNumber(hex: string): number {
 // ---------------------------------------------------------------------------
 // Utility
 // ---------------------------------------------------------------------------
+
+export function formatNumber(value: number): string {
+  if (!Number.isFinite(value)) return "∞";
+  const sign = value < 0 ? "-" : "";
+  const absolute = Math.abs(value);
+  if (absolute < 1000) {
+    const rounded = absolute >= 100 ? Math.floor(absolute) : Math.round(absolute * 10) / 10;
+    return `${sign}${rounded}`;
+  }
+
+  const suffixes = ["", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
+  const tier = Math.floor(Math.log10(absolute) / 3);
+  const suffix = tier < suffixes.length ? suffixes[tier] : getAlphabeticSuffix(tier - suffixes.length);
+  const scaled = absolute / Math.pow(1000, tier);
+  const formatted = scaled >= 100 ? scaled.toFixed(0) : scaled >= 10 ? scaled.toFixed(1) : scaled.toFixed(2);
+  return `${sign}${formatted.replace(/\.0+$|(\.\d*[1-9])0+$/, "$1")}${suffix}`;
+}
+
+function getAlphabeticSuffix(index: number): string {
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+  let value = index;
+  let suffix = "";
+  do {
+    suffix = alphabet[value % alphabet.length] + suffix;
+    value = Math.floor(value / alphabet.length) - 1;
+  } while (value >= 0);
+  return suffix.padStart(2, "a");
+}
 
 function weightedChoice<T extends { weight: number }>(items: T[], randomValue: () => number): T {
   const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
