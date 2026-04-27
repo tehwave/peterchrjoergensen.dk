@@ -418,6 +418,15 @@ export function initIdleGame(): void {
 // Mount
 // ---------------------------------------------------------------------------
 
+/**
+ * Mounts the Idle Game into the provided container.
+ * 
+ * Sets up a PixiJS application, loads assets, hydrates persisted state,
+ * and starts the main ticker loop handling physics, AI, and rendering.
+ *
+ * @param root - The DOM element acting as the container for the game UI and Canvas.
+ * @returns A promise that resolves to an object containing a `destroy` function to tear down the game.
+ */
 export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const ui = getUIRefs(root);
   const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -482,6 +491,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   let foliageSpawnTimer = 0;
   const animals = state.animals.map((p) => createAnimal(p, textures));
 
+  /**
+   * Translates 3D unit projections utilizing screen vectors.
+   * Leverages iso metrics caching for the exact viewport variables mapping logic onto x,y pixels.
+   * @param worldX - 3D world space coordinate X-axis
+   * @param worldY - 3D world space coordinate Y-axis
+   * @param elevation - Height scale representing Z dimension
+   */
   const project = (worldX: number, worldY: number, elevation = 0) =>
     projectWithViewport(lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH, lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT, worldX, worldY, elevation);
 
@@ -827,6 +843,16 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     state.resources.coins += totalCoinsPerSecond * COIN_TICK_INTERVAL;
   }
 
+  /**
+   * Main behavior loop governing animal pathfinding logic, sleep transitions,
+   * speed variables aligned through frame-locked timestamps, bounds collision
+   * checks, ZZZ particle instantiations.
+   *
+   * Drives hunger decay, separating logic (flocking out collision radii), and bounce ticks.
+   * 
+   * @param deltaSeconds - Elapsed ms representing tick rate
+   * @param prefersReducedMotion - Check overriding bounce parameters and UI feedback
+   */
   function tickAnimals(deltaSeconds: number, prefersReducedMotion: boolean): void {
     const nowMs = Date.now();
     const nowPerf = performance.now();
@@ -974,6 +1000,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     animal.turnImpulse *= 1 - Math.min(6 * deltaSeconds, 1);
   }
 
+  /**
+   * Tracks natural physics logic covering Z-depth mapping logic processing
+   * friction dampening, spin rates and life limit culling upon bounds zero values efficiently removing
+   * DOM clutter reducing GC pressure points.
+   * @param deltaSeconds - Elapsed MS multiplier driving Z calculations
+   * @param prefersReducedMotion - Trims intense visual output requirements
+   */
   function tickParticles(deltaSeconds: number, prefersReducedMotion: boolean): void {
     for (let i = particles.length - 1; i >= 0; i -= 1) {
       const p = particles[i];
@@ -1037,6 +1070,14 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  /**
+   * Final layout cycle iterating active `animals` array assigning scaled modifiers
+   * factoring screen mapping indices, stretching factors referencing velocity, Z-index sort layers
+   * dynamically driven upon Y-origin sorting logic.
+   *
+   * Updates shadow bounds, sleep modifiers, flipping angles, and rarity glows per individual sprite properties.
+   * @param time - Performance timestamp used calculating sine waves powering the idle breathing bob logic
+   */
   function renderAnimals(time: number): void {
     for (const animal of animals) {
       const isSleeping = animal.sleeping;
@@ -1068,6 +1109,12 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  /**
+   * Final projection step driving foliage loops, generating bouncing math against root
+   * positions scaling alpha blends matching maxLife boundaries for fading states.
+   *
+   * Offsets visual sprite mapping over bounding logic ensuring organic placement depth checks.
+   */
   function renderFoliage(): void {
     for (const f of foliageList) {
       let alpha = 1;
@@ -1088,6 +1135,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  /**
+   * Tracks Z-velocity mapping simulated gravity, physics bounces at origin offset 0,
+   * iterating and scrubbing expired instances cleaning memory out loops.
+   *
+   * Extends life traits against delta intervals to handle natural destruction events.
+   * @param deltaSeconds - Elapsed seconds driving velocity math
+   */
   function tickFood(deltaSeconds: number): void {
     for (let i = foodItems.length - 1; i >= 0; i--) {
       const f = foodItems[i];
@@ -1106,6 +1160,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  /**
+   * Final projection step mapping raw logical coordinates against isometric world indices,
+   * modifying Z-planes enforcing depth ordering, scaling and tracking fading lifetimes on sprites.
+   */
   function renderFood(): void {
     for (const f of foodItems) {
       const bounceOffset = f.z * (reducedMotion ? 3 : 7);
@@ -1124,6 +1182,11 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   // --- Background ---
+  /**
+   * Translates active simulation into isometric grid logic regenerating tile vertices,
+   * projecting global palettes modulating light intensities mapping day cycles efficiently
+   * without mutating textures every loop.
+   */
   function renderBackground(): void {
     const w = lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH;
     const h = lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT;
@@ -1433,6 +1496,12 @@ function getUIRefs(root: HTMLElement): UIRefs {
   return { root, stage, population, food, coins, mood, summary, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
 }
 
+/**
+ * Fetches required images, applies "nearest" mode to support crisp pixel art,
+ * returns them neatly packaged onto a Map, keyed precisely by their `src`/`id`.
+ *
+ * @returns Map mapping `id/src` strings into parsed instances of `Texture`.
+ */
 async function loadTextures(): Promise<Map<string, Texture>> {
   if (!texturesPromise) {
     const symbols = [
@@ -1469,6 +1538,14 @@ async function loadTextures(): Promise<Map<string, Texture>> {
 // State persistence
 // ---------------------------------------------------------------------------
 
+/**
+ * Hydrates game state from `localStorage` or generates the starting state.
+ *
+ * Attempts to parse, validate, and simulate offline progression.
+ * Returns the default initial state if persistence is missing or unparseable.
+ *
+ * @returns The structured application state
+ */
 function hydrateState(): IdleGameState {
   if (typeof localStorage === "undefined") return createDefaultState();
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -1483,6 +1560,11 @@ function hydrateState(): IdleGameState {
   }
 }
 
+/**
+ * Writes the active state to the `localStorage` key assigned for offline progression.
+ *
+ * @param state - Current idle game state tree
+ */
 function persistState(state: IdleGameState): void {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1517,6 +1599,13 @@ function createDefaultState(): IdleGameState {
   };
 }
 
+/**
+ * Advances game state to simulate elapsed time away from the active browser window.
+ * Calculates hunger, happiness, day/night cycles, and resources based on constraints.
+ * 
+ * @param state - The loaded, previously persisted idle game state
+ * @returns The modified state aligned to `now()` timeframe
+ */
 function applyOfflineCatchup(state: IdleGameState): IdleGameState {
   const now = Date.now();
   const elapsedMs = clamp(now - state.lastUpdatedAt, 0, MAX_OFFLINE_MS);
@@ -1649,6 +1738,12 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>
   };
 }
 
+/**
+ * Creates visual wrappers consisting of Sprite textures with bottom anchors
+ * bundled atop elliptical shadow Graphics.
+ *
+ * @param texture - The PIXI Texture to load into the new Sprite
+ */
 function createAnimalSprite(texture: Texture): AnimalSpriteView {
   const container = new Container();
   const shadow = new Graphics();
@@ -1666,6 +1761,14 @@ function createAnimalSprite(texture: Texture): AnimalSpriteView {
   return { container, sprite, shadow };
 }
 
+/**
+ * Defines a new physics wrapper around food drops handling bounding sizes, shadows, Z planes,
+ * scale sizes, and life limits to enforce efficient GC and snappy aesthetics.
+ *
+ * @param textures - Global mapped definitions for food sprite assets.
+ * @param assetSrc - A path pointing to a food asset string id format.
+ * @returns Instantiated FoodItem container representing a physics wrapper
+ */
 function createFoodItem(textures: Map<string, Texture>, assetSrc: string): FoodItem {
   const container = new Container();
   const texture = textures.get(assetSrc);
@@ -1705,6 +1808,16 @@ function applyMoodTint(animal: Animal): number {
 // Projection
 // ---------------------------------------------------------------------------
 
+/**
+ * Maps a 3D isometric world unit to a 2D screen coordinate.
+ *
+ * @param width - The current container width.
+ * @param height - The current container height.
+ * @param worldX - X position inside the isometric space.
+ * @param worldY - Y position inside the isometric space.
+ * @param elevation - Z height off the ground (0 based).
+ * @returns 2D window coordinate.
+ */
 function projectWithViewport(width: number, height: number, worldX: number, worldY: number, elevation = 0): { x: number; y: number } {
   const isoX = Math.min(width / 16, 42);
   const isoY = isoX * ISOMETRIC_Y_RATIO;
@@ -1751,6 +1864,13 @@ function pickParticleColor(kind: ParticleKind): number {
 // Day/night interpolation
 // ---------------------------------------------------------------------------
 
+/**
+ * Interpolates smoothly smoothly across DayPalettes utilizing progressive dayCycleTime ratios.
+ * Modulates sky gradients, terrain tiles, stroke colours, and global lighting intensities.
+ *
+ * @param progress - Unit ratio ranging from 0.0 (Dawn) -> 1.0 (Midnight)
+ * @returns Blended DayPalette
+ */
 function interpolateDayPalette(progress: number): DayPalette {
   // 0.0-0.15 dawn, 0.15-0.5 day, 0.5-0.65 sunset, 0.65-1.0 night
   const phases: { start: number; end: number; phase: DayCyclePhase }[] = [
