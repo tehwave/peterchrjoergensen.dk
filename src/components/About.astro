@@ -353,34 +353,14 @@ sortedSkills.forEach((skill, index) => {
         margin-top: $space-xl;
         width: calc(100vw - var(--about-skills-left, 0px));
         max-width: calc(100vw - var(--about-skills-left, 0px));
-        --about-skills-bleed-left: 0;
-        --about-skills-bleed-right: 0;
         min-width: 0;
         overflow: hidden;
         padding-bottom: $space-xs;
 
-        &::before,
-        &::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          bottom: $space-xs;
-          width: $space-4xl;
-          pointer-events: none;
-          transition: opacity 0.2s ease;
-          z-index: 2;
-        }
-
-        &::before {
-          left: 0;
-          opacity: var(--about-skills-bleed-left);
-          background: linear-gradient(to left, rgba($color-orange, 0), rgba($color-orange, 0.16));
-        }
-
-        &::after {
-          right: 0;
-          opacity: var(--about-skills-bleed-right);
-          background: linear-gradient(to right, rgba($color-orange, 0), rgba($color-orange, 0.16));
+        @include respond-to(md) {
+          width: 100vw;
+          max-width: 100vw;
+          margin-left: calc(-1 * var(--about-skills-left, 0px));
         }
       }
 
@@ -427,8 +407,22 @@ sortedSkills.forEach((skill, index) => {
       }
 
       &__skill-item {
+        --about-skill-enter: 1;
+        --about-skill-shift: 0px;
+
         width: max-content;
         flex: 0 0 auto;
+        opacity: var(--about-skill-enter);
+        transform: translateX(var(--about-skill-shift));
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        will-change: opacity, transform;
+
+        @media (prefers-reduced-motion: reduce) {
+          transition: opacity 0.08s linear;
+          transform: none;
+        }
       }
 
       &__link {
@@ -444,34 +438,57 @@ sortedSkills.forEach((skill, index) => {
 </section>
 
 <script>
-  function syncAboutSkillsBleed(rail: Element) {
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function syncAboutSkillsRail(rail: Element) {
     if (!(rail instanceof HTMLElement)) {
       return;
     }
 
-    const wrapper = rail.closest(".about__skills");
-    if (!(wrapper instanceof HTMLElement)) {
+    const items = rail.querySelectorAll(".about__skill-item");
+    if (items.length === 0) {
       return;
     }
 
-    const maxScrollLeft = rail.scrollWidth - rail.clientWidth;
-    const threshold = 2;
-    const fadeDistance = 56;
+    const railRect = rail.getBoundingClientRect();
+    const railCenter = railRect.left + railRect.width / 2;
+    const edgeFadeDistance = 104;
+    const maxOffset = 14;
+    const edgeThreshold = 6;
+    const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    const normalizedScrollLeft = clamp(rail.scrollLeft, 0, maxScrollLeft);
+    const isAtLeftEdge = normalizedScrollLeft <= edgeThreshold;
+    const isAtRightEdge = normalizedScrollLeft >= maxScrollLeft - edgeThreshold;
 
-    if (maxScrollLeft <= threshold) {
-      wrapper.style.setProperty("--about-skills-bleed-left", "0");
-      wrapper.style.setProperty("--about-skills-bleed-right", "0");
-      return;
-    }
+    items.forEach((item) => {
+      if (!(item instanceof HTMLElement)) {
+        return;
+      }
 
-    const leftDistance = Math.max(0, rail.scrollLeft - threshold);
-    const rightDistance = Math.max(0, maxScrollLeft - rail.scrollLeft - threshold);
+      const itemRect = item.getBoundingClientRect();
+      const itemWidth = Math.max(itemRect.width, 1);
+      const visibleLeft = Math.max(itemRect.left, railRect.left);
+      const visibleRight = Math.min(itemRect.right, railRect.right);
+      const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+      const visibilityRatio = clamp(visibleWidth / itemWidth, 0, 1);
 
-    const bleedLeft = Math.min(leftDistance / fadeDistance, 1);
-    const bleedRight = Math.min(rightDistance / fadeDistance, 1);
+      const distanceToLeftEdge = itemRect.left - railRect.left;
+      const distanceToRightEdge = railRect.right - itemRect.right;
+      const leftEdgeProgress = isAtLeftEdge ? 1 : clamp(distanceToLeftEdge / edgeFadeDistance, 0, 1);
+      const rightEdgeProgress = isAtRightEdge ? 1 : clamp(distanceToRightEdge / edgeFadeDistance, 0, 1);
+      const edgeProgress = Math.min(leftEdgeProgress, rightEdgeProgress);
+      const reveal = Math.min(visibilityRatio, edgeProgress);
 
-    wrapper.style.setProperty("--about-skills-bleed-left", bleedLeft.toFixed(3));
-    wrapper.style.setProperty("--about-skills-bleed-right", bleedRight.toFixed(3));
+      const itemCenter = itemRect.left + itemRect.width / 2;
+      const entersFromLeft = itemCenter <= railCenter;
+      const direction = entersFromLeft ? -1 : 1;
+      const shift = (1 - reveal) * maxOffset * direction;
+
+      item.style.setProperty("--about-skill-enter", reveal.toFixed(3));
+      item.style.setProperty("--about-skill-shift", `${shift.toFixed(2)}px`);
+    });
   }
 
   function syncAboutSkillsViewportWidth() {
@@ -483,7 +500,7 @@ sortedSkills.forEach((skill, index) => {
           const left = Math.max(0, wrapper.getBoundingClientRect().left);
           wrapper.style.setProperty("--about-skills-left", `${left}px`);
         }
-        syncAboutSkillsBleed(rail);
+        syncAboutSkillsRail(rail);
       }
     });
   }
@@ -493,20 +510,36 @@ sortedSkills.forEach((skill, index) => {
     skillsRails.forEach((rail) => {
       if (rail instanceof HTMLElement) {
         rail.scrollLeft = 0;
-        syncAboutSkillsBleed(rail);
+        syncAboutSkillsRail(rail);
       }
     });
+  }
+
+  const skillsRailFrameMap = new WeakMap<HTMLElement, number>();
+
+  function scheduleSkillsRailSync(rail: HTMLElement) {
+    const pendingFrame = skillsRailFrameMap.get(rail);
+    if (pendingFrame) {
+      cancelAnimationFrame(pendingFrame);
+    }
+
+    const frame = requestAnimationFrame(() => {
+      syncAboutSkillsRail(rail);
+      skillsRailFrameMap.delete(rail);
+    });
+
+    skillsRailFrameMap.set(rail, frame);
   }
 
   function bindAboutSkillsScrollHandlers() {
     const skillsRails = document.querySelectorAll(".about__skills-scroll");
     skillsRails.forEach((rail) => {
-      if (rail instanceof HTMLElement && rail.dataset.aboutSkillsBleedBound !== "true") {
+      if (rail instanceof HTMLElement && rail.dataset.aboutSkillsScrollBound !== "true") {
         rail.addEventListener("scroll", () => {
-          syncAboutSkillsBleed(rail);
+          scheduleSkillsRailSync(rail);
         });
-        rail.dataset.aboutSkillsBleedBound = "true";
-        syncAboutSkillsBleed(rail);
+        rail.dataset.aboutSkillsScrollBound = "true";
+        syncAboutSkillsRail(rail);
       }
     });
   }
