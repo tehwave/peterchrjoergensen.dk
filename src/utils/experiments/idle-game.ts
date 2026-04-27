@@ -616,6 +616,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function getManualPower(): number {
     const capacityPower = Math.max(1, state.resources.foodCapacity / BASE_FOOD_CAPACITY);
     const cpsPower = Math.max(1, getTotalCoinsPerSecond());
+    // The fractional curve lets manual actions keep pace with exponential systems without making early clicks jump by entire upgrade tiers.
     return Math.max(1, Math.floor(Math.pow(capacityPower * cpsPower, 0.35) * getGoldenRationsMultiplier(state.upgrades.goldenRations)));
   }
 
@@ -1869,8 +1870,8 @@ function validateState(input: unknown): IdleGameState | null {
   const resources = c.resources as Partial<Resources>;
   if (!hasValidResourceShape(resources)) return null;
   const upgrades = validateUpgrades(c.upgrades);
-  const defaultState = validatedAnimals.length > 0 ? null : createDefaultState();
-  const animals = validatedAnimals.length > 0 ? validatedAnimals : defaultState!.animals;
+  const defaultState = createDefaultState();
+  const animals = validatedAnimals.length > 0 ? validatedAnimals : defaultState.animals;
   const owned = validateOwnedRecord(c.owned, animals);
   const state: IdleGameState = {
     animals,
@@ -2299,8 +2300,7 @@ export function formatNumber(value: number): string {
   const sign = value < 0 ? "-" : "";
   const absolute = Math.abs(value);
   if (absolute < 1000) {
-    const rounded = absolute >= 100 ? Math.floor(absolute) : Math.round(absolute * 10) / 10;
-    return `${sign}${rounded}`;
+    return sign + (absolute >= 100 ? absolute.toFixed(0) : absolute.toFixed(1).replace(/\.0$/, ""));
   }
 
   const suffixes = ["", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
@@ -2316,7 +2316,7 @@ function getAlphabeticSuffix(index: number): string {
   let value = index;
   let suffix = "";
   do {
-    suffix = alphabet[value % alphabet.length] + suffix;
+    suffix = alphabet[Math.abs(value % alphabet.length)] + suffix;
     value = Math.floor(value / alphabet.length) - 1;
   } while (value >= 0);
   return suffix.padStart(2, "a");
