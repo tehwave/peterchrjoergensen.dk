@@ -4,6 +4,8 @@ import Layout from "../../layouts/Layout.astro";
 
 <Layout title="Idle Game Experiment | Peter Chr. Jørgensen" description="A pastel PixiJS idle-game experiment with bouncy animal sprites, day/night cycles, rarity tiers, and local persistence.">
   <section class="idle-game" data-idle-game-root>
+    <button class="idle-game__back-button" data-idle-game-back type="button" aria-label="Go back"> ← Back </button>
+
     <div class="idle-game__card">
       <div class="idle-game__playfield">
         <div class="idle-game__stage" data-idle-game-stage></div>
@@ -40,6 +42,33 @@ import Layout from "../../layouts/Layout.astro";
 
   <script>
     import { initIdleGame } from "../../utils/experiments/idle-game";
+
+    const idleGamePageClass = "idle-game-page";
+    const backButtonSelector = "[data-idle-game-back]";
+
+    const applyIdleGamePageClass = () => {
+      document.body.classList.add(idleGamePageClass);
+    };
+
+    const clearIdleGamePageClass = () => {
+      document.body.classList.remove(idleGamePageClass);
+    };
+
+    applyIdleGamePageClass();
+    document.addEventListener("astro:before-preparation", clearIdleGamePageClass, { once: true });
+
+    const backButton = document.querySelector(backButtonSelector);
+
+    if (backButton instanceof HTMLButtonElement) {
+      backButton.addEventListener("click", () => {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+
+        window.location.assign("/");
+      });
+    }
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initIdleGame, { once: true });
@@ -79,6 +108,39 @@ import Layout from "../../layouts/Layout.astro";
       @include respond-to(sm) {
         max-width: 100%;
         border-radius: 22px;
+      }
+    }
+
+    &__back-button {
+      @include focus-ring;
+      position: fixed;
+      top: calc($space-sm + env(safe-area-inset-top));
+      left: $space-sm;
+      z-index: 40;
+      border: 0;
+      border-radius: $radius-full;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-text-light;
+      background: rgba($color-blue-dark, 0.9);
+      backdrop-filter: blur(8px);
+      box-shadow: $shadow-sm;
+      cursor: pointer;
+      transition:
+        transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1),
+        background-color 0.18s cubic-bezier(0.2, 0.7, 0.3, 1),
+        box-shadow 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+
+      &:hover {
+        transform: translateY(-1px);
+        background: rgba($color-blue-dark, 0.96);
+        box-shadow: $shadow-md;
+      }
+
+      &:active {
+        transform: scale(0.97);
       }
     }
 
@@ -367,6 +429,20 @@ import Layout from "../../layouts/Layout.astro";
       &__button {
         transition: none;
       }
+
+      &__back-button {
+        transition: none;
+      }
     }
+  }
+
+  :global(body.idle-game-page .header),
+  :global(body.idle-game-page .footer) {
+    display: none;
+  }
+
+  :global(body.idle-game-page) .idle-game {
+    min-height: 100dvh;
+    padding: $space-sm $space-sm $space-sm;
   }
 </style>

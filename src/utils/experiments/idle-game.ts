@@ -188,6 +188,8 @@ const OFFLINE_HAPPINESS_HUNGER_COUPLING = 0.06;
 const IDLE_BOB_AMPLITUDE = 9;
 const DEFAULT_VIEWPORT_WIDTH = 420;
 const DEFAULT_VIEWPORT_HEIGHT = 560;
+const VIEWPORT_ANCHOR_Y = 0.5;
+const ISOMETRIC_Y_RATIO = 0.72;
 const RECOMMENDED_MAX_DPR = 2;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FEEDBACK_LOW_CAP_THRESHOLD = 0.8;
@@ -917,18 +919,25 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const h = lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT;
     const progress = state.dayCycleTime / DAY_CYCLE_DURATION;
     const pal = interpolateDayPalette(progress);
+    const topColor = hexToNumber(pal.skyTop);
+    const bottomColor = hexToNumber(pal.skyBottom);
+    const gradientBands = 24;
 
     bgGraphics.clear();
-    bgGraphics.rect(0, 0, w, h).fill({ color: hexToNumber(pal.skyBottom) });
 
-    // Gradient overlay
-    const topColor = hexToNumber(pal.skyTop);
-    bgGraphics.rect(0, 0, w, h * 0.6).fill({ color: topColor, alpha: 0.7 });
+    for (let i = 0; i < gradientBands; i += 1) {
+      const t = i / (gradientBands - 1);
+      const easedT = Math.pow(t, 1.08);
+      const color = lerpHex(topColor, bottomColor, easedT);
+      const y = (i / gradientBands) * h;
+      const bandHeight = h / gradientBands + 1;
+      bgGraphics.rect(0, y, w, bandHeight).fill({ color });
+    }
   }
 
   function rebuildGround(): void {
     const width = ui.stage.clientWidth;
-    const height = Math.max(ui.stage.clientHeight, DEFAULT_VIEWPORT_WIDTH);
+    const height = Math.max(ui.stage.clientHeight, DEFAULT_VIEWPORT_HEIGHT);
     lastViewportWidth = width;
     lastViewportHeight = height;
 
@@ -939,9 +948,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const pal = interpolateDayPalette(progress);
 
     const centerX = width * 0.5;
-    const centerY = height * 0.35;
+    const centerY = height * VIEWPORT_ANCHOR_Y;
     const isoX = Math.min(width / 16, 42);
-    const isoY = isoX * 0.48;
+    const isoY = isoX * ISOMETRIC_Y_RATIO;
 
     worldShadow.ellipse(centerX, centerY + isoY * 5.5, isoX * 5.6, isoY * 4.8).fill({
       alpha: pal.shadowAlpha,
@@ -1339,10 +1348,10 @@ function applyMoodTint(animal: Animal): number {
 
 function projectWithViewport(width: number, height: number, worldX: number, worldY: number, elevation = 0): { x: number; y: number } {
   const isoX = Math.min(width / 16, 42);
-  const isoY = isoX * 0.48;
+  const isoY = isoX * ISOMETRIC_Y_RATIO;
   return {
     x: width * 0.5 + (worldX - worldY) * isoX,
-    y: height * 0.34 + (worldX + worldY) * isoY - elevation,
+    y: height * VIEWPORT_ANCHOR_Y + (worldX + worldY) * isoY - elevation,
   };
 }
 
