@@ -439,7 +439,7 @@ export function initIdleGame(): void {
 
 /**
  * Mounts the Idle Game into the provided container.
- * 
+ *
  * Sets up a PixiJS application, loads assets, hydrates persisted state,
  * and starts the main ticker loop handling physics, AI, and rendering.
  *
@@ -822,6 +822,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const earnedStardust = Math.max(1, Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS)));
     animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     animals.length = 0;
+    foodItems.length = 0;
     const freshState = createDefaultState();
     state.animals = freshState.animals;
     state.owned = freshState.owned;
@@ -840,6 +841,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     });
     reconcileAnimalViews();
     spawnParticleBurst(0, 0, "star", reducedMotion ? 16 : 28);
+    lastTime = performance.now();
+    app.ticker.start();
     persistSoon(true);
     updateHUD();
     updateSummary();
@@ -1039,7 +1042,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
    * checks, ZZZ particle instantiations.
    *
    * Drives hunger decay, separating logic (flocking out collision radii), and bounce ticks.
-   * 
+   *
    * @param deltaSeconds - Elapsed ms representing tick rate
    * @param prefersReducedMotion - Check overriding bounce parameters and UI feedback
    */
@@ -1690,7 +1693,23 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const shopClose = root.querySelector<HTMLButtonElement>("[data-idle-game-shop-close]");
   const shopList = root.querySelector<HTMLElement>("[data-idle-game-shop-list]");
 
-  if (!stage || !population || !food || !coins || !stardust || !mood || !summary || !feedback || !feedButton || !populateButton || !shopButton || !pauseButton || !shopDrawer || !shopClose || !shopList) {
+  if (
+    !stage ||
+    !population ||
+    !food ||
+    !coins ||
+    !stardust ||
+    !mood ||
+    !summary ||
+    !feedback ||
+    !feedButton ||
+    !populateButton ||
+    !shopButton ||
+    !pauseButton ||
+    !shopDrawer ||
+    !shopClose ||
+    !shopList
+  ) {
     throw new Error("Idle game mount points are missing.");
   }
 
@@ -1809,7 +1828,7 @@ function createDefaultState(): IdleGameState {
 /**
  * Advances game state to simulate elapsed time away from the active browser window.
  * Calculates hunger, happiness, day/night cycles, and resources based on constraints.
- * 
+ *
  * @param state - The loaded, previously persisted idle game state
  * @returns The modified state aligned to `now()` timeframe
  */
@@ -1853,9 +1872,11 @@ function validateState(input: unknown): IdleGameState | null {
   const resources = c.resources as Partial<Resources>;
   if (!hasValidResourceShape(resources)) return null;
   const upgrades = validateUpgrades(c.upgrades);
-  const owned = validateOwnedRecord(c.owned, validatedAnimals);
+  const defaultState = validatedAnimals.length > 0 ? null : createDefaultState();
+  const animals = validatedAnimals.length > 0 ? validatedAnimals : defaultState!.animals;
+  const owned = validateOwnedRecord(c.owned, animals);
   const state: IdleGameState = {
-    animals: validatedAnimals.length > 0 ? validatedAnimals : createDefaultState().animals,
+    animals,
     owned,
     resources: {
       food: Math.max(0, resources.food),
