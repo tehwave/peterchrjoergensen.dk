@@ -24,8 +24,18 @@ import animalPenguin from "../../assets/experiments/idle-game/animals/animal-pen
 import animalPig from "../../assets/experiments/idle-game/animals/animal-pig.png";
 import animalPolar from "../../assets/experiments/idle-game/animals/animal-polar.png";
 import animalTiger from "../../assets/experiments/idle-game/animals/animal-tiger.png";
+import flowerPurpleA from "../../assets/experiments/idle-game/foliage/flower_purpleA_NE.png";
+import flowerRedA from "../../assets/experiments/idle-game/foliage/flower_redA_NE.png";
+import flowerRedB from "../../assets/experiments/idle-game/foliage/flower_redB_NE.png";
+import flowerYellowA from "../../assets/experiments/idle-game/foliage/flower_yellowA_NE.png";
+import grassLarge from "../../assets/experiments/idle-game/foliage/grass_large_NE.png";
+import grassLeafsLarge from "../../assets/experiments/idle-game/foliage/grass_leafsLarge_NE.png";
+import grassLeafs from "../../assets/experiments/idle-game/foliage/grass_leafs_NE.png";
+import grass from "../../assets/experiments/idle-game/foliage/grass_NE.png";
 import particleHeart from "../../assets/experiments/idle-game/symbols/heart.png";
 import particleStar from "../../assets/experiments/idle-game/symbols/star.png";
+
+const foliageAssets: ImageAsset[] = [flowerPurpleA, flowerRedA, flowerRedB, flowerYellowA, grassLarge, grassLeafsLarge, grassLeafs, grass];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -145,6 +155,19 @@ interface Particle {
   life: number;
   maxLife: number;
   spin: number;
+  baseScale: number;
+}
+
+interface Foliage {
+  view: Container;
+  sprite: Sprite;
+  x: number;
+  y: number;
+  growth: number;
+  life: number;
+  maxLife: number;
+  bounce: number;
+  bounceVelocity: number;
   baseScale: number;
 }
 
@@ -399,6 +422,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const bgLayer = new Container();
   const worldLayer = new Container();
   const particleLayer = new Container();
+  const foliageLayer = new Container();
   const animalLayer = new Container();
   const ground = new Graphics();
   const worldShadow = new Graphics();
@@ -407,10 +431,12 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   bgLayer.addChild(bgGraphics);
   worldLayer.sortableChildren = true;
   particleLayer.sortableChildren = true;
+  foliageLayer.sortableChildren = true;
   animalLayer.sortableChildren = true;
 
   worldLayer.addChild(worldShadow);
   worldLayer.addChild(ground);
+  worldLayer.addChild(foliageLayer);
   worldLayer.addChild(animalLayer);
   app.stage.addChild(bgLayer);
   app.stage.addChild(worldLayer);
@@ -429,6 +455,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   let populationPressureState: "normal" | "warning" = "normal";
   let shopOpen = false;
   const particles: Particle[] = [];
+  const foliageList: Foliage[] = [];
+  let foliageSpawnTimer = 0;
   const animals = state.animals.map((p) => createAnimal(p, textures));
 
   const project = (worldX: number, worldY: number, elevation = 0) =>
@@ -436,6 +464,11 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   rebuildGround();
   animals.forEach((a) => animalLayer.addChild(a.view.container));
+
+  for (let i = 0; i < 110; i++) {
+    spawnFoliage(true);
+  }
+
   updateFeedback(feedbackMessage);
   updateHUD();
   updateSummary();
@@ -469,8 +502,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     animal.bounceVelocity += reducedMotion ? 4.0 : 12.0;
     animal.turnImpulse = 1;
     animal.happiness = clamp(animal.happiness + 0.12, 0, 1);
-    spawnParticleBurst(animal.x, animal.y, "star", reducedMotion ? 6 : 12);
-    spawnParticleBurst(animal.x, animal.y, "heart", reducedMotion ? 3 : 6);
+    spawnParticleBurst(animal.x, animal.y, "star", reducedMotion ? 2 : 4);
+    spawnParticleBurst(animal.x, animal.y, "heart", reducedMotion ? 1 : 2);
     updateFeedback(`${animal.definition.label} woke up with a springy bounce!`);
   }
 
@@ -716,8 +749,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     tickResources(deltaSeconds);
     tickCoins(deltaSeconds);
     tickAnimals(deltaSeconds, reducedMotion);
+    tickFoliage(deltaSeconds, reducedMotion);
     tickParticles(deltaSeconds, reducedMotion);
     renderAnimals(now * 0.001);
+    renderFoliage();
 
     saveTimer += deltaSeconds;
     summaryTimer += deltaSeconds;
@@ -905,12 +940,50 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         continue;
       }
 
-      const { x, y } = project(p.x, p.y, p.z);
+      const screen = project(p.x, p.y, p.z);
       const lifeRatio = p.life / p.maxLife;
-      p.view.position.set(x, y);
-      p.view.alpha = lifeRatio;
-      p.view.scale.set(p.baseScale * (0.6 + (1 - lifeRatio) * 0.45));
-      p.view.zIndex = y + 400;
+      p.view.position.set(screen.x, screen.y);
+      p.view.alpha = Math.min(1, lifeRatio * 3.0); // Keep fully opaque for most of its life
+      p.view.scale.set(p.baseScale * Math.min(1.2, 0.6 + (1 - lifeRatio) * 0.7)); // Slight grow over time
+      p.view.zIndex = screen.y + 400;
+    }
+  }
+
+  function tickFoliage(deltaSeconds: number, prefersReducedMotion: boolean): void {
+    foliageSpawnTimer -= deltaSeconds;
+    if (foliageSpawnTimer <= 0) {
+      foliageSpawnTimer = randomBetween(0.5, 1.5);
+      if (foliageList.length < 120) {
+        spawnFoliage();
+      }
+    }
+
+    for (let i = foliageList.length - 1; i >= 0; i -= 1) {
+      const f = foliageList[i];
+      f.life -= deltaSeconds;
+
+      if (f.life < 0) {
+        f.view.destroy();
+        foliageList.splice(i, 1);
+        continue;
+      }
+
+      if (f.bounce !== 0 || f.bounceVelocity !== 0) {
+        const springTension = prefersReducedMotion ? 40.0 : 120.0;
+        const springDampening = prefersReducedMotion ? 6.0 : 12.0;
+
+        const springForce = -f.bounce * springTension;
+        const dampingForce = -f.bounceVelocity * springDampening;
+        const totalForce = springForce + dampingForce;
+
+        f.bounceVelocity += totalForce * deltaSeconds;
+        f.bounce += f.bounceVelocity * deltaSeconds;
+
+        if (Math.abs(f.bounceVelocity) < 0.05 && Math.abs(f.bounce) < 0.05) {
+          f.bounceVelocity = 0;
+          f.bounce = 0;
+        }
+      }
     }
   }
 
@@ -942,6 +1015,26 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.view.sprite.alpha = isSleeping ? 0.75 : 1;
       animal.view.shadow.scale.set(scale * 0.85 + stretch * 0.15, scale * 0.55 - stretch * 0.08);
       animal.view.shadow.alpha = clamp(0.18 + animal.growth * 0.08 - Math.abs(bob + bounce) * 0.008, 0.08, 0.3);
+    }
+  }
+
+  function renderFoliage(): void {
+    for (const f of foliageList) {
+      let alpha = 1;
+
+      if (f.life < 1.0) {
+        alpha = Math.max(0, f.life); // Fade out
+      } else if (f.maxLife - f.life < 0.5) {
+        alpha = Math.max(0, (f.maxLife - f.life) * 2); // Fade in
+      }
+
+      const bounceOffset = f.bounce * (reducedMotion ? 3 : 7);
+      const screen = project(f.x, f.y, 0);
+
+      f.view.position.set(screen.x, screen.y - bounceOffset);
+      f.view.alpha = alpha;
+      f.view.scale.set(f.baseScale);
+      f.view.zIndex = screen.y - 1; // Sit slightly behind animals at exact y
     }
   }
 
@@ -1011,6 +1104,85 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  function spawnFoliage(instant = false): void {
+    if (foliageAssets.length === 0) return;
+
+    let x = 0;
+    let y = 0;
+    let valid = false;
+
+    // Generate coordinates framing the outside of the 9x9 diamond floor.
+    // The tiles occupy local coordinates x,y from approx -6.5 to +6.5.
+    for (let attempts = 0; attempts < 40; attempts++) {
+      const testX = randomBetween(-11, 11);
+      const testY = randomBetween(-11, 11);
+
+      // 1. Completely exclude the 'painted squares' in the center
+      if (testX > -5.5 && testX < 5.5 && testY > -5.5 && testY < 5.5) {
+        continue;
+      }
+
+      // 2. Bound the outer limits in a circle (becomes a perfect ellipse when projected via isometric math)
+      if (testX * testX + testY * testY > 12.0 * 12.0) {
+        continue;
+      }
+
+      let tooClose = false;
+      for (const f of foliageList) {
+        if (distanceSq(testX, testY, f.x, f.y) < 1.0) {
+          tooClose = true;
+          break;
+        }
+      }
+
+      if (!tooClose) {
+        x = testX;
+        y = testY;
+        valid = true;
+        break;
+      }
+    }
+
+    if (!valid) return;
+
+    const asset = foliageAssets[Math.floor(Math.random() * foliageAssets.length)];
+    const texture = textures.get(asset.src);
+    if (!texture) return;
+
+    const sprite = new Sprite(texture);
+    // Move anchor up to 0.60 to counteract the intrinsic empty padding 
+    // at the bottom of the tall 512x512 canvas graphics
+    sprite.anchor.set(0.5, 0.60);
+
+    const container = new Container();
+    container.addChild(sprite);
+
+    const life = randomBetween(120, 240);
+    const maxLife = instant ? life : life + 0.5;
+
+    // Give it a random flip (1 or -1) and random size
+    const flip = Math.random() > 0.5 ? 1 : -1;
+    const baseScale = randomBetween(0.8, 1.2);
+    // Setting `sprite.scale.x` here, and preserving it when container scale changes
+    sprite.scale.x = flip;
+
+    const f: Foliage = {
+      view: container,
+      sprite,
+      x,
+      y,
+      growth: 1,
+      life,
+      maxLife,
+      bounce: 0,
+      bounceVelocity: instant ? 0 : reducedMotion ? 4 : 12,
+      baseScale,
+    };
+
+    foliageLayer.addChild(f.view);
+    foliageList.push(f);
+  }
+
   function spawnParticleBurst(worldX: number, worldY: number, kind: ParticleKind, count: number): void {
     for (let i = 0; i < count; i += 1) {
       let view: Container;
@@ -1023,7 +1195,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         const sprite = new Sprite(texture);
         sprite.anchor.set(0.5);
         sprite.tint = color;
-        baseScale = size / 22; // Scale sprite down relative to old vector sizes
+        sprite.blendMode = "add"; // Added additive blending to make gray sprites more vibrant and less transparent
+        baseScale = size / 60; // Scale sprite down significantly relative to old vector sizes
         view = sprite;
       } else {
         const graphic = new Graphics();
@@ -1131,6 +1304,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     reducedMotionMedia.removeEventListener("change", handleReducedMotionChange);
     app.ticker.stop();
     particleLayer.removeChildren().forEach((c) => c.destroy());
+    foliageLayer.removeChildren().forEach((c) => c.destroy());
     animalLayer.removeChildren().forEach((c) => c.destroy());
     app.destroy(true, { children: true, texture: false, textureSource: false });
     ui.stage.replaceChildren();
@@ -1187,6 +1361,11 @@ async function loadTextures(): Promise<Map<string, Texture>> {
         const texture = await Assets.load(s.asset.src);
         texture.source.scaleMode = "nearest";
         return [s.id, texture] as const;
+      }),
+      ...foliageAssets.map(async (asset) => {
+        const texture = await Assets.load(asset.src);
+        texture.source.scaleMode = "nearest";
+        return [asset.src, texture] as const;
       }),
     ]).then((entries) => new Map<string, Texture>(entries));
   }
@@ -1436,8 +1615,9 @@ function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number,
 
 function pickParticleColor(kind: ParticleKind): number {
   const colorMap: Record<ParticleKind, number[]> = {
-    heart: basePalette.heart,
-    star: basePalette.sparkle,
+    // Highly saturated colors so they stay vibrant when tinting grey sprites
+    heart: [0xff1144, 0xff3366, 0xff1188],
+    star: [0xffea00, 0xffcc00, 0xffd500],
     zzz: basePalette.zzz,
     dot: basePalette.confetti,
   };
