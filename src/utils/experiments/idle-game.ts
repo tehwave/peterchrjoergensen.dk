@@ -419,6 +419,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   app.canvas.setAttribute("aria-hidden", "true");
 
   // Layers
+  // We use separate layers for foliage and animals. Placing the foliageLayer behind 
+  // the animalLayer ensures dynamic entities are never occluded by static decor.
   const bgLayer = new Container();
   const worldLayer = new Container();
   const particleLayer = new Container();
@@ -1117,12 +1119,14 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const testX = randomBetween(-11, 11);
       const testY = randomBetween(-11, 11);
 
-      // 1. Completely exclude the 'painted squares' in the center
+      // 1. Completely exclude the 'painted squares' in the central play area 
+      //    (-5.5 to +5.5 space) so animals have a clear, unoccluded stage.
       if (testX > -5.5 && testX < 5.5 && testY > -5.5 && testY < 5.5) {
         continue;
       }
 
-      // 2. Bound the outer limits in a circle (becomes a perfect ellipse when projected via isometric math)
+      // 2. Bound the outer limits in a circle (becomes a perfect ellipse when 
+      //    projected via isometric math) to create a natural, organic frame.
       if (testX * testX + testY * testY > 12.0 * 12.0) {
         continue;
       }
@@ -1150,8 +1154,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (!texture) return;
 
     const sprite = new Sprite(texture);
-    // Move anchor up to 0.60 to counteract the intrinsic empty padding 
-    // at the bottom of the tall 512x512 canvas graphics
+    // Counteract intrinsic empty padding at the bottom of the tall 512x512 foliage assets.
+    // Moving the anchor up to 0.60 visually "sinks" the blank space into the ground.
     sprite.anchor.set(0.5, 0.60);
 
     const container = new Container();
@@ -1160,7 +1164,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const life = randomBetween(120, 240);
     const maxLife = instant ? life : life + 0.5;
 
-    // Give it a random flip (1 or -1) and random size
+    // Randomly flip horizontally (1 or -1) to double visual variety from the small
+    // asset pool without polluting standard size scaling on the outer container.
     const flip = Math.random() > 0.5 ? 1 : -1;
     const baseScale = randomBetween(0.8, 1.2);
     // Setting `sprite.scale.x` here, and preserving it when container scale changes
