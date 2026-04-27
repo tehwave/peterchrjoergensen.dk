@@ -35,7 +35,14 @@ import grass from "../../assets/experiments/idle-game/foliage/grass_NE.png";
 import particleHeart from "../../assets/experiments/idle-game/symbols/heart.png";
 import particleStar from "../../assets/experiments/idle-game/symbols/star.png";
 
+import foodApple from "../../assets/experiments/idle-game/food/apple.png";
+import foodBurger from "../../assets/experiments/idle-game/food/burger.png";
+import foodCarrot from "../../assets/experiments/idle-game/food/carrot.png";
+import foodPizza from "../../assets/experiments/idle-game/food/pizza.png";
+import foodWatermelon from "../../assets/experiments/idle-game/food/watermelon.png";
+
 const foliageAssets: ImageAsset[] = [flowerPurpleA, flowerRedA, flowerRedB, flowerYellowA, grassLarge, grassLeafsLarge, grassLeafs, grass];
+const foodAssets: ImageAsset[] = [foodApple, foodBurger, foodCarrot, foodPizza, foodWatermelon];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,6 +139,7 @@ interface Animal extends PersistedAnimal {
   spriteScale: number;
   sleepTimer: number;
   heartTimer: number;
+  snackHeartTimer: number;
   zzzTimer: number;
   wakeBouncePending: boolean;
   definition: AnimalDefinition;
@@ -169,6 +177,18 @@ interface Foliage {
   bounce: number;
   bounceVelocity: number;
   baseScale: number;
+}
+
+interface FoodItem {
+  view: Container;
+  sprite: Sprite;
+  shadow: Graphics;
+  x: number;
+  y: number;
+  z: number;
+  vz: number;
+  life: number;
+  maxLife: number;
 }
 
 interface IdleGameMount {
@@ -419,7 +439,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   app.canvas.setAttribute("aria-hidden", "true");
 
   // Layers
-  // We use separate layers for foliage and animals. Placing the foliageLayer behind 
+  // We use separate layers for foliage and animals. Placing the foliageLayer behind
   // the animalLayer ensures dynamic entities are never occluded by static decor.
   const bgLayer = new Container();
   const worldLayer = new Container();
@@ -458,6 +478,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   let shopOpen = false;
   const particles: Particle[] = [];
   const foliageList: Foliage[] = [];
+  const foodItems: FoodItem[] = [];
   let foliageSpawnTimer = 0;
   const animals = state.animals.map((p) => createAnimal(p, textures));
 
@@ -522,6 +543,18 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
     state.resources.food = clamp(state.resources.food - FEED_COST, 0, state.resources.foodCapacity);
     const feedPoint = { x: randomBetween(-2.2, 2.2), y: randomBetween(-1.8, 1.8) };
+
+    const foodCount = Math.floor(randomBetween(1, 3.99));
+    for (let i = 0; i < foodCount; i++) {
+      const asset = foodAssets[Math.floor(randomBetween(0, foodAssets.length))];
+      const food = createFoodItem(textures, asset.src);
+      food.x = clamp(feedPoint.x + randomBetween(-1.2, 1.2), minX(), maxX());
+      food.y = clamp(feedPoint.y + randomBetween(-1.2, 1.2), minY(), maxY());
+      food.z = randomBetween(2, 4);
+      food.vz = randomBetween(4, 9);
+      foodItems.push(food);
+      animalLayer.addChild(food.view);
+    }
 
     const awakeAnimals = animals.filter((a) => !a.sleeping);
     const nearbyAnimals = awakeAnimals
@@ -753,8 +786,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     tickAnimals(deltaSeconds, reducedMotion);
     tickFoliage(deltaSeconds, reducedMotion);
     tickParticles(deltaSeconds, reducedMotion);
+    tickFood(deltaSeconds);
     renderAnimals(now * 0.001);
     renderFoliage();
+    renderFood();
 
     saveTimer += deltaSeconds;
     summaryTimer += deltaSeconds;
@@ -871,8 +906,21 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const targetDx = animal.targetX - animal.x;
       const targetDy = animal.targetY - animal.y;
       const targetDistance = Math.hypot(targetDx, targetDy) || 1;
+
+      // Snacking behavior
+      const isSnacking = targetDistance < 1.0 && animal.feedTargetUntil > nowPerf;
+      if (isSnacking) {
+        animal.snackHeartTimer -= deltaSeconds;
+        if (animal.snackHeartTimer <= 0) {
+          animal.snackHeartTimer = 0.5 + randomBetween(0, 0.4);
+          if (!prefersReducedMotion) spawnParticleBurst(animal.x, animal.y - 0.4, "heart", 1);
+        }
+      } else {
+        animal.snackHeartTimer = 0.1; // reset when not snacking so it's ready
+      }
+
       const hungerUrgency = 0.6 + (1 - animal.hunger) * 0.45;
-      const maxSpeed = animal.feedTargetUntil > nowPerf ? 1.8 : 1.1 + hungerUrgency * 0.8;
+      const maxSpeed = isSnacking ? 0 : animal.feedTargetUntil > nowPerf ? 1.8 : 1.1 + hungerUrgency * 0.8;
       const desiredX = (targetDx / targetDistance) * maxSpeed + separationX * 0.55;
       const desiredY = (targetDy / targetDistance) * maxSpeed + separationY * 0.55;
 
@@ -1040,6 +1088,41 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  function tickFood(deltaSeconds: number): void {
+    for (let i = foodItems.length - 1; i >= 0; i--) {
+      const f = foodItems[i];
+      f.life -= deltaSeconds;
+      if (f.life <= 0) {
+        f.view.destroy();
+        foodItems.splice(i, 1);
+        continue;
+      }
+      f.vz -= 18 * deltaSeconds; // Gravity
+      f.z += f.vz * deltaSeconds;
+      if (f.z < 0) {
+        f.z = 0;
+        f.vz *= -0.4; // Bounce dampening
+      }
+    }
+  }
+
+  function renderFood(): void {
+    for (const f of foodItems) {
+      const bounceOffset = f.z * (reducedMotion ? 3 : 7);
+      const screen = project(f.x, f.y, 0);
+
+      f.view.position.set(screen.x, screen.y - bounceOffset);
+      f.view.zIndex = screen.y - 1;
+
+      const scale = f.life < 0.3 ? Math.max(0, f.life / 0.3) : 1;
+      f.sprite.scale.set(0.9 * scale);
+
+      f.shadow.position.set(0, bounceOffset);
+      f.shadow.alpha = clamp(0.18 - f.z * 0.04, 0.05, 0.3);
+      f.shadow.scale.set(clamp(1 - f.z * 0.1, 0.5, 1));
+    }
+  }
+
   // --- Background ---
   function renderBackground(): void {
     const w = lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH;
@@ -1119,13 +1202,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const testX = randomBetween(-11, 11);
       const testY = randomBetween(-11, 11);
 
-      // 1. Completely exclude the 'painted squares' in the central play area 
+      // 1. Completely exclude the 'painted squares' in the central play area
       //    (-5.5 to +5.5 space) so animals have a clear, unoccluded stage.
       if (testX > -5.5 && testX < 5.5 && testY > -5.5 && testY < 5.5) {
         continue;
       }
 
-      // 2. Bound the outer limits in a circle (becomes a perfect ellipse when 
+      // 2. Bound the outer limits in a circle (becomes a perfect ellipse when
       //    projected via isometric math) to create a natural, organic frame.
       if (testX * testX + testY * testY > 12.0 * 12.0) {
         continue;
@@ -1156,7 +1239,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const sprite = new Sprite(texture);
     // Counteract intrinsic empty padding at the bottom of the tall 512x512 foliage assets.
     // Moving the anchor up to 0.60 visually "sinks" the blank space into the ground.
-    sprite.anchor.set(0.5, 0.60);
+    sprite.anchor.set(0.5, 0.6);
 
     const container = new Container();
     container.addChild(sprite);
@@ -1372,6 +1455,11 @@ async function loadTextures(): Promise<Map<string, Texture>> {
         texture.source.scaleMode = "nearest";
         return [asset.src, texture] as const;
       }),
+      ...foodAssets.map(async (asset) => {
+        const texture = await Assets.load(asset.src);
+        texture.source.scaleMode = "nearest";
+        return [asset.src, texture] as const;
+      }),
     ]).then((entries) => new Map<string, Texture>(entries));
   }
   return texturesPromise;
@@ -1553,6 +1641,7 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>
     spriteScale: definition.baseScale * scaleJitter,
     sleepTimer: 0,
     heartTimer: randomBetween(0, HEART_EMIT_INTERVAL),
+    snackHeartTimer: 0,
     zzzTimer: 0,
     wakeBouncePending: false,
     definition,
@@ -1575,6 +1664,34 @@ function createAnimalSprite(texture: Texture): AnimalSpriteView {
   container.addChild(sprite);
 
   return { container, sprite, shadow };
+}
+
+function createFoodItem(textures: Map<string, Texture>, assetSrc: string): FoodItem {
+  const container = new Container();
+  const texture = textures.get(assetSrc);
+  if (!texture) throw new Error(`Missing food texture: \${assetSrc}`);
+
+  const shadow = new Graphics();
+  shadow.ellipse(0, -2, 12, 6).fill({ alpha: 0.18, color: basePalette.shadow });
+
+  const sprite = new Sprite(texture);
+  sprite.anchor.set(0.5, 1);
+  sprite.scale.set(0.9);
+
+  container.addChild(shadow);
+  container.addChild(sprite);
+
+  return {
+    view: container,
+    sprite,
+    shadow,
+    x: 0,
+    y: 0,
+    z: 0,
+    vz: 0,
+    life: 3.5,
+    maxLife: 3.5,
+  };
 }
 
 function applyMoodTint(animal: Animal): number {
