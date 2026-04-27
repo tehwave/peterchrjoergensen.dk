@@ -244,6 +244,12 @@ const VISUAL_AGGREGATION_THRESHOLD = 10;
 const ANIMAL_COST_GROWTH = 1.15;
 const PRESTIGE_UNLOCK_COINS = 1_000_000;
 const PRESTIGE_MULTIPLIER_PER_STARDUST = 0.1;
+const MANUAL_POWER_SCALING_EXPONENT = 0.35;
+const BASE_FEED_HUNGER_GAIN = 0.2;
+const FEED_POWER_HUNGER_MULTIPLIER = 0.14;
+const BASE_FEED_HAPPINESS_GAIN = 0.12;
+const FEED_POWER_HAPPINESS_MULTIPLIER = 0.08;
+const AGGREGATE_SCALE_BASE = 10;
 const WORLD_WIDTH = 12;
 const WORLD_DEPTH = 12;
 const WORLD_TILE_COLUMNS = 9;
@@ -617,7 +623,19 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const capacityPower = Math.max(1, state.resources.foodCapacity / BASE_FOOD_CAPACITY);
     const cpsPower = Math.max(1, getTotalCoinsPerSecond());
     // The fractional curve lets manual actions keep pace with exponential systems without making early clicks jump by entire upgrade tiers.
-    return Math.max(1, Math.floor(Math.pow(capacityPower * cpsPower, 0.35) * getGoldenRationsMultiplier(state.upgrades.goldenRations)));
+    return Math.max(1, Math.floor(Math.pow(capacityPower * cpsPower, MANUAL_POWER_SCALING_EXPONENT) * getGoldenRationsMultiplier(state.upgrades.goldenRations)));
+  }
+
+  function getMostHatchedSpecies(hatchCounts: Map<AnimalSpeciesId, number>): AnimalSpeciesId | undefined {
+    let selectedSpecies: AnimalSpeciesId | undefined;
+    let selectedCount = 0;
+    hatchCounts.forEach((count, speciesId) => {
+      if (count > selectedCount) {
+        selectedSpecies = speciesId;
+        selectedCount = count;
+      }
+    });
+    return selectedSpecies;
   }
 
   // Event handlers
@@ -658,8 +676,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.targetX = clamp(feedPoint.x + randomBetween(-0.6, 0.6), minX(), maxX());
       animal.targetY = clamp(feedPoint.y + randomBetween(-0.6, 0.6), minY(), maxY());
       animal.feedTargetUntil = performance.now() + 3200 + index * 60;
-      animal.hunger = clamp(animal.hunger + 0.2 + Math.log10(1 + feedPower) * 0.14, 0, 1);
-      animal.happiness = clamp(animal.happiness + 0.12 + Math.log10(1 + feedPower) * 0.08, 0, 1);
+      animal.hunger = clamp(animal.hunger + BASE_FEED_HUNGER_GAIN + Math.log10(1 + feedPower) * FEED_POWER_HUNGER_MULTIPLIER, 0, 1);
+      animal.happiness = clamp(animal.happiness + BASE_FEED_HAPPINESS_GAIN + Math.log10(1 + feedPower) * FEED_POWER_HAPPINESS_MULTIPLIER, 0, 1);
       animal.bounceVelocity += reducedMotion ? 2.5 : 6.0;
       animal.turnImpulse = 1;
     });
@@ -702,7 +720,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       state.owned[species.id] = (state.owned[species.id] || 0) + 1;
     }
     reconcileAnimalViews();
-    const featuredSpeciesId = hatchCounts.keys().next().value as AnimalSpeciesId | undefined;
+    const featuredSpeciesId = getMostHatchedSpecies(hatchCounts);
     const featuredBaby = featuredSpeciesId ? animals.find((animal) => animal.species === featuredSpeciesId) : undefined;
     happyAdults.slice(0, 2).forEach((a) => {
       a.happiness = clamp(a.happiness - 0.08, 0, 1);
@@ -817,7 +835,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       return;
     }
 
-    const earnedStardust = Math.max(1, Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS)));
+    const earnedStardust = Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS));
     animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     animals.length = 0;
     foodItems.length = 0;
@@ -946,7 +964,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     prestigeInfo.appendChild(prestigeName);
     const prestigeStats = document.createElement("div");
     prestigeStats.className = "shop-item__stats";
-    const pendingStardust = state.totalLifetimeCoins >= PRESTIGE_UNLOCK_COINS ? Math.max(1, Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS))) : 0;
+    const pendingStardust = state.totalLifetimeCoins >= PRESTIGE_UNLOCK_COINS ? Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS)) : 0;
     prestigeStats.textContent = `Lifetime: ${formatNumber(state.totalLifetimeCoins)}/${formatNumber(PRESTIGE_UNLOCK_COINS)} · Reward: ${formatNumber(pendingStardust)} Stardust`;
     prestigeInfo.appendChild(prestigeStats);
     prestigeItem.appendChild(prestigeInfo);
@@ -1278,7 +1296,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const bounce = animal.bounce * (reducedMotion ? 3 : 7);
       const screen = project(animal.x, animal.y, 0);
       const owned = state.owned[animal.species] || 1;
-      const aggregateScale = owned > VISUAL_AGGREGATION_THRESHOLD ? Math.log10(10 + owned) : 1;
+      const aggregateScale = owned > VISUAL_AGGREGATION_THRESHOLD ? Math.log10(AGGREGATE_SCALE_BASE + owned) : 1;
       const scale = animal.spriteScale * animal.growth * aggregateScale;
       const moodTint = isSleeping ? 0xd8d0e8 : applyMoodTint(animal);
       const speed = Math.hypot(animal.vx, animal.vy);
@@ -2316,7 +2334,7 @@ function getAlphabeticSuffix(index: number): string {
   let value = index;
   let suffix = "";
   do {
-    suffix = alphabet[Math.abs(value % alphabet.length)] + suffix;
+    suffix = alphabet[value % alphabet.length] + suffix;
     value = Math.floor(value / alphabet.length) - 1;
   } while (value >= 0);
   return suffix.padStart(2, "a");
