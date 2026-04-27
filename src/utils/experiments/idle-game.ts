@@ -571,7 +571,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     syncDerivedCapacities(state);
 
     for (const speciesId of animalSpeciesIds) {
-      const owned = state.owned[speciesId] || 0;
       const speciesAnimals = animals.filter((animal) => animal.species === speciesId);
       const targetVisible = getTargetVisibleCount(speciesId);
 
@@ -587,8 +586,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         animals.push(animal);
         animalLayer.addChild(animal.view.container);
       }
-
-      if (owned <= 0) state.owned[speciesId] = 0;
     }
   }
 
@@ -1584,7 +1581,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (popEl) popEl.textContent = `${formatNumber(totalPopulation)}/${formatNumber(state.resources.populationCap)}`;
     if (foodEl) foodEl.textContent = `${formatNumber(Math.floor(state.resources.food))}/${formatNumber(state.resources.foodCapacity)}`;
     if (coinsEl) coinsEl.textContent = `${formatNumber(Math.floor(state.resources.coins))}`;
-    if (stardustEl) stardustEl.textContent = `${formatNumber(state.stardust)} (x${formatNumber(getPrestigeMultiplier())})`;
+    if (stardustEl) stardustEl.textContent = `${formatNumber(state.stardust)} (+${formatNumber((getPrestigeMultiplier() - 1) * 100)}%)`;
     if (moodEl) moodEl.textContent = `${Math.round(averageMood * 100)}%`;
 
     ui.feedback.textContent = feedbackMessage;
@@ -1886,7 +1883,7 @@ function validateState(input: unknown): IdleGameState | null {
       populateCooldownUntil: Math.max(0, resources.populateCooldownUntil),
     },
     upgrades,
-    totalLifetimeCoins: Math.max(0, typeof c.totalLifetimeCoins === "number" ? c.totalLifetimeCoins : resources.coins || 0),
+    totalLifetimeCoins: Math.max(0, typeof c.totalLifetimeCoins === "number" ? c.totalLifetimeCoins : 0),
     stardust: Math.max(0, typeof c.stardust === "number" ? c.stardust : 0),
     paused: Boolean(c.paused),
     lastUpdatedAt: typeof c.lastUpdatedAt === "number" ? c.lastUpdatedAt : Date.now(),
@@ -2041,8 +2038,8 @@ function createPersistedAnimal(species: AnimalSpeciesId): PersistedAnimal {
     species,
     x: clamp(randomBetween(-1.4, 1.4), minX(), maxX()),
     y: clamp(randomBetween(-1.1, 1.1), minY(), maxY()),
-    age: randomBetween(4, 14),
-    growth: 1,
+    age: 0,
+    growth: 0.58,
     hunger: 0.84,
     happiness: 0.82,
     sleeping: false,
