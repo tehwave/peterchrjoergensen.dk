@@ -24,6 +24,8 @@ import animalPenguin from "../../assets/experiments/idle-game/animals/animal-pen
 import animalPig from "../../assets/experiments/idle-game/animals/animal-pig.png";
 import animalPolar from "../../assets/experiments/idle-game/animals/animal-polar.png";
 import animalTiger from "../../assets/experiments/idle-game/animals/animal-tiger.png";
+import particleHeart from "../../assets/experiments/idle-game/symbols/heart.png";
+import particleStar from "../../assets/experiments/idle-game/symbols/star.png";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,13 +58,17 @@ type AnimalSpeciesId =
   | "tiger";
 
 type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
-type ParticleKind = "heart" | "sparkle" | "dot" | "zzz";
+type ParticleKind = "heart" | "star" | "dot" | "zzz";
 type DayCyclePhase = "dawn" | "day" | "sunset" | "night";
+
+interface ImageAsset {
+  src: string;
+}
 
 interface AnimalDefinition {
   id: AnimalSpeciesId;
   label: string;
-  asset: string;
+  asset: ImageAsset;
   weight: number;
   baseScale: number;
   rarity: Rarity;
@@ -102,6 +108,8 @@ interface IdleGameState {
 interface Animal extends PersistedAnimal {
   vx: number;
   vy: number;
+  facingDirection: 1 | -1;
+  directionChangeCooldown: number;
   targetX: number;
   targetY: number;
   wanderCooldown: number;
@@ -127,7 +135,7 @@ interface AnimalSpriteView {
 }
 
 interface Particle {
-  graphic: Graphics;
+  view: Container;
   x: number;
   y: number;
   z: number;
@@ -137,6 +145,7 @@ interface Particle {
   life: number;
   maxLife: number;
   spin: number;
+  baseScale: number;
 }
 
 interface IdleGameMount {
@@ -201,6 +210,9 @@ const SLEEP_DURATION_MAX = 18;
 const HEART_EMIT_INTERVAL = 2.5;
 const ZZZ_EMIT_INTERVAL = 1.8;
 const COIN_TICK_INTERVAL = 1.0;
+const DIRECTION_CHANGE_COOLDOWN_MIN = 0.45;
+const DIRECTION_CHANGE_COOLDOWN_MAX = 0.95;
+const DIRECTION_CHANGE_SPEED_THRESHOLD = 0.13;
 
 const RARITY_COLORS: Record<Rarity, number> = {
   common: 0x95a5a6,
@@ -316,7 +328,7 @@ const basePalette = {
 let activeGame: IdleGameMount | null = null;
 let activeMountToken = 0;
 let cleanupRegistered = false;
-let texturesPromise: Promise<Map<AnimalSpeciesId, Texture>> | null = null;
+let texturesPromise: Promise<Map<string, Texture>> | null = null;
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -367,7 +379,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const ui = getUIRefs(root);
   const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
   let reducedMotion = reducedMotionMedia.matches;
-  const textures = await loadAnimalTextures();
+  const textures = await loadTextures();
 
   const app = new Application();
   await app.init({
@@ -454,10 +466,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function wakeAnimal(animal: Animal): void {
     animal.sleeping = false;
     animal.wakeBouncePending = true;
-    animal.bounceVelocity += reducedMotion ? 1.5 : 4.0;
+    animal.bounceVelocity += reducedMotion ? 4.0 : 12.0;
     animal.turnImpulse = 1;
     animal.happiness = clamp(animal.happiness + 0.12, 0, 1);
-    spawnParticleBurst(animal.x, animal.y, "sparkle", reducedMotion ? 6 : 12);
+    spawnParticleBurst(animal.x, animal.y, "star", reducedMotion ? 6 : 12);
     spawnParticleBurst(animal.x, animal.y, "heart", reducedMotion ? 3 : 6);
     updateFeedback(`${animal.definition.label} woke up with a springy bounce!`);
   }
@@ -488,7 +500,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       animal.feedTargetUntil = performance.now() + 3200 + index * 60;
       animal.hunger = clamp(animal.hunger + 0.34, 0, 1);
       animal.happiness = clamp(animal.happiness + 0.18, 0, 1);
-      animal.bounceVelocity += reducedMotion ? 0.8 : 1.8;
+      animal.bounceVelocity += reducedMotion ? 2.5 : 6.0;
       animal.turnImpulse = 1;
     });
 
@@ -541,10 +553,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     animalLayer.addChild(baby.view.container);
     happyAdults.slice(0, 2).forEach((a) => {
       a.happiness = clamp(a.happiness - 0.08, 0, 1);
-      a.bounceVelocity += reducedMotion ? 0.6 : 1.2;
+      a.bounceVelocity += reducedMotion ? 2.0 : 4.5;
     });
     state.resources.populateCooldownUntil = now + POPULATE_COOLDOWN_MS;
-    spawnParticleBurst(baby.x, baby.y, "sparkle", reducedMotion ? 10 : 16);
+    spawnParticleBurst(baby.x, baby.y, "star", reducedMotion ? 10 : 16);
     spawnParticleBurst(baby.x, baby.y, "dot", reducedMotion ? 7 : 10);
 
     const rarityLabel = species.rarity !== "common" ? ` (${species.rarity})` : "";
@@ -629,7 +641,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     );
     animals.push(baby);
     animalLayer.addChild(baby.view.container);
-    spawnParticleBurst(baby.x, baby.y, "sparkle", 16);
+    spawnParticleBurst(baby.x, baby.y, "star", 16);
     spawnParticleBurst(baby.x, baby.y, "heart", 8);
     updateFeedback(`Bought a ${def.rarity} ${def.label.toLowerCase()}!`);
     persistSoon();
@@ -647,7 +659,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
       const img = document.createElement("img");
       img.className = "shop-item__icon";
-      img.src = def.asset;
+      img.src = def.asset.src;
       img.alt = def.label;
       item.appendChild(img);
 
@@ -764,7 +776,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         }
         if (animal.sleepTimer <= 0) {
           animal.sleeping = false;
-          animal.bounceVelocity += 0.6;
+          animal.bounceVelocity += prefersReducedMotion ? 2.5 : 8.0;
         }
         // Sleeping animals don't move, but still apply spring physics for visual
         tickAnimalSpring(animal, deltaSeconds, prefersReducedMotion);
@@ -790,15 +802,17 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       // Wake bounce effect
       if (animal.wakeBouncePending) {
         animal.wakeBouncePending = false;
-        animal.bounceVelocity += prefersReducedMotion ? 1.5 : 3.5;
+        animal.bounceVelocity += prefersReducedMotion ? 4.0 : 12.0;
       }
 
       // Wandering
       animal.wanderCooldown -= deltaSeconds;
+      animal.directionChangeCooldown = Math.max(0, animal.directionChangeCooldown - deltaSeconds);
       if (animal.feedTargetUntil <= nowPerf && animal.wanderCooldown <= 0) {
         animal.targetX = clamp(animal.x + randomBetween(-2.8, 2.8), minX(), maxX());
         animal.targetY = clamp(animal.y + randomBetween(-2.6, 2.6), minY(), maxY());
         animal.wanderCooldown = randomBetween(1.2, 3.4);
+        animal.bounceVelocity += prefersReducedMotion ? 1.0 : 3.0;
       }
 
       // Separation
@@ -825,13 +839,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const desiredX = (targetDx / targetDistance) * maxSpeed + separationX * 0.55;
       const desiredY = (targetDy / targetDistance) * maxSpeed + separationY * 0.55;
 
+      const velocityBeforeX = animal.vx;
+      const velocityBeforeY = animal.vy;
+
       animal.vx += (desiredX - animal.vx) * Math.min(5 * deltaSeconds, 1);
       animal.vy += (desiredY - animal.vy) * Math.min(5 * deltaSeconds, 1);
       animal.vx *= 0.92;
       animal.vy *= 0.92;
-
-      const prevVx = animal.vx;
-      const prevVy = animal.vy;
 
       animal.x = clamp(animal.x + animal.vx * deltaSeconds, minX(), maxX());
       animal.y = clamp(animal.y + animal.vy * deltaSeconds, minY(), maxY());
@@ -839,8 +853,23 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       if (animal.x <= minX() || animal.x >= maxX()) animal.vx *= -0.4;
       if (animal.y <= minY() || animal.y >= maxY()) animal.vy *= -0.4;
 
-      const turnDelta = Math.abs(prevVx - animal.vx) + Math.abs(prevVy - animal.vy);
-      if (turnDelta > 0.05) animal.turnImpulse = clamp(animal.turnImpulse + turnDelta * 1.5, 0, 1);
+      const speed = Math.hypot(animal.vx, animal.vy);
+      if (speed > DIRECTION_CHANGE_SPEED_THRESHOLD) {
+        animal.bounceVelocity += speed * deltaSeconds * (prefersReducedMotion ? 1.5 : 4.0);
+      }
+
+      const movingDirection: 1 | -1 = animal.vx >= 0 ? -1 : 1;
+      if (speed > DIRECTION_CHANGE_SPEED_THRESHOLD && movingDirection !== animal.facingDirection && animal.directionChangeCooldown <= 0) {
+        animal.facingDirection = movingDirection;
+        animal.directionChangeCooldown = randomBetween(DIRECTION_CHANGE_COOLDOWN_MIN, DIRECTION_CHANGE_COOLDOWN_MAX);
+        animal.turnImpulse = clamp(animal.turnImpulse + (prefersReducedMotion ? 0.42 : 0.95), 0, 1);
+        animal.bounceVelocity += prefersReducedMotion ? 1.8 : 6.5;
+      }
+
+      const turnDelta = Math.hypot(animal.vx - velocityBeforeX, animal.vy - velocityBeforeY);
+      if (turnDelta > 0.08) {
+        animal.turnImpulse = clamp(animal.turnImpulse + turnDelta * (prefersReducedMotion ? 0.38 : 0.82), 0, 1);
+      }
 
       tickAnimalSpring(animal, deltaSeconds, prefersReducedMotion);
     }
@@ -849,12 +878,15 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function tickAnimalSpring(animal: Animal, deltaSeconds: number, prefersReducedMotion: boolean): void {
-    const springTension = prefersReducedMotion ? 7 : 12;
-    const springDamping = prefersReducedMotion ? 0.78 : 0.72;
-    animal.bounceVelocity += (-animal.bounce * springTension + animal.turnImpulse * (prefersReducedMotion ? 0.4 : 0.85)) * deltaSeconds * 8;
-    animal.bounceVelocity *= springDamping;
-    animal.bounce += animal.bounceVelocity * deltaSeconds * 5;
-    animal.turnImpulse *= prefersReducedMotion ? 0.72 : 0.62;
+    const k = prefersReducedMotion ? 40 : 120; // Spring stiffness
+    const d = prefersReducedMotion ? 6 : 8; // Damping
+    const turnForce = animal.turnImpulse * (prefersReducedMotion ? 6 : 14);
+
+    const springForce = -k * animal.bounce - d * animal.bounceVelocity + turnForce;
+    animal.bounceVelocity += springForce * deltaSeconds;
+    animal.bounce += animal.bounceVelocity * deltaSeconds;
+
+    animal.turnImpulse *= 1 - Math.min(6 * deltaSeconds, 1);
   }
 
   function tickParticles(deltaSeconds: number, prefersReducedMotion: boolean): void {
@@ -865,20 +897,20 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       p.y += p.vy * deltaSeconds;
       p.z += p.vz * deltaSeconds;
       p.vz -= prefersReducedMotion ? 0.6 * deltaSeconds : 1.5 * deltaSeconds;
-      p.graphic.rotation += p.spin * deltaSeconds;
+      p.view.rotation += p.spin * deltaSeconds;
 
       if (p.life <= 0) {
-        p.graphic.destroy();
+        p.view.destroy();
         particles.splice(i, 1);
         continue;
       }
 
       const { x, y } = project(p.x, p.y, p.z);
       const lifeRatio = p.life / p.maxLife;
-      p.graphic.position.set(x, y);
-      p.graphic.alpha = lifeRatio;
-      p.graphic.scale.set(0.6 + (1 - lifeRatio) * 0.45);
-      p.graphic.zIndex = y + 400;
+      p.view.position.set(x, y);
+      p.view.alpha = lifeRatio;
+      p.view.scale.set(p.baseScale * (0.6 + (1 - lifeRatio) * 0.45));
+      p.view.zIndex = y + 400;
     }
   }
 
@@ -894,7 +926,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const moodTint = isSleeping ? 0xd8d0e8 : applyMoodTint(animal);
       const speed = Math.hypot(animal.vx, animal.vy);
       const stretch = clamp(speed * 0.09 + Math.abs(animal.bounce) * 0.08, 0, reducedMotion ? 0.05 : 0.14);
-      const direction = animal.vx >= 0 ? 1 : -1;
+      const direction = animal.facingDirection;
 
       // Rarity glow
       if (animal.definition.rarity !== "common" && !isSleeping) {
@@ -981,13 +1013,27 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   function spawnParticleBurst(worldX: number, worldY: number, kind: ParticleKind, count: number): void {
     for (let i = 0; i < count; i += 1) {
-      const graphic = new Graphics();
+      let view: Container;
       const color = pickParticleColor(kind);
       const size = kind === "zzz" ? 6 + Math.random() * 4 : 4 + Math.random() * 6;
-      drawParticleShape(graphic, kind, color, size);
+      let baseScale = 1;
+
+      if (kind === "heart" || kind === "star") {
+        const texture = textures.get(kind)!;
+        const sprite = new Sprite(texture);
+        sprite.anchor.set(0.5);
+        sprite.tint = color;
+        baseScale = size / 22; // Scale sprite down relative to old vector sizes
+        view = sprite;
+      } else {
+        const graphic = new Graphics();
+        drawParticleShape(graphic, kind, color, size);
+        view = graphic;
+      }
+
       const isZzz = kind === "zzz";
       const particle: Particle = {
-        graphic,
+        view,
         x: worldX + randomBetween(-0.4, 0.4),
         y: worldY + randomBetween(-0.4, 0.4),
         z: Math.random() * (isZzz ? 10 : 18),
@@ -997,8 +1043,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         life: isZzz ? randomBetween(1.0, 1.6) : randomBetween(0.7, 1.3),
         maxLife: isZzz ? 1.6 : 1.4,
         spin: isZzz ? randomBetween(-0.3, 0.3) : randomBetween(-1.6, 1.6),
+        baseScale,
       };
-      particleLayer.addChild(graphic);
+      particleLayer.addChild(view);
       particles.push(particle);
     }
   }
@@ -1124,15 +1171,24 @@ function getUIRefs(root: HTMLElement): UIRefs {
   return { root, stage, population, food, coins, mood, summary, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
 }
 
-async function loadAnimalTextures(): Promise<Map<AnimalSpeciesId, Texture>> {
+async function loadTextures(): Promise<Map<string, Texture>> {
   if (!texturesPromise) {
-    texturesPromise = Promise.all(
-      animalDefinitions.map(async (d) => {
-        const texture = await Assets.load(d.asset);
+    const symbols = [
+      { id: "heart", asset: particleHeart as ImageAsset },
+      { id: "star", asset: particleStar as ImageAsset },
+    ];
+    texturesPromise = Promise.all([
+      ...animalDefinitions.map(async (d) => {
+        const texture = await Assets.load(d.asset.src);
         texture.source.scaleMode = "nearest";
         return [d.id, texture] as const;
       }),
-    ).then((entries) => new Map(entries));
+      ...symbols.map(async (s) => {
+        const texture = await Assets.load(s.asset.src);
+        texture.source.scaleMode = "nearest";
+        return [s.id, texture] as const;
+      }),
+    ]).then((entries) => new Map<string, Texture>(entries));
   }
   return texturesPromise;
 }
@@ -1286,7 +1342,7 @@ function hasValidResourceShape(r: Partial<Resources>): r is Resources {
 // Animal creation
 // ---------------------------------------------------------------------------
 
-function createAnimal(persisted: PersistedAnimal, textures: Map<AnimalSpeciesId, Texture>): Animal {
+function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>): Animal {
   const definition = animalDefinitionMap.get(persisted.species);
   const texture = textures.get(persisted.species);
   if (!definition || !texture) throw new Error(`Missing definition or texture for ${persisted.species}`);
@@ -1299,6 +1355,8 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<AnimalSpeciesId,
     ...persisted,
     vx: 0,
     vy: 0,
+    facingDirection: Math.random() < 0.5 ? -1 : 1,
+    directionChangeCooldown: randomBetween(0.15, 0.65),
     targetX: clamp(persisted.x + randomBetween(-2, 2), minX(), maxX()),
     targetY: clamp(persisted.y + randomBetween(-2, 2), minY(), maxY()),
     wanderCooldown: randomBetween(0.1, 2.2),
@@ -1362,31 +1420,6 @@ function projectWithViewport(width: number, height: number, worldX: number, worl
 function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number, size: number): void {
   graphic.clear();
 
-  if (kind === "heart") {
-    graphic
-      .moveTo(0, size * 0.35)
-      .bezierCurveTo(size * 0.7, -size * 0.35, size * 1.2, size * 0.35, 0, size * 1.2)
-      .bezierCurveTo(-size * 1.2, size * 0.35, -size * 0.7, -size * 0.35, 0, size * 0.35)
-      .closePath()
-      .fill({ alpha: 0.9, color });
-    return;
-  }
-
-  if (kind === "sparkle") {
-    graphic
-      .moveTo(0, -size)
-      .lineTo(size * 0.28, -size * 0.28)
-      .lineTo(size, 0)
-      .lineTo(size * 0.28, size * 0.28)
-      .lineTo(0, size)
-      .lineTo(-size * 0.28, size * 0.28)
-      .lineTo(-size, 0)
-      .lineTo(-size * 0.28, -size * 0.28)
-      .closePath()
-      .fill({ alpha: 0.88, color });
-    return;
-  }
-
   if (kind === "zzz") {
     // Draw a "Z" shape
     graphic
@@ -1404,7 +1437,7 @@ function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number,
 function pickParticleColor(kind: ParticleKind): number {
   const colorMap: Record<ParticleKind, number[]> = {
     heart: basePalette.heart,
-    sparkle: basePalette.sparkle,
+    star: basePalette.sparkle,
     zzz: basePalette.zzz,
     dot: basePalette.confetti,
   };
