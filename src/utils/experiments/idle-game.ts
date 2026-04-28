@@ -124,7 +124,7 @@ interface IdleGameState {
   owned: Record<AnimalSpeciesId, number>;
   resources: Resources;
   upgrades: IdleGameUpgrades;
-  totalLifetimeCoins: number;
+  runLifetimeCoins: number;
   stardust: number;
   paused: boolean;
   lastUpdatedAt: number;
@@ -706,9 +706,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       return;
     }
 
-    const happyAdults = animals.filter((a) => a.growth >= 0.96 && a.happiness >= 0.5 && a.hunger >= 0.4 && !a.sleeping);
-    if (happyAdults.length < 2) {
-      updateFeedback("Need 2+ happy awake adults to hatch.");
+    const happyAdultRepresentatives = animals.filter((a) => a.growth >= 0.96 && a.happiness >= 0.5 && a.hunger >= 0.4 && !a.sleeping);
+    if (totalPopulation < 2 || happyAdultRepresentatives.length < 1) {
+      updateFeedback("Need 2+ animals and a happy awake representative to hatch.");
       return;
     }
 
@@ -722,7 +722,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     reconcileAnimalViews();
     const featuredSpeciesId = getMostHatchedSpecies(hatchCounts);
     const featuredBaby = featuredSpeciesId ? animals.find((animal) => animal.species === featuredSpeciesId) : undefined;
-    happyAdults.slice(0, 2).forEach((a) => {
+    happyAdultRepresentatives.slice(0, 2).forEach((a) => {
       a.happiness = clamp(a.happiness - 0.08, 0, 1);
       a.bounceVelocity += reducedMotion ? 2.0 : 4.5;
     });
@@ -830,12 +830,12 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function handlePrestige(): void {
-    if (state.totalLifetimeCoins < PRESTIGE_UNLOCK_COINS) {
-      updateFeedback(`Prestige unlocks at ${formatNumber(PRESTIGE_UNLOCK_COINS)} lifetime coins.`);
+    if (state.runLifetimeCoins < PRESTIGE_UNLOCK_COINS) {
+      updateFeedback(`Prestige unlocks at ${formatNumber(PRESTIGE_UNLOCK_COINS)} run coins.`);
       return;
     }
 
-    const earnedStardust = Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS));
+    const earnedStardust = Math.floor(Math.cbrt(state.runLifetimeCoins / PRESTIGE_UNLOCK_COINS));
     animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     animals.length = 0;
     foodItems.length = 0;
@@ -844,7 +844,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     state.owned = freshState.owned;
     state.resources = freshState.resources;
     state.upgrades = freshState.upgrades;
-    state.totalLifetimeCoins = 0;
+    state.runLifetimeCoins = 0;
     state.stardust += earnedStardust;
     state.paused = false;
     state.lastMessage = `Prestiged for ${formatNumber(earnedStardust)} Stardust. Passive production is now x${formatNumber(getPrestigeMultiplier())}.`;
@@ -964,14 +964,14 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     prestigeInfo.appendChild(prestigeName);
     const prestigeStats = document.createElement("div");
     prestigeStats.className = "shop-item__stats";
-    const pendingStardust = state.totalLifetimeCoins >= PRESTIGE_UNLOCK_COINS ? Math.floor(Math.cbrt(state.totalLifetimeCoins / PRESTIGE_UNLOCK_COINS)) : 0;
-    prestigeStats.textContent = `Lifetime: ${formatNumber(state.totalLifetimeCoins)}/${formatNumber(PRESTIGE_UNLOCK_COINS)} · Reward: ${formatNumber(pendingStardust)} Stardust`;
+    const pendingStardust = state.runLifetimeCoins >= PRESTIGE_UNLOCK_COINS ? Math.floor(Math.cbrt(state.runLifetimeCoins / PRESTIGE_UNLOCK_COINS)) : 0;
+    prestigeStats.textContent = `Run coins: ${formatNumber(state.runLifetimeCoins)}/${formatNumber(PRESTIGE_UNLOCK_COINS)} · Reward: ${formatNumber(pendingStardust)} Stardust`;
     prestigeInfo.appendChild(prestigeStats);
     prestigeItem.appendChild(prestigeInfo);
     const prestigeButton = document.createElement("button");
     prestigeButton.className = "shop-item__buy";
     prestigeButton.textContent = "Prestige";
-    prestigeButton.disabled = state.totalLifetimeCoins < PRESTIGE_UNLOCK_COINS;
+    prestigeButton.disabled = state.runLifetimeCoins < PRESTIGE_UNLOCK_COINS;
     prestigeButton.addEventListener("click", handlePrestige);
     prestigeItem.appendChild(prestigeButton);
     prestigeSection.appendChild(prestigeItem);
@@ -1049,7 +1049,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
     const earnedCoins = getTotalCoinsPerSecond() * COIN_TICK_INTERVAL;
     state.resources.coins += earnedCoins;
-    state.totalLifetimeCoins += earnedCoins;
+    state.runLifetimeCoins += earnedCoins;
   }
 
   /**
@@ -1650,7 +1650,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         owned: state.owned,
         resources: state.resources,
         upgrades: state.upgrades,
-        totalLifetimeCoins: state.totalLifetimeCoins,
+        runLifetimeCoins: state.runLifetimeCoins,
         stardust: state.stardust,
         paused: state.paused,
         lastUpdatedAt: state.lastUpdatedAt,
@@ -1832,7 +1832,7 @@ function createDefaultState(): IdleGameState {
     owned,
     resources: { food: STARTING_FOOD, foodCapacity: BASE_FOOD_CAPACITY, coins: STARTING_COINS, populationCap: BASE_POPULATION_CAP, populateCooldownUntil: 0 },
     upgrades: createDefaultUpgrades(),
-    totalLifetimeCoins: 0,
+    runLifetimeCoins: 0,
     stardust: 0,
     paused: false,
     lastUpdatedAt: Date.now(),
@@ -1895,19 +1895,19 @@ function validateState(input: unknown): IdleGameState | null {
     animals,
     owned,
     resources: {
-      food: Math.max(0, resources.food),
-      foodCapacity: Math.max(BASE_FOOD_CAPACITY, resources.foodCapacity),
-      coins: Math.max(0, resources.coins || 0),
-      populationCap: Math.max(BASE_POPULATION_CAP, resources.populationCap),
-      populateCooldownUntil: Math.max(0, resources.populateCooldownUntil),
+      food: getFiniteNumber(resources.food, STARTING_FOOD, 0),
+      foodCapacity: getFiniteNumber(resources.foodCapacity, BASE_FOOD_CAPACITY, BASE_FOOD_CAPACITY),
+      coins: getFiniteNumber(resources.coins, STARTING_COINS, 0),
+      populationCap: getFiniteNumber(resources.populationCap, BASE_POPULATION_CAP, BASE_POPULATION_CAP),
+      populateCooldownUntil: getFiniteNumber(resources.populateCooldownUntil, 0, 0),
     },
     upgrades,
-    totalLifetimeCoins: Math.max(0, typeof c.totalLifetimeCoins === "number" ? c.totalLifetimeCoins : 0),
-    stardust: Math.max(0, typeof c.stardust === "number" ? c.stardust : 0),
+    runLifetimeCoins: getFiniteNumber(c.runLifetimeCoins, getFiniteNumber((c as { totalLifetimeCoins?: unknown }).totalLifetimeCoins, 0), 0),
+    stardust: getFiniteNumber(c.stardust, 0, 0),
     paused: Boolean(c.paused),
-    lastUpdatedAt: typeof c.lastUpdatedAt === "number" ? c.lastUpdatedAt : Date.now(),
+    lastUpdatedAt: getFiniteNumber(c.lastUpdatedAt, Date.now()),
     lastMessage: typeof c.lastMessage === "string" ? c.lastMessage : "Welcome back to the meadow.",
-    dayCycleTime: typeof c.dayCycleTime === "number" ? c.dayCycleTime % DAY_CYCLE_DURATION : 30,
+    dayCycleTime: getFiniteNumber(c.dayCycleTime, 30) % DAY_CYCLE_DURATION,
   };
 
   syncDerivedCapacities(state);
@@ -1921,24 +1921,24 @@ function validateAnimal(input: unknown): PersistedAnimal | null {
   if (
     typeof c.id !== "string" ||
     !animalDefinitionMap.has(c.species as AnimalSpeciesId) ||
-    typeof c.x !== "number" ||
-    typeof c.y !== "number" ||
-    typeof c.age !== "number" ||
-    typeof c.growth !== "number" ||
-    typeof c.hunger !== "number" ||
-    typeof c.happiness !== "number"
+    !Number.isFinite(c.x) ||
+    !Number.isFinite(c.y) ||
+    !Number.isFinite(c.age) ||
+    !Number.isFinite(c.growth) ||
+    !Number.isFinite(c.hunger) ||
+    !Number.isFinite(c.happiness)
   )
     return null;
 
   return {
     id: c.id,
     species: c.species as AnimalSpeciesId,
-    x: clamp(c.x, -WORLD_WIDTH / 2, WORLD_WIDTH / 2),
-    y: clamp(c.y, -WORLD_DEPTH / 2, WORLD_DEPTH / 2),
-    age: Math.max(0, c.age),
-    growth: clamp(c.growth, 0.58, 1),
-    hunger: clamp(c.hunger, 0, 1),
-    happiness: clamp(c.happiness, 0, 1),
+    x: clamp(getFiniteNumber(c.x, 0), -WORLD_WIDTH / 2, WORLD_WIDTH / 2),
+    y: clamp(getFiniteNumber(c.y, 0), -WORLD_DEPTH / 2, WORLD_DEPTH / 2),
+    age: getFiniteNumber(c.age, 0, 0),
+    growth: clamp(getFiniteNumber(c.growth, 1), 0.58, 1),
+    hunger: clamp(getFiniteNumber(c.hunger, 0.8), 0, 1),
+    happiness: clamp(getFiniteNumber(c.happiness, 0.8), 0, 1),
     sleeping: Boolean(c.sleeping),
   };
 }
@@ -1951,13 +1951,22 @@ function createDefaultUpgrades(): IdleGameUpgrades {
   return { meadowExpansion: 0, siloStorage: 0, goldenRations: 0 };
 }
 
+function getFiniteNumber(value: unknown, fallback: number, min = Number.NEGATIVE_INFINITY): number {
+  const numericValue = typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  return Math.max(min, numericValue);
+}
+
+function getFiniteInteger(value: unknown, fallback: number, min = Number.NEGATIVE_INFINITY): number {
+  return Math.floor(getFiniteNumber(value, fallback, min));
+}
+
 function validateUpgrades(input: unknown): IdleGameUpgrades {
   if (!input || typeof input !== "object") return createDefaultUpgrades();
   const c = input as Partial<IdleGameUpgrades>;
   return {
-    meadowExpansion: Math.max(0, Math.floor(c.meadowExpansion || 0)),
-    siloStorage: Math.max(0, Math.floor(c.siloStorage || 0)),
-    goldenRations: Math.max(0, Math.floor(c.goldenRations || 0)),
+    meadowExpansion: getFiniteInteger(c.meadowExpansion, 0, 0),
+    siloStorage: getFiniteInteger(c.siloStorage, 0, 0),
+    goldenRations: getFiniteInteger(c.goldenRations, 0, 0),
   };
 }
 
@@ -1976,7 +1985,7 @@ function validateOwnedRecord(input: unknown, fallbackAnimals: PersistedAnimal[])
   if (input && typeof input === "object") {
     const record = input as Partial<Record<AnimalSpeciesId, number>>;
     animalSpeciesIds.forEach((speciesId) => {
-      owned[speciesId] = Math.max(0, Math.floor(record[speciesId] || 0));
+      owned[speciesId] = getFiniteInteger(record[speciesId], 0, 0);
     });
   }
 
@@ -2042,7 +2051,7 @@ function getUpgradeDescription(upgradeId: keyof IdleGameUpgrades, nextLevel: num
   const descriptions: Record<keyof IdleGameUpgrades, string> = {
     meadowExpansion: `Population cap: ${formatNumber(getPopulationCap(nextLevel))} next`,
     siloStorage: `Food cap: ${formatNumber(getFoodCapacity(nextLevel))} next`,
-    goldenRations: `Manual multiplier: x${formatNumber(getGoldenRationsMultiplier(nextLevel))} next`,
+    goldenRations: `Manual and food regen multiplier: x${formatNumber(getGoldenRationsMultiplier(nextLevel))} next`,
   };
   return descriptions[upgradeId];
 }
