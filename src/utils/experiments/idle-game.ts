@@ -459,7 +459,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
   let reducedMotion = reducedMotionMedia.matches;
   const textures = await loadTextures();
-  const textTextureCache = new Map<string, Texture>();
 
   const app = new Application();
   await app.init({
@@ -752,11 +751,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const handlePauseToggle = () => {
     state.paused = !state.paused;
     if (state.paused) {
-      app.ticker.stop();
       updateFeedback("Paused.");
     } else {
       lastTime = performance.now();
-      app.ticker.start();
       updateFeedback("Resumed.");
     }
     updateHUD();
@@ -765,7 +762,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   const handleVisibilityChange = () => {
     if (document.hidden) app.ticker.stop();
-    else if (!state.paused) {
+    else {
       lastTime = performance.now();
       app.ticker.start();
     }
@@ -876,8 +873,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
     const earnedStardust = Math.floor(Math.cbrt(state.runLifetimeCoins / PRESTIGE_UNLOCK_COINS));
     animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
+    particleLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     animals.length = 0;
     foodItems.length = 0;
+    particles.length = 0;
     const freshState = createDefaultState();
     state.animals = freshState.animals;
     state.owned = freshState.owned;
@@ -1070,7 +1069,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   });
 
-  if (document.hidden || state.paused) app.ticker.stop();
+  if (document.hidden) app.ticker.stop();
 
   // --- Tick functions ---
 
@@ -1097,9 +1096,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
       const visibleSprites = animals.filter((a) => a.species === def.id);
       if (visibleSprites.length > 0) {
-        const valPerSprite = Math.floor(speciesEarned / visibleSprites.length);
-        if (valPerSprite > 0) {
-          const formattedAmount = `+${formatNumber(valPerSprite, true)}`; // Use dropDecimals flag
+        const valPerSprite = speciesEarned / visibleSprites.length;
+        if (valPerSprite >= 0.01) {
+          const formattedAmount = `+${formatNumber(valPerSprite, false)}`;
 
           for (const animal of visibleSprites) {
             animal.pendingTexts.push({
@@ -1673,32 +1672,28 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function spawnTextParticle(worldX: number, worldY: number, textString: string, scale: number = 1): void {
-    if (!textTextureCache.has(textString)) {
-      const text = new Text({
-        text: textString,
-        style: {
-          fontFamily: "Arial, sans-serif",
-          fontSize: 24,
-          fontWeight: "bold",
-          fill: 0xffd700,
-          dropShadow: {
-            alpha: 0.8,
-            angle: Math.PI / 4,
-            blur: 2,
-            color: 0x000000,
-            distance: 2,
-          },
+    const text = new Text({
+      text: textString,
+      style: {
+        fontFamily: "Arial, sans-serif",
+        fontSize: 24,
+        fontWeight: "bold",
+        fill: 0xffd700,
+        dropShadow: {
+          alpha: 0.8,
+          angle: Math.PI / 4,
+          blur: 2,
+          color: 0x000000,
+          distance: 2,
         },
-      });
-      textTextureCache.set(textString, app.renderer.generateTexture(text));
-    }
+      },
+    });
 
-    const sprite = new Sprite(textTextureCache.get(textString)!);
-    sprite.anchor.set(0.5);
-    sprite.scale.set(scale);
+    text.anchor.set(0.5);
+    text.scale.set(scale);
 
     const particle: Particle = {
-      view: sprite,
+      view: text,
       x: worldX,
       y: worldY,
       z: 15,
@@ -1713,7 +1708,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       fadeOnly: true,
     };
 
-    animalLayer.addChild(sprite);
+    animalLayer.addChild(text);
     particles.push(particle);
   }
 
@@ -1800,10 +1795,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     particleLayer.removeChildren().forEach((c) => c.destroy());
     foliageLayer.removeChildren().forEach((c) => c.destroy());
     animalLayer.removeChildren().forEach((c) => c.destroy());
-
-    // Clear out internally generated Textures to avoid memory leaks
-    textTextureCache.forEach((texture) => texture.destroy(true));
-    textTextureCache.clear();
 
     app.destroy(true, { children: true, texture: false, textureSource: false });
     ui.stage.replaceChildren();
