@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
+import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js/unsafe-eval";
 
 import animalBeaver from "../../assets/experiments/idle-game/animals/animal-beaver.png";
 import animalBee from "../../assets/experiments/idle-game/animals/animal-bee.png";
@@ -902,8 +902,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const earnedStardust = Math.floor(Math.cbrt(state.runLifetimeCoins / PRESTIGE_UNLOCK_COINS));
     // Prestige must clear both display lists and backing arrays. Leaving old views
     // around is subtle: the state reset looks correct but the old ticker keeps rendering ghosts.
-    animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
-    particleLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
+    animalLayer.removeChildren().forEach((child: Container) => child.destroy({ children: true }));
+    particleLayer.removeChildren().forEach((child: Container) => child.destroy({ children: true }));
     animals.length = 0;
     foodItems.length = 0;
     particles.length = 0;
@@ -1850,9 +1850,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     document.removeEventListener("visibilitychange", handleVisibilityChange);
     reducedMotionMedia.removeEventListener("change", handleReducedMotionChange);
     app.ticker.stop();
-    particleLayer.removeChildren().forEach((c) => c.destroy());
-    foliageLayer.removeChildren().forEach((c) => c.destroy());
-    animalLayer.removeChildren().forEach((c) => c.destroy());
+    particleLayer.removeChildren().forEach((c: Container) => c.destroy());
+    foliageLayer.removeChildren().forEach((c: Container) => c.destroy());
+    animalLayer.removeChildren().forEach((c: Container) => c.destroy());
 
     // Keep cached textures alive between route visits; destroying sources here would
     // invalidate the shared `texturesPromise` and make future mounts reuse dead textures.
