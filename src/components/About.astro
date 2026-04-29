@@ -401,8 +401,34 @@ sortedSkills.forEach((skill, index) => {
       }
 
       &__skills--desktop {
+        padding-bottom: $space-sm;
+
         @include respond-to(md) {
           display: none;
+        }
+
+        .about__skills-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: $color-neutral-400 transparent;
+          -ms-overflow-style: auto;
+
+          &::-webkit-scrollbar {
+            display: block;
+            height: 4px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: $color-neutral-400;
+            border-radius: $radius-full;
+
+            &:hover {
+              background: $color-neutral-500;
+            }
+          }
         }
       }
 
