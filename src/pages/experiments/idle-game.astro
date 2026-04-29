@@ -9,7 +9,10 @@ import Layout from "../../layouts/Layout.astro";
     makes the Pixi mount resilient to future markup reshuffles.
   -->
   <section class="idle-game" data-idle-game-root>
-    <button class="idle-game__back-button" data-idle-game-back type="button" aria-label="Go back"> ← Back </button>
+    <button class="idle-game__back-button" data-idle-game-back type="button" aria-label="Go back">
+      <span aria-hidden="true">&larr;</span>
+      <span class="idle-game__back-text">Back</span>
+    </button>
 
     <div class="idle-game__container">
       <div class="idle-game__card">
@@ -52,8 +55,11 @@ import Layout from "../../layouts/Layout.astro";
       </div>
 
       <div class="idle-game__credits">
-        Pixel art by <a href="https://kenney.nl" target="_blank" rel="noopener noreferrer">Kenney.nl</a> • Built with <a href="https://pixijs.com/" target="_blank" rel="noopener noreferrer">PixiJS</a> •
-        Made with love and AI in Denmark. <a href="https://bsky.app/profile/tehwave.bsky.social" target="_blank" rel="noopener noreferrer">@tehwave</a>
+        <span
+          >Pixel art by <a href="https://kenney.nl" target="_blank" rel="noopener noreferrer">Kenney.nl</a> &bull; Built with <a href="https://pixijs.com/" target="_blank" rel="noopener noreferrer"
+            >PixiJS</a
+          > &bull; Made with love and AI in Denmark. <a href="https://bsky.app/profile/tehwave.bsky.social" target="_blank" rel="noopener noreferrer">@tehwave</a></span
+        >
       </div>
     </div>
   </section>
@@ -186,10 +192,18 @@ import Layout from "../../layouts/Layout.astro";
         position: static;
         writing-mode: horizontal-tb;
         transform: none;
-        text-align: center;
         margin-top: $space-md;
         padding-bottom: $space-sm;
         bottom: auto;
+        white-space: nowrap;
+        overflow-x: auto;
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; // Hide scrollbar for Firefox
+
+        &::-webkit-scrollbar {
+          display: none; // Hide scrollbar for Chrome/Safari/Edge
+        }
       }
     }
 
@@ -202,6 +216,9 @@ import Layout from "../../layouts/Layout.astro";
       border: 0;
       border-radius: $radius-full;
       padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
       font: inherit;
       font-size: $font-size-sm;
       font-weight: $font-weight-semibold;
@@ -223,6 +240,16 @@ import Layout from "../../layouts/Layout.astro";
 
       &:active {
         transform: scale(0.97);
+      }
+
+      @include respond-to(sm) {
+        padding: 10px;
+      }
+    }
+
+    &__back-text {
+      @include respond-to(sm) {
+        display: none;
       }
     }
 
