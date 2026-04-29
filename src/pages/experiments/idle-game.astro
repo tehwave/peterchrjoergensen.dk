@@ -39,8 +39,6 @@ import Layout from "../../layouts/Layout.astro";
         </div>
       </div>
     </div>
-
-    <p class="idle-game__summary" data-idle-game-summary aria-live="polite">Loading the meadow...</p>
   </section>
 
   <script>
@@ -295,6 +293,10 @@ import Layout from "../../layouts/Layout.astro";
       border-radius: 22px 22px 0 0;
       z-index: 10;
       box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+      transition:
+        transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1),
+        opacity 0.2s;
+      transform-origin: bottom center;
 
       &[hidden] {
         display: none;
@@ -307,6 +309,12 @@ import Layout from "../../layouts/Layout.astro";
       justify-content: space-between;
       align-items: center;
       padding: $space-md $space-md $space-sm;
+      cursor: grab;
+      touch-action: none;
+
+      &:active {
+        cursor: grabbing;
+      }
     }
 
     &__shop-content {
@@ -457,19 +465,6 @@ import Layout from "../../layouts/Layout.astro";
           transform: translateY(-1px);
         }
       }
-    }
-
-    &__summary {
-      max-width: 420px;
-      width: 100%;
-      margin: $space-sm auto 0;
-      padding: $space-sm $space-md;
-      border-radius: $radius-lg;
-      background: rgba(255, 255, 255, 0.55);
-      color: $color-text-secondary;
-      font-size: $font-size-xs;
-      line-height: $leading-relaxed;
-      text-align: center;
     }
 
     @media (prefers-reduced-motion: reduce) {

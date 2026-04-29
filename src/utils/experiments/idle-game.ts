@@ -213,7 +213,6 @@ interface UIRefs {
   coins: HTMLElement;
   stardust: HTMLElement;
   mood: HTMLElement;
-  summary: HTMLElement;
   feedback: HTMLElement;
   feedButton: HTMLButtonElement;
   populateButton: HTMLButtonElement;
@@ -503,7 +502,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   syncDerivedCapacities(state);
   let feedbackMessage = state.lastMessage || "A tiny cozy meadow is ready.";
   let saveTimer = 0;
-  let summaryTimer = 0;
   let coinTimer = 0;
   let destroyed = false;
   let lastTime = performance.now();
@@ -537,7 +535,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   updateFeedback(feedbackMessage);
   updateHUD();
-  updateSummary();
   renderAnimals(0);
   renderShopList();
 
@@ -686,7 +683,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     updateFeedback(`Snack drop x${formatNumber(feedPower)}! ${nearbyAnimals.length} animals waddling over.`);
     persistSoon();
     updateHUD();
-    updateSummary();
   };
 
   const handlePopulate = () => {
@@ -735,7 +731,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     updateFeedback(`${formatNumber(hatchCount)} tiny animals hatched!`);
     persistSoon();
     updateHUD();
-    updateSummary();
   };
 
   const handleShopToggle = () => {
@@ -747,6 +742,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const handleShopClose = () => {
     shopOpen = false;
     ui.shopDrawer.hidden = true;
+    ui.shopDrawer.style.transform = "";
   };
 
   const handlePauseToggle = () => {
@@ -783,6 +779,47 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   document.addEventListener("visibilitychange", handleVisibilityChange);
   reducedMotionMedia.addEventListener("change", handleReducedMotionChange);
 
+  // Drag to close drawer
+  let dragStartY = 0;
+  let dragCurrentY = 0;
+  let isDraggingDrawer = false;
+
+  ui.shopDrawer.addEventListener("pointerdown", (e) => {
+    // Only drag from the header area to not interfere with scrolling the list
+    if (!(e.target as HTMLElement).closest(".idle-game__shop-header")) return;
+    // Don't drag if clicking the close button
+    if ((e.target as HTMLElement).closest("[data-idle-game-shop-close]")) return;
+
+    isDraggingDrawer = true;
+    dragStartY = e.clientY;
+    dragCurrentY = e.clientY;
+    ui.shopDrawer.style.transition = "none";
+    ui.shopDrawer.setPointerCapture(e.pointerId);
+  });
+
+  ui.shopDrawer.addEventListener("pointermove", (e) => {
+    if (!isDraggingDrawer) return;
+    dragCurrentY = e.clientY;
+    const deltaY = Math.max(0, dragCurrentY - dragStartY); // Only allow dragging down
+    ui.shopDrawer.style.transform = `translateY(${deltaY}px)`;
+  });
+
+  const handleDragEnd = (e: PointerEvent) => {
+    if (!isDraggingDrawer) return;
+    isDraggingDrawer = false;
+    ui.shopDrawer.releasePointerCapture(e.pointerId);
+    ui.shopDrawer.style.transition = "transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1)";
+    const deltaY = Math.max(0, dragCurrentY - dragStartY);
+    if (deltaY > 50) {
+      handleShopClose();
+    } else {
+      ui.shopDrawer.style.transform = "";
+    }
+  };
+
+  ui.shopDrawer.addEventListener("pointerup", handleDragEnd);
+  ui.shopDrawer.addEventListener("pointercancel", handleDragEnd);
+
   // --- Shop ---
   function handleShopBuy(speciesId: AnimalSpeciesId): void {
     const def = animalDefinitionMap.get(speciesId);
@@ -808,7 +845,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     updateFeedback(`Bought a ${def.rarity} ${def.label.toLowerCase()}!`);
     persistSoon();
     updateHUD();
-    updateSummary();
     renderShopList();
   }
 
@@ -825,7 +861,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     updateFeedback(`${getUpgradeLabel(upgradeId)} upgraded to level ${formatNumber(state.upgrades[upgradeId])}.`);
     persistSoon();
     updateHUD();
-    updateSummary();
     renderShopList();
   }
 
@@ -861,7 +896,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     app.ticker.start();
     persistSoon(true);
     updateHUD();
-    updateSummary();
     renderShopList();
   }
 
@@ -1021,16 +1055,14 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     renderFood();
 
     saveTimer += deltaSeconds;
-    summaryTimer += deltaSeconds;
 
     if (saveTimer >= 1.2) {
       saveTimer = 0;
       persistSoon();
     }
-    if (summaryTimer >= 0.2) {
-      summaryTimer = 0;
+
+    if (Math.random() < 0.1) {
       updateHUD();
-      updateSummary();
     }
   });
 
@@ -1610,14 +1642,6 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     ui.root.dataset.populationPressure = populationPressure >= 1 ? "full" : populationPressure >= FEEDBACK_LOW_CAP_THRESHOLD ? "warning" : "normal";
   }
 
-  function updateSummary(): void {
-    const sleepCount = animals.filter((a) => a.sleeping).length;
-    const totalPopulation = getTotalPopulation();
-    const totalCps = getTotalCoinsPerSecond();
-    const awake = animals.length - sleepCount;
-    ui.summary.textContent = `${formatNumber(totalPopulation)} animals (${awake} visible awake, ${sleepCount} sleeping), ${formatNumber(Math.floor(state.resources.food))} food, ${formatNumber(Math.floor(state.resources.coins))} coins (+${formatNumber(totalCps)}/s), ${formatNumber(state.stardust)} Stardust.`;
-  }
-
   function updateFeedback(message: string): void {
     feedbackMessage = message;
     ui.feedback.textContent = message;
@@ -1699,7 +1723,6 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const coins = root.querySelector<HTMLElement>("[data-idle-game-coins]");
   const stardust = root.querySelector<HTMLElement>("[data-idle-game-stardust]");
   const mood = root.querySelector<HTMLElement>("[data-idle-game-mood]");
-  const summary = root.querySelector<HTMLElement>("[data-idle-game-summary]");
   const feedback = root.querySelector<HTMLElement>("[data-idle-game-feedback]");
   const feedButton = root.querySelector<HTMLButtonElement>("[data-idle-game-action='feed']");
   const populateButton = root.querySelector<HTMLButtonElement>("[data-idle-game-action='populate']");
@@ -1716,7 +1739,6 @@ function getUIRefs(root: HTMLElement): UIRefs {
     !coins ||
     !stardust ||
     !mood ||
-    !summary ||
     !feedback ||
     !feedButton ||
     !populateButton ||
@@ -1729,7 +1751,7 @@ function getUIRefs(root: HTMLElement): UIRefs {
     throw new Error("Idle game mount points are missing.");
   }
 
-  return { root, stage, population, food, coins, stardust, mood, summary, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
+  return { root, stage, population, food, coins, stardust, mood, feedback, feedButton, populateButton, shopButton, pauseButton, shopDrawer, shopClose, shopList };
 }
 
 /**
