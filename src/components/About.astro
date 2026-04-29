@@ -7,9 +7,11 @@
  * hook from the narrative for better scannability.
  */
 import SkillTag from "./SkillTag.astro";
-import AnimateOnScroll from "./AnimateOnScroll.astro";
+import WaterTank from "./WaterTank.astro";
 
 type Props = Record<string, never>;
+
+type SkillCategory = "languages" | "framework" | "frontend" | "backend" | "cms" | "devops" | "analytics" | "ai" | "tools" | "platforms" | "creative" | "other";
 
 const skills = [
   "Astro",
@@ -21,7 +23,7 @@ const skills = [
   "JavaScript",
   "TypeScript",
   "C#",
-  "SCSS",
+  "Sass",
   "MySQL",
   "WooCommerce",
   "GameMaker",
@@ -31,14 +33,157 @@ const skills = [
   "AWS",
   "Cloudflare",
   "Redis",
+  "Algolia",
+  "Blender",
+  "GitHub",
+  "Drupal",
+  "Maya",
+  "SQLite",
+  "ChatGPT",
+  "Claude",
+  "Alpine.js",
+  "Apache",
+  "Nginx",
+  "App Store",
+  "Arduino",
+  "DigitalOcean",
+  "Dungeons & Dragons",
+  "Elementor",
+  "Unreal Engine",
+  "Figma",
+  "Ghostty",
+  "Git",
+  "Google Analytics",
+  "Google Ads",
+  "Google Cloud",
+  "Google Gemini",
+  "Google Search Console",
+  "Google Tag Manager",
+  "Grunt",
+  "Gulp",
+  "Homebrew",
+  "Hotjar",
+  "HTML5",
+  "Itch.io",
+  "JWT",
+  "Laravel Horizon",
+  "Laravel Nova",
+  "Linux",
+  "macOS",
+  "Mailchimp",
+  "Mailgun",
+  "Mailtrap",
+  "Markdown",
+  "Facebook Pixel (Meta)",
+  "MinIO",
+  "Model Context Protocol",
+  "n8n",
+  "Node.js",
+  "npm",
+  "nvm",
+  "OBS Studio",
+  "Packagist",
+  "Roots Bedrock",
+  "Sublime Text",
+  "Tailwind CSS",
+  "Trello",
+  "Trustpilot",
+  "Ubuntu",
+  "Webpack",
+  "WP Rocket",
+  "Yoast",
+  "YouTube",
+  "Zapier",
 ];
+
+const skillsByCategory: Record<SkillCategory, string[]> = {
+  languages: ["JavaScript", "TypeScript", "PHP", "C#", "Sass", "HTML5", "Markdown"],
+  framework: ["Astro", "Laravel", "WordPress"],
+  frontend: ["Vue.js", "Alpine.js", "Tailwind CSS", "Bootstrap", "jQuery"],
+  backend: ["Laravel Horizon", "Laravel Nova", "Node.js", "MySQL", "SQLite", "JWT", "n8n", "MinIO"],
+  cms: ["WooCommerce", "Drupal", "Elementor", "Roots Bedrock", "WP Rocket", "Yoast"],
+  devops: [
+    "AWS",
+    "Google Cloud",
+    "Cloudflare",
+    "DigitalOcean",
+    "Linux",
+    "Ubuntu",
+    "macOS",
+    "Nginx",
+    "Apache",
+    "Redis",
+    "Webpack",
+    "npm",
+    "nvm",
+    "Git",
+    "GitHub",
+    "Homebrew",
+    "Packagist",
+    "Grunt",
+    "Gulp",
+  ],
+  analytics: ["Google Analytics", "Google Ads", "Google Search Console", "Google Tag Manager", "Facebook Pixel (Meta)", "Hotjar", "Trustpilot"],
+  ai: ["ChatGPT", "Claude", "Google Gemini", "Model Context Protocol"],
+  tools: ["Figma", "Sublime Text", "OBS Studio", "Mailchimp", "Mailgun", "Mailtrap", "Ghostty", "Trello", "Zapier"],
+  platforms: ["YouTube", "Itch.io", "Arduino", "Algolia", "App Store"],
+  creative: ["Unity", "Unreal Engine", "GameMaker", "Blender", "Maya", "VR", "Dungeons & Dragons"],
+  other: [],
+};
+
+const categoryOrder: Record<SkillCategory, number> = {
+  languages: 1,
+  framework: 2,
+  frontend: 3,
+  backend: 4,
+  cms: 5,
+  devops: 6,
+  analytics: 7,
+  ai: 8,
+  tools: 9,
+  platforms: 10,
+  creative: 11,
+  other: 12,
+};
+
+const skillCategoryByLabel = new Map<string, SkillCategory>();
+for (const [category, labels] of Object.entries(skillsByCategory) as Array<[SkillCategory, string[]]>) {
+  for (const label of labels) {
+    skillCategoryByLabel.set(label, category);
+  }
+}
+
+const sortedSkills = [...skills].sort((a, b) => {
+  const categoryA = skillCategoryByLabel.get(a) ?? "other";
+  const categoryB = skillCategoryByLabel.get(b) ?? "other";
+
+  const categoryDelta = categoryOrder[categoryA] - categoryOrder[categoryB];
+  if (categoryDelta !== 0) {
+    return categoryDelta;
+  }
+
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+});
+
+const skillRowsDesktop = Array.from({ length: 5 }, () => [] as string[]);
+sortedSkills.forEach((skill, index) => {
+  skillRowsDesktop[index % 5].push(skill);
+});
+
+const skillRowsMobile = Array.from({ length: 3 }, () => [] as string[]);
+sortedSkills.forEach((skill, index) => {
+  skillRowsMobile[index % 3].push(skill);
+});
 ---
 
 <section class="about" id="about">
   <div class="about__container">
     <div class="about__left">
-      <span class="about__label">ABOUT ME</span>
-      <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      <div class="about__header">
+        <span class="about__label">ABOUT ME</span>
+        <h2 class="about__heading">I'm passionate about digital experiences that resonate</h2>
+      </div>
+      <WaterTank />
     </div>
     <div class="about__right">
       <div class="about__content">
@@ -54,19 +199,44 @@ const skills = [
             ><strong>the gm(48)</strong>, a GameMaker game jam</a
           > since 2013, helping hundreds of developers bring their ideas to life. I've optimized VR games for budget phones, architected complex web applications, and shipped projects that real people depend
           on every day.
-          <p class="about__text">
-            The technical stuff? I've got it. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
-          </p>
-          <div class="about__skills">
-            {
-              skills.map((skill) => (
-                <AnimateOnScroll>
-                  <SkillTag label={skill} />
-                </AnimateOnScroll>
-              ))
-            }
-          </div>
         </p>
+        <p class="about__text">
+          The technical stuff? I've got it. Just look below. But the part I care about most is what happens on the other side of the screen, when someone uses what I've made and <em>feels</em> something.
+        </p>
+        <div class="about__skills about__skills--desktop" aria-label="Skills">
+          <div class="about__skills-scroll">
+            <div class="about__skills-track">
+              {
+                skillRowsDesktop.map((row) => (
+                  <div class="about__skills-row">
+                    {row.map((skill) => (
+                      <div class="about__skill-item">
+                        <SkillTag label={skill} variant="large" />
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+        <div class="about__skills about__skills--mobile" aria-label="Skills">
+          <div class="about__skills-scroll">
+            <div class="about__skills-track">
+              {
+                skillRowsMobile.map((row) => (
+                  <div class="about__skills-row">
+                    {row.map((skill) => (
+                      <div class="about__skill-item">
+                        <SkillTag label={skill} variant="large" />
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -102,6 +272,26 @@ const skills = [
         display: flex;
         flex-direction: column;
         gap: $space-lg;
+
+        @include respond-to(lg) {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          gap: $space-xl;
+        }
+
+        @include respond-to(sm) {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: $space-lg;
+        }
+      }
+
+      &__header {
+        display: flex;
+        flex-direction: column;
+        gap: $space-lg;
       }
 
       &__label {
@@ -121,15 +311,15 @@ const skills = [
       &__right {
         display: flex;
         align-items: center;
+        min-width: 0;
       }
 
       &__content {
-        border-left: 3px solid $color-orange;
         padding-left: $space-xl;
+        min-width: 0;
+        width: 100%;
 
         @include respond-to(lg) {
-          border-left: none;
-          border-top: 3px solid $color-orange;
           padding-left: 0;
           padding-top: $space-lg;
         }
@@ -158,10 +348,81 @@ const skills = [
       }
 
       &__skills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: $space-md;
+        position: relative;
+        display: block;
         margin-top: $space-xl;
+        width: calc(100vw - var(--about-skills-left, 0px));
+        max-width: calc(100vw - var(--about-skills-left, 0px));
+        min-width: 0;
+        overflow: hidden;
+        padding-bottom: $space-xs;
+
+        @include respond-to(md) {
+          width: 100vw;
+          max-width: 100vw;
+          margin-left: calc(-1 * var(--about-skills-left, 0px));
+        }
+      }
+
+      &__skills-scroll {
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      &__skills-track {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $space-md;
+        width: max-content;
+      }
+
+      &__skills-row {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: $space-md;
+        width: max-content;
+      }
+
+      &__skills--mobile {
+        display: none;
+
+        @include respond-to(md) {
+          display: flex;
+        }
+      }
+
+      &__skills--desktop {
+        @include respond-to(md) {
+          display: none;
+        }
+      }
+
+      &__skill-item {
+        --about-skill-enter: 1;
+        --about-skill-shift: 0px;
+
+        width: max-content;
+        flex: 0 0 auto;
+        opacity: var(--about-skill-enter);
+        transform: translateX(var(--about-skill-shift));
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        will-change: opacity, transform;
+
+        @media (prefers-reduced-motion: reduce) {
+          transition: opacity 0.08s linear;
+          transform: none;
+        }
       }
 
       &__link {
@@ -175,3 +436,146 @@ const skills = [
     }
   </style>
 </section>
+
+<script>
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function syncAboutSkillsRail(rail: Element) {
+    if (!(rail instanceof HTMLElement)) {
+      return;
+    }
+
+    const items = rail.querySelectorAll(".about__skill-item");
+    if (items.length === 0) {
+      return;
+    }
+
+    const railRect = rail.getBoundingClientRect();
+    const railCenter = railRect.left + railRect.width / 2;
+    const edgeFadeDistance = 104;
+    const maxOffset = 14;
+    const edgeThreshold = 6;
+    const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    const normalizedScrollLeft = clamp(rail.scrollLeft, 0, maxScrollLeft);
+    const isAtLeftEdge = normalizedScrollLeft <= edgeThreshold;
+    const isAtRightEdge = normalizedScrollLeft >= maxScrollLeft - edgeThreshold;
+
+    items.forEach((item) => {
+      if (!(item instanceof HTMLElement)) {
+        return;
+      }
+
+      const itemRect = item.getBoundingClientRect();
+      const itemWidth = Math.max(itemRect.width, 1);
+      const visibleLeft = Math.max(itemRect.left, railRect.left);
+      const visibleRight = Math.min(itemRect.right, railRect.right);
+      const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+      const visibilityRatio = clamp(visibleWidth / itemWidth, 0, 1);
+
+      const distanceToLeftEdge = itemRect.left - railRect.left;
+      const distanceToRightEdge = railRect.right - itemRect.right;
+      const leftEdgeProgress = isAtLeftEdge ? 1 : clamp(distanceToLeftEdge / edgeFadeDistance, 0, 1);
+      const rightEdgeProgress = isAtRightEdge ? 1 : clamp(distanceToRightEdge / edgeFadeDistance, 0, 1);
+      const edgeProgress = Math.min(leftEdgeProgress, rightEdgeProgress);
+      const reveal = Math.min(visibilityRatio, edgeProgress);
+
+      const itemCenter = itemRect.left + itemRect.width / 2;
+      const entersFromLeft = itemCenter <= railCenter;
+      const direction = entersFromLeft ? -1 : 1;
+      const shift = (1 - reveal) * maxOffset * direction;
+
+      item.style.setProperty("--about-skill-enter", reveal.toFixed(3));
+      item.style.setProperty("--about-skill-shift", `${shift.toFixed(2)}px`);
+    });
+  }
+
+  function syncAboutSkillsViewportWidth() {
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement) {
+        const wrapper = rail.closest(".about__skills");
+        if (wrapper instanceof HTMLElement) {
+          const left = Math.max(0, wrapper.getBoundingClientRect().left);
+          wrapper.style.setProperty("--about-skills-left", `${left}px`);
+        }
+        syncAboutSkillsRail(rail);
+      }
+    });
+  }
+
+  function resetAboutSkillsScroll() {
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement) {
+        rail.scrollLeft = 0;
+        syncAboutSkillsRail(rail);
+      }
+    });
+  }
+
+  const skillsRailFrameMap = new WeakMap<HTMLElement, number>();
+
+  function scheduleSkillsRailSync(rail: HTMLElement) {
+    const pendingFrame = skillsRailFrameMap.get(rail);
+    if (pendingFrame) {
+      cancelAnimationFrame(pendingFrame);
+    }
+
+    const frame = requestAnimationFrame(() => {
+      syncAboutSkillsRail(rail);
+      skillsRailFrameMap.delete(rail);
+    });
+
+    skillsRailFrameMap.set(rail, frame);
+  }
+
+  function bindAboutSkillsScrollHandlers() {
+    const skillsRails = document.querySelectorAll(".about__skills-scroll");
+    skillsRails.forEach((rail) => {
+      if (rail instanceof HTMLElement && rail.dataset.aboutSkillsScrollBound !== "true") {
+        rail.addEventListener("scroll", () => {
+          scheduleSkillsRailSync(rail);
+        });
+        rail.dataset.aboutSkillsScrollBound = "true";
+        syncAboutSkillsRail(rail);
+      }
+    });
+  }
+
+  function scheduleAboutSkillsReset() {
+    bindAboutSkillsScrollHandlers();
+    syncAboutSkillsViewportWidth();
+    resetAboutSkillsScroll();
+    requestAnimationFrame(() => {
+      bindAboutSkillsScrollHandlers();
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+      requestAnimationFrame(() => {
+        bindAboutSkillsScrollHandlers();
+        syncAboutSkillsViewportWidth();
+        resetAboutSkillsScroll();
+      });
+    });
+    window.setTimeout(() => {
+      bindAboutSkillsScrollHandlers();
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+    }, 80);
+    window.setTimeout(() => {
+      bindAboutSkillsScrollHandlers();
+      syncAboutSkillsViewportWidth();
+      resetAboutSkillsScroll();
+    }, 220);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleAboutSkillsReset, { once: true });
+  } else {
+    scheduleAboutSkillsReset();
+  }
+
+  document.addEventListener("astro:page-load", scheduleAboutSkillsReset);
+  window.addEventListener("resize", scheduleAboutSkillsReset);
+</script>

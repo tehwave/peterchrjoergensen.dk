@@ -10,10 +10,15 @@ interface Props {
   heading?: string;
 }
 
-const { label = "I'm open to talk shop", heading = "Got something worth building?" } = Astro.props;
+const { label = "Websites. Games. Good ideas.", heading = "Got something worth building?" } = Astro.props;
 ---
 
 <footer class="footer" id="contact">
+  <div class="footer__wave footer__wave--top" aria-hidden="true">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+      <path class="footer__divider-shape" d="M0,92 C180,66 360,46 540,52 C720,58 900,90 1080,94 C1260,98 1350,88 1440,78 L1440,120 L0,120 Z"></path>
+    </svg>
+  </div>
   <div class="footer__container">
     <div class="footer__content">
       <div class="footer__heading-group">
@@ -45,6 +50,9 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
             </svg>
           </a>
         </div>
+        <p class="footer__text">
+          Could you be interested in an experiment of mine? Then check out <a href="/experiments/groovy-waves/" class="footer__link">Groovy Waves</a>!
+        </p>
       </div>
     </div>
     <div class="footer__meta">
@@ -61,23 +69,90 @@ const { label = "I'm open to talk shop", heading = "Got something worth building
       </p>
     </div>
   </div>
+  <div class="footer__wave footer__wave--bottom" aria-hidden="true">
+    <canvas class="footer__wave-canvas" data-footer-wave="bottom" role="presentation" aria-hidden="true"></canvas>
+  </div>
 </footer>
+
+<script>
+  import { mountWaveEngine } from "../utils/wave-engine";
+  import { setupWaveLifecycle } from "../utils/wave-lifecycle";
+  import { createStackedWaveScene, drawStackedWaveScene } from "../utils/wave-renderers/stacked-waves";
+
+  function mountFooterWaves(): () => void {
+    return mountWaveEngine({
+      rootSelector: ".footer",
+      canvasSelector: "[data-footer-wave]",
+      createScene: ({ canvas, context }) => createStackedWaveScene(canvas, context),
+      drawScene: drawStackedWaveScene,
+      size: { minWidth: 120, minHeight: 40, maxDpr: 2 },
+      staticTime: 0,
+    });
+  }
+
+  setupWaveLifecycle({
+    scopeKey: "footer-waves",
+    init: mountFooterWaves,
+  });
+</script>
 
 <style lang="scss">
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
 
   .footer {
+    position: relative;
+    isolation: isolate;
     background-color: $color-blue-dark;
-    padding: $space-4xl $space-xl;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    padding: $space-4xl $space-xl calc($space-4xl + 8.1rem);
 
     @include respond-to(md) {
-      padding: $space-3xl $space-lg;
+      padding: $space-3xl $space-lg calc($space-3xl + 6.2rem);
+    }
+
+    &__wave {
+      position: absolute;
+      inset-inline: 0;
+      width: 100%;
+      pointer-events: none;
+      z-index: 1;
+
+      svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      &-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      &--top {
+        top: 0;
+        height: clamp(3rem, 6vw, 5.75rem);
+        transform: translateY(-96%);
+        z-index: 1;
+      }
+
+      &--bottom {
+        bottom: 0;
+        height: clamp(6.5rem, 13vw, 10.5rem);
+        z-index: 0;
+      }
+    }
+
+    &__divider-shape {
+      fill: $color-blue-dark;
     }
 
     &__container {
       max-width: $max-width;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
     }
 
     &__content {

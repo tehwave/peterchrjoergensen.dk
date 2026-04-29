@@ -10,6 +10,7 @@
  */
 import { Picture } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import type { ProjectCategory } from "../types";
 
 interface Props {
   title: string;
@@ -20,36 +21,52 @@ interface Props {
   link?: string;
   hasPage?: boolean; // True if project has MDX page (internal route)
   animationDelay?: number;
+  /** Category (or categories) used to drive the colored image backdrop. */
+  category?: ProjectCategory | ProjectCategory[];
 }
 
-const { title, description, alt, tags = [], image, link, hasPage = false } = Astro.props;
+const { title, description, alt, tags = [], image, link, hasPage = false, category } = Astro.props;
 
 // "#" is used in data to indicate "no link yet" — treat as missing
 const hasLink = link && link !== "#";
 
 // Determine link destination and type
-const isInternal = hasPage;
-const linkUrl = isInternal ? `/projects/${link}/` : link;
+const linkUrl = hasPage ? `/projects/${link}/` : link;
+// These must stay aligned with the max-width breakpoints in `respond-to(lg)`
+// and `respond-to(sm)` from `_mixins.scss`, so image source sizing flips when
+// the grid actually changes column count.
+const desktopMultiColumnMinWidth = 1025;
+const tabletMultiColumnMinWidth = 641;
+const imageWidths = hasPage ? [400, 800, 1200, 1600] : [400, 600, 800];
+const standardImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3), (min-width: ${tabletMultiColumnMinWidth}px) calc((calc(100vw - (var(--space-lg) * 2)) - var(--space-xl)) / 2), calc(100vw - (var(--space-lg) * 2))`;
+const featuredImageSizes = `(min-width: ${desktopMultiColumnMinWidth}px) calc(((min(calc(100vw - (var(--space-xl) * 2)), var(--max-width)) - (var(--space-xl) * 2)) / 3) * 1.15), (min-width: ${tabletMultiColumnMinWidth}px) calc(100vw - (var(--space-lg) * 2)), calc(100vw - (var(--space-lg) * 2))`;
+const imageSizes = hasPage ? featuredImageSizes : standardImageSizes;
+
+// Normalize category into a sorted, space-separated token list so multi-category
+// cards can be styled with a combined gradient in the future.
+const categoryList = (Array.isArray(category) ? category : category ? [category] : []).slice().sort();
+const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefined;
 ---
 
 {
-  isInternal && hasLink ? (
-    <a href={linkUrl} class="project-card project-card--clickable" aria-label={`View ${title} case study`}>
+  hasPage && hasLink ? (
+    <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
+          </div>
+        )}
+        <span class="project-card__image-badge" aria-hidden="true">
+          View case study
+        </span>
+        {tags.length > 0 && (
+          <div class="project-card__tags project-card__tags--featured">
+            {tags.map((tag) => (
+              <span class="project-card__tag">{tag}</span>
+            ))}
           </div>
         )}
       </div>
@@ -74,7 +91,7 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
         </h3>
         <p class="project-card__description">{description}</p>
         {tags.length > 0 && (
-          <div class="project-card__tags">
+          <div class:list={["project-card__tags", { "project-card__tags--content-featured": hasPage }]}>
             {tags.map((tag) => (
               <span class="project-card__tag">{tag}</span>
             ))}
@@ -83,19 +100,10 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       </div>
     </a>
   ) : (
-    <article class="project-card">
+    <article class="project-card" data-category={dataCategory}>
       <div class="project-card__image-wrapper">
         {image ? (
-          <Picture
-            src={image}
-            formats={["avif", "webp"]}
-            alt={alt}
-            class="project-card__image"
-            loading="lazy"
-            quality="mid"
-            widths={[400, 600, 800]}
-            sizes="(min-width: 1024px) 400px, (min-width: 768px) 45vw, 90vw"
-          />
+          <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
         ) : (
           <div class="project-card__placeholder" aria-hidden="true">
             <span>{title.charAt(0)}</span>
@@ -129,13 +137,12 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
 }
 
 <style lang="scss">
-  @use "sass:color";
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
 
   .project-card {
     background-color: $color-white;
-    border-radius: 8px;
+    border-radius: $radius-2xl;
     overflow: hidden;
     box-shadow: 0 2px 8px $color-shadow;
     @include transition(all, 0.3s);
@@ -150,11 +157,11 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       box-shadow: 0 8px 24px $color-shadow-hover;
 
       .project-card__image {
-        transform: scale(1.05);
+        transform: translateY(-5px);
       }
 
       .project-card__placeholder {
-        background: linear-gradient(135deg, color.adjust($color-blue, $lightness: 5%) 0%, $color-blue-dark 100%);
+        transform: translateY(-5px);
       }
     }
 
@@ -172,6 +179,10 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
           transform: translateX(4px);
           opacity: 1;
         }
+
+        .project-card__image-badge {
+          transform: translateY(-2px);
+        }
       }
 
       &:focus-visible {
@@ -180,47 +191,216 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       }
     }
 
+    &--featured {
+      display: grid;
+      grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.25fr);
+      align-items: stretch;
+      position: relative;
+      border: 1px solid rgba($color-blue-dark, 0.14);
+      background-color: $color-white;
+      box-shadow:
+        0 2px 8px $color-shadow,
+        0 10px 24px rgba($color-blue-dark, 0.08);
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+      }
+    }
+
     &__image-wrapper {
-      aspect-ratio: 16 / 10;
-      overflow: hidden;
-      background-color: $color-cream;
-      // Reserve space to prevent CLS
-      contain: layout style paint;
+      position: relative;
+      z-index: 1;
+      padding: $space-md $space-md 0;
+      background-color: $color-neutral-200;
+      // Let the image bleed past the bottom edge
+      overflow: visible;
+      contain: layout style;
+
+      // Pattern overlay (category-specific). Sits above the gradient, below the image tile.
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: var(--project-card-pattern, none);
+        background-size: var(--project-card-pattern-size, 32px 32px);
+        opacity: 0.9;
+        mix-blend-mode: soft-light;
+      }
+    }
+
+    &--featured &__image-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: $space-lg;
+      padding: $space-lg;
+      min-width: 0;
+
+      @include respond-to(md) {
+        gap: $space-md;
+        padding: $space-md $space-md 0;
+      }
     }
 
     &__image {
+      position: relative;
+      z-index: 1;
+      display: block;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      @include transition(transform, 0.3s);
-      // Explicit aspect-ratio for CLS prevention
+      height: auto;
       aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: calc(#{$radius-2xl} - #{$space-sm});
+      // Bleed into the content area below
+      margin-bottom: -14px;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    &--featured &__image {
+      width: calc(100% + #{$space-2xl});
+      max-width: none;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      margin-bottom: -#{$space-lg};
+      margin-left: -#{$space-sm};
+      margin-right: -#{$space-xl};
+      object-position: center top;
+
+      @include respond-to(md) {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        margin-bottom: -14px;
+        margin-left: 0;
+        margin-right: 0;
+      }
     }
 
     &__placeholder {
-      width: 100%;
-      height: 100%;
+      position: relative;
+      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 100%);
-      @include transition(background, 0.3s);
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: calc(#{$radius-2xl} - #{$space-xs});
+      margin-bottom: -14px;
+      background: linear-gradient(135deg, rgba($color-white, 0.22) 0%, rgba($color-black, 0.18) 100%);
+      transition:
+        transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.3s ease;
 
       span {
         font-size: $font-size-4xl;
         font-weight: 700;
         color: $color-white;
-        opacity: 0.9;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        opacity: 0.95;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    &--featured &__placeholder {
+      aspect-ratio: 4 / 3;
+      width: calc(100% + #{$space-2xl});
+      max-width: none;
+      margin-bottom: -#{$space-lg};
+      margin-left: -#{$space-sm};
+      margin-right: -#{$space-xl};
+
+      @include respond-to(md) {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        margin-bottom: -14px;
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+
+    // Category-driven backdrops behind the image tile.
+    // Patterns double as a11y affordance for color-blind users.
+    &[data-category~="web"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, $color-blue-light 0%, $color-blue 55%, $color-blue-dark 100%);
+      // Grid / tic-tac-toe lines — technical, structured feel.
+      --project-card-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M0 16h32M16 0v32' stroke='white' stroke-width='1' opacity='0.35'/></svg>");
+      --project-card-pattern-size: 32px 32px;
+    }
+
+    &[data-category~="games"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, $color-orange-light 0%, $color-orange 55%, $color-orange-dark 100%);
+      // Alternating plus / circle pattern — arcade feel with more visual distinction.
+      --project-card-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='44'><path d='M10 4v12M4 10h12' stroke='white' stroke-width='1.6' stroke-linecap='round' opacity='0.42'/><circle cx='34' cy='10' r='5.5' fill='none' stroke='white' stroke-width='1.4' opacity='0.38'/><circle cx='10' cy='34' r='5.5' fill='none' stroke='white' stroke-width='1.4' opacity='0.38'/><path d='M34 28v12M28 34h12' stroke='white' stroke-width='1.6' stroke-linecap='round' opacity='0.42'/></svg>");
+      --project-card-pattern-size: 44px 44px;
+    }
+
+    &[data-category~="creative"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, #a78bfa 0%, $color-purple 100%);
+      // Overlapping circles — bubbles / playful.
+      --project-card-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='10' cy='10' r='7' fill='none' stroke='white' stroke-width='1' opacity='0.4'/><circle cx='30' cy='30' r='7' fill='none' stroke='white' stroke-width='1' opacity='0.4'/><circle cx='30' cy='10' r='7' fill='none' stroke='white' stroke-width='1' opacity='0.25'/><circle cx='10' cy='30' r='7' fill='none' stroke='white' stroke-width='1' opacity='0.25'/></svg>");
+      --project-card-pattern-size: 40px 40px;
+    }
+
+    // Combined backdrops for multi-category projects.
+    &[data-category~="web"][data-category~="games"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 45%, $color-orange 55%, $color-orange-dark 100%);
+    }
+
+    &[data-category~="web"][data-category~="creative"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, $color-blue 0%, $color-blue-dark 45%, $color-purple 100%);
+    }
+
+    &[data-category~="games"][data-category~="creative"] .project-card__image-wrapper {
+      background: linear-gradient(135deg, $color-orange 0%, $color-orange-dark 45%, $color-purple 100%);
+    }
+
+    &__image-badge {
+      position: absolute;
+      left: calc(#{$space-md} + #{$space-sm});
+      top: calc(#{$space-md} + #{$space-sm});
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: rgba($color-blue-dark, 0.88);
+      color: $color-white;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 12px rgba($color-black, 0.2);
+      @include transition(transform, 0.2s);
+    }
+
+    &--featured &__image-badge {
+      left: calc(#{$space-lg} + #{$space-sm});
+      top: calc(#{$space-lg} + #{$space-sm});
+
+      @include respond-to(md) {
+        left: calc(#{$space-md} + #{$space-sm});
+        top: calc(#{$space-md} + #{$space-sm});
       }
     }
 
     &__content {
+      position: relative;
+      z-index: 1;
       padding: $space-xl;
       display: flex;
       flex-direction: column;
       gap: $space-sm;
       flex-grow: 1;
+    }
+
+    &--featured &__content {
+      justify-content: center;
+      padding: $space-2xl $space-2xl $space-2xl $space-xl;
+      gap: $space-md;
+
+      @include respond-to(md) {
+        padding: $space-xl;
+      }
     }
 
     &__title {
@@ -231,6 +411,11 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       align-items: center;
       gap: $space-xs;
       @include transition(color, 0.2s);
+    }
+
+    &--featured &__title {
+      font-size: clamp($font-size-xl, 1.5vw + 1rem, $font-size-2xl);
+      line-height: 1.15;
     }
 
     // Arrow icon for internal pages (full card clickable)
@@ -272,11 +457,58 @@ const linkUrl = isInternal ? `/projects/${link}/` : link;
       flex-grow: 1;
     }
 
+    &--featured &__description {
+      font-size: $font-size-base;
+      line-height: 1.75;
+      max-width: 58ch;
+    }
+
     &__tags {
       display: flex;
       flex-wrap: wrap;
       gap: $space-xs;
-      margin-top: $space-sm;
+      margin-top: auto;
+    }
+
+    &__tags--featured {
+      position: relative;
+      z-index: 2;
+      align-self: flex-start;
+      max-width: min(18rem, calc(100% - #{$space-sm}));
+      margin-top: auto;
+      padding-top: $space-md;
+
+      @include respond-to(md) {
+        display: none;
+      }
+    }
+
+    &[data-category~="web"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-blue-dark, 0.92);
+      color: $color-white;
+    }
+
+    &[data-category~="games"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-orange-dark, 0.94);
+      color: $color-white;
+    }
+
+    &[data-category~="creative"] .project-card__tags--featured .project-card__tag {
+      background-color: rgba($color-purple, 0.92);
+      color: $color-white;
+    }
+
+    &[data-category~="web"][data-category~="games"] .project-card__tags--featured .project-card__tag {
+      background: linear-gradient(135deg, rgba($color-blue-dark, 0.96) 0%, rgba($color-orange-dark, 0.96) 100%);
+      color: $color-white;
+    }
+
+    &__tags--content-featured {
+      display: none;
+
+      @include respond-to(md) {
+        display: flex;
+      }
     }
 
     &__tag {

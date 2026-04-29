@@ -1,4 +1,6 @@
 ---
+import { getSkillIcon } from "../data/skill-icons";
+
 /**
  * Simple skill/technology badge.
  *
@@ -7,18 +9,53 @@
  */
 interface Props {
   label: string;
+  variant?: "default" | "large";
 }
 
-const { label } = Astro.props;
+const { label, variant = "default" } = Astro.props;
+
+const icon = variant === "large" ? getSkillIcon(label) : undefined;
+
+function toLinearSrgb(channelHex: string): number {
+  const channel = Number.parseInt(channelHex, 16) / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function getRelativeLuminance(hex: string): number {
+  const r = toLinearSrgb(hex.slice(0, 2));
+  const g = toLinearSrgb(hex.slice(2, 4));
+  const b = toLinearSrgb(hex.slice(4, 6));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function hasReadableContrastOnWhite(hex: string, minContrast = 1.8): boolean {
+  const luminance = getRelativeLuminance(hex);
+  const contrastAgainstWhite = 1.05 / (luminance + 0.05);
+  return contrastAgainstWhite >= minContrast;
+}
+
+const isValidIconHex = Boolean(icon && /^[0-9a-f]{6}$/i.test(icon.hex));
+const iconColor = icon && isValidIconHex && hasReadableContrastOnWhite(icon.hex) ? `#${icon.hex}` : undefined;
 ---
 
-<span class="skill-tag">{label}</span>
+<span class:list={["skill-tag", `skill-tag--${variant}`]} style={iconColor ? `--skill-tag-icon-color: ${iconColor};` : undefined}>
+  {
+    icon && (
+      <svg class="skill-tag__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d={icon.path} />
+      </svg>
+    )
+  }
+  {variant === "large" ? <span class="skill-tag__label">{label}</span> : label}
+</span>
 
 <style lang="scss">
   @use "../styles/variables" as *;
   @use "../styles/mixins" as *;
 
   .skill-tag {
+    --skill-tag-icon-current: var(--skill-tag-icon-color, currentColor);
+
     display: inline-block;
     padding: $space-xs $space-md;
     border: 1px solid $color-border;
@@ -29,9 +66,37 @@ const { label } = Astro.props;
     @include transition(all, 0.2s);
 
     &:hover {
+      --skill-tag-icon-current: currentColor;
       border-color: $color-orange;
       color: $color-orange;
       transform: translateY(-2px);
+    }
+
+    &--large {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-sm;
+      padding: calc($space-xs + 1px) $space-md;
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+
+      @include respond-to(md) {
+        flex-direction: column;
+        gap: $space-xs;
+        justify-content: center;
+      }
+    }
+
+    &__icon {
+      width: 1.125rem;
+      height: 1.125rem;
+      flex-shrink: 0;
+      color: var(--skill-tag-icon-current);
+      @include transition(color, 0.2s);
+    }
+
+    &__label {
+      line-height: $leading-none;
     }
   }
 </style>

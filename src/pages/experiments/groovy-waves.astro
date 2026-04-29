@@ -1,0 +1,2264 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Button from "../../components/Button.astro";
+
+const waveExperiments = [
+  {
+    title: "Swell Stack",
+    variant: "swell",
+    description: "The calm baseline. This is the version that feels closest to a reusable house style instead of an effect screaming for attention.",
+  },
+  {
+    title: "Interference Grid",
+    variant: "interference",
+    description: "Denser crossings for interfaces that want a little more friction and energy without becoming noisy.",
+  },
+  {
+    title: "Ribbon Pulse",
+    variant: "ribbon",
+    description: "A louder accent wave for hover, CTA, and state-change moments where a little drama is actually useful.",
+  },
+  {
+    title: "Contour Sweep",
+    variant: "contour",
+    description: "More line than glow. This one feels technical, almost diagram-like, which makes it good for structural UI edges.",
+  },
+  {
+    title: "Chromatic Drift",
+    variant: "chromatic",
+    description: "The most identity-driven variant. It leans into the `tehwave` nickname without needing a giant logo to do the job.",
+  },
+  {
+    title: "Tidal Noise",
+    variant: "tidal",
+    description: "Chunkier and less polite. Good when I want the motion to feel organic rather than perfectly engineered.",
+  },
+] as const;
+
+const placementVariants = [
+  {
+    title: "Inner halo",
+    note: "This is the clearest expression of the idea: the component stays readable, but the edge carries the `tehwave` fingerprint.",
+  },
+  {
+    title: "Bottom lip",
+    note: "A restrained option where the wave acts more like a footer accent. Technically it is just a clipped bottom strip, so it stays cheap to render.",
+  },
+  {
+    title: "Inner white seam",
+    note: "This is the subtle version. White-on-white lets the structure show up without reading as decoration pasted on top of the component.",
+  },
+  {
+    title: "Deep bottom pocket",
+    note: "Same bottom strategy, just deeper. It starts to change the silhouette of the component without needing a whole new container shape.",
+  },
+  {
+    title: "Outer footer flare",
+    note: "The most expressive placement. It breaks the card boundary on purpose, which makes it useful for special cases rather than default UI.",
+  },
+] as const;
+---
+
+<Layout title="Groovy Waves Experiment | Peter Chr. Jørgensen" description="A calmer wave laboratory focused on embedded wave borders, organic surfaces, and less boxy component design.">
+  <section class="groovy-waves" data-groovy-waves>
+    <div class="groovy-waves__container">
+      <header class="groovy-waves__intro" data-wave-reveal data-reveal-direction="up">
+        <p class="groovy-waves__eyebrow">Experiment</p>
+        <h1 class="groovy-waves__title">Groovy Waves Lab</h1>
+        <p class="groovy-waves__lede">
+          I have gone by <code>tehwave</code> online for years, so this is me testing whether waves can become more than a personal in-joke. I want them to function as a real design motif: edges, seams,
+          and state changes that make interfaces feel less boxy without becoming heavy, distracting, or annoying to ship.
+        </p>
+      </header>
+
+      <article class="groovy-waves__hero wave-panel" data-wave-reveal data-reveal-direction="up">
+        <div class="wave-panel__meta">
+          <h2 class="wave-panel__title">Ambient master field</h2>
+          <p class="wave-panel__description">
+            This is the base renderer underneath everything on the page. Same canvas system, different placement rules. It respects reduced motion, keeps draw logic simple, and stays lightweight
+            enough to be a viable UI layer instead of a one-off hero gimmick.
+          </p>
+        </div>
+        <canvas class="wave-panel__canvas" data-wave-canvas data-wave-variant="swell" data-wave-role="hero" role="img" aria-label="Ambient layered wave field"></canvas>
+      </article>
+
+      <section class="groovy-waves__section" aria-labelledby="variant-lab-title">
+        <div class="groovy-waves__section-head" data-wave-reveal data-reveal-direction="left">
+          <h2 id="variant-lab-title">Variant micro-lab</h2>
+          <p>
+            Before I start embedding waves into cards, nav, and buttons, I want a small personality library. Each variant is the same rendering system with different frequencies, layer weights, and
+            colour handling, so the motif can flex without becoming visually random.
+          </p>
+        </div>
+
+        <div class="groovy-waves__lab-grid">
+          {
+            waveExperiments.map((experiment, index) => (
+              <article class="wave-tile" data-wave-reveal data-reveal-direction={index % 3 === 0 ? "up" : index % 3 === 1 ? "left" : "right"}>
+                <div class="wave-tile__head">
+                  <h3 class="wave-tile__title">{experiment.title}</h3>
+                  <span class="wave-tile__chip">{experiment.variant}</span>
+                </div>
+                <canvas class="wave-tile__canvas" data-wave-canvas data-wave-variant={experiment.variant} data-wave-role="tile" role="img" aria-label={`${experiment.title} wave variant preview`} />
+                <p class="wave-tile__description">{experiment.description}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="groovy-waves__section" aria-labelledby="placement-title">
+        <div class="groovy-waves__section-head" data-wave-reveal data-reveal-direction="right">
+          <h2 id="placement-title">Placement variants</h2>
+          <p>
+            The real question is not "can I render waves?" It is "where can they live in a component without breaking usability?" These examples test edge-bound halos, clipped bottom strips, embossed
+            seams, and the occasional intentional silhouette break.
+          </p>
+        </div>
+
+        <div class="placement-grid">
+          <article class="placement-demo placement-demo--inside" data-wave-reveal data-reveal-direction="left">
+            <div class="placement-demo__inner placement-demo__inner--inside-shell">
+              <canvas
+                class="placement-demo__field placement-demo__field--edge-bleed"
+                data-wave-canvas
+                data-wave-variant="chromatic"
+                data-wave-role="outside"
+                role="img"
+                aria-label="Inner halo wave inside button group shell"></canvas>
+              <div class="placement-demo__content">
+                <p class="placement-demo__eyebrow">Inner halo</p>
+                <div class="placement-demo__actions">
+                  <button class="placement-button placement-button--plain" type="button">Primary action</button>
+                  <button class="placement-button placement-button--plain" type="button">Secondary</button>
+                </div>
+                <p class="placement-demo__note">{placementVariants[0].note}</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="placement-demo placement-demo--bottom" data-wave-reveal data-reveal-direction="up">
+            <div class="placement-demo__inner placement-demo__inner--solid placement-demo__inner--bottom-shell">
+              <canvas
+                class="placement-demo__field placement-demo__field--bottom-inside"
+                data-wave-canvas
+                data-wave-variant="tidal"
+                data-wave-role="bottom"
+                role="img"
+                aria-label="Bottom-only wave edge inside the card"></canvas>
+              <div class="placement-demo__content placement-demo__content--bottom">
+                <p class="placement-demo__eyebrow">Bottom lip</p>
+                <h3>Accordion / disclosure shell</h3>
+                <p class="placement-demo__note">{placementVariants[1].note}</p>
+                <div class="placement-demo__accordion">
+                  <button class="placement-demo__accordion-trigger" type="button">How the wave is attached</button>
+                  <p>The panel is normal. The wave just kisses the bottom edge.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="placement-demo placement-demo--inner placement-demo--wide" data-wave-reveal data-reveal-direction="right">
+            <div class="placement-demo__inner placement-demo__inner--paper">
+              <div class="placement-demo__content">
+                <p class="placement-demo__eyebrow">Inner white seam</p>
+                <div class="placement-demo__nav">
+                  <div class="placement-demo__nav-shell">
+                    <canvas
+                      class="placement-demo__field placement-demo__field--inner"
+                      data-wave-canvas
+                      data-wave-variant="swell"
+                      data-wave-role="inner"
+                      role="img"
+                      aria-label="Inner white wave seam under nav"></canvas>
+                    <nav class="placement-demo__nav-links" aria-label="Wave nav examples">
+                      <a href="#">Overview</a>
+                      <a href="#">Process</a>
+                      <a href="#">Notes</a>
+                      <a href="#">Ship</a>
+                    </nav>
+                  </div>
+                </div>
+                <p class="placement-demo__note">{placementVariants[2].note}</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="placement-demo placement-demo--bottom placement-demo--deep" data-wave-reveal data-reveal-direction="left">
+            <div class="placement-demo__inner placement-demo__inner--solid placement-demo__inner--bottom-shell placement-demo__inner--deep-bottom">
+              <canvas
+                class="placement-demo__field placement-demo__field--bottom-inside placement-demo__field--bottom-deep"
+                data-wave-canvas
+                data-wave-variant="ribbon"
+                data-wave-role="bottom"
+                role="img"
+                aria-label="Deep bottom pocket wave inside the card"></canvas>
+              <div class="placement-demo__content placement-demo__content--bottom placement-demo__content--deep-bottom">
+                <p class="placement-demo__eyebrow">Deep bottom pocket</p>
+                <h3>Card footer reshaper</h3>
+                <p class="placement-demo__note">{placementVariants[3].note}</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="groovy-waves__section" aria-labelledby="button-states-title">
+        <div class="groovy-waves__section-head" data-wave-reveal data-reveal-direction="left">
+          <h2 id="button-states-title">Button states through the `tehwave` motif</h2>
+          <p>
+            Buttons are where this experiment either becomes real or falls apart. These states test whether the wave treatment can communicate default, hover, and active feedback while staying
+            readable, reduced-motion friendly, and cheap enough to use more than once on a page.
+          </p>
+        </div>
+
+        <div class="button-showcase-grid">
+          <article class="button-showcase" data-wave-reveal data-reveal-direction="left">
+            <div class="button-showcase__card button-showcase__card--clip">
+              <div class="button-showcase__content">
+                <div class="button-showcase__meta">
+                  <p class="button-showcase__eyebrow">Default / contained</p>
+                  <h3 class="button-showcase__title">A quiet state that keeps the label in charge</h3>
+                </div>
+                <Button waveState="default" waveMount="external">Default action</Button>
+                <p class="button-showcase__note">
+                  This is the safe default. The wave is clipped inside the button shell, so the identity is there, but the button still behaves like normal UI instead of a special effect.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="button-showcase button-showcase--hover" data-wave-reveal data-reveal-direction="up">
+            <div class="button-showcase__card button-showcase__card--clip">
+              <div class="button-showcase__content">
+                <div class="button-showcase__meta">
+                  <p class="button-showcase__eyebrow">Hover / intent</p>
+                  <h3 class="button-showcase__title">Same structure, faster motion when intent is clear</h3>
+                </div>
+                <Button waveState="hover" waveMount="external">Hover me</Button>
+                <p class="button-showcase__note">
+                  On hover, the wave grows and animates faster, but only on the button itself. That keeps the interaction crisp, avoids accidental triggers from nearby text, and still respects reduced
+                  motion when the OS asks for less animation.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="button-showcase" data-wave-reveal data-reveal-direction="right">
+            <div class="button-showcase__card button-showcase__card--bleed">
+              <div class="button-showcase__content">
+                <div class="button-showcase__meta">
+                  <p class="button-showcase__eyebrow">Active / toggled</p>
+                  <h3 class="button-showcase__title">The expressive state, still trimmed for usability</h3>
+                </div>
+                <Button waveState="active" waveMount="external" ariaPressed={true}>Toggled on</Button>
+                <p class="button-showcase__note">
+                  This is the loudest state, but it is still constrained. The edge bleed is intentional, the amplitude is tuned down, and the renderer stays on the same lightweight canvas path as the
+                  rest of the experiment.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  type WaveVariant = "swell" | "interference" | "ribbon" | "contour" | "chromatic" | "tidal";
+  type WaveRole = "hero" | "tile" | "frame" | "seam" | "accent" | "outside" | "bottom" | "inner";
+
+  interface WaveScene {
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    variant: WaveVariant;
+    role: WaveRole;
+    intensity: number;
+    speedMultiplier: number;
+    hoverSpeedMultiplier: number;
+    width: number;
+    height: number;
+    dpr: number;
+    visible: boolean;
+    hoverFillEnabled: boolean;
+    fillProgress: number;
+    targetFillProgress: number;
+    phaseTime: number;
+    fillLocked: boolean;
+    paused: boolean;
+  }
+
+  let teardownGroovyWaves: (() => void) | null = null;
+  let groovyWavesInitHandler: (() => void) | null = null;
+
+  const PALETTES: Record<WaveVariant, string[]> = {
+    swell: ["#57e3ff", "#4f8cff", "#9560ff", "#ff63cf", "#ff9a68"],
+    interference: ["#9bf5ff", "#70a0ff", "#9a7cff", "#f77dff", "#ffd66c"],
+    ribbon: ["#58e6ff", "#6a8bff", "#b06bff", "#ff7ca8", "#ff8f5e"],
+    contour: ["#66f0ff", "#4fa1ff", "#7a74ff", "#ff6df2", "#ffd774"],
+    chromatic: ["#5ae9ff", "#6695ff", "#9f6bff", "#ff6cff", "#ff9f80"],
+    tidal: ["#8df7ff", "#5ab2ff", "#9688ff", "#ff8be1", "#ffc97a"],
+  };
+
+  const BACKGROUNDS: Record<WaveVariant, [string, string, string]> = {
+    swell: ["#0a1b5d", "#151a75", "#2b0d5e"],
+    interference: ["#10195a", "#102571", "#340d58"],
+    ribbon: ["#091d64", "#1d1e7a", "#3a145f"],
+    contour: ["#0b1f61", "#20286f", "#2e1659"],
+    chromatic: ["#12185f", "#172b79", "#2a0e52"],
+    tidal: ["#0d245f", "#122f72", "#2f1758"],
+  };
+
+  const ROLE_CONFIG: Record<WaveRole, { layerCount: number; xStep: number; alphaBoost: number; shadowBlur: number }> = {
+    hero: { layerCount: 5, xStep: 2, alphaBoost: 0.12, shadowBlur: 20 },
+    tile: { layerCount: 4, xStep: 3, alphaBoost: 0.04, shadowBlur: 12 },
+    frame: { layerCount: 4, xStep: 3, alphaBoost: 0.08, shadowBlur: 14 },
+    seam: { layerCount: 3, xStep: 3, alphaBoost: 0.03, shadowBlur: 10 },
+    accent: { layerCount: 3, xStep: 4, alphaBoost: 0.02, shadowBlur: 9 },
+    outside: { layerCount: 4, xStep: 3, alphaBoost: 0.1, shadowBlur: 16 },
+    bottom: { layerCount: 3, xStep: 3, alphaBoost: 0.05, shadowBlur: 12 },
+    inner: { layerCount: 2, xStep: 4, alphaBoost: 0.02, shadowBlur: 7 },
+  };
+
+  function initGroovyWaves() {
+    teardownGroovyWaves?.();
+    teardownGroovyWaves = mountGroovyWaves();
+
+    document.addEventListener(
+      "astro:before-preparation",
+      () => {
+        teardownGroovyWaves?.();
+        teardownGroovyWaves = null;
+      },
+      { once: true },
+    );
+  }
+
+  function mountGroovyWaves() {
+    const root = document.querySelector("[data-groovy-waves]");
+    if (!(root instanceof HTMLElement)) {
+      return () => {};
+    }
+
+    const canvasNodes = Array.from(root.querySelectorAll("[data-wave-canvas]"));
+    const canvases = canvasNodes.filter((node): node is HTMLCanvasElement => node instanceof HTMLCanvasElement);
+    const revealNodes = Array.from(root.querySelectorAll("[data-wave-reveal]"));
+    const revealItems = revealNodes.filter((node): node is HTMLElement => node instanceof HTMLElement);
+
+    if (canvases.length === 0) {
+      return () => {};
+    }
+
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let isPageVisible = !document.hidden;
+    let frameId: number | null = null;
+    let previousFrameTime: number | null = null;
+    const cleanupCallbacks: Array<() => void> = [];
+
+    const scenes: WaveScene[] = [];
+
+    for (const canvas of canvases) {
+      const variantRaw = canvas.dataset.waveVariant;
+      const variant: WaveVariant = isWaveVariant(variantRaw) ? variantRaw : "swell";
+      const roleRaw = canvas.dataset.waveRole;
+      const role: WaveRole = isWaveRole(roleRaw) ? roleRaw : "tile";
+      const intensityRaw = Number(canvas.dataset.waveIntensity ?? "1");
+      const intensity = Number.isFinite(intensityRaw) ? Math.min(Math.max(intensityRaw, 0.08), 1) : 1;
+      const hoverSpeedRaw = Number(canvas.dataset.waveHoverSpeed ?? "1");
+      const hoverSpeedMultiplier = Number.isFinite(hoverSpeedRaw) ? Math.min(Math.max(hoverSpeedRaw, 1), 4) : 1;
+      const hoverFillEnabled = canvas.dataset.waveHoverFill === "1";
+      const fillLocked = canvas.dataset.waveFillLocked === "1";
+      const paused = canvas.dataset.wavePaused === "1";
+      const context = canvas.getContext("2d", { alpha: true });
+
+      if (!context) continue;
+
+      scenes.push({
+        canvas,
+        context,
+        variant,
+        role,
+        intensity,
+        speedMultiplier: 1,
+        hoverSpeedMultiplier,
+        width: 0,
+        height: 0,
+        dpr: 1,
+        visible: true,
+        hoverFillEnabled,
+        fillProgress: fillLocked ? 1 : 0,
+        targetFillProgress: fillLocked ? 1 : 0,
+        phaseTime: 0,
+        fillLocked,
+        paused,
+      });
+    }
+
+    if (scenes.length === 0) {
+      return () => {};
+    }
+
+    function syncSceneSize(scene: WaveScene) {
+      const rect = scene.canvas.getBoundingClientRect();
+      scene.width = Math.max(120, Math.floor(rect.width));
+      scene.height = Math.max(80, Math.floor(rect.height));
+      scene.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      scene.canvas.width = Math.max(1, Math.floor(scene.width * scene.dpr));
+      scene.canvas.height = Math.max(1, Math.floor(scene.height * scene.dpr));
+      scene.context.setTransform(scene.dpr, 0, 0, scene.dpr, 0, 0);
+    }
+
+    function buildWavyRectPoints(width: number, height: number, inset: number, amplitude: number, phase: number, density: number) {
+      const left = inset;
+      const right = width - inset;
+      const top = inset;
+      const bottom = height - inset;
+      const points: Array<{ x: number; y: number }> = [];
+      const topSegments = Math.max(18, Math.floor((right - left) / density));
+      const sideSegments = Math.max(12, Math.floor((bottom - top) / density));
+
+      for (let index = 0; index <= topSegments; index += 1) {
+        const progress = index / topSegments;
+        const x = left + (right - left) * progress;
+        const y = top - Math.sin(progress * Math.PI * 2 + phase) * amplitude - Math.cos(progress * Math.PI * 5 + phase * 0.8) * (amplitude * 0.35);
+        points.push({ x, y });
+      }
+
+      for (let index = 1; index <= sideSegments; index += 1) {
+        const progress = index / sideSegments;
+        const x = right + Math.sin(progress * Math.PI * 2 + phase * 1.2) * amplitude + Math.cos(progress * Math.PI * 4 + phase) * (amplitude * 0.25);
+        const y = top + (bottom - top) * progress;
+        points.push({ x, y });
+      }
+
+      for (let index = 1; index <= topSegments; index += 1) {
+        const progress = index / topSegments;
+        const x = right - (right - left) * progress;
+        const y = bottom + Math.sin(progress * Math.PI * 2 + phase * 0.9) * amplitude + Math.cos(progress * Math.PI * 5 + phase * 0.5) * (amplitude * 0.3);
+        points.push({ x, y });
+      }
+
+      for (let index = 1; index < sideSegments; index += 1) {
+        const progress = index / sideSegments;
+        const x = left - Math.sin(progress * Math.PI * 2 + phase) * amplitude - Math.cos(progress * Math.PI * 4 + phase * 1.1) * (amplitude * 0.25);
+        const y = bottom - (bottom - top) * progress;
+        points.push({ x, y });
+      }
+
+      return points;
+    }
+
+    function traceClosedPath(context: CanvasRenderingContext2D, points: Array<{ x: number; y: number }>) {
+      if (points.length === 0) return;
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+      for (let index = 1; index < points.length; index += 1) {
+        const current = points[index];
+        const previous = points[index - 1];
+        const midpointX = (previous.x + current.x) * 0.5;
+        const midpointY = (previous.y + current.y) * 0.5;
+        context.quadraticCurveTo(previous.x, previous.y, midpointX, midpointY);
+      }
+      const last = points[points.length - 1];
+      const first = points[0];
+      context.quadraticCurveTo(last.x, last.y, first.x, first.y);
+      context.closePath();
+    }
+
+    function drawTransparentBorder(
+      context: CanvasRenderingContext2D,
+      width: number,
+      height: number,
+      palette: string[],
+      roleConfig: { layerCount: number; xStep: number; alphaBoost: number; shadowBlur: number },
+      time: number,
+      role: WaveRole,
+      intensity: number,
+      addSeam: boolean,
+    ) {
+      const outerInsetBase = role === "outside" ? 6 + (1 - intensity) * 12 : role === "accent" ? 8 : 20;
+      const innerGap = role === "outside" ? Math.max(3, 16 * intensity) : 18;
+      for (let layer = 0; layer < roleConfig.layerCount; layer += 1) {
+        const phase = time * (0.00018 + layer * 0.00004) + layer * 0.8;
+        const outerInset = outerInsetBase + layer * 5;
+        const innerInset = outerInset + innerGap;
+        const outerAmplitude = (8 + layer * 2.6) * intensity;
+        const innerAmplitude = Math.max(1.2, outerAmplitude * 0.42);
+        const gradient = context.createLinearGradient(0, 0, width, height);
+
+        for (let index = 0; index < palette.length; index += 1) {
+          gradient.addColorStop(index / (palette.length - 1), palette[(index + layer) % palette.length]);
+        }
+
+        const outerPoints = buildWavyRectPoints(width, height, outerInset, outerAmplitude, phase, 16);
+        const innerPoints = buildWavyRectPoints(width, height, innerInset, innerAmplitude, phase * 1.1, 18);
+
+        context.save();
+        context.fillStyle = gradient;
+        context.strokeStyle = gradient;
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = Math.min(0.58, (0.16 + layer * 0.1 + roleConfig.alphaBoost) * (0.45 + intensity * 0.55));
+        context.shadowColor = palette[(layer + 2) % palette.length];
+        context.shadowBlur = roleConfig.shadowBlur * (0.35 + intensity * 0.65);
+
+        traceClosedPath(context, outerPoints);
+        context.fill();
+
+        context.globalCompositeOperation = "destination-out";
+        traceClosedPath(context, innerPoints);
+        context.fill();
+        context.restore();
+
+        context.save();
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = Math.min(0.7, (0.26 + layer * 0.09) * (0.48 + intensity * 0.52));
+        context.strokeStyle = gradient;
+        context.lineWidth = Math.max(0.7, (1.2 + layer * 0.15) * (0.45 + intensity * 0.55));
+        traceClosedPath(context, outerPoints);
+        context.stroke();
+        context.restore();
+      }
+
+      if (addSeam) {
+        const seamX = width * 0.3;
+        const seamGradient = context.createLinearGradient(seamX - 18, 0, seamX + 18, height);
+        seamGradient.addColorStop(0, palette[0]);
+        seamGradient.addColorStop(0.5, palette[2]);
+        seamGradient.addColorStop(1, palette[4]);
+
+        context.save();
+        context.strokeStyle = seamGradient;
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = 0.6;
+        context.lineWidth = 2.2;
+        context.shadowColor = palette[2];
+        context.shadowBlur = 12;
+        context.beginPath();
+        for (let y = 22; y <= height - 22; y += 3) {
+          const progress = (y - 22) / Math.max(1, height - 44);
+          const x = seamX + Math.sin(progress * Math.PI * 3 + time * 0.00024) * 8 + Math.cos(progress * Math.PI * 6 + time * 0.00018) * 3;
+          if (y === 22) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        }
+        context.stroke();
+        context.restore();
+      }
+    }
+
+    function drawWaveStrip(context: CanvasRenderingContext2D, width: number, height: number, palette: string[], time: number, mode: "bottom" | "inner", fillProgress = 0, dynamicCoverage = false) {
+      const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
+      const boostedFillProgress = mode === "bottom" ? Math.min(1.3, clampedFillProgress * 1.3) : clampedFillProgress;
+      const coverageProgress = Math.pow(clampedFillProgress, 0.84);
+      const bandTop = mode === "bottom" ? Math.max(-height * 0.22, height * (0.7 - boostedFillProgress * 0.7)) : height * 0.12;
+      const baseY = mode === "bottom" ? height * (0.86 - boostedFillProgress * 0.58) : height * 0.46;
+      const maxAmplitude = mode === "bottom" ? 10 + boostedFillProgress * 18 : 10;
+      const lineAlpha = mode === "bottom" ? 0.46 + clampedFillProgress * 0.2 : 0.4;
+
+      if (mode === "bottom" && dynamicCoverage && coverageProgress > 0.0001) {
+        const coverageGradient = context.createLinearGradient(0, 0, width, height);
+        coverageGradient.addColorStop(0, palette[0]);
+        coverageGradient.addColorStop(0.46, palette[2]);
+        coverageGradient.addColorStop(1, palette[4]);
+
+        context.save();
+        context.globalCompositeOperation = "source-over";
+        context.globalAlpha = Math.min(1, coverageProgress * 0.96);
+        context.fillStyle = coverageGradient;
+        context.fillRect(0, 0, width, height);
+        context.restore();
+      }
+
+      for (let layer = 0; layer < (mode === "bottom" ? 3 : 3); layer += 1) {
+        const gradient = context.createLinearGradient(0, 0, width, 0);
+        for (let index = 0; index < palette.length; index += 1) {
+          gradient.addColorStop(index / (palette.length - 1), palette[(index + layer) % palette.length]);
+        }
+
+        const amplitude = Math.max(2.8, maxAmplitude - layer * (2 + boostedFillProgress * 0.9));
+        const frequency = 0.01 + layer * 0.002;
+        const phase = time * (0.0002 + layer * 0.00005) + layer * 0.6;
+
+        context.save();
+        context.globalCompositeOperation = mode === "inner" ? "multiply" : "screen";
+        context.globalAlpha = lineAlpha - layer * 0.08;
+        context.strokeStyle = gradient;
+        context.fillStyle = gradient;
+        context.lineWidth = mode === "bottom" ? 1.6 : 2.6;
+        context.beginPath();
+
+        for (let x = 0; x <= width + 2; x += 3) {
+          const waveY = baseY + Math.sin(x * frequency + phase) * amplitude + Math.cos(x * frequency * 1.8 + phase * 0.8) * (amplitude * 0.34);
+          if (x === 0) context.moveTo(x, waveY);
+          else context.lineTo(x, waveY);
+        }
+
+        if (mode === "bottom") {
+          context.lineTo(width, height + 4);
+          context.lineTo(0, height + 4);
+          context.closePath();
+          context.fill();
+        } else {
+          context.stroke();
+        }
+
+        context.restore();
+      }
+
+      if (mode === "bottom") {
+        const topGlow = context.createLinearGradient(0, bandTop, 0, height);
+        topGlow.addColorStop(0, "rgba(255, 255, 255, 0)");
+        topGlow.addColorStop(1, "rgba(255, 255, 255, 0.16)");
+
+        context.save();
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = dynamicCoverage ? coverageProgress * 0.26 : 0.18 + clampedFillProgress * 0.12;
+        context.fillStyle = topGlow;
+        context.fillRect(0, bandTop, width, Math.max(1, height - bandTop));
+        context.restore();
+      }
+
+      if (mode === "inner") {
+        context.save();
+        context.globalAlpha = 0.16;
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, bandTop, width, height - bandTop * 1.1);
+        context.restore();
+      }
+    }
+
+    function drawScene(scene: WaveScene, time: number) {
+      const { context, width, height, role, variant, intensity } = scene;
+      const [bgStart, bgMid, bgEnd] = BACKGROUNDS[variant];
+      const palette = PALETTES[variant];
+      const roleConfig = ROLE_CONFIG[role];
+
+      context.clearRect(0, 0, width, height);
+
+      if (role === "frame" || role === "seam" || role === "accent" || role === "outside") {
+        drawTransparentBorder(context, width, height, palette, roleConfig, time, role, intensity, role === "seam");
+        return;
+      }
+
+      if (role === "bottom" || role === "inner") {
+        drawWaveStrip(context, width, height, palette, time, role, scene.fillProgress, scene.hoverFillEnabled);
+        return;
+      }
+
+      const backgroundGradient = context.createLinearGradient(0, 0, width, height);
+      backgroundGradient.addColorStop(0, bgStart);
+      backgroundGradient.addColorStop(0.48, bgMid);
+      backgroundGradient.addColorStop(1, bgEnd);
+      context.fillStyle = backgroundGradient;
+      context.fillRect(0, 0, width, height);
+
+      const glow = context.createRadialGradient(width * 0.18, height * 0.16, 0, width * 0.18, height * 0.16, Math.max(width, height) * 0.7);
+      glow.addColorStop(0, "rgba(88, 230, 255, 0.12)");
+      glow.addColorStop(0.5, "rgba(255, 94, 201, 0.08)");
+      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+
+      for (let layer = 0; layer < roleConfig.layerCount; layer += 1) {
+        const crest = height * (0.16 + layer * 0.16);
+        const frequency = (0.0048 + layer * 0.001) * (variant === "ribbon" ? 1.18 : 1);
+        const amplitude = (role === "hero" ? 16 : 9) + layer * 4.2;
+        const speed = (0.00018 + layer * 0.00004) * (layer % 2 === 0 ? 1 : -1);
+        const phase = time * speed;
+
+        const gradient = context.createLinearGradient(0, 0, width, 0);
+        for (let index = 0; index < palette.length; index += 1) {
+          gradient.addColorStop(index / (palette.length - 1), palette[(index + layer) % palette.length]);
+        }
+
+        context.save();
+        context.globalCompositeOperation = "screen";
+        context.globalAlpha = Math.min(0.78, 0.24 + layer * 0.08 + roleConfig.alphaBoost);
+        context.strokeStyle = gradient;
+        context.fillStyle = gradient;
+        context.lineWidth = variant === "contour" ? 1.2 : role === "hero" ? 1.8 : 1.5;
+        context.shadowColor = palette[(layer + 2) % palette.length];
+        context.shadowBlur = roleConfig.shadowBlur;
+        context.beginPath();
+        context.moveTo(0, height + 18);
+
+        for (let x = 0; x <= width + roleConfig.xStep; x += roleConfig.xStep) {
+          const primary = Math.sin(x * frequency + phase + layer * 0.8) * amplitude;
+          const harmonic = Math.sin(x * frequency * 0.58 - phase * 1.3 + layer * 0.6) * (amplitude * 0.42);
+          const contour = variant === "contour" ? Math.cos(x * frequency * 1.6 + phase * 1.6) * (amplitude * 0.26) : 0;
+          const chromatic = variant === "chromatic" ? Math.sin(x * frequency * 2.05 + phase * 0.8) * (amplitude * 0.18) : 0;
+          const turbulence =
+            variant === "interference"
+              ? Math.sin(x * frequency * 2.6 + phase * 2.1) * (amplitude * 0.28)
+              : variant === "tidal"
+                ? Math.cos(x * frequency * 2.15 + phase * 1.05) * (amplitude * 0.22)
+                : 0;
+          const y = crest + primary + harmonic + contour + chromatic + turbulence;
+
+          context.lineTo(x, y);
+        }
+
+        if (variant === "contour") {
+          context.stroke();
+        } else {
+          context.lineTo(width, height + 18);
+          context.closePath();
+          context.fill();
+        }
+
+        context.restore();
+      }
+    }
+
+    function stopLoop() {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+
+      previousFrameTime = null;
+    }
+
+    function render(time: number) {
+      const deltaTime = previousFrameTime === null ? 16.67 : Math.min(40, Math.max(0, time - previousFrameTime));
+      previousFrameTime = time;
+
+      for (const scene of scenes) {
+        if (!scene.visible) continue;
+
+        const fillDelta = scene.targetFillProgress - scene.fillProgress;
+        const fillLerp = 1 - Math.exp(-deltaTime / 90);
+        if (Math.abs(fillDelta) > 0.001) {
+          scene.fillProgress += fillDelta * fillLerp;
+        } else {
+          scene.fillProgress = scene.targetFillProgress;
+        }
+
+        if (!scene.paused) {
+          scene.phaseTime += deltaTime * scene.speedMultiplier;
+        }
+        drawScene(scene, scene.phaseTime);
+      }
+
+      frameId = requestAnimationFrame(render);
+    }
+
+    function renderStatic() {
+      for (const scene of scenes) {
+        drawScene(scene, scene.phaseTime);
+      }
+    }
+
+    function updatePlayback() {
+      const hasVisibleScene = scenes.some((scene) => scene.visible);
+      const shouldAnimate = !reduceMotionQuery.matches && isPageVisible && hasVisibleScene;
+
+      if (!shouldAnimate) {
+        stopLoop();
+        renderStatic();
+        return;
+      }
+
+      if (frameId === null) {
+        frameId = requestAnimationFrame(render);
+      }
+    }
+
+    function handleResize() {
+      for (const scene of scenes) {
+        syncSceneSize(scene);
+      }
+
+      updatePlayback();
+    }
+
+    function handlePageVisibilityChange() {
+      isPageVisible = !document.hidden;
+      updatePlayback();
+    }
+
+    function handleMotionChange() {
+      updatePlayback();
+    }
+
+    const sceneObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const target = entry.target;
+          if (!(target instanceof HTMLCanvasElement)) continue;
+
+          const scene = scenes.find((item) => item.canvas === target);
+          if (!scene) continue;
+
+          scene.visible = entry.isIntersecting;
+        }
+
+        updatePlayback();
+      },
+      { threshold: 0.08 },
+    );
+
+    const revealObserver =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                const target = entry.target;
+                if (!(target instanceof HTMLElement)) continue;
+
+                target.classList.toggle("is-inview", entry.isIntersecting);
+              }
+            },
+            { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+          )
+        : null;
+
+    for (const scene of scenes) {
+      syncSceneSize(scene);
+      sceneObserver.observe(scene.canvas);
+
+      if ((scene.hoverSpeedMultiplier > 1 || scene.hoverFillEnabled) && !scene.fillLocked) {
+        const hoverTarget = scene.canvas.closest(".button-sample");
+
+        if (hoverTarget instanceof HTMLElement) {
+          const updateHoverState = (isActive: boolean) => {
+            scene.speedMultiplier = isActive ? scene.hoverSpeedMultiplier : 1;
+
+            if (scene.hoverFillEnabled) {
+              scene.targetFillProgress = isActive ? 1 : 0;
+
+              if (reduceMotionQuery.matches) {
+                scene.fillProgress = scene.targetFillProgress;
+                renderStatic();
+              }
+            }
+          };
+
+          const activateHoverSpeed = () => {
+            updateHoverState(true);
+          };
+
+          const resetHoverSpeed = () => {
+            updateHoverState(false);
+          };
+
+          hoverTarget.addEventListener("mouseenter", activateHoverSpeed);
+          hoverTarget.addEventListener("mouseleave", resetHoverSpeed);
+          hoverTarget.addEventListener("focusin", activateHoverSpeed);
+          hoverTarget.addEventListener("focusout", resetHoverSpeed);
+
+          cleanupCallbacks.push(() => {
+            hoverTarget.removeEventListener("mouseenter", activateHoverSpeed);
+            hoverTarget.removeEventListener("mouseleave", resetHoverSpeed);
+            hoverTarget.removeEventListener("focusin", activateHoverSpeed);
+            hoverTarget.removeEventListener("focusout", resetHoverSpeed);
+          });
+        }
+      }
+    }
+
+    for (const revealItem of revealItems) {
+      if (revealObserver) {
+        revealObserver.observe(revealItem);
+      } else {
+        revealItem.classList.add("is-inview");
+      }
+    }
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    document.addEventListener("visibilitychange", handlePageVisibilityChange);
+    reduceMotionQuery.addEventListener("change", handleMotionChange);
+
+    updatePlayback();
+
+    return () => {
+      stopLoop();
+      sceneObserver.disconnect();
+      revealObserver?.disconnect();
+      cleanupCallbacks.forEach((cleanup) => cleanup());
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handlePageVisibilityChange);
+      reduceMotionQuery.removeEventListener("change", handleMotionChange);
+    };
+  }
+
+  function isWaveVariant(value: string | undefined): value is WaveVariant {
+    return value === "swell" || value === "interference" || value === "ribbon" || value === "contour" || value === "chromatic" || value === "tidal";
+  }
+
+  function isWaveRole(value: string | undefined): value is WaveRole {
+    return value === "hero" || value === "tile" || value === "frame" || value === "seam" || value === "accent" || value === "outside" || value === "bottom" || value === "inner";
+  }
+
+  initGroovyWaves();
+
+  const ensureGroovyWavesHandler = () => {
+    if (groovyWavesInitHandler) {
+      document.removeEventListener("astro:page-load", groovyWavesInitHandler);
+    }
+
+    groovyWavesInitHandler = initGroovyWaves;
+    document.addEventListener("astro:page-load", groovyWavesInitHandler);
+  };
+
+  ensureGroovyWavesHandler();
+</script>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .groovy-waves {
+    min-height: calc(100vh - $header-height);
+    padding: calc($header-height + $space-2xl) $space-xl $space-4xl;
+    background:
+      radial-gradient(circle at 15% 12%, rgba($color-blue-light, 0.2), transparent 42%), radial-gradient(circle at 80% 78%, rgba($color-purple, 0.12), transparent 44%),
+      linear-gradient(160deg, rgba($color-blue-dark, 0.11), rgba($color-orange-light, 0.06)), $color-bg;
+
+    @include respond-to(md) {
+      padding: calc($header-height + $space-xl) $space-lg $space-3xl;
+    }
+
+    &__container {
+      @include container;
+      display: grid;
+      gap: $space-2xl;
+    }
+
+    &__intro {
+      display: grid;
+      gap: $space-md;
+      max-width: 76ch;
+    }
+
+    &__eyebrow {
+      @include section-label;
+    }
+
+    &__title {
+      @include section-heading;
+      max-width: 16ch;
+    }
+
+    &__lede {
+      font-size: $font-size-lg;
+      line-height: $leading-relaxed;
+      color: rgba($color-text-primary, 0.84);
+    }
+
+    &__section {
+      display: grid;
+      gap: $space-lg;
+    }
+
+    &__section-head {
+      display: grid;
+      gap: $space-sm;
+      max-width: 66ch;
+
+      h2 {
+        font-size: $font-size-2xl;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.82);
+        line-height: $leading-relaxed;
+      }
+    }
+
+    &__lab-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: $space-lg;
+
+      @include respond-to(lg) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .wave-panel {
+    display: grid;
+    gap: $space-md;
+    border-radius: 32px 28px 38px 24px / 24px 34px 26px 36px;
+    border: 1px solid rgba($color-blue-dark, 0.18);
+    background: rgba($color-white, 0.64);
+    padding: $space-lg;
+    box-shadow: $shadow-md;
+
+    &__meta {
+      display: grid;
+      gap: $space-xs;
+
+      p {
+        color: rgba($color-text-primary, 0.8);
+      }
+    }
+
+    &__title {
+      font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+    }
+
+    &__canvas {
+      width: 100%;
+      height: clamp(280px, 46vh, 500px);
+      border-radius: 28px 22px 36px 20px / 22px 34px 24px 32px;
+      display: block;
+      border: 1px solid rgba($color-blue-dark, 0.2);
+      overflow: clip;
+    }
+  }
+
+  .wave-tile {
+    display: grid;
+    gap: $space-sm;
+    border-radius: 26px 20px 30px 22px / 20px 30px 22px 28px;
+    border: 1px solid rgba($color-blue-dark, 0.14);
+    background: rgba($color-white, 0.74);
+    padding: $space-md;
+    box-shadow: $shadow-sm;
+
+    &__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: $space-md;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      line-height: $leading-snug;
+    }
+
+    &__chip {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: $color-blue-dark;
+      background: rgba($color-blue-light, 0.15);
+      border: 1px solid rgba($color-blue-dark, 0.18);
+      border-radius: 999px 920px 980px 900px / 960px 870px 980px 900px;
+      padding: 0.2rem 0.6rem;
+    }
+
+    &__canvas {
+      width: 100%;
+      height: 140px;
+      border-radius: 24px 16px 28px 18px / 18px 28px 18px 26px;
+      display: block;
+      border: 1px solid rgba($color-blue-dark, 0.2);
+    }
+
+    &__description {
+      color: rgba($color-text-primary, 0.82);
+      line-height: $leading-relaxed;
+      font-size: $font-size-sm;
+    }
+  }
+
+  .component-lab {
+    display: grid;
+    gap: $space-lg;
+
+    &--projects {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      @include respond-to(lg) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &--blog {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .integration-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .wave-object {
+    position: relative;
+    grid-column: span 4;
+    min-height: 280px;
+
+    @include respond-to(lg) {
+      grid-column: span 3;
+    }
+
+    @include respond-to(md) {
+      grid-column: auto;
+    }
+
+    &--wide {
+      grid-column: span 8;
+
+      @include respond-to(lg) {
+        grid-column: span 6;
+      }
+
+      @include respond-to(md) {
+        grid-column: auto;
+      }
+    }
+
+    &--tall {
+      min-height: 420px;
+    }
+
+    &--compact {
+      min-height: 250px;
+    }
+
+    &__field,
+    &__seam {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__seam {
+      inset: 0 auto 0 31%;
+      width: 52px;
+      height: 100%;
+
+      @include respond-to(md) {
+        inset: 36% 0 auto 0;
+        width: 100%;
+        height: 48px;
+      }
+    }
+
+    &__inner {
+      position: relative;
+      z-index: 1;
+      min-height: inherit;
+      display: grid;
+      align-content: start;
+      gap: $space-sm;
+      padding: 2rem 2rem 2.1rem;
+      background: rgba($color-white, 0.96);
+      border-radius: 24px 30px 20px 28px / 22px 18px 30px 24px;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+
+      h3 {
+        line-height: $leading-snug;
+        max-width: 18ch;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.84);
+        line-height: $leading-relaxed;
+        max-width: 38ch;
+      }
+
+      &--split {
+        grid-template-columns: minmax(180px, 0.9fr) 1fr;
+        align-items: center;
+        gap: 4rem;
+        padding: 2.5rem 2.4rem 2.4rem;
+
+        @include respond-to(md) {
+          grid-template-columns: 1fr;
+          gap: 2.6rem;
+          padding-top: 2rem;
+        }
+      }
+
+      &--ghost {
+        padding: 3rem 3.2rem 2.6rem;
+
+        @include respond-to(md) {
+          padding: 2.4rem 2rem 2.2rem;
+        }
+      }
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.74);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__meta {
+      font-size: $font-size-sm;
+      color: rgba($color-blue-dark, 0.84);
+      font-weight: $font-weight-medium;
+    }
+
+    &--glass {
+      .wave-object__inner {
+        padding: 2.8rem 2.6rem 2.6rem;
+        background: rgba($color-white, 0.24);
+        border-radius: 28px 34px 22px 30px / 24px 20px 34px 28px;
+        backdrop-filter: blur(14px);
+        max-width: calc(100% - 2rem);
+        margin: 1rem;
+      }
+    }
+
+    &--solid {
+      .wave-object__inner {
+        padding: 3rem 3rem 2.8rem;
+        background: rgba($color-white, 0.95);
+        border-radius: 24px 32px 22px 30px / 28px 22px 32px 24px;
+        max-width: calc(100% - 2.2rem);
+        margin: 1.1rem;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+      }
+    }
+
+    &--airy {
+      .wave-object__inner {
+        padding: 3.4rem 3.4rem 3rem;
+
+        @include respond-to(md) {
+          padding: 2.5rem 2.1rem 2.3rem;
+        }
+      }
+    }
+
+    &--dense {
+      .wave-object__inner {
+        padding: 1.55rem 1.55rem 1.45rem;
+        background: rgba($color-white, 0.86);
+        border-radius: 20px 24px 18px 22px / 22px 18px 24px 20px;
+        max-width: calc(100% - 1.2rem);
+        margin: 0.6rem;
+      }
+    }
+
+    &--split {
+      .wave-object__inner {
+        max-width: calc(100% - 2rem);
+        margin: 1rem;
+        background: rgba($color-white, 0.88);
+        border-radius: 24px 30px 20px 28px / 22px 18px 30px 24px;
+        backdrop-filter: blur(10px);
+      }
+    }
+
+    &--ghost {
+      .wave-object__inner {
+        background: transparent;
+      }
+    }
+  }
+
+  .primitive-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .primitive-panel {
+    position: relative;
+    grid-column: span 4;
+    min-height: 220px;
+
+    @include respond-to(lg) {
+      grid-column: span 3;
+    }
+
+    @include respond-to(md) {
+      grid-column: auto;
+    }
+
+    &--wide {
+      grid-column: span 8;
+
+      @include respond-to(lg) {
+        grid-column: span 6;
+      }
+
+      @include respond-to(md) {
+        grid-column: auto;
+      }
+    }
+
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__inner {
+      position: relative;
+      z-index: 1;
+      min-height: inherit;
+      padding: 1.7rem 1.7rem 1.6rem;
+      background: rgba($color-white, 0.96);
+      border-radius: 20px 28px 18px 26px / 22px 18px 28px 20px;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+
+      &--stack {
+        display: grid;
+        gap: $space-md;
+      }
+
+      &--field {
+        display: grid;
+        gap: $space-md;
+        padding: 2rem 2rem 1.8rem;
+      }
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.74);
+      font-weight: $font-weight-semibold;
+    }
+
+    &--actions,
+    &--segmented,
+    &--toolbar,
+    &--badges {
+      min-height: 190px;
+    }
+  }
+
+  .placement-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .placement-demo {
+    position: relative;
+    grid-column: span 4;
+    min-height: 220px;
+
+    @include respond-to(lg) {
+      grid-column: span 3;
+    }
+
+    @include respond-to(md) {
+      grid-column: auto;
+    }
+
+    &--wide {
+      grid-column: span 8;
+
+      @include respond-to(lg) {
+        grid-column: span 6;
+      }
+
+      @include respond-to(md) {
+        grid-column: auto;
+      }
+    }
+
+    &__field {
+      position: absolute;
+      display: block;
+      pointer-events: none;
+
+      &--inset {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      &--edge-bleed {
+        inset: -28px;
+        width: calc(100% + 56px);
+        height: calc(100% + 56px);
+      }
+
+      &--bottom {
+        inset: auto 0 -2px 0;
+        width: 100%;
+        height: 72px;
+      }
+
+      &--bottom-inside {
+        inset: auto -10px -14px -10px;
+        width: calc(100% + 20px);
+        height: 104px;
+      }
+
+      &--bottom-deep {
+        height: 132px;
+      }
+
+      &--bottom-outside {
+        inset: auto -10px -22px -10px;
+        width: calc(100% + 20px);
+        height: 132px;
+      }
+
+      &--inner {
+        inset: auto -2px 0 -2px;
+        width: 100%;
+        height: 86px;
+      }
+    }
+
+    &__inner {
+      position: relative;
+      z-index: 1;
+      min-height: inherit;
+      background: rgba($color-white, 0.96);
+      border-radius: 20px 28px 18px 26px / 24px 18px 28px 20px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+
+      &--solid {
+        background: rgba($color-white, 0.96);
+        border-radius: 20px 28px 18px 26px / 24px 18px 28px 20px;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+        overflow: clip;
+      }
+
+      &--paper {
+        background: rgba($color-white, 0.94);
+        border-radius: 22px 30px 18px 28px / 24px 18px 32px 20px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+        padding: 1.5rem 1.7rem 1.8rem;
+      }
+
+      &--inside-shell {
+        overflow: visible;
+        min-height: 220px;
+      }
+
+      &--bottom-shell {
+        min-height: 220px;
+        overflow: clip;
+      }
+
+      &--deep-bottom {
+        min-height: 240px;
+        overflow: clip;
+      }
+
+      &--outer-bottom-shell {
+        overflow: visible;
+        min-height: 220px;
+      }
+    }
+
+    &__content {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: $space-sm;
+      padding: 1.6rem 1.6rem 1.4rem;
+
+      &--bottom {
+        padding-bottom: 4.8rem;
+      }
+
+      &--deep-bottom {
+        padding-bottom: 6.2rem;
+      }
+
+      &--outer-bottom {
+        padding-bottom: 2.4rem;
+      }
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.74);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    &__note {
+      color: rgba($color-text-primary, 0.82);
+      line-height: $leading-relaxed;
+      max-width: 40ch;
+    }
+
+    &__accordion {
+      display: grid;
+      gap: 0.5rem;
+      padding-top: 0.4rem;
+
+      p {
+        color: rgba($color-text-primary, 0.82);
+        line-height: $leading-relaxed;
+      }
+    }
+
+    &__accordion-trigger {
+      justify-self: start;
+      border: 0;
+      background: transparent;
+      color: $color-blue-dark;
+      font-weight: $font-weight-semibold;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    &__nav {
+      display: grid;
+      gap: $space-sm;
+    }
+
+    &__nav-shell {
+      position: relative;
+      padding-bottom: 1.2rem;
+    }
+
+    &__nav-links {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+
+      a {
+        color: rgba($color-blue-dark, 0.88);
+        text-decoration: none;
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+
+  .placement-button {
+    border: 0;
+    background: rgba($color-white, 0.9);
+    color: $color-blue-dark;
+    padding: 0.82rem 1.05rem;
+    border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  }
+
+  .button-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .button-showcase {
+    grid-column: span 4;
+
+    @include respond-to(lg) {
+      grid-column: span 3;
+    }
+
+    @include respond-to(md) {
+      grid-column: auto;
+    }
+
+    &__card {
+      min-height: 220px;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+
+      &--clip {
+        overflow: clip;
+      }
+
+      &--bleed {
+        overflow: visible;
+      }
+    }
+
+    &__content {
+      display: grid;
+      gap: $space-md;
+      padding: 1.6rem;
+    }
+
+    &__meta {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.74);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      line-height: $leading-snug;
+      max-width: 20ch;
+    }
+
+    &__note {
+      color: rgba($color-text-primary, 0.82);
+      line-height: $leading-relaxed;
+      max-width: 34ch;
+    }
+
+    .button-sample--hover,
+    .button-sample--locked {
+      .button-sample__field--bottom {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform: none;
+      }
+
+      &:hover .button-sample__field--bottom,
+      &:focus-visible .button-sample__field--bottom {
+        filter: saturate(1.12);
+      }
+    }
+  }
+
+  .button-sample {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 0 1.3rem;
+    border: 0;
+    background: rgba($color-white, 0.98);
+    color: $color-blue-dark;
+    border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
+    box-shadow:
+      0 10px 20px rgba(15, 23, 42, 0.06),
+      inset 0 1.2px 0 rgba($color-white, 0.88),
+      inset 0 -2.8px 8px rgba($color-blue-dark, 0.08);
+    cursor: pointer;
+    transition:
+      box-shadow 260ms var(--ease-out),
+      background-color 260ms var(--ease-out);
+
+    &--bottom {
+      overflow: clip;
+    }
+
+    &--halo {
+      overflow: visible;
+    }
+
+    &--active {
+      background: rgba($color-white, 0.98);
+      box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.08),
+        inset 0 1.2px 0 rgba($color-white, 0.9),
+        inset 0 -4px 10px rgba($color-blue-dark, 0.12);
+    }
+
+    &__field {
+      position: absolute;
+      display: block;
+      pointer-events: none;
+      transition:
+        transform 260ms var(--ease-out),
+        filter 260ms var(--ease-out),
+        opacity 260ms var(--ease-out);
+
+      &--bottom {
+        inset: auto -8px -10px -8px;
+        width: calc(100% + 16px);
+        height: 78px;
+        transform-origin: center bottom;
+      }
+
+      &--halo {
+        inset: -10px;
+        width: calc(100% + 20px);
+        height: calc(100% + 20px);
+      }
+
+      &--halo-tight {
+        inset: -1px;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+      }
+    }
+
+    &__label {
+      position: relative;
+      z-index: 1;
+      font-weight: $font-weight-semibold;
+      padding: 0.3rem 0.15rem;
+    }
+  }
+
+  .wave-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .wave-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 1.2rem;
+    background: transparent;
+    border: 0;
+    color: $color-blue-dark;
+    cursor: pointer;
+
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    &__label {
+      position: relative;
+      z-index: 1;
+      font-weight: $font-weight-semibold;
+      padding: 0.2rem 0.1rem;
+    }
+
+    &--primary .wave-button__label {
+      color: $color-white;
+      text-shadow: 0 1px 6px rgba(9, 16, 87, 0.55);
+    }
+
+    &--solid .wave-button__label {
+      color: $color-blue-dark;
+    }
+
+    &--ghost {
+      opacity: 0.88;
+    }
+  }
+
+  .wave-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .wave-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 0.92rem;
+
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    &__label {
+      position: relative;
+      z-index: 1;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: rgba($color-blue-dark, 0.88);
+    }
+  }
+
+  .wave-segmented {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    &__item {
+      border: 0;
+      background: rgba($color-white, 0.65);
+      color: rgba($color-blue-dark, 0.86);
+      padding: 0.7rem 1rem;
+      border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+
+      &--active {
+        background: rgba($color-white, 0.92);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      }
+    }
+  }
+
+  .wave-field {
+    display: grid;
+    gap: 0.45rem;
+
+    &__label {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.74);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__input,
+    &__textarea {
+      width: 100%;
+      border: 0;
+      border-radius: 20px 28px 18px 24px / 24px 18px 28px 20px;
+      background: rgba($color-white, 0.9);
+      color: $color-text-primary;
+      padding: 0.95rem 1.05rem;
+      font: inherit;
+      box-shadow: inset 0 0 0 1px rgba($color-blue-dark, 0.08);
+
+      &:focus {
+        outline: 2px solid rgba($color-orange, 0.65);
+        outline-offset: 2px;
+      }
+    }
+
+    &--solid {
+      .wave-field__textarea {
+        background: rgba($color-white, 0.96);
+      }
+    }
+  }
+
+  .wave-timeline {
+    display: grid;
+    gap: 1rem;
+
+    &__item {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    &__marker {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      display: block;
+    }
+
+    &__marker-field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__content {
+      display: grid;
+      gap: 0.3rem;
+      padding-top: 0.45rem;
+
+      h3 {
+        font-size: $font-size-base;
+        line-height: $leading-snug;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.82);
+        line-height: $leading-relaxed;
+      }
+    }
+  }
+
+  .wave-toolbar {
+    display: inline-flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+
+    &__item {
+      min-width: 44px;
+      min-height: 44px;
+      border: 0;
+      border-radius: 16px 22px 18px 20px / 20px 16px 22px 18px;
+      background: rgba($color-white, 0.84);
+      color: rgba($color-blue-dark, 0.86);
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+  }
+
+  .project-card {
+    position: relative;
+    min-height: 380px;
+    background: transparent;
+
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__body {
+      position: relative;
+      z-index: 1;
+      min-height: 380px;
+      display: grid;
+      align-content: start;
+      gap: $space-sm;
+      padding: 3rem 3rem 3.25rem;
+      background: rgba($color-white, 0.96);
+      border-radius: 24px 32px 22px 30px / 28px 22px 32px 24px;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+
+      h3 {
+        line-height: $leading-snug;
+        max-width: 16ch;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.84);
+        line-height: $leading-relaxed;
+        max-width: 34ch;
+      }
+
+      @include respond-to(md) {
+        padding: 2.4rem 2.2rem 2.6rem;
+      }
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: $tracking-widest;
+      color: rgba($color-blue-dark, 0.76);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__stack {
+      font-size: $font-size-sm;
+      color: rgba($color-blue-dark, 0.88);
+      font-weight: $font-weight-medium;
+    }
+
+    &__link {
+      justify-self: start;
+      margin-top: auto;
+      color: $color-blue-dark;
+      text-decoration: underline;
+      text-decoration-color: rgba($color-blue-dark, 0.4);
+      text-underline-offset: 3px;
+
+      &:hover {
+        text-decoration-color: $color-orange;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 4px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .blog-card {
+    position: relative;
+    min-height: 220px;
+
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0.92;
+    }
+
+    &__layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(120px, 170px) 1fr;
+      gap: $space-lg;
+      padding: 2rem 2.2rem;
+      min-height: 220px;
+      background: rgba($color-white, 0.96);
+      border-radius: 22px 30px 18px 28px / 24px 18px 30px 22px;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.8rem;
+      }
+    }
+
+    &__meta {
+      display: grid;
+      align-content: start;
+      gap: $space-sm;
+      padding-right: $space-lg;
+    }
+
+    &__copy {
+      display: grid;
+      align-content: center;
+      gap: $space-sm;
+
+      h3 {
+        line-height: $leading-snug;
+        max-width: 20ch;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.84);
+        line-height: $leading-relaxed;
+        max-width: 42ch;
+      }
+    }
+
+    &__date {
+      font-size: $font-size-xs;
+      letter-spacing: $tracking-widest;
+      text-transform: uppercase;
+      color: rgba($color-blue-dark, 0.78);
+      font-weight: $font-weight-semibold;
+    }
+
+    &__badge {
+      justify-self: start;
+      font-size: $font-size-xs;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px 860px 940px 900px / 880px 960px 840px 920px;
+      background: rgba($color-blue-light, 0.14);
+      border: 1px solid rgba($color-blue-dark, 0.16);
+      color: $color-blue-dark;
+      text-transform: uppercase;
+      letter-spacing: $tracking-wider;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .wave-bits {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr 1fr;
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .wave-quote,
+  .wave-cta {
+    position: relative;
+    min-height: 280px;
+  }
+
+  .wave-quote {
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: $space-sm;
+      padding: 2.8rem 2.8rem 2.4rem;
+      min-height: 280px;
+    }
+
+    &__mark {
+      font-size: clamp(4rem, 9vw, 5rem);
+      line-height: 1;
+      color: rgba($color-blue-dark, 0.3);
+    }
+
+    blockquote {
+      font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+      line-height: $leading-relaxed;
+      color: rgba($color-text-primary, 0.88);
+      max-width: 30ch;
+    }
+  }
+
+  .wave-pills {
+    display: grid;
+    gap: $space-md;
+    align-content: start;
+    padding: $space-lg;
+    border-radius: 26px 18px 32px 22px / 20px 34px 18px 28px;
+    border: 1px solid rgba($color-blue-dark, 0.14);
+    background: rgba($color-white, 0.76);
+    box-shadow: $shadow-sm;
+
+    &__group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    &__text {
+      color: rgba($color-text-primary, 0.82);
+      line-height: $leading-relaxed;
+    }
+  }
+
+  .wave-pill {
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px 920px 980px 840px / 900px 1020px 860px 980px;
+    border: 1px solid rgba($color-blue-dark, 0.16);
+    background: linear-gradient(135deg, rgba($color-white, 0.86), rgba($color-blue-light, 0.08));
+    font-size: $font-size-sm;
+    color: rgba($color-blue-dark, 0.88);
+    font-weight: $font-weight-medium;
+  }
+
+  .wave-cta {
+    &__field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    &__shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: $space-sm;
+      padding: 2.4rem 2.4rem 2.2rem;
+      min-height: 280px;
+
+      h3 {
+        line-height: $leading-snug;
+        max-width: 20ch;
+      }
+
+      p {
+        color: rgba($color-text-primary, 0.84);
+        line-height: $leading-relaxed;
+        max-width: 34ch;
+      }
+    }
+
+    &__eyebrow {
+      font-size: $font-size-xs;
+      letter-spacing: $tracking-widest;
+      text-transform: uppercase;
+      color: rgba($color-blue-dark, 0.76);
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .wave-notes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: $space-lg;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .wave-note {
+    padding: $space-lg;
+    border-radius: 26px 20px 28px 18px / 18px 30px 20px 26px;
+    border: 1px solid rgba($color-blue-dark, 0.14);
+    background: rgba($color-white, 0.76);
+    box-shadow: $shadow-sm;
+    display: grid;
+    gap: $space-sm;
+
+    h3 {
+      line-height: $leading-snug;
+    }
+
+    p {
+      color: rgba($color-text-primary, 0.82);
+      line-height: $leading-relaxed;
+    }
+  }
+
+  [data-wave-reveal] {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate3d(0, 22px, 0) scale(0.985);
+    transition:
+      opacity 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &[data-reveal-direction="left"] {
+      transform: translate3d(-22px, 0, 0) scale(0.985);
+    }
+
+    &[data-reveal-direction="right"] {
+      transform: translate3d(22px, 0, 0) scale(0.985);
+    }
+
+    &.is-inview {
+      opacity: 1;
+      filter: blur(0);
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-wave-reveal] {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

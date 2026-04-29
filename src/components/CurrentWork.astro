@@ -29,8 +29,9 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
               formats={["avif", "webp"]}
               alt="gm48.net, GameMaker game jam platform"
               class="current-work__image"
-              widths={[400, 600, 800]}
-              sizes="(max-width: 768px) 100vw, 400px"
+              widths={[768, 1024, 1280, 1600, 1920]}
+              sizes="(min-width: 1200px) 1200px, 100vw"
+              quality="high"
               loading="lazy"
             />
           </div>
@@ -65,7 +66,7 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
               </p>
             </div>
             <div class="current-work__tech">
-              {techStack.map((tech) => <SkillTag label={tech} />)}
+              {techStack.map((tech) => <SkillTag label={tech} variant="large" />)}
             </div>
           </div>
         </a>
@@ -104,57 +105,117 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
       }
 
       &__card {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: $space-xl;
-        padding: $space-lg;
-        background: transparent;
-        border: 2px solid $color-border;
-        border-radius: 12px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: clamp(430px, 62vw, 560px);
+        padding: 0;
+        background: $color-white;
+        border: 1px solid $color-border;
+        border-radius: $radius-lg;
+        box-shadow: $shadow-sm;
+        overflow: hidden;
         text-decoration: none;
         color: inherit;
-        @include transition(border-color, 0.2s);
+        @include transition(all, 0.3s);
         @include focus-visible;
 
+        &::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            radial-gradient(circle at 16% 88%, rgba($color-black, 0.72) 0%, rgba($color-black, 0.56) 26%, rgba($color-black, 0.26) 48%, rgba($color-black, 0) 72%),
+            linear-gradient(180deg, rgba($color-black, 0.04) 0%, rgba($color-black, 0.72) 70%, rgba($color-black, 0.86) 100%);
+        }
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          opacity: 0;
+          background:
+            radial-gradient(circle at 12% 18%, rgba($color-orange, 0.4) 0%, rgba($color-orange, 0) 45%),
+            radial-gradient(circle at 82% 22%, rgba($color-blue-light, 0.38) 0%, rgba($color-blue-light, 0) 52%),
+            radial-gradient(circle at 50% 84%, rgba($color-blue-dark, 0.34) 0%, rgba($color-blue-dark, 0) 58%);
+          background-size: 170% 170%;
+          background-position: 0% 50%;
+          mix-blend-mode: screen;
+          animation: current-work-gradient-shift 7s ease infinite paused;
+          @include transition(opacity, 0.35s);
+
+          @include reduced-motion {
+            animation: none;
+          }
+        }
+
         &:hover {
-          border-color: $color-orange;
+          transform: translateY(-4px);
+          box-shadow: $shadow-md;
+        }
+
+        &:hover::after {
+          opacity: 0.78;
+          animation-play-state: running;
         }
 
         &:hover .current-work__icon {
           transform: translate(2px, -2px);
         }
 
+        &:hover .current-work__image {
+          transform: scale(1.02);
+        }
+
         @include respond-to(md) {
-          grid-template-columns: 1fr;
-          gap: $space-lg;
+          min-height: clamp(460px, 90vw, 620px);
         }
       }
 
       &__image-wrapper {
-        border-radius: 8px;
-        overflow: hidden;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: $color-cream;
       }
 
       &__image {
         width: 100%;
-        height: auto;
+        height: 100%;
         display: block;
+        object-fit: cover;
+        object-position: center top;
+        @include transition(transform, 0.3s);
       }
 
       &__details {
+        position: relative;
+        z-index: 2;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        gap: $space-sm;
+        gap: $space-md;
+        margin-top: auto;
+        padding: $space-xl;
+
+        @include respond-to(md) {
+          padding: $space-lg;
+        }
       }
 
       &__title {
-        font-size: $font-size-xl;
+        font-size: $font-size-2xl;
         font-weight: $font-weight-bold;
-        color: $color-text-dark;
+        letter-spacing: $tracking-tight;
+        color: $color-text-light;
         display: flex;
         align-items: center;
         gap: $space-sm;
+
+        @include respond-to(md) {
+          font-size: $font-size-xl;
+        }
       }
 
       &__icon {
@@ -164,8 +225,9 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
 
       &__description {
         font-size: $font-size-base;
-        color: $color-text-muted;
-        line-height: 1.7;
+        color: rgba($color-text-light, 0.92);
+        line-height: $leading-loose;
+        max-width: 72ch;
 
         p {
           margin: 0 0 $space-md 0;
@@ -185,7 +247,21 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
         display: flex;
         flex-wrap: wrap;
         gap: $space-sm;
-        margin-top: $space-md;
+        margin-top: $space-sm;
+      }
+    }
+
+    @keyframes current-work-gradient-shift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
       }
     }
   </style>
