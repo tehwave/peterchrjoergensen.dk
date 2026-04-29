@@ -1,4 +1,5 @@
-import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js/unsafe-eval";
+import "pixi.js/unsafe-eval";
+import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 
 import animalBeaver from "../../assets/experiments/idle-game/animals/animal-beaver.png";
 import animalBee from "../../assets/experiments/idle-game/animals/animal-bee.png";
