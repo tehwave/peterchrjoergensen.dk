@@ -120,6 +120,8 @@ interface IdleGameUpgrades {
 }
 
 interface IdleGameState {
+  // `animals` is the persisted set of representative sprites, not the source of truth for population.
+  // Large herds are collapsed visually; economy and caps must read from `owned` instead.
   animals: PersistedAnimal[];
   owned: Record<AnimalSpeciesId, number>;
   resources: Resources;
@@ -241,6 +243,8 @@ const STARTING_COINS = 0;
 const STARTING_POPULATION = 5;
 const BASE_FOOD_CAPACITY = 90;
 const BASE_POPULATION_CAP = 20;
+// Rendering every owned animal becomes noisy and expensive once idle scaling kicks in.
+// Above the aggregation threshold, one larger representative sprite stands in for that species.
 const MAX_VISUAL_ANIMALS = 48;
 const VISUAL_AGGREGATION_THRESHOLD = 10;
 const ANIMAL_COST_GROWTH = 1.15;
@@ -395,9 +399,13 @@ const basePalette = {
 // Module-level state
 // ---------------------------------------------------------------------------
 
+// Astro view transitions can call `initIdleGame` repeatedly without a hard reload.
+// These module-level guards ensure there is only ever one Pixi app/ticker alive.
 let activeGame: IdleGameMount | null = null;
 let activeMountToken = 0;
 let cleanupRegistered = false;
+// Texture loading is shared across mounts; Pixi textures are intentionally not destroyed
+// during route cleanup so navigating away/back does not reload the same pixel art assets.
 let texturesPromise: Promise<Map<string, Texture>> | null = null;
 
 // ---------------------------------------------------------------------------
@@ -411,10 +419,14 @@ export function initIdleGame(): void {
     return;
   }
 
+  // The token protects against async races: a slower previous mount can finish after
+  // a newer route transition, and must destroy itself instead of becoming active.
   const mountToken = ++activeMountToken;
   destroyActiveGame();
 
   if (!cleanupRegistered) {
+    // Astro fires this before preparing the next page. Registering once per active
+    // mount prevents duplicate listeners while still tearing down Pixi before DOM swap.
     document.addEventListener(
       "astro:before-preparation",
       () => {
@@ -466,6 +478,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     autoDensity: true,
     backgroundAlpha: 0,
     preference: "webgl",
+    // Cap DPR because the canvas animates continuously; very high-density screens
+    // otherwise pay a large fill-rate cost for pixel art that is intentionally crisp.
     resolution: Math.min(window.devicePixelRatio || 1, RECOMMENDED_MAX_DPR),
     resizeTo: ui.stage,
   });
@@ -474,9 +488,9 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   app.canvas.className = "idle-game__canvas";
   app.canvas.setAttribute("aria-hidden", "true");
 
-  // Layers
-  // We use separate layers for foliage and animals. Placing the foliageLayer behind
-  // the animalLayer ensures dynamic entities are never occluded by static decor.
+  // Layers are split by behavior rather than just z-order. Background/ground are redrawn,
+  // foliage and animals sort by projected Y, and particles can float above both without
+  // contaminating the animal display list during cleanup.
   const bgLayer = new Container();
   const worldLayer = new Container();
   const particleLayer = new Container();
@@ -500,7 +514,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   app.stage.addChild(worldLayer);
   app.stage.addChild(particleLayer);
 
-  // State
+  // Runtime state mirrors persistence but keeps transient Pixi-only arrays separate.
+  // `state` is the canonical economy/save object; `animals`, `particles`, etc. are render helpers.
   const state = hydrateState();
   syncDerivedCapacities(state);
   let feedbackMessage = state.lastMessage || "A tiny cozy meadow is ready.";
@@ -519,11 +534,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const animals = state.animals.map((p) => createAnimal(p, textures));
 
   /**
-   * Translates 3D unit projections utilizing screen vectors.
-   * Leverages iso metrics caching for the exact viewport variables mapping logic onto x,y pixels.
-   * @param worldX - 3D world space coordinate X-axis
-   * @param worldY - 3D world space coordinate Y-axis
-   * @param elevation - Height scale representing Z dimension
+   * Projects world-space coordinates using the latest measured viewport.
+   *
+   * Pixi may tick before a resize measurement has landed, so the fallback sizes
+   * keep first render deterministic instead of briefly projecting everything at 0x0.
    */
   const project = (worldX: number, worldY: number, elevation = 0) =>
     projectWithViewport(lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH, lastViewportHeight || ui.stage.clientHeight || DEFAULT_VIEWPORT_HEIGHT, worldX, worldY, elevation);
@@ -541,7 +555,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   renderAnimals(0);
   renderShopList();
 
-  // Click on canvas to wake sleeping animals
+  // Canvas taps intentionally only wake sleeping animals. The shop/HUD remain real
+  // DOM controls, so the canvas does not need to implement a broader input system.
   app.canvas.addEventListener("pointerdown", handleCanvasTap);
 
   function handleCanvasTap(event: PointerEvent): void {
@@ -576,6 +591,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function reconcileAnimalViews(): void {
     syncDerivedCapacities(state);
 
+    // `state.owned` may represent hundreds or thousands of animals. Keep only the
+    // representative sprites required for readable visuals and rebuild toward that target.
     for (const speciesId of animalSpeciesIds) {
       const speciesAnimals = animals.filter((animal) => animal.species === speciesId);
       const targetVisible = getTargetVisibleCount(speciesId);
@@ -598,6 +615,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function getTargetVisibleCount(speciesId: AnimalSpeciesId): number {
     const owned = Math.floor(state.owned[speciesId] || 0);
     if (owned <= 0) return 0;
+    // One sprite per high-count species keeps rare purchases visible while preventing
+    // common species from consuming the whole visual budget.
     const visualCount = owned > VISUAL_AGGREGATION_THRESHOLD ? 1 : owned;
     return Math.min(visualCount, Math.max(0, MAX_VISUAL_ANIMALS - countOtherSpeciesVisuals(speciesId)));
   }
@@ -615,6 +634,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function getTotalCoinsPerSecond(): number {
+    // Passive production is based on owned counts, not visible representatives.
+    // This is the key invariant that keeps aggregation from changing progression.
     const baseCps = animalDefinitions.reduce((total, def) => total + (state.owned[def.id] || 0) * def.coinsPerSecond, 0);
     return baseCps * getPrestigeMultiplier();
   }
@@ -654,6 +675,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     state.resources.food = clamp(state.resources.food - feedCost, 0, state.resources.foodCapacity);
     const feedPoint = { x: randomBetween(-2.2, 2.2), y: randomBetween(-1.8, 1.8) };
 
+    // Food drops are visual feedback first; the actual stat gain is applied below
+    // so reduced/aggregated animal counts do not affect the cost-benefit math.
     const foodCount = Math.floor(randomBetween(1, 3.99));
     for (let i = 0; i < foodCount; i++) {
       const asset = foodAssets[Math.floor(randomBetween(0, foodAssets.length))];
@@ -705,6 +728,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       return;
     }
 
+    // Hatching uses visible adults as a lightweight "someone is available" gate,
+    // then increments `owned` directly so aggregated herds can still grow correctly.
     const happyAdultRepresentatives = animals.filter((a) => a.growth >= 0.96 && a.happiness >= 0.5 && a.hunger >= 0.4 && !a.sleeping);
     if (totalPopulation < 2 || happyAdultRepresentatives.length < 1) {
       updateFeedback("Need 2+ animals and a happy awake representative to hatch.");
@@ -761,6 +786,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   };
 
   const handleVisibilityChange = () => {
+    // Stop the ticker while hidden to avoid burning CPU in background tabs. Offline
+    // catchup handles longer absences when the state is hydrated again.
     if (document.hidden) app.ticker.stop();
     else {
       lastTime = performance.now();
@@ -780,7 +807,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   document.addEventListener("visibilitychange", handleVisibilityChange);
   reducedMotionMedia.addEventListener("change", handleReducedMotionChange);
 
-  // Drag to close drawer
+  // Drag-to-close is implemented on the drawer header only. This avoids fighting
+  // native scrolling inside the shop list, which is especially easy to break on touch devices.
   let dragStartY = 0;
   let dragCurrentY = 0;
   let isDraggingDrawer = false;
@@ -872,6 +900,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
 
     const earnedStardust = Math.floor(Math.cbrt(state.runLifetimeCoins / PRESTIGE_UNLOCK_COINS));
+    // Prestige must clear both display lists and backing arrays. Leaving old views
+    // around is subtle: the state reset looks correct but the old ticker keeps rendering ghosts.
     animalLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     particleLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     animals.length = 0;
@@ -903,6 +933,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function renderShopList(): void {
+    // The shop is rebuilt from canonical state instead of diffed. The list is small,
+    // and full regeneration avoids stale disabled states after coins/caps change.
     const buyableSpecies = animalDefinitions.filter((d) => d.shopCost > 0);
     ui.shopList.innerHTML = "";
     const animalSection = createShopSection("Animals", "Costs grow by 15% for every animal you own.");
@@ -1031,6 +1063,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   // --- Main tick ---
   app.ticker.add(() => {
     const now = performance.now();
+    // Clamp frame delta so returning from a blocked tab or breakpoint does not launch
+    // animals/particles across the meadow in a single catch-up frame.
     const deltaSeconds = Math.min((now - lastTime) / 1000, 0.05);
     lastTime = now;
     if (destroyed) return;
@@ -1041,7 +1075,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       lastViewportHeight = ui.stage.clientHeight;
     }
 
-    // Always animate background (even when paused for ambience)
+    // Always animate background while paused. Pause freezes economy/animals, not the
+    // ambient day/night backdrop, which makes the state feel intentionally paused rather than broken.
     state.dayCycleTime = (state.dayCycleTime + deltaSeconds) % DAY_CYCLE_DURATION;
     renderBackground();
 
@@ -1094,6 +1129,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
       totalEarned += speciesEarned;
 
+      // Floating coin text is distributed across visible representatives. This keeps
+      // aggregated species honest visually without tying income to sprite count.
       const visibleSprites = animals.filter((a) => a.species === def.id);
       if (visibleSprites.length > 0) {
         const valPerSprite = speciesEarned / visibleSprites.length;
@@ -1116,14 +1153,13 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Main behavior loop governing animal pathfinding logic, sleep transitions,
-   * speed variables aligned through frame-locked timestamps, bounds collision
-   * checks, ZZZ particle instantiations.
+   * Advances representative animal simulation for one frame.
    *
-   * Drives hunger decay, separating logic (flocking out collision radii), and bounce ticks.
+   * This deliberately models only the visible sprites. Population/economy use
+   * `state.owned`, while these animals provide mood, movement, sleep, and feedback cues.
    *
-   * @param deltaSeconds - Elapsed ms representing tick rate
-   * @param prefersReducedMotion - Check overriding bounce parameters and UI feedback
+   * @param deltaSeconds - Clamped elapsed seconds for this animation frame.
+   * @param prefersReducedMotion - Whether motion-heavy secondary effects should be softened.
    */
   function tickAnimals(deltaSeconds: number, prefersReducedMotion: boolean): void {
     const nowMs = Date.now();
@@ -1151,7 +1187,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const happinessDrift = (animal.hunger - HUNGER_NEUTRAL_POINT) * HAPPINESS_HUNGER_COUPLING * deltaSeconds - HAPPINESS_DECAY_PER_SECOND * deltaSeconds;
       animal.happiness = clamp(animal.happiness + happinessDrift, 0, 1);
 
-      // Sleep logic
+      // Sleep makes the meadow feel alive but is intentionally non-persistent on offline
+      // catchup; otherwise a saved sleeping sprite could wake hours later with stale timers.
       if (animal.sleeping) {
         animal.sleepTimer -= deltaSeconds;
         animal.zzzTimer -= deltaSeconds;
@@ -1200,7 +1237,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         animal.bounceVelocity += prefersReducedMotion ? 1.0 : 3.0;
       }
 
-      // Separation
+      // Separation is visual only. It keeps sprites from stacking, but should not be
+      // interpreted as a collision system for game rules.
       let separationX = 0;
       let separationY = 0;
       for (const other of animals) {
@@ -1276,6 +1314,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   function tickAnimalSpring(animal: Animal, deltaSeconds: number, prefersReducedMotion: boolean): void {
+    // A tiny spring gives direction changes and wakeups weight without adding a full
+    // skeletal animation system for the Kenney sprites.
     const k = prefersReducedMotion ? 40 : 120; // Spring stiffness
     const d = prefersReducedMotion ? 6 : 8; // Damping
     const turnForce = animal.turnImpulse * (prefersReducedMotion ? 6 : 14);
@@ -1288,11 +1328,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Tracks natural physics logic covering Z-depth mapping logic processing
-   * friction dampening, spin rates and life limit culling upon bounds zero values efficiently removing
-   * DOM clutter reducing GC pressure points.
-   * @param deltaSeconds - Elapsed MS multiplier driving Z calculations
-   * @param prefersReducedMotion - Trims intense visual output requirements
+   * Advances short-lived particle effects and removes expired Pixi views.
+   *
+   * Particles own their display objects, so this loop is also the cleanup path that
+   * prevents burst-heavy interactions from accumulating invisible children.
    */
   function tickParticles(deltaSeconds: number, prefersReducedMotion: boolean): void {
     for (let i = particles.length - 1; i >= 0; i -= 1) {
@@ -1314,13 +1353,18 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       }
 
       const screen = project(p.x, p.y, p.z);
-      const baseZScreen = project(p.x, p.y, 0); // Use 0 elevation for true z-index so it doesn't clip through animals when floating up
+      // Sort floating effects by their ground contact point. Sorting by elevated Y would
+      // make high particles incorrectly pass behind animals as they rise.
+      const baseZScreen = project(p.x, p.y, 0);
 
       const lifeRatio = Math.max(0, p.life / p.maxLife);
       p.view.position.set(screen.x, screen.y);
-      p.view.alpha = p.fadeOnly ? Math.min(1, lifeRatio * 1.5) : Math.min(1, lifeRatio * 3.0); // Keep fully opaque for most of its life, but fade out at end
+      // Keep particles fully opaque for most of their life, then fade near the end;
+      // otherwise every burst reads as washed out from the moment it spawns.
+      p.view.alpha = p.fadeOnly ? Math.min(1, lifeRatio * 1.5) : Math.min(1, lifeRatio * 3.0);
       if (!p.fixedScale) {
-        p.view.scale.set(p.baseScale * Math.min(1.2, 0.6 + (1 - lifeRatio) * 0.7)); // Slight grow over time
+        // A small grow-over-time curve makes hearts/stars pop without needing extra frames.
+        p.view.scale.set(p.baseScale * Math.min(1.2, 0.6 + (1 - lifeRatio) * 0.7));
       }
 
       p.view.zIndex = p.fadeOnly ? baseZScreen.y + 20 : screen.y + 400;
@@ -1366,12 +1410,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Final layout cycle iterating active `animals` array assigning scaled modifiers
-   * factoring screen mapping indices, stretching factors referencing velocity, Z-index sort layers
-   * dynamically driven upon Y-origin sorting logic.
+   * Projects animal state into Pixi transforms for the current frame.
    *
-   * Updates shadow bounds, sleep modifiers, flipping angles, and rarity glows per individual sprite properties.
-   * @param time - Performance timestamp used calculating sine waves powering the idle breathing bob logic
+   * This is intentionally render-only: game rules should mutate state in tick handlers,
+   * while this function maps mood, speed, sleep, and aggregation into visual treatment.
    */
   function renderAnimals(time: number): void {
     for (const animal of animals) {
@@ -1382,6 +1424,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       const bounce = animal.bounce * (reducedMotion ? 3 : 7);
       const screen = project(animal.x, animal.y, 0);
       const owned = state.owned[animal.species] || 1;
+      // Aggregated herds get one larger representative so progress remains visible
+      // without turning the meadow into a sprite stress test.
       const aggregateScale = owned > VISUAL_AGGREGATION_THRESHOLD ? Math.log10(AGGREGATE_SCALE_BASE + owned) : 1;
       const scale = animal.spriteScale * animal.growth * aggregateScale;
       const moodTint = isSleeping ? 0xd8d0e8 : applyMoodTint(animal);
@@ -1407,10 +1451,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Final projection step driving foliage loops, generating bouncing math against root
-   * positions scaling alpha blends matching maxLife boundaries for fading states.
+   * Renders decorative foliage from world space into the isometric frame.
    *
-   * Offsets visual sprite mapping over bounding logic ensuring organic placement depth checks.
+   * Foliage is cosmetic and sits just behind animals at the same projected Y, which
+   * preserves depth without letting tall grass cover interactive sprites.
    */
   function renderFoliage(): void {
     for (const f of foliageList) {
@@ -1433,11 +1477,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Tracks Z-velocity mapping simulated gravity, physics bounces at origin offset 0,
-   * iterating and scrubbing expired instances cleaning memory out loops.
+   * Advances thrown food props until they expire.
    *
-   * Extends life traits against delta intervals to handle natural destruction events.
-   * @param deltaSeconds - Elapsed seconds driving velocity math
+   * Food exists to communicate a feed action; it does not drive hunger directly, so
+   * cleanup can be aggressive without affecting progression.
    */
   function tickFood(deltaSeconds: number): void {
     for (let i = foodItems.length - 1; i >= 0; i--) {
@@ -1458,8 +1501,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   }
 
   /**
-   * Final projection step mapping raw logical coordinates against isometric world indices,
-   * modifying Z-planes enforcing depth ordering, scaling and tracking fading lifetimes on sprites.
+   * Projects food props and their shadows into the scene.
+   *
+   * The shadow stays on the ground while the sprite rises/falls, which sells height
+   * in a 2D isometric scene without introducing a real 3D camera.
    */
   function renderFood(): void {
     for (const f of foodItems) {
@@ -1480,9 +1525,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
   // --- Background ---
   /**
-   * Translates active simulation into isometric grid logic regenerating tile vertices,
-   * projecting global palettes modulating light intensities mapping day cycles efficiently
-   * without mutating textures every loop.
+   * Redraws the sky gradient for the current day/night palette.
+   *
+   * The background is cheap vector work and avoids texture mutation, which keeps the
+   * day cycle deterministic across DPR changes and route remounts.
    */
   function renderBackground(): void {
     const w = lastViewportWidth || ui.stage.clientWidth || DEFAULT_VIEWPORT_WIDTH;
@@ -1519,6 +1565,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
 
     const centerX = width * 0.5;
     const centerY = height * VIEWPORT_ANCHOR_Y;
+    // Tile size scales with the narrow viewport but is capped so desktop screens do
+    // not turn the meadow into oversized diamonds with huge empty edges.
     const isoX = Math.min(width / 16, 42);
     const isoY = isoX * ISOMETRIC_Y_RATIO;
 
@@ -1556,8 +1604,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     let y = 0;
     let valid = false;
 
-    // Generate coordinates framing the outside of the 9x9 diamond floor.
-    // The tiles occupy local coordinates x,y from approx -6.5 to +6.5.
+    // Generate coordinates framing the outside of the 9x9 diamond floor. Keeping
+    // decor outside the playable square avoids obscuring animals and feed effects.
     for (let attempts = 0; attempts < 40; attempts++) {
       const testX = randomBetween(-11, 11);
       const testY = randomBetween(-11, 11);
@@ -1643,8 +1691,12 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
         const sprite = new Sprite(texture);
         sprite.anchor.set(0.5);
         sprite.tint = color;
-        sprite.blendMode = "add"; // Added additive blending to make gray sprites more vibrant and less transparent
-        baseScale = size / 60; // Scale sprite down significantly relative to old vector sizes
+        // The source symbol sprites are grey masks; additive blending keeps tinted
+        // hearts/stars readable against both day and night palettes.
+        sprite.blendMode = "add";
+        // Source symbols are larger than the old vector particles, so normalize them
+        // here instead of baking assumptions into every caller's `count`/`size` values.
+        baseScale = size / 60;
         view = sprite;
       } else {
         const graphic = new Graphics();
@@ -1716,6 +1768,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   function updateHUD(): void {
     const totalPopulation = getTotalPopulation();
     const populationPressure = totalPopulation / state.resources.populationCap;
+    // Mood reflects visible representatives rather than all owned animals. That makes
+    // it a readable care signal for the current scene, while economy still uses `owned`.
     const averageMood = animals.length === 0 ? 0 : animals.reduce((s, a) => s + a.happiness, 0) / animals.length;
 
     const popEl = ui.population.querySelector("b");
@@ -1754,6 +1808,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     state.lastMessage = feedbackMessage;
     state.lastUpdatedAt = Date.now();
     if (force || !destroyed) {
+      // Persist only serializable gameplay state. Pixi objects, timers, velocities,
+      // and pending text particles are transient and reconstructed on hydrate.
       persistState({
         animals: animals.map((a) => ({
           id: a.id,
@@ -1783,6 +1839,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (destroyed) return;
     destroyed = true;
     persistSoon(true);
+    // Listener cleanup must mirror setup exactly. The route can remount via Astro
+    // transitions, and duplicate listeners are otherwise hard to spot until inputs fire twice.
     app.canvas.removeEventListener("pointerdown", handleCanvasTap);
     ui.feedButton.removeEventListener("click", handleFeed);
     ui.populateButton.removeEventListener("click", handlePopulate);
@@ -1796,6 +1854,8 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     foliageLayer.removeChildren().forEach((c) => c.destroy());
     animalLayer.removeChildren().forEach((c) => c.destroy());
 
+    // Keep cached textures alive between route visits; destroying sources here would
+    // invalidate the shared `texturesPromise` and make future mounts reuse dead textures.
     app.destroy(true, { children: true, texture: false, textureSource: false });
     ui.stage.replaceChildren();
   }
@@ -1828,6 +1888,8 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const shopClose = root.querySelector<HTMLButtonElement>("[data-idle-game-shop-close]");
   const shopList = root.querySelector<HTMLElement>("[data-idle-game-shop-list]");
 
+  // Fail fast if the Astro template changes its data-attribute contract. A missing
+  // mount point is easier to debug here than as a half-mounted Pixi scene later.
   if (!stage || !population || !food || !coins || !stardust || !mood || !feedback || !feedButton || !populateButton || !shopButton || !pauseButton || !shopDrawer || !shopClose || !shopList) {
     throw new Error("Idle game mount points are missing.");
   }
@@ -1836,10 +1898,11 @@ function getUIRefs(root: HTMLElement): UIRefs {
 }
 
 /**
- * Fetches required images, applies "nearest" mode to support crisp pixel art,
- * returns them neatly packaged onto a Map, keyed precisely by their `src`/`id`.
+ * Loads and caches every texture needed by the experiment.
  *
- * @returns Map mapping `id/src` strings into parsed instances of `Texture`.
+ * Texture keys intentionally mix species ids, symbol ids, and asset `src` values
+ * because different callers start from different domain objects. The shared cache
+ * keeps Astro remounts cheap while `nearest` preserves the pixel-art look.
  */
 async function loadTextures(): Promise<Map<string, Texture>> {
   if (!texturesPromise) {
@@ -1911,6 +1974,8 @@ function persistState(state: IdleGameState): void {
 
 function createDefaultState(): IdleGameState {
   const owned = createEmptyOwnedRecord();
+  // Starter species are generated from seeded randomness so the opening mix feels
+  // varied but remains reproducible enough for debugging default-state issues.
   const animals = Array.from({ length: STARTING_POPULATION }, (_, i) => {
     const species = weightedChoice(
       animalDefinitions.filter((d) => d.rarity === "common"),
@@ -1953,6 +2018,8 @@ function createDefaultState(): IdleGameState {
  */
 function applyOfflineCatchup(state: IdleGameState): IdleGameState {
   const now = Date.now();
+  // Cap offline simulation to avoid a forgotten tab or old save file detonating the
+  // economy/mood model after months away. Long absences still progress, just bounded.
   const elapsedMs = clamp(now - state.lastUpdatedAt, 0, MAX_OFFLINE_MS);
   const elapsedSeconds = elapsedMs / 1000;
 
@@ -1984,6 +2051,8 @@ function validateState(input: unknown): IdleGameState | null {
   const c = input as Partial<IdleGameState>;
   if (!Array.isArray(c.animals) || !c.resources || typeof c.resources !== "object") return null;
 
+  // Trust localStorage enough to salvage valid pieces, but never enough to let
+  // arbitrary counts/coordinates leak into the simulation after schema changes.
   const validatedAnimals = c.animals
     .map((a) => validateAnimal(a))
     .filter((a): a is PersistedAnimal => Boolean(a))
@@ -2093,6 +2162,8 @@ function validateOwnedRecord(input: unknown, fallbackAnimals: PersistedAnimal[])
   }
 
   if (sumOwned(owned) === 0) {
+    // Older saves may only have representative animals. Reconstruct a minimum owned
+    // record from those sprites so the player does not reopen to an empty economy.
     fallbackAnimals.forEach((animal) => {
       owned[animal.species] += 1;
     });
@@ -2102,6 +2173,8 @@ function validateOwnedRecord(input: unknown, fallbackAnimals: PersistedAnimal[])
 }
 
 function syncDerivedCapacities(state: IdleGameState): void {
+  // Capacity fields are stored for quick UI/persistence inspection, but upgrades are
+  // authoritative. Re-sync after hydrate/buy paths so stale saves cannot preserve old caps.
   state.resources.populationCap = getPopulationCap(state.upgrades.meadowExpansion);
   state.resources.foodCapacity = getFoodCapacity(state.upgrades.siloStorage);
   state.resources.food = clamp(state.resources.food, 0, state.resources.foodCapacity);
@@ -2164,6 +2237,8 @@ function sumOwned(owned: Record<AnimalSpeciesId, number>): number {
 }
 
 function createPersistedAnimal(species: AnimalSpeciesId): PersistedAnimal {
+  // New representatives start near the center so newly purchased/hatched species are
+  // immediately visible instead of appearing at the edge of the decorative frame.
   return {
     id: createAnimalId(),
     species,
@@ -2187,6 +2262,8 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>
   if (!definition || !texture) throw new Error(`Missing definition or texture for ${persisted.species}`);
 
   const view = createAnimalSprite(texture);
+  // Derive bob/scale from the stable id so remounting a save does not make every
+  // animal subtly change size or phase, which would look like state corruption.
   const bobPhase = hashToUnit(`${persisted.id}:bob`) * Math.PI * 2;
   const scaleJitter = 0.92 + hashToUnit(`${persisted.id}:scale`) * 0.16;
 
@@ -2218,10 +2295,10 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>
 }
 
 /**
- * Creates visual wrappers consisting of Sprite textures with bottom anchors
- * bundled atop elliptical shadow Graphics.
+ * Creates the Pixi display objects for an animal sprite and its ground shadow.
  *
- * @param texture - The PIXI Texture to load into the new Sprite
+ * The sprite anchor sits at the feet so projection coordinates can represent ground
+ * contact. That keeps z-sorting and shadows stable while the sprite bobs above it.
  */
 function createAnimalSprite(texture: Texture): AnimalSpriteView {
   const container = new Container();
@@ -2241,12 +2318,10 @@ function createAnimalSprite(texture: Texture): AnimalSpriteView {
 }
 
 /**
- * Defines a new physics wrapper around food drops handling bounding sizes, shadows, Z planes,
- * scale sizes, and life limits to enforce efficient GC and snappy aesthetics.
+ * Creates a short-lived food prop with its own shadow and vertical physics state.
  *
- * @param textures - Global mapped definitions for food sprite assets.
- * @param assetSrc - A path pointing to a food asset string id format.
- * @returns Instantiated FoodItem container representing a physics wrapper
+ * Food props are intentionally independent from hunger calculations: they are a
+ * tactile animation layer for feed actions, not the source of truth for animal stats.
  */
 function createFoodItem(textures: Map<string, Texture>, assetSrc: string): FoodItem {
   const container = new Container();
@@ -2277,6 +2352,8 @@ function createFoodItem(textures: Map<string, Texture>, assetSrc: string): FoodI
 }
 
 function applyMoodTint(animal: Animal): number {
+  // Happiness carries most of the tint because it changes slower than hunger; hunger
+  // still contributes enough that neglected animals visibly warm/desaturate.
   const mood = animal.happiness * 0.6 + animal.hunger * 0.4;
   if (mood > 0.82) return 0xffffff;
   if (mood > 0.52) return 0xf7f2ff;
@@ -2289,6 +2366,9 @@ function applyMoodTint(animal: Animal): number {
 
 /**
  * Maps a 3D isometric world unit to a 2D screen coordinate.
+ *
+ * The projection intentionally has no inverse because all game rules operate in
+ * world space. Pointer interactions compare screen-space distances only after projecting.
  *
  * @param width - The current container width.
  * @param height - The current container height.
@@ -2314,7 +2394,8 @@ function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number,
   graphic.clear();
 
   if (kind === "zzz") {
-    // Draw a "Z" shape
+    // Draw a tiny custom "Z" instead of loading another texture; this keeps sleep
+    // particles lightweight and readable at multiple sizes.
     graphic
       .moveTo(-size * 0.4, -size * 0.4)
       .lineTo(size * 0.4, -size * 0.4)
@@ -2329,7 +2410,7 @@ function drawParticleShape(graphic: Graphics, kind: ParticleKind, color: number,
 
 function pickParticleColor(kind: ParticleKind): number {
   const colorMap: Record<ParticleKind, number[]> = {
-    // Highly saturated colors so they stay vibrant when tinting grey sprites
+    // Highly saturated colors stay vibrant when tinting grey symbol sprites, especially at night.
     heart: [0xff1144, 0xff3366, 0xff1188],
     star: [0xffea00, 0xffcc00, 0xffd500],
     zzz: basePalette.zzz,
@@ -2344,11 +2425,10 @@ function pickParticleColor(kind: ParticleKind): number {
 // ---------------------------------------------------------------------------
 
 /**
- * Interpolates smoothly smoothly across DayPalettes utilizing progressive dayCycleTime ratios.
- * Modulates sky gradients, terrain tiles, stroke colours, and global lighting intensities.
+ * Selects or blends the active day/night palette.
  *
- * @param progress - Unit ratio ranging from 0.0 (Dawn) -> 1.0 (Midnight)
- * @returns Blended DayPalette
+ * Most of each phase is held steady, then the final 30% blends into the next phase.
+ * That avoids constant low-level color churn while still making transitions feel soft.
  */
 function interpolateDayPalette(progress: number): DayPalette {
   // 0.0-0.15 dawn, 0.15-0.5 day, 0.5-0.65 sunset, 0.65-1.0 night
@@ -2427,6 +2507,8 @@ function hexToNumber(hex: string): number {
 // ---------------------------------------------------------------------------
 
 export function formatNumber(value: number, dropDecimals: boolean = false): string {
+  // Idle-game values grow quickly; compact notation keeps buttons and HUD pills from
+  // reflowing as progression scales into large numbers.
   if (!Number.isFinite(value)) return "∞";
   const sign = value < 0 ? "-" : "";
   const absolute = Math.abs(value);
@@ -2447,6 +2529,8 @@ export function formatNumber(value: number, dropDecimals: boolean = false): stri
 }
 
 function getAlphabeticSuffix(index: number): string {
+  // After the named suffixes, keep generating deterministic two-letter suffixes so
+  // formatting keeps working even if balancing accidentally permits absurd values.
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   let value = index;
   let suffix = "";
@@ -2458,6 +2542,8 @@ function getAlphabeticSuffix(index: number): string {
 }
 
 function weightedChoice<T extends { weight: number }>(items: T[], randomValue: () => number): T {
+  // Accept the RNG as a dependency so starter generation can be seeded while normal
+  // hatching still uses Math.random.
   const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
   let threshold = randomValue() * totalWeight;
   for (const item of items) {
@@ -2468,6 +2554,8 @@ function weightedChoice<T extends { weight: number }>(items: T[], randomValue: (
 }
 
 function seededRandom(seed: string): () => number {
+  // Minimal deterministic generator: good enough for stable cosmetic defaults, not
+  // intended for security or statistically sensitive reward tables.
   let value = Math.floor(hashToUnit(seed) * 2147483647) || 1;
   return () => {
     value = (value * 48271) % 2147483647;
@@ -2476,6 +2564,8 @@ function seededRandom(seed: string): () => number {
 }
 
 function hashToUnit(value: string): number {
+  // FNV-1a style hashing gives stable per-id variation without storing extra fields
+  // in localStorage for every cosmetic jitter value.
   let hash = 2166136261;
   for (let i = 0; i < value.length; i += 1) {
     hash ^= value.charCodeAt(i);

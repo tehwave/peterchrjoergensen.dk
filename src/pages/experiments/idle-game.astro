@@ -3,6 +3,11 @@ import Layout from "../../layouts/Layout.astro";
 ---
 
 <Layout title="Idle Game Experiment | Peter Chr. Jørgensen" description="A pastel PixiJS idle-game experiment with bouncy animal sprites, day/night cycles, rarity tiers, and local persistence.">
+  <!--
+    The TypeScript module discovers this root via data attributes instead of
+    imports from the Astro template. Keeping the DOM contract explicit here
+    makes the Pixi mount resilient to future markup reshuffles.
+  -->
   <section class="idle-game" data-idle-game-root>
     <button class="idle-game__back-button" data-idle-game-back type="button" aria-label="Go back"> ← Back </button>
 
@@ -10,6 +15,7 @@ import Layout from "../../layouts/Layout.astro";
       <div class="idle-game__card">
         <div class="idle-game__playfield">
           <div class="idle-game__stage" data-idle-game-stage></div>
+          <!-- Overlay controls live outside the Pixi canvas so they stay semantic, accessible, and easy to update without rebuilding sprites. -->
           <div class="idle-game__overlay-hud" aria-label="Game status">
             <div class="idle-game__hud-row">
               <span class="idle-game__hud-pill" data-idle-game-population title="Population">🐾 <b>0/0</b></span>
@@ -55,6 +61,9 @@ import Layout from "../../layouts/Layout.astro";
   <script>
     import { initIdleGame } from "../../utils/experiments/idle-game";
 
+    // The experiment intentionally behaves like a fullscreen app: the class hides
+    // the site chrome and tightens page padding, but is removed before Astro swaps
+    // routes so the rest of the site cannot inherit the experiment shell.
     const idleGamePageClass = "idle-game-page";
     const backButtonSelector = "[data-idle-game-back]";
 
@@ -73,6 +82,8 @@ import Layout from "../../layouts/Layout.astro";
 
     if (backButton instanceof HTMLButtonElement) {
       backButton.addEventListener("click", () => {
+        // Prefer browser history when available so deep links return users to the page
+        // they came from; fall back to the homepage for direct visits/bookmarks.
         if (window.history.length > 1) {
           window.history.back();
           return;
@@ -88,6 +99,9 @@ import Layout from "../../layouts/Layout.astro";
       initIdleGame();
     }
 
+    // Astro view transitions can re-run inline scripts without a full reload.
+    // The game module guards against duplicate Pixi mounts, so calling this after
+    // every page-load keeps transitions working without leaking canvases/tickers.
     document.addEventListener("astro:page-load", initIdleGame);
   </script>
 </Layout>
@@ -108,6 +122,8 @@ import Layout from "../../layouts/Layout.astro";
       position: relative;
       width: 100%;
       max-width: 420px;
+      // The Pixi viewport is tuned around a narrow portrait canvas; flex lets the
+      // game fill available height while preserving that phone-like aspect on desktop.
       flex: 1 1 0;
       display: flex;
       flex-direction: column;
@@ -137,7 +153,8 @@ import Layout from "../../layouts/Layout.astro";
     &__credits {
       position: absolute;
       top: 0;
-      bottom: 64px; // Offset by approx bottom-bar height to center relative to canvas
+      // Offset by the control bar so the vertical credit line centers against the canvas, not the full card.
+      bottom: 64px;
       right: -28px;
       display: flex;
       align-items: center;
@@ -211,6 +228,8 @@ import Layout from "../../layouts/Layout.astro";
 
     &__playfield {
       position: relative;
+      // `min-height: 0` is the critical flexbox escape hatch: without it the Pixi
+      // stage can overflow the card instead of yielding space to the bottom bar.
       flex: 1 1 0;
       min-height: 0;
       overflow: hidden;
@@ -239,6 +258,8 @@ import Layout from "../../layouts/Layout.astro";
       align-items: center;
       gap: 6px;
       z-index: 2;
+      // Let taps pass through the HUD wrapper to the canvas; individual pills opt
+      // back in so tooltips/copy interactions still work where useful.
       pointer-events: none;
     }
 
@@ -425,6 +446,9 @@ import Layout from "../../layouts/Layout.astro";
       display: grid;
       gap: 6px;
 
+      // Shop rows are generated imperatively by the Pixi game module. `:global()`
+      // keeps Astro's scoped styles attached to this drawer without forcing those
+      // DOM nodes to know about the component's generated scope attribute.
       :global(.shop-item) {
         display: flex;
         align-items: center;
@@ -555,6 +579,8 @@ import Layout from "../../layouts/Layout.astro";
     display: none;
   }
 
+  // The body class is applied only while this route is active. This keeps the
+  // experiment feeling app-like without making the global layout special-case the route.
   :global(body.idle-game-page) .idle-game {
     min-height: 100dvh;
     padding: $space-sm $space-sm $space-sm;
