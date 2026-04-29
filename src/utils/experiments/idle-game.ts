@@ -1600,7 +1600,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (popEl) popEl.textContent = `${formatNumber(totalPopulation)}/${formatNumber(state.resources.populationCap)}`;
     if (foodEl) foodEl.textContent = `${formatNumber(Math.floor(state.resources.food))}/${formatNumber(state.resources.foodCapacity)}`;
     if (coinsEl) coinsEl.textContent = `${formatNumber(Math.floor(state.resources.coins))}`;
-    if (stardustEl) stardustEl.textContent = `${formatNumber(state.stardust)} (+${formatNumber((getPrestigeMultiplier() - 1) * 100)}%)`;
+    if (stardustEl) stardustEl.textContent = `${formatNumber(state.stardust)}`;
     if (moodEl) moodEl.textContent = `${Math.round(averageMood * 100)}%`;
 
     ui.feedback.textContent = feedbackMessage;

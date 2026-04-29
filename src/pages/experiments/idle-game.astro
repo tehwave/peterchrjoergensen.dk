@@ -22,7 +22,7 @@ import Layout from "../../layouts/Layout.astro";
       <div class="idle-game__bottom-bar">
         <div class="idle-game__controls">
           <button class="idle-game__button idle-game__button--feed" data-idle-game-action="feed" type="button">🍎 Feed</button>
-          <button class="idle-game__button idle-game__button--populate" data-idle-game-action="populate" type="button">�� Hatch</button>
+          <button class="idle-game__button idle-game__button--populate" data-idle-game-action="populate" type="button">🐣 Hatch</button>
           <button class="idle-game__button idle-game__button--shop" data-idle-game-action="shop" type="button">🏪 Shop</button>
           <button class="idle-game__button idle-game__button--pause" data-idle-game-action="pause" type="button">⏸ Pause</button>
         </div>
@@ -33,8 +33,10 @@ import Layout from "../../layouts/Layout.astro";
           <h2 class="idle-game__shop-title">🏪 Meadow Shop</h2>
           <button class="idle-game__shop-close" data-idle-game-shop-close type="button" aria-label="Close shop">✕</button>
         </div>
-        <p class="idle-game__shop-hint">Buy animals, expand capacity, and prestige for Stardust.</p>
-        <div class="idle-game__shop-list" data-idle-game-shop-list></div>
+        <div class="idle-game__shop-content">
+          <p class="idle-game__shop-hint">Buy animals, expand capacity, and prestige for Stardust.</p>
+          <div class="idle-game__shop-list" data-idle-game-shop-list></div>
+        </div>
       </div>
     </div>
 
@@ -179,6 +181,8 @@ import Layout from "../../layouts/Layout.astro";
 
     &__hud-pill {
       display: inline-flex;
+      flex: 1;
+      justify-content: center;
       align-items: center;
       gap: 4px;
       padding: 4px 10px;
@@ -186,6 +190,8 @@ import Layout from "../../layouts/Layout.astro";
       background: rgba(255, 255, 255, 0.78);
       backdrop-filter: blur(8px);
       font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
       color: $color-text-primary;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       line-height: 1.3;
@@ -276,17 +282,17 @@ import Layout from "../../layouts/Layout.astro";
     }
 
     &__shop-drawer {
+      display: flex;
+      flex-direction: column;
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
       max-height: 60%;
-      overflow-y: auto;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(16px);
       border-top: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 22px 22px 0 0;
-      padding: $space-md;
       z-index: 10;
       box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
 
@@ -296,10 +302,16 @@ import Layout from "../../layouts/Layout.astro";
     }
 
     &__shop-header {
+      flex-shrink: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: $space-sm;
+      padding: $space-md $space-md $space-sm;
+    }
+
+    &__shop-content {
+      overflow-y: auto;
+      padding: 0 $space-md $space-md;
     }
 
     &__shop-title {
