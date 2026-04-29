@@ -54,6 +54,7 @@ const categories = [
   { id: "all", label: "All" },
   { id: "web", label: "Web" },
   { id: "games", label: "Games" },
+  { id: "creative", label: "Creative" },
 ] as const;
 ---
 
@@ -88,6 +89,7 @@ const categories = [
                 tags={project.tags}
                 image={project.image}
                 link={project.link}
+                isInternal={"isInternal" in project ? project.isInternal : false}
                 hasPage={project.hasPage}
                 category={project.category}
               />

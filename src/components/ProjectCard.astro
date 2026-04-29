@@ -19,19 +19,21 @@ interface Props {
   tags?: string[];
   image?: ImageMetadata;
   link?: string;
+  isInternal?: boolean;
   hasPage?: boolean; // True if project has MDX page (internal route)
   animationDelay?: number;
   /** Category (or categories) used to drive the colored image backdrop. */
   category?: ProjectCategory | ProjectCategory[];
 }
 
-const { title, description, alt, tags = [], image, link, hasPage = false, category } = Astro.props;
+const { title, description, alt, tags = [], image, link, isInternal = false, hasPage = false, category } = Astro.props;
 
 // "#" is used in data to indicate "no link yet" — treat as missing
 const hasLink = link && link !== "#";
 
 // Determine link destination and type
 const linkUrl = hasPage ? `/projects/${link}/` : link;
+const externalLinkAttributes = isInternal ? {} : { target: "_blank", rel: "noopener noreferrer" };
 // These must stay aligned with the max-width breakpoints in `respond-to(lg)`
 // and `respond-to(sm)` from `_mixins.scss`, so image source sizing flips when
 // the grid actually changes column count.
@@ -113,7 +115,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       <div class="project-card__content">
         <h3 class="project-card__title">
           {hasLink ? (
-            <a href={linkUrl} target="_blank" rel="noopener noreferrer" class="project-card__external-link">
+            <a href={linkUrl} {...externalLinkAttributes} class="project-card__external-link">
               {title}
               <svg class="project-card__external-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M7 17L17 7M17 7H7M17 7V17" />

@@ -21,6 +21,8 @@ export interface Project {
   image?: ImageMetadata;
   /** External link to live project or demo */
   link?: string;
+  /** Whether the link points to an internal site route */
+  isInternal?: boolean;
   /** Category for filtering projects */
   category: ProjectCategory;
 }

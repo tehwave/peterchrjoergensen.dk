@@ -6,6 +6,8 @@ import grundfosImg from "../assets/projects/grundfos.png";
 import firkantImg from "../assets/projects/firkant.png";
 import gm48Img from "../assets/projects/gm48.png";
 import websiteImg from "../assets/projects/website.png";
+import groovyWavesImg from "../assets/projects/groovy-waves.png";
+import idleGameImg from "../assets/projects/idle-game.png";
 import odensegolfklubImg from "../assets/projects/odensegolfklub.png";
 import westernImg from "../assets/projects/western.jpg";
 import mordombordImg from "../assets/projects/mordombord.png";
@@ -71,6 +73,16 @@ export const projects: Project[] = [
     image: websiteImg,
     link: "https://github.com/tehwave/peterchrjoergensen.dk",
     category: "web",
+  },
+  {
+    title: "Groovy Waves",
+    description: "A wave-design lab for testing canvas-driven UI motifs, embedded borders, motion states, and less boxy component surfaces.",
+    alt: "Screenshot of the Groovy Waves experiment showing layered wave UI panels",
+    tags: ["Astro", "Canvas", "Motion"],
+    image: groovyWavesImg,
+    link: "/experiments/groovy-waves/",
+    isInternal: true,
+    category: "creative",
   },
 
   // === CLIENT PROJECTS ===
@@ -236,6 +248,16 @@ export const projects: Project[] = [
     tags: ["GameMaker", "Game Design", "Procedural"],
     image: firkantImg,
     link: "https://firkant.website",
+    category: "games",
+  },
+  {
+    title: "Idle Game",
+    description: "A pastel PixiJS idle-game prototype with bouncy animals, local persistence, shop progression, and a deliberately cozy mobile-first shell.",
+    alt: "Screenshot of the Idle Game experiment showing a pastel meadow with animal sprites and HUD controls",
+    tags: ["PixiJS", "TypeScript", "Game Design"],
+    image: idleGameImg,
+    link: "/experiments/idle-game/",
+    isInternal: true,
     category: "games",
   },
   {
