@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Graphics, Sprite, Texture } from "pixi.js";
+import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 
 import animalBeaver from "../../assets/experiments/idle-game/animals/animal-beaver.png";
 import animalBee from "../../assets/experiments/idle-game/animals/animal-bee.png";
@@ -154,6 +154,7 @@ interface Animal extends PersistedAnimal {
   wakeBouncePending: boolean;
   definition: AnimalDefinition;
   view: AnimalSpriteView;
+  pendingTexts: { text: string; delay: number; value: number }[];
 }
 
 interface AnimalSpriteView {
@@ -174,6 +175,8 @@ interface Particle {
   maxLife: number;
   spin: number;
   baseScale: number;
+  fixedScale?: boolean;
+  fadeOnly?: boolean;
 }
 
 interface Foliage {
@@ -456,6 +459,7 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
   const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
   let reducedMotion = reducedMotionMedia.matches;
   const textures = await loadTextures();
+  const textTextureCache = new Map<string, Texture>();
 
   const app = new Application();
   await app.init({
@@ -1079,9 +1083,37 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     if (coinTimer < COIN_TICK_INTERVAL) return;
     coinTimer -= COIN_TICK_INTERVAL;
 
-    const earnedCoins = getTotalCoinsPerSecond() * COIN_TICK_INTERVAL;
-    state.resources.coins += earnedCoins;
-    state.runLifetimeCoins += earnedCoins;
+    const prestigeMult = getPrestigeMultiplier();
+    let totalEarned = 0;
+
+    for (const def of animalDefinitions) {
+      const owned = state.owned[def.id] || 0;
+      if (owned <= 0) continue;
+
+      const speciesEarned = owned * def.coinsPerSecond * prestigeMult * COIN_TICK_INTERVAL;
+      if (speciesEarned <= 0) continue;
+
+      totalEarned += speciesEarned;
+
+      const visibleSprites = animals.filter((a) => a.species === def.id);
+      if (visibleSprites.length > 0) {
+        const valPerSprite = Math.floor(speciesEarned / visibleSprites.length);
+        if (valPerSprite > 0) {
+          const formattedAmount = `+${formatNumber(valPerSprite, true)}`; // Use dropDecimals flag
+
+          for (const animal of visibleSprites) {
+            animal.pendingTexts.push({
+              text: formattedAmount,
+              delay: randomBetween(0, 1),
+              value: valPerSprite,
+            });
+          }
+        }
+      }
+    }
+
+    state.resources.coins += totalEarned;
+    state.runLifetimeCoins += totalEarned;
   }
 
   /**
@@ -1099,6 +1131,21 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     const nowPerf = performance.now();
 
     for (const animal of animals) {
+      if (animal.pendingTexts.length > 0) {
+        for (let i = animal.pendingTexts.length - 1; i >= 0; i--) {
+          animal.pendingTexts[i].delay -= deltaSeconds;
+          if (animal.pendingTexts[i].delay <= 0) {
+            // Give base font scale 0.8, then add some chunk proportional to the sprite scale,
+            // and a bonus based on the magnitude (log10) of the coin value.
+            const magnitudeBonus = Math.log10(Math.max(1, animal.pendingTexts[i].value)) * 0.15;
+            const fontScale = Math.min(3.0, 0.8 + animal.spriteScale * 0.5 + magnitudeBonus) * 0.4;
+
+            spawnTextParticle(animal.x, animal.y, animal.pendingTexts[i].text, fontScale);
+            animal.pendingTexts.splice(i, 1);
+          }
+        }
+      }
+
       animal.age += deltaSeconds;
       animal.growth = clamp(animal.growth + deltaSeconds / BABY_GROWTH_SECONDS, 0.58, 1);
       animal.hunger = clamp(animal.hunger - HUNGER_DECAY_PER_SECOND * deltaSeconds, 0, 1);
@@ -1255,7 +1302,10 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       p.x += p.vx * deltaSeconds;
       p.y += p.vy * deltaSeconds;
       p.z += p.vz * deltaSeconds;
-      p.vz -= prefersReducedMotion ? 0.6 * deltaSeconds : 1.5 * deltaSeconds;
+
+      if (!p.fadeOnly) {
+        p.vz -= prefersReducedMotion ? 0.6 * deltaSeconds : 1.5 * deltaSeconds;
+      }
       p.view.rotation += p.spin * deltaSeconds;
 
       if (p.life <= 0) {
@@ -1265,11 +1315,16 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
       }
 
       const screen = project(p.x, p.y, p.z);
-      const lifeRatio = p.life / p.maxLife;
+      const baseZScreen = project(p.x, p.y, 0); // Use 0 elevation for true z-index so it doesn't clip through animals when floating up
+
+      const lifeRatio = Math.max(0, p.life / p.maxLife);
       p.view.position.set(screen.x, screen.y);
-      p.view.alpha = Math.min(1, lifeRatio * 3.0); // Keep fully opaque for most of its life
-      p.view.scale.set(p.baseScale * Math.min(1.2, 0.6 + (1 - lifeRatio) * 0.7)); // Slight grow over time
-      p.view.zIndex = screen.y + 400;
+      p.view.alpha = p.fadeOnly ? Math.min(1, lifeRatio * 1.5) : Math.min(1, lifeRatio * 3.0); // Keep fully opaque for most of its life, but fade out at end
+      if (!p.fixedScale) {
+        p.view.scale.set(p.baseScale * Math.min(1.2, 0.6 + (1 - lifeRatio) * 0.7)); // Slight grow over time
+      }
+
+      p.view.zIndex = p.fadeOnly ? baseZScreen.y + 20 : screen.y + 400;
     }
   }
 
@@ -1617,6 +1672,51 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     }
   }
 
+  function spawnTextParticle(worldX: number, worldY: number, textString: string, scale: number = 1): void {
+    if (!textTextureCache.has(textString)) {
+      const text = new Text({
+        text: textString,
+        style: {
+          fontFamily: "Arial, sans-serif",
+          fontSize: 24,
+          fontWeight: "bold",
+          fill: 0xffd700,
+          dropShadow: {
+            alpha: 0.8,
+            angle: Math.PI / 4,
+            blur: 2,
+            color: 0x000000,
+            distance: 2,
+          },
+        },
+      });
+      textTextureCache.set(textString, app.renderer.generateTexture(text));
+    }
+
+    const sprite = new Sprite(textTextureCache.get(textString)!);
+    sprite.anchor.set(0.5);
+    sprite.scale.set(scale);
+
+    const particle: Particle = {
+      view: sprite,
+      x: worldX,
+      y: worldY,
+      z: 15,
+      vx: randomBetween(-0.06, 0.06),
+      vy: randomBetween(-0.06, 0.06),
+      vz: randomBetween(6.5, 9.0),
+      life: 1.2,
+      maxLife: 1.2,
+      spin: 0,
+      baseScale: scale,
+      fixedScale: true,
+      fadeOnly: true,
+    };
+
+    animalLayer.addChild(sprite);
+    particles.push(particle);
+  }
+
   // --- HUD ---
   function updateHUD(): void {
     const totalPopulation = getTotalPopulation();
@@ -1700,6 +1800,11 @@ export async function mountIdleGame(root: HTMLElement): Promise<IdleGameMount> {
     particleLayer.removeChildren().forEach((c) => c.destroy());
     foliageLayer.removeChildren().forEach((c) => c.destroy());
     animalLayer.removeChildren().forEach((c) => c.destroy());
+
+    // Clear out internally generated Textures to avoid memory leaks
+    textTextureCache.forEach((texture) => texture.destroy(true));
+    textTextureCache.clear();
+
     app.destroy(true, { children: true, texture: false, textureSource: false });
     ui.stage.replaceChildren();
   }
@@ -1732,22 +1837,7 @@ function getUIRefs(root: HTMLElement): UIRefs {
   const shopClose = root.querySelector<HTMLButtonElement>("[data-idle-game-shop-close]");
   const shopList = root.querySelector<HTMLElement>("[data-idle-game-shop-list]");
 
-  if (
-    !stage ||
-    !population ||
-    !food ||
-    !coins ||
-    !stardust ||
-    !mood ||
-    !feedback ||
-    !feedButton ||
-    !populateButton ||
-    !shopButton ||
-    !pauseButton ||
-    !shopDrawer ||
-    !shopClose ||
-    !shopList
-  ) {
+  if (!stage || !population || !food || !coins || !stardust || !mood || !feedback || !feedButton || !populateButton || !shopButton || !pauseButton || !shopDrawer || !shopClose || !shopList) {
     throw new Error("Idle game mount points are missing.");
   }
 
@@ -2132,6 +2222,7 @@ function createAnimal(persisted: PersistedAnimal, textures: Map<string, Texture>
     wakeBouncePending: false,
     definition,
     view,
+    pendingTexts: [],
   };
 }
 
@@ -2344,11 +2435,12 @@ function hexToNumber(hex: string): number {
 // Utility
 // ---------------------------------------------------------------------------
 
-export function formatNumber(value: number): string {
+export function formatNumber(value: number, dropDecimals: boolean = false): string {
   if (!Number.isFinite(value)) return "∞";
   const sign = value < 0 ? "-" : "";
   const absolute = Math.abs(value);
   if (absolute < 1000) {
+    if (dropDecimals) return sign + absolute.toFixed(0);
     return sign + (absolute >= 100 ? absolute.toFixed(0) : absolute.toFixed(1).replace(/\.0$/, ""));
   }
 
@@ -2356,6 +2448,9 @@ export function formatNumber(value: number): string {
   const tier = Math.floor(Math.log10(absolute) / 3);
   const suffix = tier < suffixes.length ? suffixes[tier] : getAlphabeticSuffix(tier - suffixes.length);
   const scaled = absolute / Math.pow(1000, tier);
+
+  if (dropDecimals) return `${sign}${scaled.toFixed(0)}${suffix}`;
+
   const formatted = scaled >= 100 ? scaled.toFixed(0) : scaled >= 10 ? scaled.toFixed(1) : scaled.toFixed(2);
   return `${sign}${formatted.replace(/\.0+$|(\.\d*[1-9])0+$/, "$1")}${suffix}`;
 }
