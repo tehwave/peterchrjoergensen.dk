@@ -360,7 +360,7 @@ import Layout from "../../../layouts/Layout.astro";
       border: 3px solid #111;
       border-radius: $radius-xl;
       padding: $space-sm $space-md;
-      background: rgba($color-white, 0.78);
+      background: $color-white;
       box-shadow: 4px 4px 0 #111;
       display: flex;
       flex-direction: column;
@@ -426,6 +426,11 @@ import Layout from "../../../layouts/Layout.astro";
         display: flex;
         flex-direction: column;
         gap: $space-md;
+        background: #ffffff;
+        border: 4px solid #111;
+        border-radius: 24px;
+        padding: $space-md;
+        box-shadow: 12px 12px 0 #111;
       }
       
       &--connected {
@@ -513,10 +518,10 @@ import Layout from "../../../layouts/Layout.astro";
       input[type="text"] {
         @include focus-ring;
         width: 100%;
-        border: 2px solid rgba($color-black, 0.14);
+        border: 2px solid #111;
         border-radius: $radius-lg;
         padding: $space-sm;
-        background: rgba($color-white, 0.88);
+        background: #fff;
         color: $color-text-dark;
         font-family: $font-mono;
         font-size: $font-size-xs;
@@ -544,14 +549,14 @@ import Layout from "../../../layouts/Layout.astro";
         height: 2.25rem;
         background: transparent;
         border: none;
-        color: rgba($color-black, 0.6);
+        color: #111;
         cursor: pointer;
         border-radius: $radius-md;
         transition: all 0.2s ease;
         
         &:hover {
           color: $color-black;
-          background: rgba($color-black, 0.06);
+          background: #eee;
         }
         
         &:active {
@@ -607,21 +612,21 @@ import Layout from "../../../layouts/Layout.astro";
       }
 
       &--ghost {
-        background: rgba($color-white, 0.72);
+        background: #fff;
       }
     }
 
     &__handshake-status {
       margin: 0;
-      border: 1px solid rgba($color-black, 0.1);
+      border: 3px solid #111;
       border-radius: $radius-full;
       padding: $space-sm $space-md;
-      background: rgba($color-white, 0.72);
-      color: rgba($color-text-dark, 0.74);
+      background: #fff;
+      color: #111;
       text-align: center;
       font-size: $font-size-sm;
       font-weight: $font-weight-semibold;
-      box-shadow: $shadow-xs;
+      box-shadow: 4px 4px 0 #111;
     }
 
     &--busy {
