@@ -83,6 +83,13 @@ class BrowserMultiplayerController {
       this.renderPanels("client");
       this.setStatus("Paste the invite code from the host.");
     }));
+
+    // Hide the touch zone tutorial text and borders on first touch interaction
+    this.on(this.dom.touchZone, "pointerdown", () => {
+      this.dom.touchZone.style.border = "none";
+      this.dom.touchZone.style.background = "transparent";
+      this.dom.touchZone.replaceChildren(); // Removes text
+    }, { once: true });
     
     // Disable/enable submit buttons based on input
     this.on(this.dom.answerInput, "input", () => {
@@ -387,17 +394,20 @@ class BrowserMultiplayerController {
     if (state.roundState === "countdown") {
       const seconds = Math.ceil(state.countdownMs / 800);
       this.dom.overlay.textContent = seconds <= 0 ? "GO" : String(seconds);
+      this.dom.overlay.setAttribute("data-browser-multiplayer-overlay", "countdown");
       this.dom.overlay.hidden = false;
       return;
     }
 
     if (state.roundState === "gameover") {
       this.dom.overlay.textContent = state.winner === this.role ? "YOU WIN" : "YOU LOSE";
+      this.dom.overlay.setAttribute("data-browser-multiplayer-overlay", "gameover");
       this.dom.overlay.hidden = false;
       return;
     }
 
     if (state.roundState === "disconnected") {
+      this.dom.overlay.setAttribute("data-browser-multiplayer-overlay", "disconnected");
       this.dom.overlay.hidden = false;
       return;
     }

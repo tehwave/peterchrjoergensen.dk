@@ -47,9 +47,9 @@ export const SIMULATION = {
   maxFrameMs: 80,
   countdownMs: 2400,
   scoredPauseMs: 2400,
-  goalFreezeMs: 100,
-  paddleFreezeMs: 24,
-  wallFreezeMs: 7,
+  goalFreezeMs: 150,
+  paddleFreezeMs: 50,
+  wallFreezeMs: 35,
   scoreLimit: 5,
 } as const;
 
@@ -74,7 +74,7 @@ export const RENDER = {
   background: 0xfff3a1,
   ink: 0x111111,
   mutedInk: 0x3b342d,
-  surface: 0xffe800,
+  surface: 0xffffff,
   host: 0xff007f,
   client: 0x00e5ff,
   goal: 0xffffff,

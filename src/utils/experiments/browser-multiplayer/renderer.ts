@@ -35,6 +35,9 @@ export class MatchRenderer {
   private readonly world = new Container();
   private readonly court = new Graphics();
   private readonly action = new Graphics();
+  private readonly puckGraphics = new Container();
+  private readonly puckShadowGraphics = new Graphics();
+  private readonly puckBodyGraphics = new Graphics();
   private readonly effects = new Graphics();
   private readonly particles: Particle[] = [];
   private readonly trail: TrailPoint[] = [];
@@ -78,18 +81,21 @@ export class MatchRenderer {
   }
 
   /** Trigger short-lived visual feedback for collisions and goals. */
-  flashImpact(strength: number, color: number): void {
+  flashImpact(strength: number, color: number, doShake: boolean = true, x: number = ARENA.width / 2, y: number = ARENA.height / 2): void {
     this.squash = Math.max(this.squash, 1 + strength * 0.18);
     this.squashVelocity -= strength * 1.6;
-    this.shakeMagnitude = Math.max(this.shakeMagnitude, strength * 18);
-    this.shakeTime = Math.max(this.shakeTime, 0.24);
+    
+    if (doShake) {
+      this.shakeMagnitude = Math.max(this.shakeMagnitude, strength * 18);
+      this.shakeTime = Math.max(this.shakeTime, 0.24);
+    }
 
     for (let index = 0; index < Math.min(RENDER.maxParticles - this.particles.length, 12); index += 1) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 200 + Math.random() * 400 * strength;
       this.particles.push({
-        x: ARENA.width / 2,
-        y: ARENA.height / 2,
+        x,
+        y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         life: 0.45 + Math.random() * 0.35,
@@ -121,9 +127,11 @@ export class MatchRenderer {
       autoStart: true,
     });
 
+    this.puckGraphics.addChild(this.puckShadowGraphics, this.puckBodyGraphics);
+    
     this.app.canvas.setAttribute("aria-hidden", "true");
     this.mount.replaceChildren(this.app.canvas);
-    this.world.addChild(this.court, this.effects, this.action);
+    this.world.addChild(this.court, this.effects, this.action, this.puckGraphics);
     this.app.stage.addChild(this.world);
     this.resize();
     this.drawCourt();
@@ -153,16 +161,37 @@ export class MatchRenderer {
     this.court.clear();
     this.court.rect(0, 0, ARENA.width, ARENA.height).fill({ color: RENDER.surface });
     
-    // Pop art dots
+    // Windscreen frit (dotted fade) at top and bottom goal areas
     for (let x = 0; x < ARENA.width; x += 40) {
       for (let y = 0; y < ARENA.height; y += 40) {
-        this.court.circle(x + 20, y + 20, 6).fill({ color: 0xffda00, alpha: 0.8 });
+        const distFromTop = y;
+        const distFromBottom = ARENA.height - y;
+        const distToEdge = Math.min(distFromTop, distFromBottom);
+        
+        let dotRadius = 3.5;
+        let dotAlpha = 0.05;
+
+        if (distToEdge < 350) {
+           const fade = Math.pow(1 - Math.max(0, distToEdge / 350), 2); // 1 at edge, 0 at 350px
+           dotRadius = 3.5 + (fade * 9); // dots get larger
+           dotAlpha = 0.05 + (fade * 0.7); // dots get darker
+        }
+
+        this.court.circle(x + 20, y + 20, dotRadius).fill({ color: 0x000000, alpha: dotAlpha });
       }
     }
 
+    // Inner aiming rectangle 
+    const marginX = 140;
+    const marginY = 280;
+    this.court.rect(marginX, marginY, ARENA.width - marginX * 2, ARENA.height - marginY * 2).stroke({ color: RENDER.ink, width: 8, alpha: 0.2 });
+
+    // Center line
     this.court.rect(ARENA.wallThickness, ARENA.height / 2 - ARENA.centerLineWidth / 2, ARENA.width - ARENA.wallThickness * 2, ARENA.centerLineWidth).fill({ color: RENDER.ink });
-    this.court.rect(ARENA.wallThickness * 2, ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ color: RENDER.goal }).stroke({ width: 8, color: RENDER.ink });
-    this.court.rect(ARENA.wallThickness * 2, ARENA.height - ARENA.goalDepth - ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ color: RENDER.goal }).stroke({ width: 8, color: RENDER.ink });
+    
+    // Center circle
+    this.court.circle(ARENA.width / 2, ARENA.height / 2, 140).fill({ color: RENDER.surface }).stroke({ color: RENDER.ink, width: 8 });
+    this.court.circle(ARENA.width / 2, ARENA.height / 2, 24).fill({ color: RENDER.ink });
   }
 
   private drawAction(state: MatchState): void {
@@ -177,12 +206,30 @@ export class MatchRenderer {
     this.drawPaddle(state.hostPaddle.x, hostY, RENDER.host, this.role === "host", true);
     this.drawPaddle(state.clientPaddle.x, clientY, RENDER.client, this.role === "client", false);
 
-    // Puck pop art drop shadow
-    this.action.circle(state.ball.x + 12, ballY + 14, PUCK.radius).fill({ color: 0x000000 });
-    // Puck
-    this.action.circle(state.ball.x, ballY, PUCK.radius).fill({ color: RENDER.surface }).stroke({ width: 8, color: RENDER.ink });
-    this.action.ellipse(state.ball.x, ballY, PUCK.radius * 0.7 * this.squash, PUCK.radius * 0.7 / this.squash).fill({ color: RENDER.ink });
-    this.action.circle(state.ball.x - PUCK.radius * 0.24, ballY - PUCK.radius * 0.24, PUCK.radius * 0.18).fill({ alpha: 1, color: 0xffffff });
+    // Calculate ball transform based on velocity
+    const speed = magnitude(state.ball.vx, state.ball.vy);
+    const angle = speed > 50 ? Math.atan2(viewYForRole(this.role, state.ball.y + state.ball.vy) - ballY, state.ball.vx) : 0;
+    
+    // Elongate only when close to max speed (like motion blur)
+    const stretchThreshold = PUCK.maxSpeed * 0.8;
+    const stretch = speed > stretchThreshold ? 1 + Math.min((speed - stretchThreshold) / 500, 1.5) : 1;
+    const squish = 1 / stretch;
+
+    this.puckGraphics.position.set(state.ball.x, ballY);
+    this.puckGraphics.rotation = angle;
+    this.puckGraphics.scale.set(stretch, squish * this.squash);
+
+    this.puckShadowGraphics.clear();
+    // Revert rotation just for the drop shadow offset, so light always comes from same angle
+    this.puckShadowGraphics.rotation = -angle;
+    // We must undo the scale to ensure shadow drops exactly straight and doesn't squish weirdly
+    this.puckShadowGraphics.scale.set(1 / stretch, 1 / (squish * this.squash));
+    this.puckShadowGraphics.circle(12, 14, PUCK.radius).fill({ color: 0x000000 });
+
+    this.puckBodyGraphics.clear();
+    this.puckBodyGraphics.circle(0, 0, PUCK.radius).fill({ color: RENDER.surface }).stroke({ width: 8 / stretch, color: RENDER.ink });
+    this.puckBodyGraphics.ellipse(0, 0, PUCK.radius * 0.7, PUCK.radius * 0.7).fill({ color: RENDER.ink });
+    this.puckBodyGraphics.circle(-PUCK.radius * 0.24, -PUCK.radius * 0.24, PUCK.radius * 0.18).fill({ alpha: 1, color: 0xffffff });
   }
 
   private drawPaddle(x: number, y: number, color: number, local: boolean, top: boolean): void {
@@ -218,12 +265,15 @@ export class MatchRenderer {
     if (state.tick !== this.lastTick && state.freezeMs > 0) {
       // Simulation hit-stop doubles as a cheap signal that an impact happened.
       const speed = magnitude(state.ball.vx, state.ball.vy);
-      const strength = state.roundState === "scored" || state.roundState === "gameover" ? 1.8 : Math.min(1.3, speed / 1100);
-      this.flashImpact(strength, state.lastScoredBy === "host" ? RENDER.host : state.lastScoredBy === "client" ? RENDER.client : RENDER.ink);
+      const isGoal = state.roundState === "scored" || state.roundState === "gameover";
+      const strength = isGoal ? 1.8 : Math.min(1.3, speed / 1100);
+      
+      // We still spawn particles and flash impact strength, but we do not shake unless someone scored.
+      this.flashImpact(strength, state.lastScoredBy === "host" ? RENDER.host : state.lastScoredBy === "client" ? RENDER.client : RENDER.ink, isGoal, state.ball.x, state.ball.y);
     }
 
-    if (state.scores.host !== this.lastHostScore) this.flashImpact(1.8, RENDER.host);
-    if (state.scores.client !== this.lastClientScore) this.flashImpact(1.8, RENDER.client);
+    if (state.scores.host !== this.lastHostScore) this.flashImpact(1.8, RENDER.host, true, state.ball.x, state.ball.y);
+    if (state.scores.client !== this.lastClientScore) this.flashImpact(1.8, RENDER.client, true, state.ball.x, state.ball.y);
 
     this.lastHostScore = state.scores.host;
     this.lastClientScore = state.scores.client;
