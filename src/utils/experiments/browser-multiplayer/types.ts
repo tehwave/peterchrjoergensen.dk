@@ -111,16 +111,19 @@ export interface BrowserMultiplayerDom {
   game: HTMLElement;
   statusNodes: HTMLElement[];
   overlay: HTMLElement;
+  scoreboard: HTMLElement;
   scoreHost: HTMLElement;
   scoreClient: HTMLElement;
   hostLabel: HTMLElement;
   clientLabel: HTMLElement;
   handshake: HTMLElement;
+  choicePanel: HTMLElement;
   hostPanel: HTMLElement;
   clientPanel: HTMLElement;
   connectedPanel: HTMLElement;
-  createButton: HTMLButtonElement;
-  joinButton: HTMLButtonElement;
+  topActions: HTMLElement;
+  createButtons: HTMLButtonElement[];
+  joinButtons: HTMLButtonElement[];
   resetButton: HTMLButtonElement;
   offerOutput: HTMLInputElement;
   offerInput: HTMLInputElement;
@@ -133,7 +136,6 @@ export interface BrowserMultiplayerDom {
   copyOfferButton: HTMLButtonElement;
   copyAnswerButton: HTMLButtonElement;
   rematchButton: HTMLButtonElement;
-  roleText: HTMLElement;
   touchZone: HTMLElement;
   backButton: HTMLButtonElement;
 }

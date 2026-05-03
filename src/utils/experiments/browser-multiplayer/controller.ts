@@ -76,13 +76,13 @@ class BrowserMultiplayerController {
   }
 
   private bindUi(): void {
-    this.on(this.dom.createButton, "click", () => void this.createHostInvite());
-    this.on(this.dom.joinButton, "click", () => {
+    this.dom.createButtons.forEach(btn => this.on(btn, "click", () => void this.createHostInvite()));
+    this.dom.joinButtons.forEach(btn => this.on(btn, "click", () => {
       this.role = "client";
       void this.ensureRenderer("client");
       this.renderPanels("client");
       this.setStatus("Paste the invite code from the host.");
-    });
+    }));
     
     // Disable/enable submit buttons based on input
     this.on(this.dom.answerInput, "input", () => {
@@ -101,6 +101,13 @@ class BrowserMultiplayerController {
     this.on(this.dom.rematchButton, "click", () => this.requestRematch());
     this.on(this.dom.resetButton, "click", () => this.resetConnection());
     this.on(this.dom.backButton, "click", () => {
+      // If we're inside a setup panel, go back to the choice panel
+      if (!this.dom.hostPanel.hidden || !this.dom.clientPanel.hidden) {
+        this.resetConnection(true);
+        return;
+      }
+      
+      // Otherwise go back to previous page
       if (window.history.length > 1) {
         window.history.back();
         return;
@@ -318,7 +325,6 @@ class BrowserMultiplayerController {
   private async ensureRenderer(role: PlayerRole): Promise<void> {
     if (this.renderer) return;
     this.renderer = await MatchRenderer.create(this.dom.stage, role);
-    this.dom.roleText.textContent = role === "host" ? "You are red. You play from the bottom." : "You are blue. You play from the bottom.";
   }
 
   private requestRematch(): void {
@@ -374,7 +380,7 @@ class BrowserMultiplayerController {
     if (state.roundState === "countdown") this.setStatus("Get ready.");
     if (state.roundState === "playing") this.setStatus("Playing.");
     if (state.roundState === "scored" && state.lastScoredBy) this.setStatus(`${state.lastScoredBy === "host" ? "Host" : "Client"} scored.`);
-    if (state.roundState === "gameover" && state.winner) this.setStatus(`${state.winner === this.role ? "You win" : "You lose"}. Rematch?`);
+    if (state.roundState === "gameover" && state.winner) this.setStatus(`${state.winner === this.role ? "You win" : "You lose"}`);
   }
 
   private updateOverlay(state: MatchState): void {
@@ -402,17 +408,36 @@ class BrowserMultiplayerController {
   private updateScore(state: MatchState): void {
     this.dom.scoreHost.textContent = String(state.scores.host);
     this.dom.scoreClient.textContent = String(state.scores.client);
-    this.dom.hostLabel.textContent = this.role === "host" ? "You · Host" : "Host";
-    this.dom.clientLabel.textContent = this.role === "client" ? "You · Client" : "Client";
+    this.dom.hostLabel.textContent = this.role === "host" ? "You" : "Opponent";
+    this.dom.clientLabel.textContent = this.role === "client" ? "You" : "Opponent";
+    
+    // Only show scoreboard during round breaks/restarts
+    const isOverlayingHUD = state.roundState === "playing" || state.roundState === "handshake";
+    this.dom.scoreboard.hidden = isOverlayingHUD;
+
+    // Show rematch button only during gameover
+    this.dom.rematchButton.hidden = state.roundState !== "gameover";
+
+    // Toggle the status bubbles during gameplay to unblock the view
+    this.dom.statusNodes.forEach(node => {
+      if (node.classList.contains("browser-multiplayer__status")) {
+        node.hidden = isOverlayingHUD;
+      }
+    });
   }
 
   private renderPanels(panel: "choice" | "host" | "client" | "connected"): void {
     this.dom.handshake.hidden = panel === "connected";
     this.dom.game.hidden = panel !== "connected";
+    this.dom.choicePanel.hidden = panel !== "choice";
     this.dom.hostPanel.hidden = panel !== "host";
     this.dom.clientPanel.hidden = panel !== "client";
     this.dom.connectedPanel.hidden = panel !== "connected";
-    this.dom.rematchButton.hidden = panel !== "connected";
+    
+    // Manage top actions: "connected" has rematch/disconnect, choice is empty so hidden
+    this.dom.topActions.hidden = panel === "choice";
+    
+    this.dom.resetButton.hidden = panel === "choice"; // Disconnect button is hidden on choice panel
   }
 
   private setStatus(message: string): void {
@@ -424,7 +449,7 @@ class BrowserMultiplayerController {
   }
 
   private setBusy(isBusy: boolean): void {
-    [this.dom.createButton, this.dom.joinButton, this.dom.createAnswerButton, this.dom.acceptAnswerButton].forEach((button) => {
+    [...this.dom.createButtons, ...this.dom.joinButtons, this.dom.createAnswerButton, this.dom.acceptAnswerButton].forEach((button) => {
       button.disabled = isBusy;
     });
     this.dom.root.classList.toggle("browser-multiplayer--busy", isBusy);
@@ -464,17 +489,20 @@ function getDom(root: HTMLElement): BrowserMultiplayerDom {
     stage: getElement(root, "[data-browser-multiplayer-stage]", HTMLElement),
     statusNodes: Array.from(root.querySelectorAll<HTMLElement>("[data-browser-multiplayer-status]")), // status: getElement(root, "[data-browser-multiplayer-status]", HTMLElement),
     overlay: getElement(root, "[data-browser-multiplayer-overlay]", HTMLElement),
+    scoreboard: getElement(root, ".browser-multiplayer__scoreboard", HTMLElement),
     scoreHost: getElement(root, "[data-browser-multiplayer-score='host']", HTMLElement),
     scoreClient: getElement(root, "[data-browser-multiplayer-score='client']", HTMLElement),
     hostLabel: getElement(root, "[data-browser-multiplayer-label='host']", HTMLElement),
     clientLabel: getElement(root, "[data-browser-multiplayer-label='client']", HTMLElement),
     handshake: getElement(root, "[data-browser-multiplayer-handshake]", HTMLElement),
     game: getElement(root, "[data-browser-multiplayer-game]", HTMLElement),
+    choicePanel: getElement(root, "[data-browser-multiplayer-panel='choice']", HTMLElement),
     hostPanel: getElement(root, "[data-browser-multiplayer-panel='host']", HTMLElement),
     clientPanel: getElement(root, "[data-browser-multiplayer-panel='client']", HTMLElement),
     connectedPanel: getElement(root, "[data-browser-multiplayer-panel='connected']", HTMLElement),
-    createButton: getElement(root, "[data-browser-multiplayer-action='create']", HTMLButtonElement),
-    joinButton: getElement(root, "[data-browser-multiplayer-action='join']", HTMLButtonElement),
+    topActions: getElement(root, "[data-browser-multiplayer-top-actions]", HTMLElement),
+    createButtons: Array.from(root.querySelectorAll<HTMLButtonElement>("[data-browser-multiplayer-action='create']")),
+    joinButtons: Array.from(root.querySelectorAll<HTMLButtonElement>("[data-browser-multiplayer-action='join']")),
     resetButton: getElement(root, "[data-browser-multiplayer-action='reset']", HTMLButtonElement),
     offerOutput: getElement(root, "[data-browser-multiplayer-offer-output]", HTMLInputElement),
     offerInput: getElement(root, "[data-browser-multiplayer-offer-input]", HTMLInputElement),
@@ -487,7 +515,6 @@ function getDom(root: HTMLElement): BrowserMultiplayerDom {
     copyOfferButton: getElement(root, "[data-browser-multiplayer-action='copy-offer']", HTMLButtonElement),
     copyAnswerButton: getElement(root, "[data-browser-multiplayer-action='copy-answer']", HTMLButtonElement),
     rematchButton: getElement(root, "[data-browser-multiplayer-action='rematch']", HTMLButtonElement),
-    roleText: getElement(root, "[data-browser-multiplayer-role]", HTMLElement),
     touchZone: getElement(root, "[data-browser-multiplayer-touch]", HTMLElement),
     backButton: getElement(root, "[data-browser-multiplayer-back]", HTMLButtonElement),
   };

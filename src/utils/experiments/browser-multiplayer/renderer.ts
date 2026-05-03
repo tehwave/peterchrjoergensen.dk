@@ -152,7 +152,7 @@ export class MatchRenderer {
   private drawCourt(): void {
     this.court.clear();
     this.court.rect(0, 0, ARENA.width, ARENA.height).fill({ color: RENDER.surface });
-    this.court.rect(ARENA.wallThickness, ARENA.wallThickness, ARENA.width - ARENA.wallThickness * 2, ARENA.height - ARENA.wallThickness * 2).stroke({ color: RENDER.ink, width: ARENA.wallThickness });
+    // Removed black border stroke per user request
     this.court.rect(ARENA.wallThickness, ARENA.height / 2 - ARENA.centerLineWidth / 2, ARENA.width - ARENA.wallThickness * 2, ARENA.centerLineWidth).fill({ alpha: 0.5, color: RENDER.ink });
     this.court.rect(ARENA.wallThickness * 2, ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ alpha: 0.7, color: RENDER.goal });
     this.court.rect(ARENA.wallThickness * 2, ARENA.height - ARENA.goalDepth - ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ alpha: 0.7, color: RENDER.goal });

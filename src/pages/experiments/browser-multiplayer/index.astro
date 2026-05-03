@@ -7,10 +7,17 @@ import Layout from "../../../layouts/Layout.astro";
   description="A zero-server WebRTC air-hockey experiment with manual handshake, mobile-first controls, and a punchy PixiJS renderer."
 >
   <section class="browser-multiplayer" data-browser-multiplayer-root>
-    <button class="browser-multiplayer__back" data-browser-multiplayer-back type="button" aria-label="Go back">
-      <span aria-hidden="true">&larr;</span>
-      <span>Back</span>
-    </button>
+    <div class="browser-multiplayer__top-bar">
+      <button class="browser-multiplayer__back" data-browser-multiplayer-back type="button" aria-label="Go back">
+        <span aria-hidden="true">&larr;</span>
+        <span>Back</span>
+      </button>
+
+      <div class="browser-multiplayer__top-actions" data-browser-multiplayer-top-actions hidden>
+        <button class="browser-multiplayer__top-action" data-browser-multiplayer-action="rematch" type="button" hidden>Rematch</button>
+        <button class="browser-multiplayer__top-action browser-multiplayer__button--ghost" data-browser-multiplayer-action="reset" type="button" hidden>Disconnect</button>
+      </div>
+    </div>
 
     <div class="browser-multiplayer__shell">
       <div class="browser-multiplayer__card" data-browser-multiplayer-game hidden>
@@ -24,23 +31,16 @@ import Layout from "../../../layouts/Layout.astro";
           <div class="browser-multiplayer__hud">
             <div class="browser-multiplayer__scoreboard" aria-label="Score">
               <div class="browser-multiplayer__score-card browser-multiplayer__score-card--host">
-                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="host">Host</span>
+                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="host">Opponent</span>
                 <strong class="browser-multiplayer__score-value" data-browser-multiplayer-score="host">0</strong>
               </div>
               <div class="browser-multiplayer__score-card browser-multiplayer__score-card--client">
                 <strong class="browser-multiplayer__score-value" data-browser-multiplayer-score="client">0</strong>
-                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="client">Client</span>
+                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="client">You</span>
               </div>
             </div>
 
             <p class="browser-multiplayer__status" data-browser-multiplayer-status aria-live="polite">Connected</p>
-
-            <div class="browser-multiplayer__controls">
-              <button class="browser-multiplayer__button browser-multiplayer__button--primary" data-browser-multiplayer-action="rematch" type="button" hidden>Rematch</button>
-              <button class="browser-multiplayer__button browser-multiplayer__button--ghost" data-browser-multiplayer-action="reset" type="button">New connection</button>
-            </div>
-            
-            <div class="browser-multiplayer__role" data-browser-multiplayer-role>You will always play from the bottom.</div>
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@ import Layout from "../../../layouts/Layout.astro";
           <p class="browser-multiplayer__intro">Create a match, send the code, paste the reply, and play. No lobby. No account. No signaling server.</p>
         </header>
 
-        <div class="browser-multiplayer__choice">
+        <div class="browser-multiplayer__choice" data-browser-multiplayer-panel="choice">
           <button class="browser-multiplayer__button browser-multiplayer__button--host" data-browser-multiplayer-action="create" type="button">Create game</button>
           <button class="browser-multiplayer__button browser-multiplayer__button--client" data-browser-multiplayer-action="join" type="button">Join game</button>
         </div>
@@ -63,11 +63,15 @@ import Layout from "../../../layouts/Layout.astro";
           <p>Send this invite to the other player. When they reply, paste their reply below.</p>
           <label>
             Invite code
-            <input type="text" data-browser-multiplayer-offer-output readonly spellcheck="false" />
+            <div class="browser-multiplayer__input-group">
+              <input type="text" data-browser-multiplayer-offer-output readonly spellcheck="false" />
+              <button class="browser-multiplayer__copy-icon" data-browser-multiplayer-action="copy-offer" type="button" aria-label="Copy code" title="Copy to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
           </label>
           <div class="browser-multiplayer__actions">
             <button class="browser-multiplayer__button" data-browser-multiplayer-action="share-offer" type="button">Share invite</button>
-            <button class="browser-multiplayer__button browser-multiplayer__button--ghost" data-browser-multiplayer-action="copy-offer" type="button">Copy</button>
           </div>
           <label>
             Reply code
@@ -86,11 +90,15 @@ import Layout from "../../../layouts/Layout.astro";
           <button class="browser-multiplayer__button browser-multiplayer__button--primary" data-browser-multiplayer-action="create-answer" type="button" disabled>Create reply</button>
           <label>
             Reply code
-            <input type="text" data-browser-multiplayer-answer-output readonly spellcheck="false" />
+            <div class="browser-multiplayer__input-group">
+              <input type="text" data-browser-multiplayer-answer-output readonly spellcheck="false" />
+              <button class="browser-multiplayer__copy-icon" data-browser-multiplayer-action="copy-answer" type="button" aria-label="Copy code" title="Copy to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
           </label>
           <div class="browser-multiplayer__actions">
             <button class="browser-multiplayer__button" data-browser-multiplayer-action="share-answer" type="button">Share reply</button>
-            <button class="browser-multiplayer__button browser-multiplayer__button--ghost" data-browser-multiplayer-action="copy-answer" type="button">Copy</button>
           </div>
         </div>
 
@@ -146,25 +154,89 @@ import Layout from "../../../layouts/Layout.astro";
     display: flex;
     flex-direction: column;
 
-    &__back {
-      @include focus-ring;
+    &__top-bar {
       position: absolute;
       z-index: 50;
       top: calc($space-sm + env(safe-area-inset-top));
       left: calc($space-sm + env(safe-area-inset-left));
+      right: calc($space-sm + env(safe-area-inset-right));
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: $space-sm;
+      flex-wrap: nowrap;
+      pointer-events: none; /* Let clicks pass through empty space */
+
+      & > * {
+        pointer-events: auto; /* Reactivate clicks on buttons */
+      }
+    }
+
+    &__top-actions {
+      display: flex;
+      flex: 1 1 auto;
+      justify-content: flex-end;
+      min-width: 0;
+      gap: $space-sm;
+      flex-wrap: nowrap;
+      
+      &[hidden] {
+        display: none !important;
+      }
+    }
+
+    &__back,
+    &__top-action {
+      @include focus-ring;
       display: inline-flex;
+      flex: 0 0 auto;
       align-items: center;
+      justify-content: center;
       gap: $space-xs;
-      border: 2px solid rgba($color-black, 0.12);
+      border: 2px solid rgba($color-black, 0.88);
       border-radius: $radius-full;
       padding: 0.55rem 0.9rem;
-      background: rgba($color-white, 0.82);
+      background: $color-white;
       color: $color-text-dark;
       font: inherit;
+      font-size: $font-size-sm;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-weight: $font-weight-bold;
-      box-shadow: $shadow-sm;
+      box-shadow: 0 4px 0 #111;
       backdrop-filter: blur(12px);
       cursor: pointer;
+      transition:
+        transform 140ms ease,
+        box-shadow 140ms ease;
+      
+      &:hover {
+        transform: translateY(1px);
+        box-shadow: 0 3px 0 #111;
+      }
+      
+      &:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0 #111;
+      }
+    }
+
+    &__top-action {
+      flex: 1 1 100%;
+      font-weight: $font-weight-black;
+      letter-spacing: $tracking-wide;
+      text-transform: uppercase;
+
+      &--host {
+        background: #e94545;
+        color: $color-white;
+      }
+
+      &--client {
+        background: #2b65e8;
+        color: $color-white;
+      }
     }
 
     &__shell {
@@ -181,11 +253,14 @@ import Layout from "../../../layouts/Layout.astro";
     }
 
     &__card {
-      flex: 1;
+      flex: 1 1 auto;
+      aspect-ratio: 10 / 18;
+      max-height: 100%;
+      margin: 0 auto;
       position: relative;
       border: 4px solid #111;
       border-radius: 34px;
-      padding: 10px;
+      padding: 0;
       background: #111;
       box-shadow: 0 28px 60px rgba($color-black, 0.22);
       display: flex;
@@ -275,6 +350,10 @@ import Layout from "../../../layouts/Layout.astro";
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: $space-sm;
+
+      &[hidden] {
+        display: none;
+      }
     }
 
     &__score-card {
@@ -314,21 +393,15 @@ import Layout from "../../../layouts/Layout.astro";
     }
 
     &__role, &__status {
-      margin-top: auto;
-      border: 1px solid rgba($color-black, 0.1);
-      border-radius: $radius-full;
-      padding: $space-sm $space-md;
-      background: rgba($color-white, 0.72);
-      color: rgba($color-text-dark, 0.74);
-      text-align: center;
-      font-size: $font-size-sm;
-      font-weight: $font-weight-semibold;
-      box-shadow: $shadow-xs;
-      backdrop-filter: blur(12px);
-    }
-    
-    &__status {
-      margin-top: $space-md;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
     }
 
     &__controls {
@@ -395,6 +468,10 @@ import Layout from "../../../layouts/Layout.astro";
       display: flex;
       gap: $space-sm;
       flex-direction: column;
+
+      &[hidden] {
+        display: none !important;
+      }
     }
 
     &__choice {
@@ -444,6 +521,42 @@ import Layout from "../../../layouts/Layout.astro";
         font-family: $font-mono;
         font-size: $font-size-xs;
         line-height: $leading-none;
+      }
+
+      .browser-multiplayer__input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        input[type="text"] {
+          padding-right: 3rem; /* Make room for the absolute button */
+        }
+      }
+
+      .browser-multiplayer__copy-icon {
+        @include focus-ring;
+        position: absolute;
+        right: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        background: transparent;
+        border: none;
+        color: rgba($color-black, 0.6);
+        cursor: pointer;
+        border-radius: $radius-md;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: $color-black;
+          background: rgba($color-black, 0.06);
+        }
+        
+        &:active {
+          transform: scale(0.95);
+        }
       }
     }
 

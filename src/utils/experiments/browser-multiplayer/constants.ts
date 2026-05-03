@@ -46,7 +46,7 @@ export const SIMULATION = {
   fixedStepMs: 1000 / 120,
   maxFrameMs: 80,
   countdownMs: 2400,
-  scoredPauseMs: 900,
+  scoredPauseMs: 2400,
   goalFreezeMs: 100,
   paddleFreezeMs: 24,
   wallFreezeMs: 7,
