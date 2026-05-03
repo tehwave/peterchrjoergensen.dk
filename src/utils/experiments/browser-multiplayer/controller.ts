@@ -27,8 +27,17 @@ function mountBrowserMultiplayer(): Teardown | void {
 }
 
 /**
- * Coordinates UI, networking, simulation, input, and rendering. It intentionally
- * keeps authority decisions here instead of inside renderer/network modules.
+ * Coordinates UI, networking, simulation, input, and rendering.
+ * 
+ * DESIGN DECISIONS:
+ * - Authoritative Host: The game logic (simulation, physics, collisions) is processed exclusively
+ *   by the Host.
+ * - Local Prediction (Client): The client relies on snapshots but predicts its own paddle input
+ *   to ensure responsive touch controls, preventing network lag from ruining the input feel.
+ * - Frame Extrapolation: The client will mathematically guess where the ball will be between
+ *   network frames, using lerps to smoothly correct discrepancies.
+ * - Peer-to-Peer setup: Does not rely on a central signaling server. Connections are made manually
+ *   by passing compressed SDP descriptors via physical copy/paste or Web Share API.
  */
 class BrowserMultiplayerController {
   private readonly dom: BrowserMultiplayerDom;
@@ -312,9 +321,14 @@ class BrowserMultiplayerController {
 
   private getClientRenderState(): MatchState {
     if (this.latestRemoteState) {
-      // Lerp ball towards authoritative state to smooth corrections
+      // EXTRAPOLATION & LERPING DECISION:
+      // The state arrives at roughly 30Hz from the Host, but the client renders at 60/120Hz.
+      // To prevent 'steppy' puck movement, we linearly interpolate (lerp) the ball's visually
+      // simulated position towards the true host position on each render frame.
       const dx = this.latestRemoteState.ball.x - this.state.ball.x;
       const dy = this.latestRemoteState.ball.y - this.state.ball.y;
+      
+      // Close the gap by 40% every frame - smooths out latency jiggles.
       this.state.ball.x += dx * 0.4;
       this.state.ball.y += dy * 0.4;
       this.state.ball.vx = this.latestRemoteState.ball.vx;
@@ -337,8 +351,11 @@ class BrowserMultiplayerController {
 
   private applyLocalPrediction(state: MatchState): void {
     if (!this.input || !this.role) return;
-    // This mutates the render copy only. It hides network latency for the local paddle
-    // while the puck and opponent still come from host-authoritative snapshots.
+    
+    // PREDICTION DECISION: Hide latency for the local player's paddle.
+    // The player's paddle locally reacts immediately to the browser touch APIs,
+    // overwriting the networked snapshot for that single object in the render-copy.
+    // The puck and opponent's paddle remain strictly driven by the Host snapshot.
     const localInput = this.input.getCurrentInput();
     const paddle = this.role === "host" ? state.hostPaddle : state.clientPaddle;
     paddle.x = localInput.paddleX;

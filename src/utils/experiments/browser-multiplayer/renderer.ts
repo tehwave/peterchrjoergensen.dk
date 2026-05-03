@@ -28,6 +28,16 @@ interface TrailPoint {
  * Pixi renderer for the action layer. The DOM owns the HUD and controls; keeping
  * Pixi focused on the court makes accessibility and teardown simpler.
  */
+/**
+ * Handles all PixiJS-related visual drawing logic.
+ * 
+ * DESIGN DECISIONS:
+ * - Decoupled View layer: Does not mutate `MatchState` or alter hit-box geometry natively.
+ * - Dynamic Transformations: Complex rotational offsets for the puck's motion are nested in a
+ *   `Container` so rotation transforms can accurately offset children like shadows directly
+ *   using intrinsic center anchors.
+ * - Visual Juicing: Owns particles, hit 'squash' distortions via spring logic, and camera shake. 
+ */
 export class MatchRenderer {
   private readonly mount: HTMLElement;
   private readonly role: PlayerRole;

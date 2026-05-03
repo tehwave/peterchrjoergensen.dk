@@ -12,6 +12,16 @@ interface NetworkCallbacks {
 /**
  * Thin WebRTC wrapper for the manual-offer flow. The controller owns game state;
  * this class only owns peer/channel lifecycle and converts SDP to shareable codes.
+ * 
+ * DESIGN DECISIONS:
+ * - Pure Peer-To-Peer setup: We bypass the traditional Node JS real-time 
+ *   Socket/Signaling server architecture entirely to keep hosting costs effectively
+ *   at $0.00. Connections are created manually.
+ * - LZString Compression: Raw SDP descriptors natively exceed standard text limits. The 
+ *   SDP objects are compressed down (downsize roughly 80-90%) leveraging LZ String so 
+ *   players can quickly pass their payloads around via SMS / WhatsApp native mobile sharing API. 
+ * - Ephemeral Connection: No lobbies or reconnections; once connected, players stay together until 
+ *   drop. Drops register as instant forfeit rather than building heavy re-handshake buffers.
  */
 export class PeerNetwork {
   private peer: RTCPeerConnection | null = null;
