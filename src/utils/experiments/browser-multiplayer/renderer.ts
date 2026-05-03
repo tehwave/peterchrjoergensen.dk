@@ -174,7 +174,7 @@ export class MatchRenderer {
         if (distToEdge < 350) {
            const fade = Math.pow(1 - Math.max(0, distToEdge / 350), 2); // 1 at edge, 0 at 350px
            dotRadius = 3.5 + (fade * 9); // dots get larger
-           dotAlpha = 0.05 + (fade * 0.7); // dots get darker
+           dotAlpha = 0.05 + (fade * 0.61); // dots get darker to max 0.66
         }
 
         this.court.circle(x + 20, y + 20, dotRadius).fill({ color: 0x000000, alpha: dotAlpha });
@@ -210,10 +210,9 @@ export class MatchRenderer {
     const speed = magnitude(state.ball.vx, state.ball.vy);
     const angle = speed > 50 ? Math.atan2(viewYForRole(this.role, state.ball.y + state.ball.vy) - ballY, state.ball.vx) : 0;
     
-    // Elongate only when close to max speed (like motion blur)
-    const stretchThreshold = PUCK.maxSpeed * 0.8;
-    const stretch = speed > stretchThreshold ? 1 + Math.min((speed - stretchThreshold) / 500, 1.5) : 1;
-    const squish = 1 / stretch;
+    // No more motion blur stretch
+    const stretch = 1;
+    const squish = 1;
 
     this.puckGraphics.position.set(state.ball.x, ballY);
     this.puckGraphics.rotation = angle;

@@ -297,6 +297,13 @@ class BrowserMultiplayerController {
 
   private stepClient(deltaMs: number): void {
     if (!this.input) return;
+
+    // Visually extrapolate the ball between network ticks
+    if (this.state.freezeMs <= 0 && this.state.roundState === "playing") {
+      this.state.ball.x += this.state.ball.vx * (deltaMs / 1000);
+      this.state.ball.y += this.state.ball.vy * (deltaMs / 1000);
+    }
+
     this.inputSendAccumulatorMs += deltaMs;
     if (this.inputSendAccumulatorMs < 1000 / NETWORK.inputHz) return;
     this.inputSendAccumulatorMs = 0;
@@ -304,7 +311,28 @@ class BrowserMultiplayerController {
   }
 
   private getClientRenderState(): MatchState {
-    return this.latestRemoteState ?? this.state;
+    if (this.latestRemoteState) {
+      // Lerp ball towards authoritative state to smooth corrections
+      const dx = this.latestRemoteState.ball.x - this.state.ball.x;
+      const dy = this.latestRemoteState.ball.y - this.state.ball.y;
+      this.state.ball.x += dx * 0.4;
+      this.state.ball.y += dy * 0.4;
+      this.state.ball.vx = this.latestRemoteState.ball.vx;
+      this.state.ball.vy = this.latestRemoteState.ball.vy;
+
+      this.state.hostPaddle.x = this.latestRemoteState.hostPaddle.x;
+      this.state.clientPaddle.x = this.latestRemoteState.clientPaddle.x;
+      
+      this.state.tick = this.latestRemoteState.tick;
+      this.state.roundState = this.latestRemoteState.roundState;
+      this.state.countdownMs = this.latestRemoteState.countdownMs;
+      this.state.freezeMs = this.latestRemoteState.freezeMs;
+      this.state.scores = { ...this.latestRemoteState.scores };
+      this.state.lastScoredBy = this.latestRemoteState.lastScoredBy;
+      this.state.winner = this.latestRemoteState.winner;
+      this.state.serveToward = this.latestRemoteState.serveToward;
+    }
+    return this.state;
   }
 
   private applyLocalPrediction(state: MatchState): void {
