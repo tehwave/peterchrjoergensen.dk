@@ -139,3 +139,18 @@ Because we use no signaling server, the UX for connection must be foolproof.
 - Local paddle movement feels immediate on both peers.
 - Unsupported or failed connections produce a clear failure state instead of hanging indefinitely.
 - The experience remains understandable and visually punchy even if network quality is imperfect.
+
+## 9. 🧭 Build Heuristics From Previous Experiments
+- Keep the Astro page thin. The page should expose explicit data-attribute mount points for the stage, HUD, handshake flow, status text, and rematch UI, while the game module discovers and validates that contract at runtime.
+- Keep semantic UI outside the renderer. Pixi should own the arena, puck, paddles, particles, and impact juice. Connection flow, score text, buttons, failure states, and accessibility messaging should stay in normal DOM.
+- Treat Astro view transitions as hostile to long-lived runtimes unless proven otherwise. The experiment should mount idempotently, tear down cleanly on `astro:before-preparation`, and tolerate `astro:page-load` firing multiple times.
+- Separate authoritative state from presentation state early. Match state, scores, round flow, and network timing should not live in the same structures as interpolation buffers, squash/stretch values, screen shake, or particles.
+- Keep mobile performance constraints explicit from the start. Cap DPR, clamp frame deltas, and degrade cosmetic effects before sacrificing control readability.
+- Prefer small, sharply scoped modules over a single large experiment file. The minimum useful split is `network`, `simulation`, `renderer`, and `page/bootstrap`.
+- Parse and validate all inbound data defensively. Handshake strings and data channel payloads should fail safely and never be trusted just because they originated from the other player.
+- If PixiJS is used, preserve any CSP-compatible import/runtime pattern already required by the site rather than assuming a default Pixi setup will work unchanged.
+
+### 9.1 Things Not To Copy Blindly
+- Do not treat multiplayer like a single-player toy loop with networking attached later. Fixed-step host simulation and clear authority boundaries matter immediately.
+- Do not let the renderer become the place where gameplay truth is invented. Juice can exaggerate, but it should not decide scores, collisions, or round flow.
+- Do not over-invest in persistence or recovery. This experiment's disconnect rule is intentionally harsh, and that simplicity is a feature.
