@@ -60,7 +60,7 @@ class BrowserMultiplayerController {
 
   async mount(): Promise<void> {
     this.bindUi();
-    this.setStatus("Create a game or paste an invite to join.");
+    this.setStatus("Choose whether to host a new match or join a friend's game.");
     this.updateScore(this.state);
     this.renderPanels("choice");
     this.frameId = window.requestAnimationFrame((time) => this.frame(time));
@@ -83,6 +83,15 @@ class BrowserMultiplayerController {
       this.renderPanels("client");
       this.setStatus("Paste the invite code from the host.");
     });
+    
+    // Disable/enable submit buttons based on input
+    this.on(this.dom.answerInput, "input", () => {
+      this.dom.acceptAnswerButton.disabled = this.dom.answerInput.value.trim() === "";
+    });
+    this.on(this.dom.offerInput, "input", () => {
+      this.dom.createAnswerButton.disabled = this.dom.offerInput.value.trim() === "";
+    });
+
     this.on(this.dom.createAnswerButton, "click", () => void this.createClientAnswer());
     this.on(this.dom.acceptAnswerButton, "click", () => void this.acceptAnswer());
     this.on(this.dom.shareOfferButton, "click", () => void this.shareCode("Game invite", this.dom.offerOutput.value));
@@ -339,9 +348,11 @@ class BrowserMultiplayerController {
     this.dom.offerOutput.value = "";
     this.dom.answerInput.value = "";
     this.dom.answerOutput.value = "";
+    this.dom.acceptAnswerButton.disabled = true;
+    this.dom.createAnswerButton.disabled = true;
     if (resetUi) {
       this.renderPanels("choice");
-      this.setStatus("Create a game or paste an invite to join.");
+      this.setStatus("Choose whether to host a new match or join a friend's game.");
     }
   }
 
@@ -395,6 +406,7 @@ class BrowserMultiplayerController {
 
   private renderPanels(panel: "choice" | "host" | "client" | "connected"): void {
     this.dom.handshake.hidden = panel === "connected";
+    this.dom.game.hidden = panel !== "connected";
     this.dom.hostPanel.hidden = panel !== "host";
     this.dom.clientPanel.hidden = panel !== "client";
     this.dom.connectedPanel.hidden = panel !== "connected";
@@ -402,7 +414,7 @@ class BrowserMultiplayerController {
   }
 
   private setStatus(message: string): void {
-    this.dom.status.textContent = message;
+    this.dom.statusNodes.forEach(node => node.textContent = message)// this.dom.status.textContent = message;
   }
 
   private showError(error: unknown): void {
@@ -447,23 +459,24 @@ function getDom(root: HTMLElement): BrowserMultiplayerDom {
   return {
     root,
     stage: getElement(root, "[data-browser-multiplayer-stage]", HTMLElement),
-    status: getElement(root, "[data-browser-multiplayer-status]", HTMLElement),
+    statusNodes: Array.from(root.querySelectorAll<HTMLElement>("[data-browser-multiplayer-status]")), // status: getElement(root, "[data-browser-multiplayer-status]", HTMLElement),
     overlay: getElement(root, "[data-browser-multiplayer-overlay]", HTMLElement),
     scoreHost: getElement(root, "[data-browser-multiplayer-score='host']", HTMLElement),
     scoreClient: getElement(root, "[data-browser-multiplayer-score='client']", HTMLElement),
     hostLabel: getElement(root, "[data-browser-multiplayer-label='host']", HTMLElement),
     clientLabel: getElement(root, "[data-browser-multiplayer-label='client']", HTMLElement),
     handshake: getElement(root, "[data-browser-multiplayer-handshake]", HTMLElement),
+    game: getElement(root, "[data-browser-multiplayer-game]", HTMLElement),
     hostPanel: getElement(root, "[data-browser-multiplayer-panel='host']", HTMLElement),
     clientPanel: getElement(root, "[data-browser-multiplayer-panel='client']", HTMLElement),
     connectedPanel: getElement(root, "[data-browser-multiplayer-panel='connected']", HTMLElement),
     createButton: getElement(root, "[data-browser-multiplayer-action='create']", HTMLButtonElement),
     joinButton: getElement(root, "[data-browser-multiplayer-action='join']", HTMLButtonElement),
     resetButton: getElement(root, "[data-browser-multiplayer-action='reset']", HTMLButtonElement),
-    offerOutput: getElement(root, "[data-browser-multiplayer-offer-output]", HTMLTextAreaElement),
-    offerInput: getElement(root, "[data-browser-multiplayer-offer-input]", HTMLTextAreaElement),
-    answerOutput: getElement(root, "[data-browser-multiplayer-answer-output]", HTMLTextAreaElement),
-    answerInput: getElement(root, "[data-browser-multiplayer-answer-input]", HTMLTextAreaElement),
+    offerOutput: getElement(root, "[data-browser-multiplayer-offer-output]", HTMLInputElement),
+    offerInput: getElement(root, "[data-browser-multiplayer-offer-input]", HTMLInputElement),
+    answerOutput: getElement(root, "[data-browser-multiplayer-answer-output]", HTMLInputElement),
+    answerInput: getElement(root, "[data-browser-multiplayer-answer-input]", HTMLInputElement),
     acceptAnswerButton: getElement(root, "[data-browser-multiplayer-action='accept-answer']", HTMLButtonElement),
     createAnswerButton: getElement(root, "[data-browser-multiplayer-action='create-answer']", HTMLButtonElement),
     shareOfferButton: getElement(root, "[data-browser-multiplayer-action='share-offer']", HTMLButtonElement),

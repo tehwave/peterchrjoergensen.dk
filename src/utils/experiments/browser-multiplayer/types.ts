@@ -108,7 +108,8 @@ export interface HandshakeEnvelope {
 export interface BrowserMultiplayerDom {
   root: HTMLElement;
   stage: HTMLElement;
-  status: HTMLElement;
+  game: HTMLElement;
+  statusNodes: HTMLElement[];
   overlay: HTMLElement;
   scoreHost: HTMLElement;
   scoreClient: HTMLElement;
@@ -121,10 +122,10 @@ export interface BrowserMultiplayerDom {
   createButton: HTMLButtonElement;
   joinButton: HTMLButtonElement;
   resetButton: HTMLButtonElement;
-  offerOutput: HTMLTextAreaElement;
-  offerInput: HTMLTextAreaElement;
-  answerOutput: HTMLTextAreaElement;
-  answerInput: HTMLTextAreaElement;
+  offerOutput: HTMLInputElement;
+  offerInput: HTMLInputElement;
+  answerOutput: HTMLInputElement;
+  answerInput: HTMLInputElement;
   acceptAnswerButton: HTMLButtonElement;
   createAnswerButton: HTMLButtonElement;
   shareOfferButton: HTMLButtonElement;
