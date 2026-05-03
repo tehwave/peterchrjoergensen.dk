@@ -51,6 +51,21 @@ The game uses a **Clean Minimalist** aesthetic (high-contrast solid colors, shar
   - **Client-Side Prediction:** To ensure local juiciness, the Client calculates their *own* paddle movement locally and absolutely based on touch. They send their `InputPayload` to the host constantly.
   - **Interpolation:** The Client uses linear/Hermite interpolation to smoothly animate the ball and the Host's paddle between the 30Hz network ticks, preventing visual stutter.
 
+### 5.1 Recommended Payload Shape
+- Keep the protocol intentionally small. Prefer a tiny set of message types rather than a large event system.
+- Recommended messages:
+  - `input`: local paddle X position, local paddle X velocity, local input tick.
+  - `state`: authoritative tick, ball position/velocity, both paddle X positions, both scores, round state.
+  - `flow`: countdown start, scored, rematch request, rematch accept, disconnect/forfeit.
+- Payload format should remain binary-first for real-time messages. JSON is acceptable for handshake-adjacent flow messages if it materially simplifies debugging.
+- The Host remains authoritative for score, puck state, collision results, and round transitions.
+
+### 5.2 Prediction Philosophy
+- Prioritize local feel over strict competitive fairness.
+- The local player should always see their own paddle respond immediately to touch, even if a later host correction slightly adjusts the rendered position.
+- Corrections should bias toward subtle reconciliation instead of visible snapping unless the state diverges badly.
+- Host advantage is acceptable for this experiment.
+
 ## 6. 🤝 The Serverless Handshake (SDP Flow)
 Because we use no signaling server, the UX for connection must be foolproof.
 - **Step 1:** UI asks: "Create Game" or "Join Game".
@@ -59,6 +74,19 @@ Because we use no signaling server, the UX for connection must be foolproof.
 - **Step 4 (Host):** Host pastes the Client's Answer string into a secondary box and clicks "Start".
 - **Connection!** Data channel opens, game transitions to the playing state.
 
+### 6.1 Platform Scope And Failure Policy
+- **Primary Targets:** iOS Safari and Chrome on Android.
+- **Desktop Scope:** Desktop Chrome is a debugging target, not a primary player-facing target.
+- **No Fallback Promise:** If a device, browser, or network path cannot complete the pure P2P flow, the game should fail clearly rather than degrade into a different connection model.
+- **Failure Messaging:** Prefer blunt, human-readable errors such as "This connection could not be established on this network" over technical WebRTC jargon.
+- **Debug Convenience:** A manual copy/paste path is acceptable for local debugging and QA even if the intended player UX is share-driven.
+
+### 6.2 Handshake Constraints
+- The handshake UX should assume that some shared payloads may be malformed, truncated, duplicated, or pasted into the wrong step.
+- Invalid or stale handshake strings should fail safely and return the player to a clean retry state.
+- Do not persist handshake secrets longer than necessary for the current connection attempt.
+- Avoid logging raw SDP blobs in normal application logs.
+
 ## 7. 🔄 Game State & Flow (State Machine)
 - `STATE_HANDSHAKE`: The manual SDP exchange UI.
 - `STATE_COUNTDOWN`: "3... 2... 1... GO!", spring-animated text at the start of a round.
@@ -66,6 +94,17 @@ Because we use no signaling server, the UX for connection must be foolproof.
 - `STATE_SCORED`: Ball explodes/resets, +1 to score, short pause, back to Countdown.
 - `STATE_GAMEOVER`: Final UI overlay. Winner declared. "Rematch" button resets score and triggers Countdown (requires Host to agree).
 - `STATE_DISCONNECTED`: If a player backgrounds the app or loses signal, the WebRTC connection cuts. This is an **Instant Forfeit (Drop = Loss)**. The survivor sees "Opponent Fled - You Win" and must create a new lobby. No complex reconnection handshake required.
+
+### 7.1 Round Rules
+- Missing the puck is an immediate goal for the opponent.
+- Each round starts from center.
+- After a goal, the next serve launches toward the player who scored.
+- Each player should always see themselves at the bottom locally, even if the renderer mirrors the arena presentation per client.
+
+### 7.2 Lifecycle Rules
+- This experiment should treat backgrounding, app switching, or hard connection loss as a practical disconnect.
+- Orientation changes should not be a supported play pattern. The product is portrait-only.
+- If touch is lost unexpectedly (`touchcancel` or equivalent), the paddle should simply stop at its last valid clamped position until new input arrives.
 
 ## 8. 🏗️ Technical Implementation & Coordinate Space
 - **Language:** Strict TypeScript is mandatory for all logic, leveraging strong typing for the WebRTC payloads and physics models.
@@ -79,3 +118,24 @@ Because we use no signaling server, the UX for connection must be foolproof.
   - Avoid sending massive JSON strings per tick. 
   - Pack state into `Float32Array`. 
   - Example Array Structure: `[TickNumber, BallX, BallY, BallVelX, BallVelY, HostPaddleX, ClientPaddleX, HostScore, ClientScore]`.
+
+### 8.1 Recommended Simulation Defaults
+- Keep constants centralized in one place so the feel can be tuned quickly during playtesting.
+- Recommended starting point only:
+  - Logical arena near `1000 x 2000`.
+  - Fixed-step simulation preferred, even if rendering stays frame-rate driven.
+  - One puck, two paddles, no items, no power-ups.
+  - First to 5 points wins.
+- The exact values for serve speed, paddle width, puck radius, speed gain, and spin influence should be treated as tuning knobs rather than locked design law.
+
+### 8.2 Renderer Boundaries
+- The renderer may exaggerate impact, trails, shake, squash, score pops, and haptics.
+- The renderer must not invent gameplay state. Score, puck position, and authoritative collisions come from simulation/host state.
+- Visual effects should degrade gracefully on weaker mobile devices by reducing particle counts and trail history before touching core readability.
+
+### 8.3 Acceptance Criteria For The Experiment
+- Two phones on supported browsers can complete the handshake and start a match without external infrastructure.
+- A full match can be played in portrait mode with readable score, stable controls, and clear win/loss states.
+- Local paddle movement feels immediate on both peers.
+- Unsupported or failed connections produce a clear failure state instead of hanging indefinitely.
+- The experience remains understandable and visually punchy even if network quality is imperfect.
