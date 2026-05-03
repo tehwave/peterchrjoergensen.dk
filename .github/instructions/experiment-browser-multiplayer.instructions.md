@@ -27,6 +27,9 @@ applyTo: "**/experiments/browser-multiplayer/**"
 
 ## 4. 🧃 Art Style & Game Feel Mathematics
 The game uses a **Clean Minimalist** aesthetic (high-contrast solid colors, sharp edges, un-cluttered background, no excess neon bloom). Every interaction must be mathematically smoothed to provide the "juice".
+- **Visual Direction:** The overall look should feel like a clean premium sports product rather than a retro arcade cabinet or toy. The base presentation is restrained and graphic, while impact reactions are allowed to be loud.
+- **Color Direction:** Default palette should lean off-white and ink-black with strong red and blue player accents. Host reads as red, client reads as blue.
+- **Piece Language:** Paddles and puck should be flat geometric forms: slab-like capsules for paddles and a crisp disk for the puck. No skeuomorphic materials or faux 3D shading are required.
 - **Hit Pauses (Sleep/Freeze Frames):** 
   - *Light hit (Wall):* 0-10ms pause.
   - *Heavy hit (Paddle):* 20-30ms pause.
@@ -39,6 +42,17 @@ The game uses a **Clean Minimalist** aesthetic (high-contrast solid colors, shar
   - **Ball Trails:** A history of the ball's previous 5-10 positions, scaled down and fading out (alpha decay).
   - **Impact Bursts:** Small geometric shapes erupting from the contact point on paddle/wall hits.
 - **Springy UI:** Score numbers scale up violently on a point, then spring back to resting size. Menus and buttons do not slide; they overshoot and settle.
+- **Intensity Balance:** Motion can skew heavier than the base visual restraint. The game should look controlled at rest and arcade-loud on impact.
+
+### 4.1 Canvas And HUD Layout
+- **Framing:** The match should sit inside a portrait-oriented framed playfield card rather than a raw full-bleed canvas.
+- **Outer Environment:** Outside the card, use a subtle off-white field with soft graphic shapes or quiet background forms. This area should support the composition, not compete with the arena.
+- **Arena Construction:** The playfield should use a strong outer border, a clear center dividing line, and visible goal zones or goal mouths. Subtle court markings or a restrained grid are welcome if they improve readability without clutter.
+- **HUD Ownership:** Score and persistent status UI should live outside the Pixi canvas in DOM overlays. The renderer owns the arena and moment-to-moment action; the DOM owns readable interface chrome.
+- **Score Layout:** Use large bold score numbers above the playfield card.
+- **Transient Messaging:** Countdown text, round-start prompts, and similar momentary feedback should appear as centered overlays above the arena rather than permanent HUD clutter.
+- **Safe Areas:** Respect mobile safe areas fully. Core score, status, and buttons should never sit under browser chrome, notches, or gesture areas.
+- **Readability Rule:** Decorative treatment must never weaken instant legibility of puck position, paddle ownership, score, or goal direction.
 
 ## 5. 📡 Network Architecture (WebRTC Data Channels)
 - **Topology:** Host-Client model over `RTCDataChannel` (ordered/unreliable where possible for minimum latency, though WebRTC data channels are pseudo-TCP if reliable is set. We prefer `ordered: false, maxRetransmits: 0` for game state updates).
