@@ -84,9 +84,9 @@ export class MatchRenderer {
     this.shakeMagnitude = Math.max(this.shakeMagnitude, strength * 18);
     this.shakeTime = Math.max(this.shakeTime, 0.24);
 
-    for (let index = 0; index < Math.min(RENDER.maxParticles - this.particles.length, 18); index += 1) {
+    for (let index = 0; index < Math.min(RENDER.maxParticles - this.particles.length, 12); index += 1) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 120 + Math.random() * 340 * strength;
+      const speed = 200 + Math.random() * 400 * strength;
       this.particles.push({
         x: ARENA.width / 2,
         y: ARENA.height / 2,
@@ -152,14 +152,17 @@ export class MatchRenderer {
   private drawCourt(): void {
     this.court.clear();
     this.court.rect(0, 0, ARENA.width, ARENA.height).fill({ color: RENDER.surface });
-    // Removed black border stroke per user request
-    this.court.rect(ARENA.wallThickness, ARENA.height / 2 - ARENA.centerLineWidth / 2, ARENA.width - ARENA.wallThickness * 2, ARENA.centerLineWidth).fill({ alpha: 0.5, color: RENDER.ink });
-    this.court.rect(ARENA.wallThickness * 2, ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ alpha: 0.7, color: RENDER.goal });
-    this.court.rect(ARENA.wallThickness * 2, ARENA.height - ARENA.goalDepth - ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ alpha: 0.7, color: RENDER.goal });
-
-    for (let y = 280; y < ARENA.height; y += 220) {
-      this.court.rect(ARENA.width / 2 - 2, y, 4, 72).fill({ alpha: 0.12, color: RENDER.ink });
+    
+    // Pop art dots
+    for (let x = 0; x < ARENA.width; x += 40) {
+      for (let y = 0; y < ARENA.height; y += 40) {
+        this.court.circle(x + 20, y + 20, 6).fill({ color: 0xffda00, alpha: 0.8 });
+      }
     }
+
+    this.court.rect(ARENA.wallThickness, ARENA.height / 2 - ARENA.centerLineWidth / 2, ARENA.width - ARENA.wallThickness * 2, ARENA.centerLineWidth).fill({ color: RENDER.ink });
+    this.court.rect(ARENA.wallThickness * 2, ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ color: RENDER.goal }).stroke({ width: 8, color: RENDER.ink });
+    this.court.rect(ARENA.wallThickness * 2, ARENA.height - ARENA.goalDepth - ARENA.wallThickness * 2, ARENA.width - ARENA.wallThickness * 4, ARENA.goalDepth).fill({ color: RENDER.goal }).stroke({ width: 8, color: RENDER.ink });
   }
 
   private drawAction(state: MatchState): void {
@@ -169,17 +172,24 @@ export class MatchRenderer {
     const ballY = viewYForRole(this.role, state.ball.y);
 
     this.action.clear();
-    this.drawPaddle(state.hostPaddle.x, hostY, RENDER.host, this.role === "host");
-    this.drawPaddle(state.clientPaddle.x, clientY, RENDER.client, this.role === "client");
+    
+    // Paddles
+    this.drawPaddle(state.hostPaddle.x, hostY, RENDER.host, this.role === "host", true);
+    this.drawPaddle(state.clientPaddle.x, clientY, RENDER.client, this.role === "client", false);
 
-    this.action.circle(state.ball.x + 8, ballY + 14, PUCK.radius * 0.92).fill({ alpha: 0.16, color: 0x000000 });
-    this.action.ellipse(state.ball.x, ballY, PUCK.radius * this.squash, PUCK.radius / this.squash).fill({ color: RENDER.ink });
-    this.action.circle(state.ball.x - PUCK.radius * 0.24, ballY - PUCK.radius * 0.24, PUCK.radius * 0.18).fill({ alpha: 0.5, color: 0xffffff });
+    // Puck pop art drop shadow
+    this.action.circle(state.ball.x + 12, ballY + 14, PUCK.radius).fill({ color: 0x000000 });
+    // Puck
+    this.action.circle(state.ball.x, ballY, PUCK.radius).fill({ color: RENDER.surface }).stroke({ width: 8, color: RENDER.ink });
+    this.action.ellipse(state.ball.x, ballY, PUCK.radius * 0.7 * this.squash, PUCK.radius * 0.7 / this.squash).fill({ color: RENDER.ink });
+    this.action.circle(state.ball.x - PUCK.radius * 0.24, ballY - PUCK.radius * 0.24, PUCK.radius * 0.18).fill({ alpha: 1, color: 0xffffff });
   }
 
-  private drawPaddle(x: number, y: number, color: number, local: boolean): void {
-    this.action.roundRect(x - PADDLE.width / 2, y - PADDLE.height / 2, PADDLE.width, PADDLE.height, PADDLE.radius).fill({ color });
-    this.action.roundRect(x - PADDLE.width / 2, y - PADDLE.height / 2, PADDLE.width, PADDLE.height, PADDLE.radius).stroke({ alpha: local ? 1 : 0.36, color: RENDER.ink, width: local ? 8 : 4 });
+  private drawPaddle(x: number, y: number, color: number, local: boolean, top: boolean): void {
+    // Pop art drop shadow
+    this.action.roundRect(x - PADDLE.width / 2 + 12, y - PADDLE.height / 2 + 14, PADDLE.width, PADDLE.height, PADDLE.radius).fill({ color: 0x000000 });
+    // Paddle Base
+    this.action.roundRect(x - PADDLE.width / 2, y - PADDLE.height / 2, PADDLE.width, PADDLE.height, PADDLE.radius).fill({ color }).stroke({ color: RENDER.ink, width: 8 });
   }
 
   private drawEffects(): void {
@@ -193,7 +203,9 @@ export class MatchRenderer {
 
     this.particles.forEach((particle) => {
       const alpha = Math.max(0, particle.life / particle.maxLife);
-      this.effects.rect(particle.x - particle.size / 2, viewYForRole(this.role, particle.y) - particle.size / 2, particle.size, particle.size).fill({ alpha, color: particle.color });
+      const scale = 1 + (1 - alpha);
+      const size = particle.size * scale;
+      this.effects.circle(particle.x, viewYForRole(this.role, particle.y), size).fill({ alpha, color: particle.color }).stroke({ width: 4 * alpha, color: RENDER.ink });
     });
   }
 

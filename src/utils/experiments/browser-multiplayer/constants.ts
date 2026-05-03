@@ -71,13 +71,13 @@ export const RENDER = {
   maxDpr: 2,
   trailLength: 9,
   maxParticles: 90,
-  background: 0xf6f1e8,
+  background: 0xfff3a1,
   ink: 0x111111,
   mutedInk: 0x3b342d,
-  surface: 0xfffbf3,
-  host: 0xe94545,
-  client: 0x2b65e8,
-  goal: 0xf0e5d3,
+  surface: 0xffe800,
+  host: 0xff007f,
+  client: 0x00e5ff,
+  goal: 0xffffff,
 } as const;
 
 export const DEFAULT_PADDLE_X = ARENA.width / 2;

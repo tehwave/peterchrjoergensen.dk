@@ -146,10 +146,10 @@ import Layout from "../../../layouts/Layout.astro";
     width: 100vw;
     height: 100dvh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background:
-      radial-gradient(circle at 12% 12%, rgba($color-orange, 0.16), transparent 26rem),
-      radial-gradient(circle at 88% 18%, rgba($color-blue, 0.14), transparent 22rem),
-      linear-gradient(180deg, #f7f1e8 0%, #e6ded4 100%);
+    background-color: #ffea00;
+    background-image: radial-gradient(#ff007f 15%, transparent 16%), radial-gradient(#00e5ff 15%, transparent 16%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     color: $color-text-dark;
     display: flex;
     flex-direction: column;
@@ -193,7 +193,7 @@ import Layout from "../../../layouts/Layout.astro";
       align-items: center;
       justify-content: center;
       gap: $space-xs;
-      border: 2px solid rgba($color-black, 0.88);
+      border: 3px solid rgba($color-black, 0.88);
       border-radius: $radius-full;
       padding: 0.55rem 0.9rem;
       background: $color-white;
@@ -204,7 +204,7 @@ import Layout from "../../../layouts/Layout.astro";
       overflow: hidden;
       text-overflow: ellipsis;
       font-weight: $font-weight-bold;
-      box-shadow: 0 4px 0 #111;
+      box-shadow: 4px 4px 0 #111;
       backdrop-filter: blur(12px);
       cursor: pointer;
       transition:
@@ -212,13 +212,13 @@ import Layout from "../../../layouts/Layout.astro";
         box-shadow 140ms ease;
       
       &:hover {
-        transform: translateY(1px);
-        box-shadow: 0 3px 0 #111;
+        transform: translateY(-2px) translateX(-2px);
+        box-shadow: 6px 6px 0 #111;
       }
       
       &:active {
-        transform: translateY(4px);
-        box-shadow: 0 0px 0 #111;
+        transform: translateY(2px) translateX(2px);
+        box-shadow: 2px 2px 0 #111;
       }
     }
 
@@ -229,13 +229,13 @@ import Layout from "../../../layouts/Layout.astro";
       text-transform: uppercase;
 
       &--host {
-        background: #e94545;
+        background: #ff007f;
         color: $color-white;
       }
 
       &--client {
-        background: #2b65e8;
-        color: $color-white;
+        background: #00e5ff;
+        color: #111;
       }
     }
 
@@ -258,11 +258,11 @@ import Layout from "../../../layouts/Layout.astro";
       max-height: 100%;
       margin: 0 auto;
       position: relative;
-      border: 4px solid #111;
+      border: 6px solid #111;
       border-radius: 34px;
       padding: 0;
       background: #111;
-      box-shadow: 0 28px 60px rgba($color-black, 0.22);
+      box-shadow: 16px 16px 0 #111;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -357,22 +357,22 @@ import Layout from "../../../layouts/Layout.astro";
     }
 
     &__score-card {
-      border: 2px solid #111;
+      border: 3px solid #111;
       border-radius: $radius-xl;
       padding: $space-sm $space-md;
       background: rgba($color-white, 0.78);
-      box-shadow: $shadow-sm;
+      box-shadow: 4px 4px 0 #111;
       display: flex;
       flex-direction: column;
       align-items: center;
 
       &--host {
-        border-color: #e94545;
+        border-color: #ff007f;
         border-bottom-left-radius: 4px;
       }
 
       &--client {
-        border-color: #2b65e8;
+        border-color: #00e5ff;
         border-bottom-right-radius: 4px;
       }
     }
@@ -564,7 +564,7 @@ import Layout from "../../../layouts/Layout.astro";
       @include focus-ring;
       min-height: 2.8rem;
       flex: 1 1 auto;
-      border: 2px solid #111;
+      border: 3px solid #111;
       border-radius: $radius-full;
       padding: 0.8rem 1rem;
       background: #fffaf0;
@@ -574,20 +574,20 @@ import Layout from "../../../layouts/Layout.astro";
       font-weight: $font-weight-black;
       letter-spacing: $tracking-wide;
       text-transform: uppercase;
-      box-shadow: 0 4px 0 #111;
+      box-shadow: 6px 6px 0 #111;
       cursor: pointer;
       transition:
         transform 140ms ease,
         box-shadow 140ms ease;
 
       &:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 0 #111;
+        transform: translateY(-2px) translateX(-2px);
+        box-shadow: 8px 8px 0 #111;
       }
 
       &:active:not(:disabled) {
-        transform: translateY(2px);
-        box-shadow: 0 2px 0 #111;
+        transform: translateY(2px) translateX(2px);
+        box-shadow: 4px 4px 0 #111;
       }
 
       &:disabled {
@@ -597,13 +597,13 @@ import Layout from "../../../layouts/Layout.astro";
 
       &--host,
       &--primary {
-        background: #e94545;
+        background: #ff007f;
         color: $color-white;
       }
 
       &--client {
-        background: #2b65e8;
-        color: $color-white;
+        background: #00e5ff;
+        color: #111;
       }
 
       &--ghost {
