@@ -124,8 +124,9 @@ class BrowserMultiplayerController {
       this.role = "host";
       await this.ensureRenderer("host");
       this.renderPanels("host");
+      this.dom.offerOutput.value = "Generating...";
       this.setBusy(true);
-      this.setStatus("Creating invite. Keep this tab open.");
+      this.setStatus("Generating invite code. Keep this tab open.");
       const offer = await this.network.createHostOffer();
       this.dom.offerOutput.value = offer;
       this.setStatus("Invite ready. Send it, then paste the reply here.");
@@ -141,8 +142,9 @@ class BrowserMultiplayerController {
     try {
       this.role = "client";
       await this.ensureRenderer("client");
+      this.dom.answerOutput.value = "Generating...";
       this.setBusy(true);
-      this.setStatus("Reading invite and creating reply.");
+      this.setStatus("Generating reply to the invite...");
       const answer = await this.network.createClientAnswer(this.dom.offerInput.value);
       this.dom.answerOutput.value = answer;
       this.setStatus("Reply ready. Send it back to the host, then wait for the match.");
@@ -425,6 +427,7 @@ class BrowserMultiplayerController {
     [this.dom.createButton, this.dom.joinButton, this.dom.createAnswerButton, this.dom.acceptAnswerButton].forEach((button) => {
       button.disabled = isBusy;
     });
+    this.dom.root.classList.toggle("browser-multiplayer--busy", isBusy);
   }
 
   private async shareCode(title: string, code: string): Promise<void> {

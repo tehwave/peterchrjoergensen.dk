@@ -511,6 +511,28 @@ import Layout from "../../../layouts/Layout.astro";
       box-shadow: $shadow-xs;
     }
 
+    &--busy {
+      cursor: wait;
+      
+      .browser-multiplayer__button {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .browser-multiplayer__handshake-status::before {
+        content: "";
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin-right: 0.5em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: browserMultiplayerSpin 0.75s linear infinite;
+        vertical-align: text-bottom;
+      }
+    }
+
     @include respond-to(sm) {
       padding-inline: 0;
 
@@ -522,5 +544,9 @@ import Layout from "../../../layouts/Layout.astro";
         border-radius: 0;
       }
     }
+  }
+
+  @keyframes browserMultiplayerSpin {
+    to { transform: rotate(360deg); }
   }
 </style>
