@@ -1,0 +1,674 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Browser Multiplayer Experiment | Peter Chr. Jørgensen"
+  description="A zero-server WebRTC air-hockey experiment with manual handshake, mobile-first controls, and a punchy PixiJS renderer."
+>
+  <section class="browser-multiplayer" data-browser-multiplayer-root>
+    <div class="browser-multiplayer__top-bar">
+      <button class="browser-multiplayer__back" data-browser-multiplayer-back type="button" aria-label="Go back">
+        <span aria-hidden="true">&larr;</span>
+        <span>Back</span>
+      </button>
+
+      <div class="browser-multiplayer__top-actions" data-browser-multiplayer-top-actions hidden>
+        <button class="browser-multiplayer__top-action" data-browser-multiplayer-action="rematch" type="button" hidden>Rematch</button>
+        <button class="browser-multiplayer__top-action browser-multiplayer__button--ghost" data-browser-multiplayer-action="reset" type="button" hidden>Disconnect</button>
+      </div>
+    </div>
+
+    <div class="browser-multiplayer__shell">
+      <div class="browser-multiplayer__card" data-browser-multiplayer-game hidden>
+        <div class="browser-multiplayer__stage-wrap">
+          <div class="browser-multiplayer__stage" data-browser-multiplayer-stage></div>
+          <div class="browser-multiplayer__overlay" data-browser-multiplayer-overlay hidden></div>
+          <div class="browser-multiplayer__touch-zone" data-browser-multiplayer-touch aria-label="Drag here to move your paddle" role="application">
+            <span>Drag here</span>
+          </div>
+
+          <div class="browser-multiplayer__hud">
+            <div class="browser-multiplayer__scoreboard" aria-label="Score">
+              <div class="browser-multiplayer__score-card browser-multiplayer__score-card--host">
+                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="host">Opponent</span>
+                <strong class="browser-multiplayer__score-value" data-browser-multiplayer-score="host">0</strong>
+              </div>
+              <div class="browser-multiplayer__score-card browser-multiplayer__score-card--client">
+                <strong class="browser-multiplayer__score-value" data-browser-multiplayer-score="client">0</strong>
+                <span class="browser-multiplayer__score-label" data-browser-multiplayer-label="client">You</span>
+              </div>
+            </div>
+
+            <p class="browser-multiplayer__status" data-browser-multiplayer-status aria-live="polite">Connected</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data attributes form the runtime contract consumed by controller.ts. -->
+      <section class="browser-multiplayer__panel browser-multiplayer__panel--handshake" data-browser-multiplayer-handshake aria-label="Connection setup">
+        <header class="browser-multiplayer__header">
+          <p class="browser-multiplayer__eyebrow">Zero-server WebRTC</p>
+          <h1 class="browser-multiplayer__title">Puck link</h1>
+          <p class="browser-multiplayer__intro">Create a match, send the code, paste the reply, and play. No lobby. No account. No signaling server.</p>
+        </header>
+
+        <div class="browser-multiplayer__choice" data-browser-multiplayer-panel="choice">
+          <button class="browser-multiplayer__button browser-multiplayer__button--host" data-browser-multiplayer-action="create" type="button">Create game</button>
+          <button class="browser-multiplayer__button browser-multiplayer__button--client" data-browser-multiplayer-action="join" type="button">Join game</button>
+        </div>
+
+        <div class="browser-multiplayer__flow" data-browser-multiplayer-panel="host" hidden>
+          <h2>Create game</h2>
+          <p>Send this invite to the other player. When they reply, paste their reply below.</p>
+          <label>
+            Invite code
+            <div class="browser-multiplayer__input-group">
+              <input type="text" data-browser-multiplayer-offer-output readonly spellcheck="false" />
+              <button class="browser-multiplayer__copy-icon" data-browser-multiplayer-action="copy-offer" type="button" aria-label="Copy code" title="Copy to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </label>
+          <div class="browser-multiplayer__actions">
+            <button class="browser-multiplayer__button" data-browser-multiplayer-action="share-offer" type="button">Share invite</button>
+          </div>
+          <label>
+            Reply code
+            <input type="text" data-browser-multiplayer-answer-input spellcheck="false" placeholder="Paste reply" />
+          </label>
+          <button class="browser-multiplayer__button browser-multiplayer__button--primary" data-browser-multiplayer-action="accept-answer" type="button" disabled>Start match</button>
+        </div>
+
+        <div class="browser-multiplayer__flow" data-browser-multiplayer-panel="client" hidden>
+          <h2>Join game</h2>
+          <p>Paste the invite from the host. Send the generated reply back to them.</p>
+          <label>
+            Invite code
+            <input type="text" data-browser-multiplayer-offer-input spellcheck="false" placeholder="Paste invite" />
+          </label>
+          <button class="browser-multiplayer__button browser-multiplayer__button--primary" data-browser-multiplayer-action="create-answer" type="button" disabled>Create reply</button>
+          <label>
+            Reply code
+            <div class="browser-multiplayer__input-group">
+              <input type="text" data-browser-multiplayer-answer-output readonly spellcheck="false" />
+              <button class="browser-multiplayer__copy-icon" data-browser-multiplayer-action="copy-answer" type="button" aria-label="Copy code" title="Copy to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </label>
+          <div class="browser-multiplayer__actions">
+            <button class="browser-multiplayer__button" data-browser-multiplayer-action="share-answer" type="button">Share reply</button>
+          </div>
+        </div>
+
+        <p class="browser-multiplayer__handshake-status" data-browser-multiplayer-status aria-live="polite">Choose whether to host a new match or join a friend's game.</p>
+      </section>
+
+      <section class="browser-multiplayer__panel browser-multiplayer__panel--connected" data-browser-multiplayer-panel="connected" hidden></section>
+    </div>
+  </section>
+
+  <script>
+    import { initBrowserMultiplayer } from "../../../utils/experiments/browser-multiplayer/controller";
+
+    const pageClass = "browser-multiplayer-page";
+    document.body.classList.add(pageClass);
+    document.addEventListener(
+      "astro:before-preparation",
+      () => {
+        // Keep the page-specific body class scoped to this route across Astro view transitions.
+        document.body.classList.remove(pageClass);
+      },
+      { once: true },
+    );
+
+    initBrowserMultiplayer();
+  </script>
+</Layout>
+
+<style lang="scss">
+  @use "../../../styles/variables" as *;
+  @use "../../../styles/mixins" as *;
+
+  :global(body.browser-multiplayer-page) {
+    overflow: hidden;
+  }
+
+  :global(body.browser-multiplayer-page Header),
+  :global(body.browser-multiplayer-page Footer) {
+    display: none !important;
+  }
+
+  .browser-multiplayer {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-color: #ffea00;
+    background-image: radial-gradient(#ff007f 15%, transparent 16%), radial-gradient(#00e5ff 15%, transparent 16%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    color: $color-text-dark;
+    display: flex;
+    flex-direction: column;
+
+    &__top-bar {
+      position: absolute;
+      z-index: 50;
+      top: calc($space-sm + env(safe-area-inset-top));
+      left: calc($space-sm + env(safe-area-inset-left));
+      right: calc($space-sm + env(safe-area-inset-right));
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: $space-sm;
+      flex-wrap: nowrap;
+      pointer-events: none; /* Let clicks pass through empty space */
+
+      & > * {
+        pointer-events: auto; /* Reactivate clicks on buttons */
+      }
+    }
+
+    &__top-actions {
+      display: flex;
+      flex: 1 1 auto;
+      justify-content: flex-end;
+      min-width: 0;
+      gap: $space-sm;
+      flex-wrap: nowrap;
+      
+      &[hidden] {
+        display: none !important;
+      }
+    }
+
+    &__back,
+    &__top-action {
+      @include focus-ring;
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      gap: $space-xs;
+      border: 3px solid rgba($color-black, 0.88);
+      border-radius: $radius-full;
+      padding: 0.55rem 0.9rem;
+      background: $color-white;
+      color: $color-text-dark;
+      font: inherit;
+      font-size: $font-size-sm;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: $font-weight-bold;
+      box-shadow: 4px 4px 0 #111;
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      transition:
+        transform 140ms ease,
+        box-shadow 140ms ease;
+      
+      &:hover {
+        transform: translateY(-2px) translateX(-2px);
+        box-shadow: 6px 6px 0 #111;
+      }
+      
+      &:active {
+        transform: translateY(2px) translateX(2px);
+        box-shadow: 2px 2px 0 #111;
+      }
+    }
+
+    &__top-action {
+      flex: 1 1 100%;
+      font-weight: $font-weight-black;
+      letter-spacing: $tracking-wide;
+      text-transform: uppercase;
+
+      &--host {
+        background: #ff007f;
+        color: $color-white;
+      }
+
+      &--client {
+        background: #00e5ff;
+        color: #111;
+      }
+    }
+
+    &__shell {
+      flex: 1;
+      width: 100%;
+      max-width: 600px;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      padding: $space-md;
+      padding-top: calc($space-xl + $space-xl); /* Reserve extra space for back button */
+    }
+
+    &__card {
+      flex: 1 1 auto;
+      aspect-ratio: 10 / 18;
+      max-height: 100%;
+      margin: 0 auto;
+      position: relative;
+      border: 6px solid #111;
+      border-radius: 34px;
+      padding: 0;
+      background: #111;
+      box-shadow: 16px 16px 0 #111;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    &__stage-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: #fffbf3;
+      isolation: isolate;
+      display: flex;
+    }
+
+    &__stage {
+      position: absolute;
+      inset: 0;
+
+      :global(canvas) {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      color: #111;
+      font-size: 90px;
+      line-height: $leading-none;
+      font-weight: $font-weight-black;
+      letter-spacing: $tracking-tight;
+      text-align: center;
+      text-transform: uppercase;
+      text-shadow: 0 4px 0 rgba($color-white, 0.72);
+      pointer-events: none;
+
+      &[data-browser-multiplayer-overlay="countdown"] {
+        place-items: end center;
+        padding-bottom: 25%;
+      }
+
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    &__hud {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      padding: $space-md;
+
+      .browser-multiplayer__button {
+        pointer-events: auto;
+      }
+    }
+
+    &__touch-zone {
+      position: absolute;
+      inset-inline: 2rem;
+      bottom: 2rem;
+      z-index: 5;
+      height: 20%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px dashed #111;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.5);
+      color: #111;
+      font-size: 1rem;
+      font-weight: $font-weight-black;
+      letter-spacing: $tracking-widest;
+      text-transform: uppercase;
+      touch-action: none;
+      user-select: none;
+    }
+
+    &__scoreboard {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      gap: $space-lg;
+
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    &__score-card {
+      border: 4px solid #111;
+      border-radius: $radius-full;
+      width: 5rem;
+      height: 5rem;
+      padding: 0;
+      background: $color-white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      &--host {
+        border-color: #ff007f;
+      }
+
+      &--client {
+        border-color: #00e5ff;
+      }
+    }
+
+    &__score-label {
+      display: none; /* Hide labels for pop art circle style */
+    }
+
+    &__score-value {
+      display: block;
+      font-size: clamp(2rem, 8vw, 3rem);
+      font-weight: $font-weight-black;
+      color: #111;
+      line-height: $leading-none;
+      margin: 0;
+    }
+
+    &__role, &__status {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    &__controls {
+      display: flex;
+      flex-direction: column;
+      gap: $space-sm;
+      margin-top: $space-sm;
+      
+      .browser-multiplayer__button {
+        width: 100%;
+      }
+    }
+
+    &__panel {
+      &[hidden] {
+        display: none;
+      }
+      
+      &--handshake {
+        max-width: 450px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        gap: $space-md;
+        background: #ffffff;
+        border: 4px solid #111;
+        border-radius: 24px;
+        padding: $space-md;
+        box-shadow: 12px 12px 0 #111;
+      }
+      
+      &--connected {
+        display: none;
+      }
+    }
+
+    &__header {
+      text-align: center;
+    }
+
+    &__eyebrow {
+      margin: 0 0 $space-xs;
+      color: rgba($color-text-dark, 0.62);
+      font-size: $font-size-xs;
+      font-weight: $font-weight-bold;
+      letter-spacing: $tracking-widest;
+      text-transform: uppercase;
+    }
+
+    &__title {
+      margin: 0;
+      color: #111;
+      font-size: clamp(2.25rem, 12vw, 4.5rem);
+      line-height: $leading-none;
+      letter-spacing: $tracking-tight;
+      text-transform: uppercase;
+    }
+
+    &__intro {
+      max-width: 35ch;
+      margin: $space-sm auto 0;
+      color: rgba($color-text-dark, 0.72);
+      font-size: $font-size-sm;
+      line-height: $leading-relaxed;
+    }
+
+    &__choice,
+    &__actions {
+      display: flex;
+      gap: $space-sm;
+      flex-direction: column;
+
+      &[hidden] {
+        display: none !important;
+      }
+    }
+
+    &__choice {
+       flex-direction: row;
+    }
+
+    &__flow {
+      display: grid;
+      gap: $space-md;
+
+      &[hidden] {
+        display: none;
+      }
+
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h2 {
+        font-size: $font-size-xl;
+      }
+
+      p {
+        color: rgba($color-text-dark, 0.68);
+        font-size: $font-size-sm;
+        line-height: $leading-relaxed;
+      }
+
+      label {
+        display: grid;
+        gap: $space-xs;
+        font-size: $font-size-xs;
+        font-weight: $font-weight-bold;
+        letter-spacing: $tracking-wider;
+        text-transform: uppercase;
+      }
+
+      input[type="text"] {
+        @include focus-ring;
+        width: 100%;
+        border: 2px solid #111;
+        border-radius: $radius-lg;
+        padding: $space-sm;
+        background: #fff;
+        color: $color-text-dark;
+        font-family: $font-mono;
+        font-size: $font-size-xs;
+        line-height: $leading-none;
+      }
+
+      .browser-multiplayer__input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        input[type="text"] {
+          padding-right: 3rem; /* Make room for the absolute button */
+        }
+      }
+
+      .browser-multiplayer__copy-icon {
+        @include focus-ring;
+        position: absolute;
+        right: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        background: transparent;
+        border: none;
+        color: #111;
+        cursor: pointer;
+        border-radius: $radius-md;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: $color-black;
+          background: #eee;
+        }
+        
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    &__button {
+      @include focus-ring;
+      min-height: 2.8rem;
+      flex: 1 1 auto;
+      border: 3px solid #111;
+      border-radius: $radius-full;
+      padding: 0.8rem 1rem;
+      background: #fffaf0;
+      color: #111;
+      font: inherit;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-black;
+      letter-spacing: $tracking-wide;
+      text-transform: uppercase;
+      box-shadow: 6px 6px 0 #111;
+      cursor: pointer;
+      transition:
+        transform 140ms ease,
+        box-shadow 140ms ease;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px) translateX(-2px);
+        box-shadow: 8px 8px 0 #111;
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(2px) translateX(2px);
+        box-shadow: 4px 4px 0 #111;
+      }
+
+      &:disabled {
+        opacity: 0.54;
+        cursor: wait;
+      }
+
+      &--host,
+      &--primary {
+        background: #ff007f;
+        color: $color-white;
+      }
+
+      &--client {
+        background: #00e5ff;
+        color: #111;
+      }
+
+      &--ghost {
+        background: #fff;
+      }
+    }
+
+    &__handshake-status {
+      margin: 0;
+      color: #111;
+      text-align: center;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+    }
+
+    &--busy {
+      cursor: wait;
+      
+      .browser-multiplayer__button {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .browser-multiplayer__handshake-status::before {
+        content: "";
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin-right: 0.5em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: browserMultiplayerSpin 0.75s linear infinite;
+        vertical-align: text-bottom;
+      }
+    }
+
+    @include respond-to(sm) {
+      padding-inline: 0;
+
+      &__shell {
+        gap: 0;
+      }
+      
+      &__panel {
+        border-radius: 0;
+      }
+    }
+  }
+
+  @keyframes browserMultiplayerSpin {
+    to { transform: rotate(360deg); }
+  }
+</style>
