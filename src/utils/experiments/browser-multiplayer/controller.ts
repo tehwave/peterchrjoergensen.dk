@@ -530,9 +530,14 @@ class BrowserMultiplayerController {
     this.setStatus("Code copied.");
   }
 
-  private on<T extends keyof HTMLElementEventMap>(element: HTMLElement, event: T, handler: (event: HTMLElementEventMap[T]) => void): void {
-    element.addEventListener(event, handler);
-    this.teardowns.push(() => element.removeEventListener(event, handler));
+  private on<T extends keyof HTMLElementEventMap>(
+    element: HTMLElement,
+    event: T,
+    handler: (event: HTMLElementEventMap[T]) => void,
+    options?: AddEventListenerOptions,
+  ): void {
+    element.addEventListener(event, handler, options);
+    this.teardowns.push(() => element.removeEventListener(event, handler, options));
   }
 }
 

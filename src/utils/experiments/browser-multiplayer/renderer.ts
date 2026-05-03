@@ -213,8 +213,8 @@ export class MatchRenderer {
     this.action.clear();
     
     // Paddles
-    this.drawPaddle(state.hostPaddle.x, hostY, RENDER.host, this.role === "host", true);
-    this.drawPaddle(state.clientPaddle.x, clientY, RENDER.client, this.role === "client", false);
+    this.drawPaddle(state.hostPaddle.x, hostY, RENDER.host);
+    this.drawPaddle(state.clientPaddle.x, clientY, RENDER.client);
 
     // Calculate ball transform based on velocity
     const speed = magnitude(state.ball.vx, state.ball.vy);
@@ -241,7 +241,7 @@ export class MatchRenderer {
     this.puckBodyGraphics.circle(-PUCK.radius * 0.24, -PUCK.radius * 0.24, PUCK.radius * 0.18).fill({ alpha: 1, color: 0xffffff });
   }
 
-  private drawPaddle(x: number, y: number, color: number, local: boolean, top: boolean): void {
+  private drawPaddle(x: number, y: number, color: number): void {
     // Pop art drop shadow
     this.action.roundRect(x - PADDLE.width / 2 + 12, y - PADDLE.height / 2 + 14, PADDLE.width, PADDLE.height, PADDLE.radius).fill({ color: 0x000000 });
     // Paddle Base
