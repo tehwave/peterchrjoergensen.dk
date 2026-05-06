@@ -16,7 +16,9 @@ I wanted to build a small browser experiment where two phones could play togethe
 
 I was not familiar with WebRTC before this project. That was the point. I wanted to use AI agents as an iteration partner, ship a concrete artifact, and then learn the technology by reading the code that came out of the process.
 
-The result is a mobile-first air-hockey prototype. One player creates an invite, sends it to the other player, receives a reply code, and starts the match. The game uses WebRTC data channels for peer-to-peer state updates and PixiJS for the action layer.
+The surprising part is where the project did not break. The WebRTC implementation worked first try. The manual handshake worked. The peer-to-peer state sync worked. The core game loop worked. What failed was the product around it, because my plan had detailed architecture decisions and almost no interface decisions.
+
+What came out of it is a tiny mobile-first air-hockey game where two phones connect directly through WebRTC. One player creates an invite, sends it to the other player, receives a reply code, and starts the match. The game uses WebRTC data channels for peer-to-peer state updates and PixiJS for the action layer.
 
 [Play the zero-server WebRTC browser multiplayer experiment](/experiments/browser-multiplayer/)
 
@@ -26,7 +28,7 @@ This had the right shape for agentic coding.
 
 It was bounded. The game only needed one puck, two paddles, simple scoring, and a manual connection flow. It was also unfamiliar enough that I could not just autopilot the implementation from memory. WebRTC forced real architecture decisions early: who owns the simulation, how signaling works, what happens when a packet drops, and how much state should cross the connection.
 
-That combination is useful. A narrow goal keeps the agent from wandering. A new technical area keeps me engaged as a reviewer instead of becoming a passive prompt writer.
+That combination worked well. The scope was small enough for the agents to execute, but unfamiliar enough that I still had to pay attention. I could not just approve diffs on autopilot.
 
 My role was not to type every line. My role was to set constraints, reject bad directions, test the result, and keep the project honest.
 
@@ -41,7 +43,7 @@ I split the work across a handful of focused conversations:
 5. **Publish it as a project.** Add it to the portfolio once it felt worth showing.
 6. **Clean up validation.** Run the project checks and fix the browser-multiplayer issues instead of leaving the repo messy.
 
-The implementation pass is almost the least interesting conversation, but for a good reason: it worked. The manual WebRTC handshake worked first try. The peer-to-peer state sync worked. The core game loop worked. There were no special debugging tools involved, just the normal VS Code workflow and `npm run check` from the project scripts.
+The implementation pass is almost the least interesting conversation, but for a good reason: it mostly just executed the plan. There were no special debugging tools involved, just the normal VS Code workflow and `npm run check` from the project scripts.
 
 The rough part was everything around the game. The plan had strong opinions about networking, simulation, authority, mobile controls, and renderer boundaries, but it did not make enough product decisions about the interface. So the first version proved the hard technical bit and exposed the soft, messy bit: the game worked, but the UI was terrible.
 
@@ -51,23 +53,24 @@ That sounds noisy, but it is also the point. The value was not one perfect promp
 
 I did not use the heaviest models available for this either. No GPT 5.5. No Claude Opus. The initial implementation, including the WebRTC work in step 2, was built with GPT 5.3 Codex. The UI and visual iteration used Gemini 3.1 Pro. That makes the result more interesting to me, not less. It was not a story about one giant model magically solving everything. It was a story about clear constraints, tight feedback, and enough technical taste to keep the agents pointed in the right direction.
 
-## What the agents built
+The agents moved fast, but they did not know what mattered. That was my job: deciding when the technical result was good enough, when it failed as a product, and which constraints were worth preserving even when a generated change looked plausible.
 
-The final implementation is split into small TypeScript modules:
+## The code boundaries I wanted
 
-- `controller.ts` coordinates DOM, networking, input, simulation, rendering, and lifecycle cleanup.
-- `network.ts` wraps WebRTC peer setup and data channel lifecycle.
-- `handshake.ts` turns SDP offers and answers into shareable connection codes.
-- `protocol.ts` packs hot-path game messages into small binary frames.
-- `simulation.ts` owns the authoritative game state and physics.
-- `renderer.ts` draws the court, puck, paddles, particles, trails, squash, and screen shake with PixiJS.
-- `input.ts` maps pointer input to absolute paddle positions.
+The important thing was separation. I did not want the renderer deciding scores, the network layer knowing game rules, or the controller turning into a 3,000-line junk drawer.
 
-That split matters. The renderer does not decide who scored. The controller does not contain collision math. The network layer does not know game rules. For a prototype, it would have been easy to dump everything into one file and call it done. I wanted something I could still understand after the AI had finished generating it.
+The final implementation is split by responsibility:
+
+- **Connection:** `network.ts`, `handshake.ts`, and `protocol.ts` handle WebRTC setup, shareable invite codes, and compact game messages.
+- **Game truth:** `simulation.ts` owns the authoritative state, physics, collisions, scores, and round flow.
+- **Presentation:** `renderer.ts` draws the court, puck, paddles, trails, particles, squash, and screen shake with PixiJS.
+- **Glue:** `controller.ts` and `input.ts` connect the DOM, touch input, network messages, simulation snapshots, and lifecycle cleanup.
+
+Those boundaries were part of the acceptance criteria. For a prototype, it would have been easy to dump everything into one file and call it done. I wanted something I could still understand after the AI had finished generating it.
 
 ## The WebRTC part
 
-WebRTC is usually introduced with a signaling server, but signaling is not the peer-to-peer part. It is just how both peers exchange enough information to connect.
+This was the first WebRTC distinction that clicked for me: signaling is not the peer-to-peer part. It is just the introduction. Both peers need to exchange enough information to connect, but that exchange does not have to happen through a server I own.
 
 For this experiment, I wanted no signaling server at all. So the signaling flow is manual:
 
@@ -204,14 +207,17 @@ This project changed how I think about learning with AI.
 
 The win was not that an agent wrote WebRTC code for me. The win was that I could steer a new technical area from idea to playable prototype, then read the resulting system until it became understandable.
 
-That is a very practical loop:
+The useful lesson was not "AI can build a WebRTC game." It was "AI can turn a narrow technical plan into a working artifact fast enough that I can spend more of my energy on judgement, product direction, and learning."
 
-1. Define a tight experiment.
-2. Let AI produce a first working slice.
-3. Test it like a product, not a code sample.
-4. Push back with specific constraints.
-5. Read the generated code until the architecture becomes yours.
-6. Validate the repo before calling it done.
+That loop looked like this:
+
+1. Write the plan.
+2. Let the agent execute the technical slice.
+3. Test the real thing, not the idea of the thing.
+4. Notice what the plan forgot.
+5. Iterate where taste matters.
+6. Read the generated code until the architecture becomes yours.
+7. Validate the repo before calling it done.
 
 WebRTC was the perfect subject for that loop. It is powerful, browser-native, and weird enough to be worth exploring. Two phones, no server, one tiny air-hockey game. That is still a pretty good reminder of how much the web platform can do.
 
