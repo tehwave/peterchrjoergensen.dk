@@ -35,14 +35,21 @@ My role was not to type every line. My role was to set constraints, reject bad d
 I split the work across a handful of focused conversations:
 
 1. **Brainstorm the experiment.** Define the game, the mobile constraints, the WebRTC learning goal, and the architecture direction.
-2. **Redesign the UI.** Fix the handshake flow, button states, viewport problems, back behavior, and small-screen layout failures.
-3. **Push the art direction.** Move it from generic prototype UI into a bright pop-art sports toy with a readable arena.
-4. **Publish it as a project.** Add it to the portfolio once it felt worth showing.
-5. **Clean up validation.** Run the project checks and fix the browser-multiplayer issues instead of leaving the repo messy.
+2. **Build from the plan.** Use the GDD/TDD as the implementation brief and let the agent build the first working version.
+3. **Redesign the UI.** Fix the handshake flow, button states, viewport problems, back behavior, and small-screen layout failures.
+4. **Push the art direction.** Move it from generic prototype UI into a bright pop-art sports toy with a readable arena.
+5. **Publish it as a project.** Add it to the portfolio once it felt worth showing.
+6. **Clean up validation.** Run the project checks and fix the browser-multiplayer issues instead of leaving the repo messy.
 
-The longest sessions were not the first implementation. They were the feedback loops. The UI/UX pass alone had 21 user messages and 289 tool calls. The pop-art pass had 15 user messages and 139 tool calls.
+The implementation pass is almost the least interesting conversation, but for a good reason: it worked. The manual WebRTC handshake worked first try. The peer-to-peer state sync worked. The core game loop worked. There were no special debugging tools involved, just the normal VS Code workflow and `npm run check` from the project scripts.
+
+The rough part was everything around the game. The plan had strong opinions about networking, simulation, authority, mobile controls, and renderer boundaries, but it did not make enough product decisions about the interface. So the first version proved the hard technical bit and exposed the soft, messy bit: the game worked, but the UI was terrible.
+
+That is why the longest sessions were the feedback loops, not the implementation. The UI/UX pass alone had 21 user messages and 289 tool calls. The pop-art pass had 15 user messages and 139 tool calls.
 
 That sounds noisy, but it is also the point. The value was not one perfect prompt. The value was fast, specific iteration.
+
+I did not use the heaviest models available for this either. No GPT 5.5. No Claude Opus. The work was done with the normal coding models I already use day to day: GPT 5.3 Codex and Gemini 3.1 Pro. That makes the result more interesting to me, not less. It was not a story about one giant model magically solving everything. It was a story about clear constraints, tight feedback, and enough technical taste to keep the agents pointed in the right direction.
 
 ## What the agents built
 
