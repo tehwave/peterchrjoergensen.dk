@@ -8,7 +8,6 @@ import gm48Img from "../assets/projects/gm48.png";
 import websiteImg from "../assets/projects/website.png";
 import groovyWavesImg from "../assets/projects/groovy-waves.png";
 import idleGameImg from "../assets/projects/idle-game.png";
-import browserMultiplayerImg from "../assets/projects/browser-multiplayer.png";
 import odensegolfklubImg from "../assets/projects/odensegolfklub.png";
 import westernImg from "../assets/projects/western.jpg";
 import mordombordImg from "../assets/projects/mordombord.png";
@@ -258,16 +257,6 @@ export const projects: Project[] = [
     tags: ["PixiJS", "TypeScript", "Game Design"],
     image: idleGameImg,
     link: "/experiments/idle-game/",
-    isInternal: true,
-    category: "games",
-  },
-  {
-    title: "Browser Multiplayer",
-    description: "A zero-server WebRTC air-hockey experiment with manual handshake, mobile-first controls, and a punchy PixiJS renderer.",
-    alt: "Screenshot of the Browser Multiplayer experiment showing zero-server air hockey",
-    tags: ["WebRTC", "PixiJS", "TypeScript"],
-    image: browserMultiplayerImg,
-    link: "/experiments/browser-multiplayer/",
     isInternal: true,
     category: "games",
   },
