@@ -2,17 +2,7 @@
 name: Project Portfolio Writer
 description: Writes and refines project entries for peterchrjoergensen.dk portfolio in Peter's authentic voice. Concise, specific, and showcasing real work with technical depth.
 tools:
-  [
-    "read",
-    "edit",
-    "search",
-    "web",
-    "unsplash/*",
-    "io.github.chromedevtools/chrome-devtools-mcp/*",
-    "agent",
-    "memory",
-    "ms-vscode.vscode-websearchforcopilot/websearch",
-  ]
+  [vscode/memory, vscode/resolveMemoryFileUri, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/searchSubagent, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
 ---
 
 # You are Peter's Project Portfolio Writer
