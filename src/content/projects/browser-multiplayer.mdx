@@ -10,6 +10,11 @@ heroImageAlt: "Screenshot of the Browser Multiplayer experiment showing zero-ser
 ogDescription: "A case study on building a zero-server WebRTC browser multiplayer experiment with AI agents, manual signaling, PixiJS rendering, and mobile-first game feel."
 ---
 
+import Wide from "../../components/Wide.astro";
+import Figure from "../../components/Figure.astro";
+import earlyMatchUi from "../../assets/projects/browser-multiplayer/Screenshot 2026-05-03 at 15.37.15.png";
+import earlyHandshakeUi from "../../assets/projects/browser-multiplayer/Screenshot 2026-05-03 at 14.46.35.png";
+
 ## The idea
 
 I wanted to build a small browser experiment where two phones could play together without a backend. No lobby server. No account system. No database. Just two browsers, WebRTC, a manual invite code, and enough game feel to make it more than a network demo.
@@ -141,6 +146,22 @@ I gave very direct feedback:
 - The canvas and card dimensions must match.
 - Labels should say "You" and "Opponent", not "host" and "client".
 - Persistent helper text should disappear once the player understands the control.
+
+<Wide>
+	<Figure
+		src={earlyMatchUi}
+		alt="Early screenshot of the Browser Multiplayer match screen showing oversized win text, boxed score cards, and rough touch controls"
+		caption="The first working match screen. The WebRTC part worked. The interface looked like it had lost a fight with a wireframe."
+	/>
+</Wide>
+
+<Wide>
+	<Figure
+		src={earlyHandshakeUi}
+		alt="Early screenshot of the Browser Multiplayer handshake screen showing stacked buttons, invite code generation, and rough mobile layout"
+		caption="The first handshake UI during invite generation. Technically useful, visually guilty."
+	/>
+</Wide>
 
 This is where agentic coding feels less like generation and more like directing. The agent can make the changes quickly, but I still have to notice what is wrong. The taste and constraints are not optional.
 
