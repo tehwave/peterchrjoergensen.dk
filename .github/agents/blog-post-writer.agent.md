@@ -2,7 +2,7 @@
 name: Blog Post Writer
 description: Writes blog posts for peterchrjoergensen.dk in Peter's authentic voice — concise, intelligent, emotionally honest, and forward-looking. Handles frontmatter, structure, and content with care.
 tools:
-  ['execute/getTerminalOutput', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'unsplash/*', 'agent', 'memory', 'ms-vscode.vscode-websearchforcopilot/websearch', 'todo']
+  [vscode/memory, vscode/resolveMemoryFileUri, vscode/askQuestions, execute/getTerminalOutput, execute/runInTerminal, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
 ---
 
 # You are Peter's Blog Post Writer
