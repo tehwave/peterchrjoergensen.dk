@@ -1,16 +1,14 @@
 ---
-title: "A Quick Dirty WebRTC Tutorial with Manual Signaling"
-description: "A short WebRTC primer showing how two browsers can connect directly with manual offer and answer codes, inspired by my multiplayer browser experiment."
+title: "How WebRTC Lets Two Browsers Talk Without a Server"
+description: "A practical WebRTC primer showing how two browsers can connect directly with manual offer and answer codes, inspired by my multiplayer browser experiment."
 pubDate: 2026-05-07
 author: "Peter Chr. Jørgensen"
 tags: ["webrtc", "browser", "p2p", "games"]
 ---
 
-WebRTC sounds bigger than it is.
+WebRTC can feel like a locked room full of acronyms.
 
-That does not mean it is simple. The API has sharp edges, and the vocabulary can make a small prototype feel like network engineering cosplay. SDP. ICE. STUN. TURN. Candidates. Offers. Answers.
-
-But the basic idea is surprisingly approachable: **two browsers exchange connection details, then talk directly.**
+That does not mean the basic idea is complicated. Strip away the ceremony, and WebRTC is surprisingly approachable: **two browsers exchange connection details, then talk directly.**
 
 That exchange is called signaling. WebRTC does not care how you do it. You can use WebSockets, Firebase, HTTP polling, QR codes, NFC, carrier pigeon, or one of the dumbest useful methods available: copy and paste.
 
@@ -30,7 +28,7 @@ That is the fun part.
 
 Once the connection is open, it stops feeling like a mysterious browser feature and starts feeling like a socket between two tabs.
 
-In my experiment, I used it for a tiny air-hockey game. The host simulates the puck and scores. The client sends paddle input. The host sends state snapshots back. The connection is direct between browsers, while the website itself is still just a static Astro page.
+In my experiment, I used it for a tiny air-hockey game. The host simulates the puck and scores. The client sends paddle input. The host sends state snapshots back. The connection is direct between browsers. The multiplayer part is just browser TypeScript using WebRTC.
 
 That is the thing I want more developers to feel: **the browser can do weirdly powerful things without asking for a backend first.**
 
@@ -42,7 +40,13 @@ You do not need to understand every WebRTC detail before building something smal
 
 `RTCPeerConnection` represents one side of the connection.
 
-It owns the negotiation state, network candidates, encryption setup, and the channels that eventually carry your data or media.
+It is the object that tells the browser, “I want to connect to another browser.” It handles the setup work, keeps track of possible network paths, and eventually owns the channels that carry your data or media.
+
+Before two browsers can connect, they need to work out how they might reach each other across real networks. Most people are behind routers, firewalls, mobile carriers, and NAT. NAT is the common router behavior where many devices share one public address.
+
+That is where a STUN server comes in. STUN means **Session Traversal Utilities for NAT**. In plain English: it helps a browser ask, “What do I look like from the outside?”
+
+This is the public STUN server I used in the experiment:
 
 ```ts
 const peer = new RTCPeerConnection({
@@ -50,9 +54,15 @@ const peer = new RTCPeerConnection({
 });
 ```
 
-That STUN server is not your game server. It does not relay gameplay. It helps the browser discover how it might be reachable from the outside, which matters because most users sit behind NAT.
+That string is less mysterious when you split it up:
 
-For real production systems, you usually also need TURN for relay fallback. For a quick experiment, a public STUN server can be enough to learn the shape of the API.
+- `stun:` means “use the STUN protocol.”
+- `stun.l.google.com` is a public STUN server hosted by Google.
+- `19302` is the port that server listens on.
+
+This server is not my game server. It does not relay gameplay. It only helps the browser discover possible connection details.
+
+Some networks still cannot connect directly. That is when WebRTC apps often use TURN, which is a relay server. If two browsers cannot reach each other directly, TURN can carry the traffic between them. You can ignore TURN for your first tiny experiment, but it matters if you want the connection to work reliably for real users.
 
 ### 2. The data channel
 
@@ -126,7 +136,11 @@ const offer = await peer.createOffer();
 await peer.setLocalDescription(offer);
 ```
 
-That local description contains SDP. SDP is not friendly. Treat it as an opaque blob. You do not need to hand-edit it. You just need to move it to the other browser.
+That local description contains SDP. SDP means **Session Description Protocol**.
+
+Despite the name, I do not think of it as a protocol I write by hand. I think of it as a browser-generated description of the connection: what this peer wants to create, what it supports, and which network paths might work.
+
+SDP is not friendly. Treat it as an opaque blob. You do not need to hand-edit it. You just need to move it to the other browser.
 
 In my experiment, I wrap it in a tiny envelope:
 
@@ -177,7 +191,11 @@ That is the strange magic trick. The website did not need to mediate the gamepla
 
 There is one practical detail that matters when you remove the signaling server: ICE candidates.
 
-Browsers can discover network candidates over time. In a normal app, you often send candidates incrementally through your signaling server. That is called trickle ICE.
+ICE means **Interactive Connectivity Establishment**. It is the part of WebRTC that tries to find a working route between peers.
+
+An ICE candidate is one possible route. It might be a local network address, a public-looking address discovered through STUN, or in more complete setups, a relay route through TURN.
+
+Browsers can discover these candidates over time. In a normal app, you often send candidates incrementally through your signaling server as they appear. That is called trickle ICE.
 
 With manual copy and paste, there is no live signaling pipe. So the invite code needs to contain enough information up front.
 
@@ -247,7 +265,7 @@ That is a rare kind of power.
 
 Manual signaling is charming, but it is not a polished product flow.
 
-Codes can be pasted into the wrong field. Share sheets can wrap text. Some networks will not connect without relay support. Some browsers support compression APIs and some do not. Mobile tabs can get backgrounded. Users will close the page and expect magic recovery.
+Codes can be pasted into the wrong field. Share sheets can wrap text. Some networks will not connect without a TURN relay. Some browsers support compression APIs and some do not. Mobile tabs can get backgrounded. Users will close the page and expect magic recovery.
 
 The experiment handles some of that:
 
@@ -259,7 +277,7 @@ The experiment handles some of that:
 
 That is enough for a prototype. It is not enough for every product.
 
-If I were building something serious, I would add a signaling server and TURN fallback early. If I were building a strange portfolio experiment, I would absolutely keep the manual handshake. The friction is part of the point. It makes the architecture visible.
+If I were building something serious, I would add a signaling server and TURN relay support early. If I were building a strange portfolio experiment, I would absolutely keep the manual handshake. The friction is part of the point. It makes the architecture visible.
 
 ## The smallest mental model
 
