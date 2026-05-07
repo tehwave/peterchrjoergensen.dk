@@ -1,0 +1,294 @@
+---
+title: "A Quick Dirty WebRTC Tutorial with Manual Signaling"
+description: "A short WebRTC primer showing how two browsers can connect directly with manual offer and answer codes, inspired by my multiplayer browser experiment."
+pubDate: 2026-05-07
+author: "Peter Chr. Jørgensen"
+tags: ["webrtc", "browser", "p2p", "games"]
+---
+
+WebRTC sounds bigger than it is.
+
+That does not mean it is simple. The API has sharp edges, and the vocabulary can make a small prototype feel like network engineering cosplay. SDP. ICE. STUN. TURN. Candidates. Offers. Answers.
+
+But the basic idea is surprisingly approachable: **two browsers exchange connection details, then talk directly.**
+
+That exchange is called signaling. WebRTC does not care how you do it. You can use WebSockets, Firebase, HTTP polling, QR codes, NFC, carrier pigeon, or one of the dumbest useful methods available: copy and paste.
+
+That is what I used in my browser multiplayer experiment. One player creates an invite code. The other player pastes it, generates a reply code, and sends that back. Once both browsers have the information they need, the WebRTC data channel opens and the game starts.
+
+No lobby server. No account system. No database.
+
+Just two browsers and a very strange handshake.
+
+## What WebRTC can do
+
+WebRTC is a browser API for peer-to-peer communication.
+
+Most people meet it through video calls, but media is only one part of it. WebRTC can also open a **data channel**, which gives you a message pipe between peers. You can send strings, binary packets, game input, collaborative document operations, sensor data, tiny files, or whatever else makes sense.
+
+That is the fun part.
+
+Once the connection is open, it stops feeling like a mysterious browser feature and starts feeling like a socket between two tabs.
+
+In my experiment, I used it for a tiny air-hockey game. The host simulates the puck and scores. The client sends paddle input. The host sends state snapshots back. The connection is direct between browsers, while the website itself is still just a static Astro page.
+
+That is the thing I want more developers to feel: **the browser can do weirdly powerful things without asking for a backend first.**
+
+## The three pieces to understand
+
+You do not need to understand every WebRTC detail before building something small. Start with these three pieces.
+
+### 1. The peer connection
+
+`RTCPeerConnection` represents one side of the connection.
+
+It owns the negotiation state, network candidates, encryption setup, and the channels that eventually carry your data or media.
+
+```ts
+const peer = new RTCPeerConnection({
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+});
+```
+
+That STUN server is not your game server. It does not relay gameplay. It helps the browser discover how it might be reachable from the outside, which matters because most users sit behind NAT.
+
+For real production systems, you usually also need TURN for relay fallback. For a quick experiment, a public STUN server can be enough to learn the shape of the API.
+
+### 2. The data channel
+
+The data channel is the part that made WebRTC click for me.
+
+On the host side, I create it before making the offer:
+
+```ts
+const channel = peer.createDataChannel("puck", {
+  ordered: false,
+  maxRetransmits: 0,
+});
+```
+
+Those options are deliberate for a fast game. I do not care if an old paddle packet arrives late. I would rather drop it and receive the next one. Current input is more useful than reliable history.
+
+For a chat app, you would probably choose reliable ordered delivery. For a game, stale packets are trash with a timestamp.
+
+On the other peer, the channel arrives through an event:
+
+```ts
+peer.addEventListener("datachannel", (event) => {
+  const channel = event.channel;
+  channel.binaryType = "arraybuffer";
+
+  channel.addEventListener("message", (message) => {
+    console.log("peer said", message.data);
+  });
+});
+```
+
+After that, sending data is boring in the best way:
+
+```ts
+channel.send("hello from the other browser");
+```
+
+Or, if you are building something that updates often, send binary frames instead of JSON on the hot path.
+
+### 3. Signaling
+
+Signaling is the introduction ceremony.
+
+One browser creates an offer. The other browser reads it and creates an answer. The first browser reads the answer. During that process, both browsers learn enough about each other to try connecting.
+
+WebRTC does **not** provide signaling for you. That is a feature, not a bug. The browser handles the peer connection, but you choose how the peers exchange the setup messages.
+
+Most apps use a signaling server because it gives a normal user experience. My experiment did not. I wanted to prove the zero-server version, so I turned the offer and answer into pasteable codes.
+
+## A manual handshake flow
+
+Here is the rough version.
+
+The host creates a peer connection and a data channel:
+
+```ts
+const peer = new RTCPeerConnection({
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+});
+
+const channel = peer.createDataChannel("demo", {
+  ordered: false,
+  maxRetransmits: 0,
+});
+```
+
+Then the host creates an offer:
+
+```ts
+const offer = await peer.createOffer();
+await peer.setLocalDescription(offer);
+```
+
+That local description contains SDP. SDP is not friendly. Treat it as an opaque blob. You do not need to hand-edit it. You just need to move it to the other browser.
+
+In my experiment, I wrap it in a tiny envelope:
+
+```ts
+const invite = {
+  v: 1,
+  type: "offer",
+  sdp: peer.localDescription?.toJSON(),
+  createdAt: Date.now(),
+};
+```
+
+Then I encode that envelope into a string with a prefix like `p2p1.`. The real project also compresses the JSON with `CompressionStream` when the browser supports it, because raw SDP gets chunky fast.
+
+Now the host shares the invite code.
+
+The client reverses that process:
+
+```ts
+await peer.setRemoteDescription(invite.sdp);
+
+const answer = await peer.createAnswer();
+await peer.setLocalDescription(answer);
+```
+
+The client wraps and sends the answer back:
+
+```ts
+const reply = {
+  v: 1,
+  type: "answer",
+  sdp: peer.localDescription?.toJSON(),
+  createdAt: Date.now(),
+};
+```
+
+Then the host accepts it:
+
+```ts
+await peer.setRemoteDescription(reply.sdp);
+```
+
+If the network path works, the data channel opens.
+
+That is the strange magic trick. The website did not need to mediate the gameplay. It only needed to help two browsers introduce themselves.
+
+## Why waiting for ICE matters
+
+There is one practical detail that matters when you remove the signaling server: ICE candidates.
+
+Browsers can discover network candidates over time. In a normal app, you often send candidates incrementally through your signaling server. That is called trickle ICE.
+
+With manual copy and paste, there is no live signaling pipe. So the invite code needs to contain enough information up front.
+
+That is why my experiment waits for ICE gathering before serializing the offer or answer:
+
+```ts
+if (peer.iceGatheringState !== "complete") {
+  await new Promise<void>((resolve) => {
+    peer.addEventListener("icegatheringstatechange", () => {
+      if (peer.iceGatheringState === "complete") resolve();
+    });
+  });
+}
+```
+
+In the actual code, I also use a timeout. Some networks never reach `complete`, and trapping the UI forever is worse than giving the user a code that might still work.
+
+This is the shape of manual signaling: wait long enough to collect useful candidates, encode the description, send it through whatever human channel you have, then fail clearly if the connection cannot be established.
+
+## What I sent over the data channel
+
+For the game, I split messages into two categories.
+
+High-frequency messages are binary:
+
+- Client input: tick, role, paddle X, paddle velocity.
+- Host state: tick, puck position, velocity, paddle positions, scores, round state.
+
+Low-frequency messages are JSON:
+
+- countdown
+- scored
+- game over
+- rematch request
+- disconnect
+
+That trade-off kept the hot path compact without making rare semantic events annoying to evolve.
+
+The host broadcasts authoritative state at 30Hz. The client sends input at 60Hz. The host simulation itself steps at 120Hz, because collision stability matters more than network broadcast rate.
+
+That sounds like a lot, but the idea is simple:
+
+**Send current input often. Send authoritative snapshots often enough. Do not worship old packets.**
+
+For this kind of game, absolute input is useful. The client sends “my paddle is at X” instead of “move left by N.” If one packet disappears, the next packet still contains the current truth. Drift does not accumulate.
+
+## What can this do?
+
+This is where WebRTC becomes interesting.
+
+Once you stop thinking of it as “video call technology,” the API opens up a lot of weird experiments:
+
+- A two-player browser game with no game server.
+- A local-first drawing app where tabs sync directly.
+- A private file drop between devices.
+- A remote control panel for an installation or kiosk.
+- A debugging tool where one browser streams state to another.
+- A collaborative toy that works from a static site.
+
+Not all of those should ship without a server. That is not the point.
+
+The point is that WebRTC gives the browser a peer-to-peer escape hatch. You can start with a static page and still build something that feels alive between devices.
+
+That is a rare kind of power.
+
+## The messy parts
+
+Manual signaling is charming, but it is not a polished product flow.
+
+Codes can be pasted into the wrong field. Share sheets can wrap text. Some networks will not connect without relay support. Some browsers support compression APIs and some do not. Mobile tabs can get backgrounded. Users will close the page and expect magic recovery.
+
+The experiment handles some of that:
+
+- Handshake strings have a versioned `p2p1.` prefix.
+- Codes include a timestamp and expire after ten minutes.
+- The decoder checks whether the user pasted an offer into the answer field.
+- Raw SDP is not logged in normal app flow.
+- Leaving the match counts as a forfeit, because reconnection is a different project.
+
+That is enough for a prototype. It is not enough for every product.
+
+If I were building something serious, I would add a signaling server and TURN fallback early. If I were building a strange portfolio experiment, I would absolutely keep the manual handshake. The friction is part of the point. It makes the architecture visible.
+
+## The smallest mental model
+
+If WebRTC feels intimidating, keep this version in your head:
+
+1. Create a peer connection.
+2. Create a data channel on one side.
+3. Create an offer.
+4. Move that offer to the other peer somehow.
+5. Create an answer.
+6. Move that answer back.
+7. Wait for the data channel to open.
+8. Send messages.
+
+Everything else is detail, and the details matter later.
+
+The best way to learn it is not to memorize every acronym first. Build one tiny thing. Make two tabs talk. Then make two phones talk. Then decide whether the weirdness is useful for your idea.
+
+That is how WebRTC clicked for me.
+
+## Want to learn more?
+
+Start with the real docs, then read code that does something concrete.
+
+- Read MDN's WebRTC overview: [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+- Read MDN's data channel guide: [Using WebRTC data channels](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels)
+- Read the WebRTC samples: [webrtc.github.io/samples](https://webrtc.github.io/samples/)
+- Skim the perfect negotiation pattern when you want a less fragile production setup: [Perfect negotiation](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Perfect_negotiation)
+- Read my case study: [I built a browser multiplayer game with AI](/projects/browser-multiplayer/)
+- Try the experiment itself: [WebRTC browser multiplayer air hockey](/experiments/browser-multiplayer/)
+
+Do not start with a full app. Start with one data channel and one message. Make the browser do the weird thing first. The architecture can get serious after the spark lands.
