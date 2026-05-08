@@ -366,7 +366,7 @@ sortedSkills.forEach((skill, index) => {
 
       &__skills-scroll {
         min-width: 0;
-        overflow-x: auto;
+        overflow-x: scroll;
         overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
@@ -405,30 +405,6 @@ sortedSkills.forEach((skill, index) => {
 
         @include respond-to(md) {
           display: none;
-        }
-
-        .about__skills-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: $color-neutral-400 transparent;
-          -ms-overflow-style: auto;
-
-          &::-webkit-scrollbar {
-            display: block;
-            height: 4px;
-          }
-
-          &::-webkit-scrollbar-track {
-            background: transparent;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background: $color-neutral-400;
-            border-radius: $radius-full;
-
-            &:hover {
-              background: $color-neutral-500;
-            }
-          }
         }
       }
 
@@ -483,6 +459,7 @@ sortedSkills.forEach((skill, index) => {
     const edgeFadeDistance = 104;
     const maxOffset = 14;
     const edgeThreshold = 6;
+    const minReveal = 0.35;
     const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
     const normalizedScrollLeft = clamp(rail.scrollLeft, 0, maxScrollLeft);
     const isAtLeftEdge = normalizedScrollLeft <= edgeThreshold;
@@ -506,13 +483,14 @@ sortedSkills.forEach((skill, index) => {
       const rightEdgeProgress = isAtRightEdge ? 1 : clamp(distanceToRightEdge / edgeFadeDistance, 0, 1);
       const edgeProgress = Math.min(leftEdgeProgress, rightEdgeProgress);
       const reveal = Math.min(visibilityRatio, edgeProgress);
+      const softenedReveal = clamp(Math.max(reveal, minReveal), minReveal, 1);
 
       const itemCenter = itemRect.left + itemRect.width / 2;
       const entersFromLeft = itemCenter <= railCenter;
       const direction = entersFromLeft ? -1 : 1;
-      const shift = (1 - reveal) * maxOffset * direction;
+      const shift = (1 - softenedReveal) * maxOffset * direction;
 
-      item.style.setProperty("--about-skill-enter", reveal.toFixed(3));
+      item.style.setProperty("--about-skill-enter", softenedReveal.toFixed(3));
       item.style.setProperty("--about-skill-shift", `${shift.toFixed(2)}px`);
     });
   }
