@@ -1,53 +1,32 @@
 ---
-title: "Setting up Godot CLI Command on macOS"
-description: "Godot lives inside a .app bundle on macOS, so a normal alias can trip you up. Here is the clean zsh function setup I use instead."
+title: "Run Godot from the macOS Terminal"
+description: "A quick zsh function for running Godot from the macOS terminal when the app bundle is not already in your PATH."
 pubDate: 2026-05-09
 author: "Peter Chr. Jørgensen"
 tags: ["godot", "macos", "cli", "zsh", "game-development"]
 ---
 
-I hit a small but annoying friction point with Godot on macOS.
+I wanted to type `godot` in my terminal and get on with it.
 
-I wanted to run `godot` from terminal, like any normal CLI tool. But on macOS, Godot is packaged as an `.app` bundle. That means the executable is buried inside the app directory, not exposed directly on your PATH.
+On macOS, that is slightly annoying if you downloaded Godot as an app. The executable is not sitting directly in `/Applications`. It is inside the `.app` bundle, which is really a directory.
 
-If you try to treat it like a single binary in `/Applications`, it fails.
-
-This came straight from the official [Godot command line docs](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html), which explain that macOS runs Godot through the `.app` bundle path instead of a regular binary path.
-
-## What the docs say, and what that means in practice
-
-The docs describe this pattern on macOS:
-
-```bash
-cd /Applications
-Godot.app/Contents/MacOS/Godot --version
-```
-
-That works because `Godot.app` is a directory, and the executable lives inside it.
-
-I wanted the same behavior without manually `cd`-ing first every time.
-
-## Why Godot feels different on macOS
-
-On macOS, this is the executable path pattern:
+The path usually looks like this:
 
 ```bash
 /Applications/Godot.app/Contents/MacOS/Godot
 ```
 
-That `.app` file is actually a folder. You can open it and find the real binary in `Contents/MacOS/`.
-
-On my machine, the app was named `Godot 2.app`, so the actual path became:
+On my machine, the app was named `Godot 2.app`, so my path was this instead:
 
 ```bash
 /Applications/Godot 2.app/Contents/MacOS/Godot
 ```
 
-The exact app name matters. If you renamed the bundle, your command must match it.
+Check your exact app name before copying the command. If you renamed the bundle, the path has to match.
 
-## The setup that worked for me
+## Add a zsh function
 
-I used a zsh function in `~/.zshrc`:
+Add this to `~/.zshrc`:
 
 ```bash
 godot() {
@@ -55,11 +34,11 @@ godot() {
 }
 ```
 
-This is better than a plain alias for this use case. I get argument forwarding via `"$@"`, so things like `--version`, `--path`, and export flags pass through exactly as expected.
+Change `Godot 2.app` to whatever your app bundle is called.
 
-## Verify the command
+I prefer a function over an alias here because `"$@"` forwards arguments cleanly. That means `--version`, `--path`, `--headless`, export flags, and the rest behave like they would with a normal binary.
 
-After saving `~/.zshrc`, reload it and test:
+Reload your shell config and test it:
 
 ```bash
 source "$HOME/.zshrc"
@@ -73,19 +52,12 @@ In my case, `godot --version` returned:
 4.6.2.stable
 ```
 
-That confirmed the function was wired correctly.
+That is all I needed.
 
-## Optional path-based alternative
+If it still fails, check these three things:
 
-The docs also mention that installing Godot via Homebrew can make `godot` available in your PATH automatically.
+- The app path matches the real bundle name in `/Applications`
+- You edited the shell file your terminal actually loads, usually `~/.zshrc`
+- `type -a godot` shows the function instead of an old alias or command
 
-## Quick troubleshooting
-
-If `godot` still does not run, check these first:
-
-- Make sure the app path in your function matches the actual bundle name
-- Confirm you edited the shell profile you actually use (`~/.zshrc` for zsh)
-- Reload your shell config after saving
-- Run `type -a godot` to verify your function is being picked up
-
-That is it. Small setup, big quality-of-life improvement if you use Godot from terminal more than occasionally.
+The official [Godot command line docs](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html) also mention Homebrew as an option on macOS. If you install Godot that way, `godot` can be added to your PATH automatically. I used the function because it fixed the downloaded app I already had.
