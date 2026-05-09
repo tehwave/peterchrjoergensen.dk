@@ -1,0 +1,72 @@
+---
+title: "Setting up Godot CLI Command on macOS"
+description: "Godot lives inside a .app bundle on macOS, so a normal alias can trip you up. Here is the clean zsh function setup I use instead."
+pubDate: 2026-05-09
+author: "Peter Chr. Jørgensen"
+tags: ["godot", "macos", "cli", "zsh", "game-development"]
+---
+
+I hit a small but annoying friction point with Godot on macOS.
+
+I wanted to run `godot` from terminal, like any normal CLI tool. But on macOS, Godot is packaged as an `.app` bundle. That means the executable is buried inside the app directory, not exposed directly on your PATH.
+
+If you try to treat it like a single binary in `/Applications`, it fails.
+
+## Why Godot feels different on macOS
+
+On macOS, this is the executable path pattern:
+
+```bash
+/Applications/Godot.app/Contents/MacOS/Godot
+```
+
+That `.app` file is actually a folder. You can open it and find the real binary in `Contents/MacOS/`.
+
+On my machine, the app was named `Godot 2.app`, so the actual path became:
+
+```bash
+/Applications/Godot 2.app/Contents/MacOS/Godot
+```
+
+The exact app name matters. If you renamed the bundle, your command must match it.
+
+## The setup that worked for me
+
+I used a zsh function in `~/.zshrc`:
+
+```bash
+godot() {
+  "/Applications/Godot 2.app/Contents/MacOS/Godot" "$@"
+}
+```
+
+This is better than a plain alias for this use case. I get argument forwarding via `"$@"`, so things like `--version`, `--path`, and export flags pass through exactly as expected.
+
+## Verify the command
+
+After saving `~/.zshrc`, reload it and test:
+
+```bash
+source "$HOME/.zshrc"
+type -a godot
+godot --version | head -n 1
+```
+
+In my case, `godot --version` returned:
+
+```text
+4.6.2.stable
+```
+
+That confirmed the function was wired correctly.
+
+## Quick troubleshooting
+
+If `godot` still does not run, check these first:
+
+- Make sure the app path in your function matches the actual bundle name
+- Confirm you edited the shell profile you actually use (`~/.zshrc` for zsh)
+- Reload your shell config after saving
+- Run `type -a godot` to verify your function is being picked up
+
+That is it. Small setup, big quality-of-life improvement if you use Godot from terminal more than occasionally.
