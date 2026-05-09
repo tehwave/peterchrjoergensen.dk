@@ -17,7 +17,6 @@
 import { getCollection, type CollectionEntry, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { Picture } from "astro:assets";
-import SkillTag from "../../components/SkillTag.astro";
 import { fadeAnimation } from "../../utils/transitions";
 import { parseInlineMarkdown } from "../../utils/markdown";
 
@@ -188,16 +187,6 @@ const structuredData = {
             )
           }
         </div>
-
-        {
-          tags && tags.length > 0 && (
-            <div class="project-page__tags" role="list" aria-label="Technologies used">
-              {tags.map((tag: string) => (
-                <SkillTag label={tag} />
-              ))}
-            </div>
-          )
-        }
       </header>
     </div>
 
@@ -354,15 +343,6 @@ const structuredData = {
       font-size: $font-size-sm;
       color: $color-text-secondary;
       align-items: center;
-
-      &::before {
-        content: "";
-        display: block;
-        width: 100%;
-        height: 1px;
-        background: $color-border;
-        margin-bottom: $space-sm;
-      }
     }
 
     &__category {
@@ -407,13 +387,6 @@ const structuredData = {
       svg {
         flex-shrink: 0;
       }
-    }
-
-    &__tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: $space-xs;
-      margin-top: $space-lg;
     }
 
     &__hero-figure {
