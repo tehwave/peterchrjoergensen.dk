@@ -12,6 +12,21 @@ I wanted to run `godot` from terminal, like any normal CLI tool. But on macOS, G
 
 If you try to treat it like a single binary in `/Applications`, it fails.
 
+This came straight from the official [Godot command line docs](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html), which explain that macOS runs Godot through the `.app` bundle path instead of a regular binary path.
+
+## What the docs say, and what that means in practice
+
+The docs describe this pattern on macOS:
+
+```bash
+cd /Applications
+Godot.app/Contents/MacOS/Godot --version
+```
+
+That works because `Godot.app` is a directory, and the executable lives inside it.
+
+I wanted the same behavior without manually `cd`-ing first every time.
+
 ## Why Godot feels different on macOS
 
 On macOS, this is the executable path pattern:
@@ -59,6 +74,10 @@ In my case, `godot --version` returned:
 ```
 
 That confirmed the function was wired correctly.
+
+## Optional path-based alternative
+
+The docs also mention that installing Godot via Homebrew can make `godot` available in your PATH automatically.
 
 ## Quick troubleshooting
 
