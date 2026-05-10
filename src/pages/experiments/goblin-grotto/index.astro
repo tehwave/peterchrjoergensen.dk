@@ -1,0 +1,343 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Goblin Grotto Experiment | Peter Chr. Jorgensen"
+  description="Play Goblin Grotto directly in the browser as an embedded Godot web build experiment."
+>
+  <section class="goblin-grotto" aria-label="Goblin Grotto experiment">
+    <button class="goblin-grotto__back" type="button" data-goblin-grotto-back aria-label="Go back">
+      <span aria-hidden="true">&larr;</span>
+      <span>Back</span>
+    </button>
+
+    <div class="goblin-grotto__frame-wrap" data-goblin-grotto-root>
+      <canvas class="goblin-grotto__canvas" id="canvas" aria-label="Goblin Grotto game canvas">
+        Your browser does not support the canvas tag.
+      </canvas>
+
+      <div class="goblin-grotto__status" id="status" aria-live="polite">
+        <img id="status-splash" class="goblin-grotto__splash" src="/experiments/goblin-grotto/goblin-grotto.png" alt="Goblin Grotto splash" />
+        <progress class="goblin-grotto__progress" id="status-progress"></progress>
+        <div class="goblin-grotto__notice" id="status-notice"></div>
+      </div>
+    </div>
+
+    <noscript>
+      <p class="goblin-grotto__noscript">Goblin Grotto requires JavaScript to run.</p>
+    </noscript>
+  </section>
+
+  <script is:inline src="/experiments/goblin-grotto/goblin-grotto.js"></script>
+
+  <script>
+    interface GodotConfig {
+      args: string[];
+      canvas?: HTMLCanvasElement | string;
+      canvasResizePolicy: number;
+      emscriptenPoolSize: number;
+      ensureCrossOriginIsolationHeaders: boolean;
+      executable: string;
+      experimentalVK: boolean;
+      fileSizes: Record<string, number>;
+      focusCanvas: boolean;
+      gdextensionLibs: string[];
+      godotPoolSize: number;
+    }
+
+    interface GodotStartOptions {
+      onProgress?: (current: number, total: number) => void;
+    }
+
+    interface GodotEngine {
+      startGame(options?: GodotStartOptions): Promise<void>;
+    }
+
+    interface GodotEngineConstructor {
+      new (config: GodotConfig): GodotEngine;
+      getMissingFeatures(options: { threads: boolean }): string[];
+    }
+
+    declare const Engine: GodotEngineConstructor;
+
+    const GODOT_CONFIG = {
+      args: [],
+      canvasResizePolicy: 2,
+      emscriptenPoolSize: 8,
+      ensureCrossOriginIsolationHeaders: true,
+      executable: "goblin-grotto",
+      experimentalVK: false,
+      fileSizes: {
+        "goblin-grotto.pck": 10425428,
+        "goblin-grotto.wasm": 37695054,
+      },
+      focusCanvas: true,
+      gdextensionLibs: [],
+      godotPoolSize: 4,
+    };
+    const GODOT_THREADS_ENABLED = false;
+
+    const startGoblinGrotto = () => {
+      const root = document.querySelector("[data-goblin-grotto-root]");
+
+      if (!(root instanceof HTMLDivElement)) {
+        return;
+      }
+
+      if (root.dataset.mounted === "true") {
+        return;
+      }
+
+      root.dataset.mounted = "true";
+
+      const canvasElement = document.getElementById("canvas");
+
+      if (!(canvasElement instanceof HTMLCanvasElement)) {
+        return;
+      }
+
+      const engineConfig: GodotConfig = {
+        ...GODOT_CONFIG,
+        canvas: canvasElement,
+      };
+
+      const engine = new Engine(engineConfig);
+      const statusOverlay = document.getElementById("status");
+      const statusProgress = document.getElementById("status-progress");
+      const statusNotice = document.getElementById("status-notice");
+
+      if (!(statusOverlay instanceof HTMLDivElement) || !(statusProgress instanceof HTMLProgressElement) || !(statusNotice instanceof HTMLDivElement)) {
+        return;
+      }
+
+      let initializing = true;
+      let statusMode = "";
+
+      const setStatusMode = (mode: "hidden" | "progress" | "notice") => {
+        if (statusMode === mode || !initializing) {
+          return;
+        }
+
+        if (mode === "hidden") {
+          statusOverlay.remove();
+          initializing = false;
+          return;
+        }
+
+        statusOverlay.style.visibility = "visible";
+        statusProgress.style.display = mode === "progress" ? "block" : "none";
+        statusNotice.style.display = mode === "notice" ? "block" : "none";
+        statusMode = mode;
+      };
+
+      const setStatusNotice = (text: string) => {
+        while (statusNotice.lastChild) {
+          statusNotice.removeChild(statusNotice.lastChild);
+        }
+
+        const lines = text.split("\n");
+        lines.forEach((line) => {
+          statusNotice.appendChild(document.createTextNode(line));
+          statusNotice.appendChild(document.createElement("br"));
+        });
+      };
+
+      const displayFailureNotice = (err: unknown) => {
+        console.error(err);
+
+        if (err instanceof Error) {
+          setStatusNotice(err.message);
+        } else if (typeof err === "string") {
+          setStatusNotice(err);
+        } else {
+          setStatusNotice("An unknown error occurred.");
+        }
+
+        setStatusMode("notice");
+        initializing = false;
+      };
+
+      const missing = Engine.getMissingFeatures({
+        threads: GODOT_THREADS_ENABLED,
+      });
+
+      if (missing.length !== 0) {
+        const missingMsg = "Error\nThe following features required to run Godot projects on the Web are missing:\n";
+        displayFailureNotice(missingMsg + missing.join("\n"));
+        return;
+      }
+
+      setStatusMode("progress");
+      engine
+        .startGame({
+          onProgress: (current: number, total: number) => {
+            if (current > 0 && total > 0) {
+              statusProgress.value = current;
+              statusProgress.max = total;
+              return;
+            }
+
+            statusProgress.removeAttribute("value");
+            statusProgress.removeAttribute("max");
+          },
+        })
+        .then(
+          () => {
+            setStatusMode("hidden");
+          },
+          (error: unknown) => {
+            displayFailureNotice(error);
+          },
+        );
+    };
+
+    const backButton = document.querySelector("[data-goblin-grotto-back]");
+
+    if (backButton instanceof HTMLButtonElement) {
+      backButton.addEventListener("click", () => {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+
+        window.location.assign("/");
+      });
+    }
+
+    const bootGame = () => {
+      startGoblinGrotto();
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bootGame, { once: true });
+    } else {
+      bootGame();
+    }
+
+    document.addEventListener("astro:page-load", bootGame);
+  </script>
+
+</Layout>
+
+<style lang="scss">
+  @use "../../../styles/variables" as *;
+  @use "../../../styles/mixins" as *;
+
+  .goblin-grotto {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+    padding: calc($header-height + env(safe-area-inset-top) + $space-md) $space-md calc($space-md + env(safe-area-inset-bottom));
+    background:
+      radial-gradient(circle at 14% 12%, rgba($color-blue, 0.22), transparent 18rem),
+      radial-gradient(circle at 88% 84%, rgba($color-orange, 0.17), transparent 16rem),
+      linear-gradient(180deg, #0a1222 0%, #141f35 100%);
+
+    &__back {
+      @include focus-ring;
+      position: fixed;
+      z-index: 20;
+      top: calc($space-sm + env(safe-area-inset-top));
+      left: $space-sm;
+      display: inline-flex;
+      align-items: center;
+      gap: $space-xs;
+      border: 1px solid rgba($color-white, 0.22);
+      border-radius: $radius-full;
+      padding: 0.5rem 0.85rem;
+      background: rgba($color-black, 0.55);
+      color: $color-text-light;
+      box-shadow: $shadow-sm;
+      font: inherit;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+    }
+
+    &__frame-wrap {
+      position: relative;
+      width: min(100%, 1180px);
+      margin-inline: auto;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba($color-white, 0.14);
+      box-shadow: 0 24px 56px rgba($color-black, 0.45);
+      background: rgba($color-black, 0.45);
+      min-height: min(74dvh, 780px);
+    }
+
+    &__canvas {
+      display: block;
+      width: 100%;
+      height: min(74dvh, 780px);
+      border: 0;
+      background: #000;
+      touch-action: none;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &__status {
+      position: absolute;
+      inset: 0;
+      visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #242424;
+      color: $color-text-light;
+      padding: $space-md;
+      box-sizing: border-box;
+    }
+
+    &__splash {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    &__progress {
+      display: none;
+      width: 50%;
+      margin-top: $space-md;
+    }
+
+    &__notice {
+      display: none;
+      border-radius: $radius-md;
+      border: 1px solid #9b3943;
+      margin-top: $space-md;
+      padding: $space-sm;
+      color: #e0e0e0;
+      background: #5b3943;
+      line-height: $leading-normal;
+      max-width: min(680px, 90%);
+      text-align: center;
+    }
+
+    &__noscript {
+      margin: 0 auto;
+      color: rgba($color-white, 0.82);
+      font-size: $font-size-sm;
+      text-align: center;
+    }
+
+    @include respond-to(sm) {
+      padding: calc($header-height + env(safe-area-inset-top) + $space-sm) $space-sm calc($space-sm + env(safe-area-inset-bottom));
+
+      &__frame-wrap,
+      &__canvas {
+        min-height: min(68dvh, 620px);
+        height: min(68dvh, 620px);
+      }
+
+      &__back span:last-child {
+        display: none;
+      }
+    }
+  }
+</style>
