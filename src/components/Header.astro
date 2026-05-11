@@ -23,8 +23,6 @@ type Props = Record<string, never>;
 </header>
 
 <script>
-  import { setupWaveLifecycle } from "../utils/wave-lifecycle";
-
   class HeaderManager {
     private header: HTMLElement | null;
     private hero: HTMLElement | null;
@@ -163,10 +161,18 @@ type Props = Record<string, never>;
     return cleanup;
   }
 
-  setupWaveLifecycle({
-    scopeKey: "header-component",
-    init: initHeader,
-  });
+  const runHeaderInit = () => {
+    initHeader();
+  };
+
+  const runHeaderCleanup = () => {
+    cleanup?.();
+    cleanup = null;
+  };
+
+  runHeaderInit();
+  document.addEventListener("astro:page-load", runHeaderInit);
+  document.addEventListener("astro:before-preparation", runHeaderCleanup);
 </script>
 
 <style lang="scss">

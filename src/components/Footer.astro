@@ -72,12 +72,22 @@ const { label = "Websites. Games. Good ideas.", heading = "Got something worth b
 </footer>
 
 <script>
-  import { mountWaveEngine } from "../utils/wave-engine";
-  import { setupWaveLifecycle } from "../utils/wave-lifecycle";
-  import { createStackedWaveScene, drawStackedWaveScene } from "../utils/wave-renderers/stacked-waves";
+  let cleanup: (() => void) | null = null;
+  let observer: IntersectionObserver | null = null;
+  let hasLoadedWaveEngine = false;
 
-  function mountFooterWaves(): () => void {
-    return mountWaveEngine({
+  async function mountFooterWaves(): Promise<void> {
+    if (hasLoadedWaveEngine) return;
+
+    const footer = document.querySelector(".footer");
+    if (!(footer instanceof HTMLElement)) return;
+
+    hasLoadedWaveEngine = true;
+
+    const [{ mountWaveEngine }, { createStackedWaveScene, drawStackedWaveScene }] = await Promise.all([import("../utils/wave-engine"), import("../utils/wave-renderers/stacked-waves")]);
+
+    cleanup?.();
+    cleanup = mountWaveEngine({
       rootSelector: ".footer",
       canvasSelector: "[data-footer-wave]",
       createScene: ({ canvas, context }) => createStackedWaveScene(canvas, context),
@@ -87,10 +97,46 @@ const { label = "Websites. Games. Good ideas.", heading = "Got something worth b
     });
   }
 
-  setupWaveLifecycle({
-    scopeKey: "footer-waves",
-    init: mountFooterWaves,
-  });
+  function initFooterWaveObserver(): void {
+    observer?.disconnect();
+
+    const footer = document.querySelector(".footer");
+    if (!(footer instanceof HTMLElement)) return;
+
+    if (!("IntersectionObserver" in window)) {
+      void mountFooterWaves();
+      return;
+    }
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        const isVisible = entries.some((entry) => entry.isIntersecting);
+        if (!isVisible) return;
+
+        observer?.disconnect();
+        observer = null;
+        void mountFooterWaves();
+      },
+      {
+        rootMargin: "200px 0px",
+      },
+    );
+
+    observer.observe(footer);
+  }
+
+  function cleanupFooterWaves(): void {
+    observer?.disconnect();
+    observer = null;
+
+    cleanup?.();
+    cleanup = null;
+    hasLoadedWaveEngine = false;
+  }
+
+  initFooterWaveObserver();
+  document.addEventListener("astro:page-load", initFooterWaveObserver);
+  document.addEventListener("astro:before-preparation", cleanupFooterWaves);
 </script>
 
 <style lang="scss">
