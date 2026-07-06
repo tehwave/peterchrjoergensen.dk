@@ -3,7 +3,6 @@ import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import compress from "@playform/compress";
 import inline from "@playform/inline";
 import mdx from "@astrojs/mdx";
-import pwa from "./src/integrations/vite-pwa";
 import { serializeSitemap } from "./src/utils/sitemap";
 
 // https://astro.build/config
@@ -40,50 +39,6 @@ export default defineConfig({
       Image: false,
       JavaScript: true,
       SVG: true,
-    }),
-    pwa({
-      registerType: "autoUpdate",
-      includeAssets: ["robots.txt"],
-      manifest: {
-        name: "Peter Chr. Jørgensen",
-        short_name: "PCJ",
-        description: "Personal website built with Astro",
-        theme_color: "#0066cc",
-        background_color: "#fafafa",
-        display: "minimal-ui",
-        start_url: "/",
-        icons: [
-          {
-            src: "/android-chrome-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "/android-chrome-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{css,js,html,svg,png,ico,txt,woff2}"],
-        runtimeCaching: [
-          {
-            urlPattern: /\/_astro\/.*\.woff2$/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "fontsource-fonts-cache",
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-        ],
-      },
     }),
     mdx(),
   ],

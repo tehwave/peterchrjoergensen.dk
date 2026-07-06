@@ -24,14 +24,6 @@ import textureSource from "../assets/black-paper.png";
 const textureAVIF = await getImage({ src: textureSource, format: "avif" });
 const textureWebP = await getImage({ src: textureSource, format: "webp" });
 const textureFallback = await getImage({ src: textureSource, format: "png" });
-const enablePwa = import.meta.env.PROD;
-const serviceWorkerRegistrationScript = `
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js", { scope: "/" });
-  });
-}
-`;
 ---
 
 <!doctype html>
@@ -55,8 +47,6 @@ if ("serviceWorker" in navigator) {
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    {enablePwa && <link rel="manifest" href="/manifest.webmanifest" />}
     <!-- Fathom - beautiful, simple website analytics -->
     <script is:inline src="https://cdn.usefathom.com/script.js" data-site="OXXUABJE" defer></script>
     <!-- / Fathom -->
@@ -64,7 +54,6 @@ if ("serviceWorker" in navigator) {
     <!-- Ahrefs Analytics -->
     <script is:inline src="https://analytics.ahrefs.com/analytics.js" data-key="PQ2PVfAM4xEKb65ihHICUQ" defer></script>
     <!-- / Ahrefs Analytics -->
-    {enablePwa && <script is:inline set:html={serviceWorkerRegistrationScript} />}
   </head>
   <body
     class="tracker-layout"
