@@ -4,7 +4,7 @@
  *
  * Centralizes SEO meta tags, Open Graph, Twitter Cards, and structured data
  * so individual pages only need to pass title/description. Fonts are loaded
- * via Astro's experimental Fonts API with automatic preload links for optimal
+ * via Astro's Fonts API with automatic preload links for optimal
  * Core Web Vitals (eliminates CSS → Font request chain).
  */
 import "../styles/global.scss";
@@ -31,6 +31,14 @@ const { title, description = "Personal website built with Astro", image = "/og-i
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(image, Astro.site);
+const enablePwa = import.meta.env.PROD;
+const serviceWorkerRegistrationScript = `
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" });
+  });
+}
+`;
 ---
 
 <!doctype html>
@@ -66,6 +74,7 @@ const socialImageURL = new URL(image, Astro.site);
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    {enablePwa && <link rel="manifest" href="/manifest.webmanifest" />}
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#fafafa" />
@@ -150,6 +159,7 @@ const socialImageURL = new URL(image, Astro.site);
 
     <!-- Page-specific head content -->
     <slot name="head" />
+    {enablePwa && <script is:inline set:html={serviceWorkerRegistrationScript} />}
   </head>
   <body
     style={{

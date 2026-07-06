@@ -32,13 +32,18 @@ interface Props {
 const { src, alt, caption } = Astro.props;
 ---
 
-<figure>
+<figure class="figure">
   <Picture src={src} formats={["avif", "webp"]} alt={alt} inferSize />
-  {caption && <figcaption set:html={parseInlineMarkdown(caption)} />}
+  {caption && <figcaption class="figure__caption" set:html={parseInlineMarkdown(caption)} />}
 </figure>
 
-<style>
-  figure img {
-    margin-bottom: 0 !important;
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .figure {
+    :global(img) {
+      margin-bottom: 0 !important;
+    }
   }
 </style>

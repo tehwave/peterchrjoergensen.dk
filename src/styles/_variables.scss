@@ -67,7 +67,7 @@ $color-text-primary: $color-text-dark;
 $color-text-secondary: #2b3d5c;
 
 // Typography
-// Using CSS variables from Astro's experimental Fonts API for optimal preloading
+// Using CSS variables from Astro's Fonts API for optimal preloading
 $font-sans:
   var(--font-inter),
   system-ui,

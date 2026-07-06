@@ -1,9 +1,9 @@
-import { defineConfig, fontProviders } from "astro/config";
+import { defineConfig, fontProviders, svgoOptimizer } from "astro/config";
 import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import compress from "@playform/compress";
 import inline from "@playform/inline";
-import vitePwa from "@vite-pwa/astro";
 import mdx from "@astrojs/mdx";
+import pwa from "./src/integrations/vite-pwa";
 import { serializeSitemap } from "./src/utils/sitemap";
 
 // https://astro.build/config
@@ -31,12 +31,17 @@ export default defineConfig({
     }),
     compress({
       CSS: true,
-      HTML: true,
+      HTML: {
+        "html-minifier-terser": {
+          // JSON-LD article bodies can contain raw Markdown/MDX snippets.
+          processScripts: [],
+        },
+      },
       Image: false,
       JavaScript: true,
       SVG: true,
     }),
-    vitePwa({
+    pwa({
       registerType: "autoUpdate",
       includeAssets: ["robots.txt"],
       manifest: {
@@ -83,6 +88,27 @@ export default defineConfig({
     mdx(),
   ],
 
+  fonts: [
+    {
+      name: "Inter",
+      cssVariable: "--font-inter",
+      provider: fontProviders.fontsource(),
+      weights: [400, 600, 700],
+      styles: ["normal"],
+      subsets: ["latin"],
+      fallbacks: ["system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+    },
+    {
+      name: "Caveat",
+      cssVariable: "--font-caveat",
+      provider: fontProviders.fontsource(),
+      weights: [700],
+      styles: ["normal"],
+      subsets: ["latin"],
+      fallbacks: ["cursive"],
+    },
+  ],
+
   // Prefetch links for faster navigation
   prefetch: {
     prefetchAll: true,
@@ -103,35 +129,7 @@ export default defineConfig({
     inlineStylesheets: "always",
   },
 
-  // Compress HTML output
-  compressHTML: true,
-
-  // Experimental optimizations
   experimental: {
-    // Optimize SVG components with SVGO
-    svgo: true,
-
-    // Font optimization with automatic preload links and fallbacks
-    // Eliminates CSS → Font request chain for better LCP
-    fonts: [
-      {
-        name: "Inter",
-        cssVariable: "--font-inter",
-        provider: fontProviders.fontsource(),
-        weights: [400, 600, 700],
-        styles: ["normal"],
-        subsets: ["latin"],
-        fallbacks: ["system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-      },
-      {
-        name: "Caveat",
-        cssVariable: "--font-caveat",
-        provider: fontProviders.fontsource(),
-        weights: [700],
-        styles: ["normal"],
-        subsets: ["latin"],
-        fallbacks: ["cursive"],
-      },
-    ],
+    svgOptimizer: svgoOptimizer(),
   },
 });

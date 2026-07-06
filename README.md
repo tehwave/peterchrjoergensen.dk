@@ -16,11 +16,11 @@ Browse through [projects](https://peterchrjoergensen.dk/#projects) I've built—
 
 The site itself is built with [Astro](https://astro.build)—a framework that ships zero JavaScript by default and lets pages load in under a second.
 
-Self-hosted fonts, edge deployment on Cloudflare, and images optimized at build time. *It's fast because it doesn't carry what it doesn't need.*
+Self-hosted fonts, edge deployment on Cloudflare, and images optimized at build time. _It's fast because it doesn't carry what it doesn't need._
 
 ## Built With
 
-- **Astro 5** — Static site generation, zero JS by default
+- **Astro 7** — Static site generation, zero JS by default
 - **TypeScript** — Type safety without the overhead
 - **Sass** — Scoped component styles, design tokens
 - **Cloudflare Pages** — Global edge deployment
