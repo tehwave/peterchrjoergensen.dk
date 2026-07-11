@@ -15,10 +15,15 @@
  * The [...slug] pattern creates a catch-all route for each project.
  */
 import { getCollection, type CollectionEntry, render } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
+import Layout from "../../../../layouts/Layout.astro";
 import { Picture } from "astro:assets";
-import { fadeAnimation } from "../../utils/transitions";
-import { parseInlineMarkdown } from "../../utils/markdown";
+import { fadeAnimation } from "../../../../utils/transitions";
+import { parseInlineMarkdown } from "../../../../utils/markdown";
+import TranslationNotice from "../../../../components/TranslationNotice.astro";
+import type { Locale } from "../../../../i18n/locale";
+import { LOCALES, localeMetadata } from "../../../../i18n/locale";
+import { getMessages } from "../../../../i18n/messages";
+import { groupTranslations, selectTranslation } from "../../../../i18n/content";
 
 /**
  * Generate static paths for all projects at build time
@@ -28,24 +33,32 @@ import { parseInlineMarkdown } from "../../utils/markdown";
  */
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
+  const groups = Array.from(groupTranslations(projects).values());
 
-  return projects.map((project) => ({
-    params: { slug: project.id },
-    props: { project },
-  }));
+  return LOCALES.flatMap((locale) =>
+    groups.map((group) => ({
+      params: { internal: "__i18n", locale, slug: group.translationKey },
+      props: { locale, translationKey: group.translationKey, ...selectTranslation(group, locale) },
+    })),
+  );
 }
 
 type Props = {
-  project: CollectionEntry<"projects">;
+  locale: Locale;
+  translationKey: string;
+  entry: CollectionEntry<"projects">;
+  contentLocale: Locale;
+  isFallback: boolean;
 };
 
-const { project } = Astro.props;
+const { locale, translationKey, entry: project, contentLocale, isFallback } = Astro.props;
+const copy = getMessages(locale);
 
 // Render the MDX content into HTML
 const { Content } = await render(project);
 
 // Generate canonical URL for SEO
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(`/projects/${translationKey}/`, Astro.site);
 
 // Extract frontmatter data from the project
 const { title, description, category, tags, externalUrl, heroImage, heroImageAlt, heroImageCaption, ogDescription } = project.data;
@@ -80,7 +93,7 @@ const structuredData = {
         "@id": "https://peterchrjoergensen.dk/#person",
         name: "Peter Chr. Jørgensen",
       },
-      inLanguage: "en-US",
+      inLanguage: localeMetadata[contentLocale].inLanguage,
       keywords: tags?.join(", ") || "",
       genre: category,
       ...(heroImage && {
@@ -99,13 +112,13 @@ const structuredData = {
         {
           "@type": "ListItem",
           position: 1,
-          name: "Home",
+          name: copy.article.homeBreadcrumb,
           item: "https://peterchrjoergensen.dk/",
         },
         {
           "@type": "ListItem",
           position: 2,
-          name: "Projects",
+          name: copy.article.projectsBreadcrumb,
           item: "https://peterchrjoergensen.dk/#projects",
         },
         {
@@ -120,7 +133,7 @@ const structuredData = {
 };
 ---
 
-<Layout title={`${title} | Peter Chr. Jørgensen`} description={socialDescription}>
+<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={socialDescription}>
   <Fragment slot="head">
     <!-- 
 			Social Media Meta Tags
@@ -148,11 +161,11 @@ const structuredData = {
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </Fragment>
 
-  <article class="project-page" transition:animate={fadeAnimation}>
+  <article class="project-page" lang={contentLocale} transition:animate={fadeAnimation}>
     <div class="project-page__header-container">
       <header class="project-page__header">
         <div class="project-page__meta-header">
-          <a href="/#projects" class="project-page__back-link">← Back to Projects</a>
+          <a href="/#projects" class="project-page__back-link">← {copy.navigation.projects}</a>
         </div>
 
         <h1>{title}</h1>
@@ -161,12 +174,12 @@ const structuredData = {
 
         <div class="project-page__meta">
           <span class="project-page__category" data-category={category}>
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {copy.projects[category]}
           </span>
           {
             externalUrl && (
               <a href={externalUrl} class="project-page__external-link" target="_blank" rel="noopener noreferrer">
-                Visit Project
+                {locale === "da" ? "Besøg projektet" : "Visit Project"}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -202,6 +215,7 @@ const structuredData = {
     }
 
     <div class="project-page__content">
+      {isFallback && <TranslationNotice locale={locale} />}
       <div class="project-page__prose">
         <Content />
       </div>
@@ -266,8 +280,8 @@ const structuredData = {
 </script>
 
 <style lang="scss">
-  @use "../../styles/variables" as *;
-  @use "../../styles/mixins" as *;
+  @use "../../../../styles/variables" as *;
+  @use "../../../../styles/mixins" as *;
 
   .project-page {
     padding-top: $header-height;

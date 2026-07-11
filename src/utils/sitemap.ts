@@ -17,7 +17,7 @@ export type { ChangeFreqEnum } from "@astrojs/sitemap";
  */
 export async function lastModifiedBlogPost(slug: string): Promise<Date | null> {
   try {
-    const filePath = join(process.cwd(), "src/content/blog", `${slug}.mdx`);
+    const filePath = join(process.cwd(), "src/content/blog", `${slug}.en.mdx`);
     const content = await readFile(filePath, "utf-8");
 
     // Extract pubDate and updatedDate from frontmatter using regex

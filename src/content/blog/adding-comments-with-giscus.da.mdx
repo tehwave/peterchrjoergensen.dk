@@ -1,0 +1,60 @@
+---
+locale: da
+translationKey: adding-comments-with-giscus
+title: "Kommentarer med giscus"
+description: "Sådan tilføjede jeg kommentarer drevet af GitHub Discussions til siden på under ti minutter uden ekstra build-kompleksitet eller databaseadministration."
+pubDate: 2026-01-14
+author: "Peter Chr. Jørgensen"
+tags: ["webudvikling", "github", "open-source"]
+heroImage: "../../assets/blog/adding-comments-with-giscus/hero.png"
+heroImageAlt: "En stilfuld, bred teknisk illustration på en mørk, geometrisk baggrund. Et lysende blåt bogikon til venstre er forbundet med flydende datalinjer og kodestumper til GitHubs Octocat-logo i en taleboble til højre. Under ikonerne står teksten IMPLEMENTING GISCUS og POWERED BY GITHUB DISCUSSIONS i en elegant, moderne skrifttype."
+heroImageCaption: "Genereret med Google Gemini"
+---
+
+Jeg ville have kommentarer på denne side. Ikke fordi jeg forventer en strøm af diskussioner, men fordi det føltes forkert at udgive tekster uden at give folk mulighed for at svare.
+
+Den sædvanlige vej er at sætte en database op, bygge moderationsværktøjer, håndtere spam og administrere brugerkonti. Det har jeg gjort før. Jeg havde ikke lyst til at gøre det igen.
+
+## Derfor fungerer giscus
+
+[giscus](https://giscus.app) er et kommentarsystem, der bruger GitHub Discussions som backend. Ingen database. Ingen brugeradministration. Ingen moderationsværktøjer, der skal bygges.
+
+Når nogen kommenterer på et blogindlæg, opretter det en GitHub Discussion, der er knyttet til siden. Folk kan kommentere direkte på hjemmesiden, eller de kan gå til repositoriet og kommentere der. Begge dele virker.
+
+Her er grundene til, at jeg valgte det:
+
+**Ingen infrastruktur at vedligeholde.** GitHub håndterer det hele: lagring, login, spamfiltrering og moderationsværktøjer. Jeg skal bare indlejre et script.
+
+**Lazy loading.** Kommentarerne indlæses først, når man scroller tæt på dem. Ingen påvirkning af sidens hastighed.
+
+**Velkendt brugerflade.** Det ligner GitHubs eget kommentarsystem, fordi det _er_ GitHubs kommentarsystem. Folk genkender det og har tillid til det.
+
+**Begrænsede rettigheder.** giscus-appen har kun adgang til Discussions. Den kan ikke røre kode, issues eller andet i repositoriet.
+
+## Alternativer til giscus
+
+Jeg kiggede på to andre muligheder, før jeg valgte giscus.
+
+**utterances** bruger GitHub Issues i stedet for Discussions. Det fungerer, men Issues er beregnet til fejl og opgaver. Det føles forkert at bruge dem til blogkommentarer. Discussions er skabt til samtaler.
+
+**gitalk** bruger også Issues, og det kræver, at man kompilerer JavaScript-bundles og administrerer npm-pakker. Den kompleksitet havde jeg ikke brug for. giscus giver dig ét enkelt script-tag. Det er det.
+
+## Opsætningen
+
+giscus har en konfigurationsguide på [giscus.app](https://giscus.app), som fører dig gennem opsætningen. Du vælger dit repository, en strategi til at koble sider og diskussioner sammen — jeg brugte sidens sti — vælger et tema, og så genererer den scriptet.
+
+Hele opsætningen består af afkrydsningsfelter og klare instruktioner. Ingen gætterier. Ingen API-dokumentation, der først skal læses.
+
+Jeg føjede scriptet til layoutet for mine blogindlæg, opdaterede mine Content Security Policy-headere, så de tillod `giscus.app`, og udgav ændringen.
+
+Samlet tid: under ti minutter.
+
+## Open source virker
+
+Sådan ser god open source ud. Nogen har bygget et værktøj, der løser et reelt problem, dokumenteret det tydeligt og gjort det helt enkelt at bruge.
+
+Jeg behøvede ikke gå på kompromis. Jeg fik kommentarer uden databasen, moderationsværktøjer uden kontrolpanelet og brugerlogin uden et login-system.
+
+giscus virker bare. Jeg anbefaler det.
+
+Hvis du vil se implementeringen, kan du kigge på [committet, der tilføjede den](https://github.com/tehwave/peterchrjoergensen.dk/commit/53ad4687208e74002268b868bec36bd5ddd153a9).

@@ -1,0 +1,317 @@
+---
+locale: da
+translationKey: quick-dirty-webrtc-manual-signaling
+title: "Sådan lader WebRTC to browsere tale sammen uden en server"
+description: "En praktisk introduktion til WebRTC, hvor to browsere forbinder direkte med manuelle tilbuds- og svarkoder, inspireret af mit multiplayer-eksperiment i browseren."
+pubDate: 2026-05-07
+author: "Peter Chr. Jørgensen"
+tags: ["webrtc", "browser", "p2p", "spil"]
+heroImage: "../../assets/blog/quick-dirty-webrtc-manual-signaling/hero.png"
+heroImageAlt: "To mennesker giver hånd foran en mønstret hvid væg"
+heroImageCaption: "Foto af [Chris Liverani](https://unsplash.com/@chrisliverani) på [Unsplash](https://unsplash.com/photos/9cd8qOgeNIY)"
+---
+
+WebRTC kan føles som et aflåst rum fyldt med forkortelser.
+
+Det betyder ikke, at grundidéen er kompliceret. Fjerner man ceremonien, er WebRTC overraskende tilgængeligt: **To browsere udveksler forbindelsesoplysninger og taler derefter direkte sammen.**
+
+Udvekslingen kaldes signalering. WebRTC er ligeglad med, hvordan du gør det. Du kan bruge WebSockets, Firebase, HTTP-polling, QR-koder, NFC, brevduer eller en af de dummeste nyttige metoder, der findes: kopiér og indsæt.
+
+Det brugte jeg i mit multiplayer-eksperiment i browseren. Den ene spiller opretter en invitationskode. Den anden indsætter den, genererer en svarkode og sender den tilbage. Når begge browsere har de nødvendige oplysninger, åbner WebRTC-datakanalen, og spillet begynder.
+
+Ingen lobbyserver. Intet kontosystem. Ingen database.
+
+Bare to browsere og et meget mærkeligt håndtryk.
+
+## Hvad WebRTC kan
+
+WebRTC er et browser-API til peer-to-peer-kommunikation.
+
+De fleste møder det gennem videoopkald, men medier er kun én del. WebRTC kan også åbne en **datakanal**, der fungerer som et beskedrør mellem peers. Du kan sende tekst, binære pakker, spilinput, handlinger i fælles dokumenter, sensordata, små filer eller hvad der ellers giver mening.
+
+Det er den sjove del.
+
+Når forbindelsen er åben, holder det op med at føles som en mystisk browserfunktion og begynder at føles som en socket mellem to faner.
+
+I mit eksperiment brugte jeg det til et lille airhockeyspil. Værten simulerer pucken og scoren. Klienten sender input til battet. Værten sender øjebliksbilleder af tilstanden tilbage. Forbindelsen går direkte mellem browserne. Multiplayerdelen er bare TypeScript i browseren, der bruger WebRTC.
+
+Det er den følelse, jeg gerne vil give flere udviklere: **Browseren kan gøre absurd kraftfulde ting uden først at bede om en backend.**
+
+## De tre dele, du skal forstå
+
+Du behøver ikke forstå alle detaljer i WebRTC, før du bygger noget småt. Begynd med disse tre dele.
+
+### 1. Peer-forbindelsen
+
+`RTCPeerConnection` repræsenterer den ene side af forbindelsen.
+
+Det er objektet, der fortæller browseren: "Jeg vil forbinde til en anden browser." Det håndterer opsætningen, holder styr på mulige netværksveje og kommer til sidst til at eje de kanaler, der bærer data eller medier.
+
+Før to browsere kan forbinde, skal de finde ud af, hvordan de muligvis kan nå hinanden gennem virkelige netværk. De fleste befinder sig bag routere, firewalls, mobiloperatører og NAT. NAT er den almindelige routeradfærd, hvor mange enheder deler én offentlig adresse.
+
+Her kommer en STUN-server ind i billedet. STUN betyder **Session Traversal Utilities for NAT**. På almindeligt dansk hjælper den browseren med at spørge: "Hvordan ser jeg ud udefra?"
+
+Jeg brugte denne offentlige STUN-server i eksperimentet:
+
+```ts
+const peer = new RTCPeerConnection({
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+});
+```
+
+Strengen er mindre mystisk, når den deles op:
+
+- `stun:` betyder "brug STUN-protokollen".
+- `stun.l.google.com` er en offentlig STUN-server hos Google.
+- `19302` er den port, serveren lytter på.
+
+Serveren er ikke min spilserver. Den videresender ikke gameplay. Den hjælper kun browseren med at finde mulige forbindelsesoplysninger.
+
+Nogle netværk kan stadig ikke forbinde direkte. Her bruger WebRTC-applikationer ofte TURN, som er en relayserver. Hvis to browsere ikke kan nå hinanden direkte, kan TURN transportere trafikken mellem dem. Du kan ignorere TURN i dit første lille eksperiment, men det bliver vigtigt, hvis forbindelsen skal fungere pålideligt for rigtige brugere.
+
+### 2. Datakanalen
+
+Datakanalen var den del, der fik WebRTC til at falde på plads for mig.
+
+På værtssiden opretter jeg den, før jeg laver tilbuddet:
+
+```ts
+const channel = peer.createDataChannel("puck", {
+  ordered: false,
+  maxRetransmits: 0,
+});
+```
+
+Indstillingerne er bevidste i et hurtigt spil. Det er ligegyldigt, om en gammel bat-pakke kommer for sent. Jeg vil hellere kassere den og modtage den næste. Aktuelt input er mere nyttigt end pålidelig historik.
+
+Til en chatapplikation ville man sandsynligvis vælge pålidelig levering i rækkefølge. I et spil er forældede pakker affald med et tidsstempel.
+
+Hos den anden peer ankommer kanalen gennem en event:
+
+```ts
+peer.addEventListener("datachannel", (event) => {
+  const channel = event.channel;
+  channel.binaryType = "arraybuffer";
+
+  channel.addEventListener("message", (message) => {
+    console.log("peer said", message.data);
+  });
+});
+```
+
+Derefter er det dejligt kedeligt at sende data:
+
+```ts
+channel.send("hello from the other browser");
+```
+
+Eller send binære frames i stedet for JSON på den varme sti, hvis du bygger noget, der opdateres ofte.
+
+### 3. Signalering
+
+Signalering er introduktionsceremonien.
+
+Den ene browser opretter et tilbud. Den anden browser læser det og opretter et svar. Den første browser læser svaret. Undervejs lærer begge browsere nok om hinanden til at forsøge en forbindelse.
+
+WebRTC leverer **ikke** signalering for dig. Det er en egenskab, ikke en fejl. Browseren håndterer peer-forbindelsen, men du vælger, hvordan de to peers udveksler opsætningsbeskederne.
+
+De fleste applikationer bruger en signaleringsserver, fordi det giver en normal brugeroplevelse. Det gjorde mit eksperiment ikke. Jeg ville bevise versionen uden server, så jeg gjorde tilbud og svar til koder, man kan indsætte.
+
+## Et manuelt håndtryk
+
+Her er den grove udgave.
+
+Værten opretter en peer-forbindelse og en datakanal:
+
+```ts
+const peer = new RTCPeerConnection({
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+});
+
+const channel = peer.createDataChannel("demo", {
+  ordered: false,
+  maxRetransmits: 0,
+});
+```
+
+Derefter opretter værten et tilbud:
+
+```ts
+const offer = await peer.createOffer();
+await peer.setLocalDescription(offer);
+```
+
+Den lokale beskrivelse indeholder SDP. SDP betyder **Session Description Protocol**.
+
+Trods navnet ser jeg det ikke som en protokol, jeg selv skal skrive. Jeg ser det som en beskrivelse, browseren genererer: Hvad denne peer vil oprette, hvad den understøtter, og hvilke netværksveje der måske virker.
+
+SDP er ikke venligt. Behandl det som en uigennemsigtig klump data. Du behøver ikke redigere det i hånden. Du skal bare flytte det til den anden browser.
+
+I mit eksperiment pakker jeg det ind i en lille konvolut:
+
+```ts
+const invite = {
+  v: 1,
+  type: "offer",
+  sdp: peer.localDescription?.toJSON(),
+  createdAt: Date.now(),
+};
+```
+
+Derefter koder jeg konvolutten som en tekststreng med et præfiks som `p2p1.`. Det rigtige projekt komprimerer også JSON med `CompressionStream`, når browseren understøtter det, for rå SDP vokser hurtigt.
+
+Nu deler værten invitationskoden.
+
+Klienten vender processen om:
+
+```ts
+await peer.setRemoteDescription(invite.sdp);
+
+const answer = await peer.createAnswer();
+await peer.setLocalDescription(answer);
+```
+
+Klienten pakker svaret ind og sender det tilbage:
+
+```ts
+const reply = {
+  v: 1,
+  type: "answer",
+  sdp: peer.localDescription?.toJSON(),
+  createdAt: Date.now(),
+};
+```
+
+Så accepterer værten det:
+
+```ts
+await peer.setRemoteDescription(reply.sdp);
+```
+
+Hvis netværksvejen virker, åbner datakanalen.
+
+Det er det mærkelige tryllenummer. Hjemmesiden behøvede ikke formidle gameplay. Den skulle kun hjælpe to browsere med at præsentere sig for hinanden.
+
+## Derfor er det vigtigt at vente på ICE
+
+Der er én praktisk detalje, der betyder noget, når signaleringsserveren fjernes: ICE-kandidater.
+
+ICE betyder **Interactive Connectivity Establishment**. Det er den del af WebRTC, der prøver at finde en brugbar rute mellem peers.
+
+En ICE-kandidat er én mulig rute. Det kan være en lokal netværksadresse, en offentlig adresse fundet gennem STUN eller, i mere komplette opsætninger, en relayrute gennem TURN.
+
+Browsere kan opdage kandidaterne over tid. I en normal applikation sender man ofte kandidater løbende gennem signaleringsserveren, efterhånden som de dukker op. Det kaldes trickle ICE.
+
+Ved manuel kopiering findes der ingen levende signaleringskanal. Derfor skal invitationskoden indeholde nok information fra begyndelsen.
+
+Det er grunden til, at mit eksperiment venter på ICE-indsamlingen, før tilbuddet eller svaret serialiseres:
+
+```ts
+if (peer.iceGatheringState !== "complete") {
+  await new Promise<void>((resolve) => {
+    peer.addEventListener("icegatheringstatechange", () => {
+      if (peer.iceGatheringState === "complete") resolve();
+    });
+  });
+}
+```
+
+I den faktiske kode bruger jeg også en timeout. Nogle netværk når aldrig til `complete`, og det er værre at låse brugerfladen for evigt end at give brugeren en kode, der måske stadig virker.
+
+Sådan ser manuel signalering ud: Vent længe nok til at samle brugbare kandidater, kod beskrivelsen, send den gennem den menneskelige kanal, du har til rådighed, og giv en tydelig fejl, hvis forbindelsen ikke kan etableres.
+
+## Det sendte jeg gennem datakanalen
+
+I spillet delte jeg beskederne i to kategorier.
+
+Beskeder med høj frekvens er binære:
+
+- Klientinput: tick, rolle, battets X-position og hastighed.
+- Værtstilstand: tick, puckens position og hastighed, batpositioner, point og rundens tilstand.
+
+Beskeder med lav frekvens er JSON:
+
+- nedtælling
+- scoring
+- spil slut
+- anmodning om omkamp
+- afbrydelse
+
+Den afvejning holdt den varme sti kompakt uden at gøre sjældne, semantiske hændelser besværlige at udvikle videre på.
+
+Værten udsender den autoritative tilstand med 30 Hz. Klienten sender input med 60 Hz. Selve simuleringen hos værten kører med 120 Hz, fordi stabile kollisioner betyder mere end netværkets udsendelsesfrekvens.
+
+Det lyder af meget, men idéen er enkel:
+
+**Send aktuelt input ofte. Send autoritative øjebliksbilleder ofte nok. Tilbed ikke gamle pakker.**
+
+Absolut input er nyttigt til denne type spil. Klienten sender "mit bat er ved X" i stedet for "flyt til venstre med N". Hvis en pakke forsvinder, indeholder den næste stadig den aktuelle sandhed. Fejl ophobes ikke.
+
+## Hvad kan det bruges til?
+
+Her bliver WebRTC interessant.
+
+Når man holder op med at tænke på det som "teknologi til videoopkald", åbner API'et for mange mærkelige eksperimenter:
+
+- Et browserspil til to spillere uden en spilserver.
+- En local-first-tegneapp, hvor faner synkroniserer direkte.
+- Privat fildeling mellem enheder.
+- Et fjernbetjeningspanel til en installation eller kiosk.
+- Et fejlfindingsværktøj, hvor én browser streamer tilstand til en anden.
+- Et kollaborativt legetøj, der virker fra en statisk hjemmeside.
+
+Ikke alle de ting bør udgives uden en server. Det er ikke pointen.
+
+Pointen er, at WebRTC giver browseren en peer-to-peer-nødudgang. Du kan begynde med en statisk side og stadig bygge noget, der føles levende mellem enheder.
+
+Det er en sjælden form for kraft.
+
+## De rodede dele
+
+Manuel signalering har charme, men det er ikke et poleret produktflow.
+
+Koder kan blive indsat i det forkerte felt. Delingsfunktioner kan ombryde teksten. Nogle netværk forbinder ikke uden et TURN-relay. Nogle browsere understøtter komprimerings-API'er, andre gør ikke. Mobilfaner kan blive sendt i baggrunden. Brugere lukker siden og forventer magisk genoprettelse.
+
+Eksperimentet håndterer noget af det:
+
+- Håndtryksstrengene har det versionsstyrede præfiks `p2p1.`.
+- Koder indeholder et tidsstempel og udløber efter ti minutter.
+- Dekoderen kontrollerer, om brugeren har indsat et tilbud i svarfeltet.
+- Rå SDP bliver ikke skrevet i loggen under det normale flow.
+- At forlade kampen tæller som at give op, fordi genforbindelse er et andet projekt.
+
+Det er nok til en prototype. Det er ikke nok til alle produkter.
+
+Hvis jeg byggede noget seriøst, ville jeg tilføje en signaleringsserver og understøttelse af TURN-relay tidligt. Hvis jeg byggede et mærkeligt portfolioeksperiment, ville jeg helt sikkert beholde det manuelle håndtryk. Friktionen er en del af pointen. Den gør arkitekturen synlig.
+
+## Den mindste mentale model
+
+Hvis WebRTC virker skræmmende, så behold denne udgave i hovedet:
+
+1. Opret en peer-forbindelse.
+2. Opret en datakanal på den ene side.
+3. Opret et tilbud.
+4. Flyt tilbuddet til den anden peer på en eller anden måde.
+5. Opret et svar.
+6. Flyt svaret tilbage.
+7. Vent på, at datakanalen åbner.
+8. Send beskeder.
+
+Alt andet er detaljer, og detaljerne bliver vigtige senere.
+
+Den bedste måde at lære det på er ikke først at huske alle forkortelserne. Byg én lille ting. Få to faner til at tale sammen. Få derefter to telefoner til at tale sammen. Beslut så, om mærkeligheden er nyttig for din idé.
+
+Det var sådan, WebRTC faldt på plads for mig.
+
+## Vil du lære mere?
+
+Begynd med den rigtige dokumentation, og læs derefter kode, der gør noget konkret.
+
+- Læs MDN's oversigt over WebRTC: [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+- Læs MDN's guide til datakanaler: [Using WebRTC data channels](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels)
+- Se WebRTC-eksemplerne: [webrtc.github.io/samples](https://webrtc.github.io/samples/)
+- Skim mønstret for perfect negotiation, når du vil have en mindre skrøbelig produktionsløsning: [Perfect negotiation](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Perfect_negotiation)
+- Læs min case: [Jeg byggede et multiplayer-spil i browseren med AI](/projects/browser-multiplayer/)
+- Prøv selve eksperimentet: [WebRTC-airhockey med multiplayer i browseren](/experiments/browser-multiplayer/)
+
+Begynd ikke med en hel applikation. Begynd med én datakanal og én besked. Få først browseren til at gøre den mærkelige ting. Arkitekturen kan blive seriøs, efter gnisten har ramt.

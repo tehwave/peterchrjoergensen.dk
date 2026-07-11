@@ -3,11 +3,13 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "check": "astro check",
-    "build": "astro check && astro build",
-    "preview": "npm run build && astro preview",
-    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=peterchrjoergensen",
+    "dev": "npm run build && concurrently --kill-others --names astro,worker \"npm:dev:astro\" \"wrangler dev\"",
+    "dev:astro": "chokidar \"src/**/*\" \"public/**/*\" \"astro.config.ts\" -c \"astro build\" --debounce 500",
+    "test": "npm run build && vitest run",
+    "check": "astro check && tsc -p tsconfig.worker.json",
+    "build": "npm run check && astro build",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
     "format": "prettier --write .",
     "astro": "astro"
   },
@@ -26,8 +28,13 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260711.1",
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^10.0.3",
     "prettier": "3.7.4",
     "prettier-plugin-astro": "0.14.1",
-    "sass": "^1.99.0"
+    "sass": "^1.99.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.110.0"
   }
 }

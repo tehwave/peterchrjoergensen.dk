@@ -11,32 +11,46 @@
  * Posts are sorted by publication date (newest first).
  */
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
-import AnimateOnScroll from "../../components/AnimateOnScroll.astro";
-import BlogPostCard from "../../components/BlogPostCard.astro";
-import { getReadingTime } from "../../utils/reading-time";
-import { fadeAnimation } from "../../utils/transitions";
+import Layout from "../../../../layouts/Layout.astro";
+import AnimateOnScroll from "../../../../components/AnimateOnScroll.astro";
+import BlogPostCard from "../../../../components/BlogPostCard.astro";
+import { getReadingTime } from "../../../../utils/reading-time";
+import { fadeAnimation } from "../../../../utils/transitions";
+import type { Locale } from "../../../../i18n/locale";
+import { LOCALES, localeMetadata } from "../../../../i18n/locale";
+import { getMessages } from "../../../../i18n/messages";
+import { groupTranslations, selectTranslation } from "../../../../i18n/content";
 
-type Props = Record<string, never>;
+export function getStaticPaths() {
+  return LOCALES.map((locale) => ({ params: { internal: "__i18n", locale }, props: { locale } }));
+}
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = getMessages(locale);
 
 // Fetch all blog posts from the content collection
-const posts = await getCollection("blog");
+const entries = await getCollection("blog");
+const posts = Array.from(groupTranslations(entries).values()).map((group) => ({ ...selectTranslation(group, locale), translationKey: group.translationKey }));
 
 // Sort posts by publication date, newest first
-const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const sortedPosts = posts.sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
 
 // Prepare posts with reading time
 const postsWithReadingTime = sortedPosts.map((post) => ({
   ...post,
-  readingTime: getReadingTime(post.body ?? ""),
+  readingTime: getReadingTime(post.entry.body ?? ""),
 }));
 
 // Split into featured (latest) and remaining posts
 const [featuredPost, ...remainingPosts] = postsWithReadingTime;
 
 // SEO metadata
-const title = "Blog";
-const description = "What I've learned building for the web. Performance optimization, frontend architecture, tooling trade-offs, and the details that make production code actually work.";
+const title = copy.metadata.blogTitle;
+const description = copy.metadata.blogDescription;
 
 // Structured data for blog listing page
 const collectionSchema = {
@@ -48,7 +62,7 @@ const collectionSchema = {
       url: "https://peterchrjoergensen.dk/blog/",
       name: title,
       description: description,
-      inLanguage: "en-US",
+      inLanguage: localeMetadata[locale].inLanguage,
       isPartOf: {
         "@id": "https://peterchrjoergensen.dk/#website",
       },
@@ -62,8 +76,8 @@ const collectionSchema = {
       itemListElement: postsWithReadingTime.map((post, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: `https://peterchrjoergensen.dk/blog/${post.id}/`,
-        name: post.data.title,
+        url: `https://peterchrjoergensen.dk/blog/${post.translationKey}/`,
+        name: post.entry.data.title,
       })),
     },
     {
@@ -72,7 +86,7 @@ const collectionSchema = {
         {
           "@type": "ListItem",
           position: 1,
-          name: "Home",
+          name: copy.article.homeBreadcrumb,
           item: "https://peterchrjoergensen.dk",
         },
         {
@@ -87,7 +101,7 @@ const collectionSchema = {
 };
 ---
 
-<Layout title={title} description={description}>
+<Layout locale={locale} localized title={title} description={description}>
   <Fragment slot="head">
     <!-- Structured data for blog collection -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
@@ -96,7 +110,7 @@ const collectionSchema = {
     <div class="journal__container">
       <header class="journal__header">
         <div class="journal__header-left">
-          <span class="journal__label">MY WRITING</span>
+          <span class="journal__label">{copy.blog.label}</span>
           <h1 class="journal__title">Blog</h1>
         </div>
         <p class="journal__tagline">{description}</p>
@@ -104,7 +118,7 @@ const collectionSchema = {
 
       {
         postsWithReadingTime.length === 0 ? (
-          <p class="journal__empty">No posts yet. Check back soon!</p>
+          <p class="journal__empty">{copy.blog.empty}</p>
         ) : (
           <div class="journal__grid">
             {/* Featured Post - Latest */}
@@ -112,14 +126,16 @@ const collectionSchema = {
               <div class="journal__featured">
                 <AnimateOnScroll animation="fade-up">
                   <BlogPostCard
-                    title={featuredPost.data.title}
-                    description={featuredPost.data.description}
-                    pubDate={featuredPost.data.pubDate}
+                    title={featuredPost.entry.data.title}
+                    description={featuredPost.entry.data.description}
+                    pubDate={featuredPost.entry.data.pubDate}
                     readingTime={featuredPost.readingTime}
-                    tags={featuredPost.data.tags}
-                    href={`/blog/${featuredPost.id}/`}
-                    heroImage={featuredPost.data.heroImage}
-                    heroImageAlt={featuredPost.data.heroImageAlt}
+                    tags={featuredPost.entry.data.tags}
+                    href={`/blog/${featuredPost.translationKey}/`}
+                    heroImage={featuredPost.entry.data.heroImage}
+                    heroImageAlt={featuredPost.entry.data.heroImageAlt}
+                    locale={locale}
+                    englishOnly={featuredPost.isFallback}
                   />
                 </AnimateOnScroll>
               </div>
@@ -131,14 +147,16 @@ const collectionSchema = {
                 {remainingPosts.map((post) => (
                   <AnimateOnScroll animation="fade-up">
                     <BlogPostCard
-                      title={post.data.title}
-                      description={post.data.description}
-                      pubDate={post.data.pubDate}
+                      title={post.entry.data.title}
+                      description={post.entry.data.description}
+                      pubDate={post.entry.data.pubDate}
                       readingTime={post.readingTime}
-                      tags={post.data.tags}
-                      href={`/blog/${post.id}/`}
-                      heroImage={post.data.heroImage}
-                      heroImageAlt={post.data.heroImageAlt}
+                      tags={post.entry.data.tags}
+                      href={`/blog/${post.translationKey}/`}
+                      heroImage={post.entry.data.heroImage}
+                      heroImageAlt={post.entry.data.heroImageAlt}
+                      locale={locale}
+                      englishOnly={post.isFallback}
                     />
                   </AnimateOnScroll>
                 ))}
@@ -152,8 +170,8 @@ const collectionSchema = {
 </Layout>
 
 <style lang="scss">
-  @use "../../styles/variables" as *;
-  @use "../../styles/mixins" as *;
+  @use "../../../../styles/variables" as *;
+  @use "../../../../styles/mixins" as *;
 
   .journal {
     position: relative;

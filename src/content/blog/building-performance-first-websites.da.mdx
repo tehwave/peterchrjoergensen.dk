@@ -1,0 +1,72 @@
+---
+locale: da
+translationKey: building-performance-first-websites
+title: "Byg ydeevnen ind i fundamentet"
+description: "Hurtig som udgangspunkt, ikke gennem heroisk optimering. Sådan gjorde jeg hastigheden uundgåelig."
+pubDate: 2025-12-26
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "ydeevne", "webudvikling"]
+heroImage: "../../assets/blog/building-performance-first-websites/hero.jpg"
+heroImageAlt: "En moderne Formel 1-racerbil i høj fart gennem et sving"
+heroImageCaption: "Foto af [Diego Gavilanez](https://unsplash.com/@gego98) på [Unsplash](https://unsplash.com)"
+---
+
+Det meste arbejde med ydeevne begynder, efter noget er blevet for langsomt. Man bygger løsningen, måler den og bruger så flere dage på at barbere millisekunder af. Jeg ville prøve det modsatte: træffe valg fra begyndelsen, der gjorde hastigheden uundgåelig.
+
+Denne hjemmeside blev mit forsøg.
+
+## Statisk først
+
+Alle sider bliver prerenderet under buildet. Forsiden, blogoversigten og de enkelte indlæg. Al HTML findes, før nogen besøger siden. Cloudflare cacher den ved kanten af netværket, så de fleste forespørgsler aldrig når den oprindelige server.
+
+Hvis dit indhold ikke ændrer sig for hver forespørgsel, så rendér det én gang. Enkelt, men let at glemme, når man automatisk rækker ud efter et framework.
+
+## Det JavaScript, jeg faktisk udgav
+
+Ingen React. Ingen Vue. Ingen hydration i browseren. De interaktive dele bruger almindelig JavaScript i `<script>`-tags inde i Astro-komponenterne.
+
+Hero-animationen bruger Typed.js til at skifte mellem "Webudvikler", "Spiludvikler" og så videre. Jeg indlæser biblioteket med `requestIdleCallback`, så det ikke blokerer den første rendering:
+
+```typescript
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(() => {
+    initTypedAnimation();
+  });
+}
+```
+
+Hvis nogen har slået `prefers-reduced-motion` til, springer jeg animationen helt over og viser statisk tekst i stedet. Tilgængelighed og ydeevne peger ofte i samme retning.
+
+Scroll-animationer toner elementer ind, når de kommer ind i synsfeltet. Jeg byggede en `AnimateOnScroll`-komponent med Intersection Observer. Intet bibliotek, bare et script, der kontrollerer `isIntersecting` og skifter en CSS-klasse.
+
+Navigationsheaderen går fra gennemsigtig til en massiv baggrund, når man scroller forbi hero-sektionen. Det er en scroll-listener med lidt tilstandsstyring, så animationen ikke bliver afbrudt, når man scroller hurtigt.
+
+Tre små scripts, alle inline i de komponenter, der har brug for dem. Ikke mere.
+
+## Billeder uden det manuelle arbejde
+
+Astros `<Picture>`-komponent genererer AVIF- og WebP-versioner under buildet. Du importerer et billede, sender det til `<Picture>`, og frameworket klarer resten:
+
+```astro
+import {Picture} from 'astro:assets'; import profileImage from '../assets/peter-profile.png';
+
+<Picture src={profileImage} formats={["avif", "webp"]} alt="Peter Chr. Jørgensen" loading="eager" fetchpriority="high" />
+```
+
+Hero-billedet bruger `loading="eager"` og `fetchpriority="high"`, fordi det ligger øverst på siden. Alt andet bliver som udgangspunkt indlæst lazy.
+
+Jeg skriver ikke `srcset` i hånden. Jeg konverterer ikke billeder manuelt. Importér, brug, færdig.
+
+## Her fungerer det
+
+Siden består primært af statisk indhold. Blogindlæg, projektbeskrivelser og en om-sektion. Intet kræver data i realtid. Derfor var Astro det oplagte valg.
+
+Hele siden sender under 100 KB JavaScript. Builds bliver færdige på få sekunder. Jeg har ikke haft brug for at profilere noget, fordi intet er langsomt nok til at kræve det.
+
+Det er den virkelige gevinst: Jeg behøver ikke optimere, fordi standardvalgene allerede er hurtige.
+
+## Her fungerer det ikke
+
+Jeg ville ikke bygge et dashboard eller en SaaS-applikation på denne måde. Astro er optimeret til indholdssider, hvor det meste af siden er statisk. Hvis noget kræver backend-logik, databaser eller rendering for hver forespørgsel, ville jeg vælge Laravel.
+
+Til en portfolio? Her har det været helt rigtigt. Hurtig som udgangspunkt, minimal JavaScript, og jeg har ikke skullet kæmpe med frameworket én eneste gang.

@@ -1,0 +1,86 @@
+---
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = getMessages(locale).localeSwitch;
+---
+
+<div class="locale-switch" role="group" aria-label={copy.label}>
+  <button class="locale-switch__button" type="button" data-locale="en" aria-label={copy.selectEnglish} aria-pressed={locale === "en" ? "true" : "false"}>EN</button>
+  <span class="locale-switch__separator" aria-hidden="true">/</span>
+  <button class="locale-switch__button" type="button" data-locale="da" aria-label={copy.selectDanish} aria-pressed={locale === "da" ? "true" : "false"}>DA</button>
+</div>
+
+<script>
+  import { serializeLocaleCookie, type Locale } from "../i18n/locale";
+
+  let localeSwitchCleanup: (() => void) | undefined;
+
+  function initializeLocaleSwitch(): void {
+    localeSwitchCleanup?.();
+
+    const controller = new AbortController();
+    document.querySelectorAll<HTMLButtonElement>(".locale-switch__button").forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const locale = button.dataset.locale;
+          if (locale !== "en" && locale !== "da") return;
+
+          document.cookie = serializeLocaleCookie(locale satisfies Locale);
+          window.location.reload();
+        },
+        { signal: controller.signal },
+      );
+    });
+
+    localeSwitchCleanup = () => controller.abort();
+  }
+
+  initializeLocaleSwitch();
+  document.addEventListener("astro:page-load", initializeLocaleSwitch);
+  document.addEventListener("astro:before-preparation", () => localeSwitchCleanup?.());
+</script>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .locale-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    color: $color-text-light;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    &__button {
+      padding: $space-xs;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0.65;
+      @include focus-visible;
+
+      &[aria-pressed="true"] {
+        color: $color-orange;
+        opacity: 1;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    &__separator {
+      opacity: 0.4;
+    }
+  }
+</style>

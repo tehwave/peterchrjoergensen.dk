@@ -5,12 +5,18 @@
  * Combines social links with a call-to-action, avoiding a separate contact page.
  * rel="me" on social links enables IndieWeb identity verification.
  */
+import { getMessages } from "../i18n/messages";
+import type { Locale } from "../i18n/locale";
+
 interface Props {
   label?: string;
   heading?: string;
+  locale?: Locale;
 }
 
-const { label = "Websites. Games. Good ideas.", heading = "Got something worth building?" } = Astro.props;
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).footer;
+const { label = copy.label, heading = copy.heading } = Astro.props;
 ---
 
 <footer class="footer" id="contact">
@@ -27,7 +33,9 @@ const { label = "Websites. Games. Good ideas.", heading = "Got something worth b
       </div>
       <div class="footer__info">
         <p class="footer__text">
-          Feel free to reach out via <a href="mailto:hello@peterchrjoergensen.dk" class="footer__email">email</a> or connect with me on social media to collaborate.
+          {locale === "da" ? "Du er velkommen til at skrive en " : "Feel free to reach out via "}<a href="mailto:hello@peterchrjoergensen.dk" class="footer__email"
+            >{locale === "da" ? "mail" : "email"}</a
+          >{locale === "da" ? " eller finde mig på sociale medier, hvis vi skal samarbejde." : " or connect with me on social media to collaborate."}
         </p>
         <div class="footer__social-links">
           <a href="https://www.linkedin.com/in/peterchrjoergensen" aria-label="LinkedIn" target="_blank" rel="noopener me" class="footer__social-link">
@@ -54,15 +62,14 @@ const { label = "Websites. Games. Good ideas.", heading = "Got something worth b
     </div>
     <div class="footer__meta">
       <p class="footer__tagline">
-        Made with <span class="footer__heart">♥</span> and AI in Denmark
+        {locale === "da" ? "Lavet med" : "Made with"}
+        <span class="footer__heart">♥</span>
+        {locale === "da" ? "og AI i Danmark" : "and AI in Denmark"}
       </p>
       <p class="footer__credits">
-        Built with <a href="https://astro.build" target="_blank" rel="noopener" class="footer__link">Astro</a>. Deployed on <a
-          href="https://cloudflare.com"
-          target="_blank"
-          rel="noopener"
-          class="footer__link">Cloudflare</a
-        >.
+        {locale === "da" ? "Bygget med " : "Built with "}<a href="https://astro.build" target="_blank" rel="noopener" class="footer__link">Astro</a>. {
+          locale === "da" ? "Udrullet på " : "Deployed on "
+        }<a href="https://cloudflare.com" target="_blank" rel="noopener" class="footer__link">Cloudflare</a>.
       </p>
     </div>
   </div>

@@ -8,40 +8,36 @@
  */
 import { Picture } from "astro:assets";
 import profileImage from "../assets/peter-profile.png";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
-type Props = Record<string, never>;
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).hero;
 
 // Displayed in rotation, order matters for first impression
-const roles = [
-  "Web Developer",
-  "Game Developer",
-  "AI Enthusiast",
-  "Laravel Artisan",
-  "WordPress Expert",
-  "GameDev Teacher",
-  "WebDev Architect",
-  "Astro Amateur",
-  "Prompt Engineer",
-  "Game Jam Organizer",
-  "Unity3D Developer",
-  "VR Developer",
-];
+const roles = copy.roles.split("|");
 ---
 
 <div class="hero-wrapper">
   <section class="hero" id="hero" data-tilt>
     <div class="hero__container">
       <div class="hero__content" style="max-height: 223px">
-        <h1 class="hero__title hero__title--handwriting">Hello!</h1>
+        <h1 class="hero__title hero__title--handwriting">{copy.greeting}</h1>
         <div class="hero__intro">
           <p>
-            I'm <strong>Peter</strong>
+            {copy.intro}
+            <strong>Peter</strong>
             <span>—{" "}</span>
             <br class="mobile-break" />
             <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
               <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
             </strong>{" "}
-            from <strong>Denmark.</strong>
+            {copy.from}
+            <strong>{copy.country}</strong>
           </p>
         </div>
       </div>
@@ -130,7 +126,7 @@ const roles = [
       typedObserver.observe(heroElement);
     } catch (error) {
       console.error("Failed to initialize Typed.js:", error);
-      typedElement.textContent = "Web Developer";
+      typedElement.textContent = roles[0] || "Web Developer";
     }
   }
 

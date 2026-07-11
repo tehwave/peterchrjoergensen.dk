@@ -9,25 +9,32 @@ import { Picture } from "astro:assets";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
 import SkillTag from "./SkillTag.astro";
 import gm48Image from "../assets/projects/gm48.png";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
-type Props = Record<string, never>;
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).currentWork;
 
 const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js", "Livewire"];
 ---
 
 <section class="current-work" id="current-work">
   <div class="current-work__container">
-    <span class="current-work__label">My Current Project</span>
-    <h2 class="current-work__heading">What I'm working on right now</h2>
+    <span class="current-work__label">{copy.label}</span>
+    <h2 class="current-work__heading">{copy.heading}</h2>
 
     <div class="current-work__content">
       <AnimateOnScroll>
-        <a href="https://gm48.net" target="_blank" rel="noopener" class="current-work__card" aria-label="gm48.net - Game jam platform (opens in new window)">
+        <a href="https://gm48.net" target="_blank" rel="noopener" class="current-work__card" aria-label={copy.linkLabel}>
           <div class="current-work__image-wrapper">
             <Picture
               src={gm48Image}
               formats={["avif", "webp"]}
-              alt="gm48.net, GameMaker game jam platform"
+              alt={copy.imageAlt}
               class="current-work__image"
               widths={[768, 1024, 1280, 1600, 1920]}
               sizes="(min-width: 1200px) 1200px, 100vw"
@@ -56,14 +63,8 @@ const techStack = ["Laravel", "PHP", "MySQL", "Redis", "Bootstrap", "Alpine.js",
               </svg>
             </h3>
             <div class="current-work__description">
-              <p>
-                I organize the gm(48), a quarterly 48-hour game jam for GameMaker developers that's been going since 2013. Four times a year, hundreds of developers from around the world race against
-                the clock to build games around a community-voted theme.
-              </p>
-              <p>
-                I rebuilt the platform from scratch in Laravel 5.1 back in 2015 and have kept it upgraded through Laravel 12. The current version handles everything: team formation, game submissions,
-                community ratings, leaderboards, and a decade's worth of jam archives. It's built to scale as the community grows.
-              </p>
+              <p>{copy.paragraph1}</p>
+              <p>{copy.paragraph2}</p>
             </div>
             <div class="current-work__tech">
               {techStack.map((tech) => <SkillTag label={tech} variant="large" />)}

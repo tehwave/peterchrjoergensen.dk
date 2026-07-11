@@ -1,4 +1,5 @@
 import type { Project } from "../types";
+import type { Locale } from "../i18n/locale";
 
 // Import project images for Astro optimization
 import janchartImg from "../assets/projects/janchart.png";
@@ -296,3 +297,97 @@ export const projects: Project[] = [
     category: "games",
   },
 ];
+
+const danishProjectCopy: Record<string, Pick<Project, "description" | "alt">> = {
+  Janchart: {
+    description: "Jeg byggede hjemmesiden i Laravel, Bootstrap og jQuery for denne virksomhed inden for befragtning, shipping og rederidrift.",
+    alt: "Skærmbillede af forsiden på Jancharts hjemmeside for shippingvirksomheden",
+  },
+  "Grundfos Safety": {
+    description: "En gamificeret quiz-webapplikation bygget i Vue.js med understøttelse af ældre browsere, som lærer medarbejdere om sikkerhed hos Grundfos.",
+    alt: "Skærmbillede af brugerfladen i quizapplikationen Grundfos Safety",
+  },
+  "gm48.net": {
+    description: "Hjemsted for et game jam-fællesskab, jeg har drevet siden 2013. Bygget i Laravel med mere end 48 afholdte jams og tusindvis af indsendte spil.",
+    alt: "Skærmbillede af forsiden på game jam-hjemmesiden gm48.net",
+  },
+  "This Website": { description: "Bygget med Astro, TypeScript og SCSS med AI-hjælp til komponentstruktur og designbeslutninger.", alt: "Skærmbillede af min personlige portfoliohjemmeside" },
+  "Groovy Waves": {
+    description: "Et bølgedesignlaboratorium til at afprøve canvas-drevne UI-motiver, indlejrede kanter, bevægelsestilstande og mindre firkantede komponentflader.",
+    alt: "Skærmbillede af Groovy Waves-eksperimentet med lagdelte bølgepaneler",
+  },
+  "Solgt.com": {
+    description: "Tech lead for Danmarks førende platform til bilsalg. Full-stack-udvikling på tværs af WordPress og Laravel.",
+    alt: "Skærmbillede af forsiden på bilsalgsplatformen Solgt.com",
+  },
+  VillaVilla: {
+    description: "Senior webudvikler og tech lead for en virksomhed med luksusferiehuse. Full-stack WordPress og Laravel.",
+    alt: "Skærmbillede af VillaVillas hjemmeside for luksusferiehuse",
+  },
+  "C&C Travel": {
+    description: "Laravel-administrationssystem med AI-integrationer til et 35 år gammelt rejsebureau med skræddersyede rejser. WordPress-frontend med specialbygget bookingflow.",
+    alt: "Skærmbillede af C&C Travels specialbyggede rejsehjemmeside",
+  },
+  "DM Greenkeeping": {
+    description: "Jeg byggede Laravel-CRM'et og tilbudssystemet, som nu understøtter denne plæneplejevirksomhed med millionomsætning.",
+    alt: "Skærmbillede af DM Greenkeepings hjemmeside for plænepleje",
+  },
+  Restudy: { description: "Læringsplatform med WordPress-frontend og Laravel-backend. Danmarks største portal for videoundervisning.", alt: "Skærmbillede af Restudys platform for videoundervisning" },
+  Kirppu: {
+    description: "Danmarks største genbrugskæde med 34 butikker. AI-baseret billedanalyse og Algolia-søgning på deres WordPress-platform.",
+    alt: "Skærmbillede af Kirppus hjemmeside for genbrugsmarkedet",
+  },
+  SkiOutlet: { description: "WordPress-webshop med tusindvis af varenumre importeret fra Microsoft NAV. Danmarks største skioutlet.", alt: "Skærmbillede af SkiOutlets webshop for skiudstyr" },
+  "Slagter Lampe": { description: "WordPress-webshop for en traditionsrig familieslagter fra 1939, kendt for sine prisvindende pølser.", alt: "Skærmbillede af Slagter Lampes webshop" },
+  AutoProff: { description: "Laravel-udviklersupport til denne B2B-platform for bilhandel på 12 europæiske markeder.", alt: "Skærmbillede af AutoProffs B2B-platform for bilhandel" },
+  "Din Bilpartner": {
+    description: "WordPress- og Laravel-udvikling for Danmarks ældste frie værkstedskæde. Jeg byggede API-integrationer og den eksklusive Express-medlemsklub.",
+    alt: "Skærmbillede af forsiden på Din Bilpartners værkstedshjemmeside",
+  },
+  "Planet Huse": { description: "WordPress-hjemmeside for en sommerhusbygger med mere end 37 års erfaring.", alt: "Skærmbillede af Planet Huses hjemmeside for sommerhusbyggeri" },
+  "Planet Living": { description: "WordPress-hjemmeside for modulære tiny houses og haveværelser.", alt: "Skærmbillede af Planet Livings hjemmeside for tiny houses" },
+  Forsia: { description: "Migrering fra Drupal til WordPress for dette danske forsikringsselskab, tidligere Sønderjysk Forsikring.", alt: "Skærmbillede af forsikringsselskabet Forsias hjemmeside" },
+  Autocentralen: { description: "WordPress-vedligeholdelse og support for en stor dansk bilforhandler med flere afdelinger.", alt: "Skærmbillede af Autocentralens bilforhandlerhjemmeside" },
+  Renell: {
+    description: "WordPress-support for et svanemærket rengøringsselskab med mere end 700 medarbejdere og historie tilbage til 1987.",
+    alt: "Skærmbillede af rengøringsselskabet Renells hjemmeside",
+  },
+  "Hørning Parket": { description: "WordPress-support for en 90 år gammel producent af premiumgulve målrettet arkitekter.", alt: "Skærmbillede af Hørning Parkets hjemmeside for parketgulve" },
+  "BSI Marine Equipment Group": {
+    description: "WordPress-hjemmeside for en marineudstyrsgruppe med ni specialiserede brands til sejlbåde og superyachter verden over.",
+    alt: "Skærmbillede af BSI Marine Equipment Groups hjemmeside",
+  },
+  FIRKANT: {
+    description: "Et hurtigt proceduregenereret platformspil, jeg lavede i GameMaker. Stram styring, øjeblikkelige genstarter og den helt rigtige 'bare ét forsøg mere'-følelse.",
+    alt: "Skærmbillede af platformspillet FIRKANT med farverig pixelgrafik",
+  },
+  "Idle Game": {
+    description: "En pastelfarvet PixiJS-prototype på et idle-spil med hoppende dyr, lokal lagring, butiksprogression og en bevidst hyggelig mobile-first-ramme.",
+    alt: "Skærmbillede af Idle Game-eksperimentet med en pasteleng, dyresprites og HUD-elementer",
+  },
+  "Mord Ombord": {
+    description: "Et VR-mordmysteriespil til Google Cardboard. Omfattende optimering for at ramme 60 fps på billige Android-telefoner.",
+    alt: "Skærmbillede af VR-mordmysteriespillet Mord Ombord",
+  },
+  "Western World": {
+    description: "Et Unity3D-miljø, der undersøger asset-pipelinen fra Maya til Unity. Støvede salooner og tumbleweeds er inkluderet.",
+    alt: "Skærmbillede af 3D-miljøet Western World i Unity",
+  },
+  "Odense Golfklub": {
+    description: "En Unity3D-mobilapp med 360-graders banebilleder og 3D-overflyvninger, bygget så klubbens medlemmer kan se hullerne før spillet.",
+    alt: "Skærmbillede af Odense Golfklubs mobilapp med en golfbane i 3D",
+  },
+  "Torpedo Trump": {
+    description: "Et satirisk game jam-bidrag, der fik tredjepladsen ved EAL Game Jam 2016. Lavet som en politisk parodi.",
+    alt: "Skærmbillede af Torpedo Trump-spillet med glitch-præget præsidentgrafik",
+  },
+};
+
+export function getProjects(locale: Locale): Project[] {
+  if (locale === "en") return projects;
+
+  return projects.map((project) => ({
+    ...project,
+    ...danishProjectCopy[project.title],
+  }));
+}

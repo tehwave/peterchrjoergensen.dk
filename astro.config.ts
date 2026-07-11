@@ -4,6 +4,7 @@ import compress from "@playform/compress";
 import inline from "@playform/inline";
 import mdx from "@astrojs/mdx";
 import { serializeSitemap } from "./src/utils/sitemap";
+import { PUBLIC_CONTENT_PATHS } from "./src/i18n/public-routes";
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,6 +20,8 @@ export default defineConfig({
   // Integrations for SEO and functionality
   integrations: [
     sitemap({
+      filter: (page) => !page.includes("/__i18n/"),
+      customPages: PUBLIC_CONTENT_PATHS.map((path) => new URL(path, "https://peterchrjoergensen.dk").toString()),
       // Customize sitemap entries with frontmatter data
       serialize: (item) => serializeSitemap(item, ChangeFreqEnum),
     }),

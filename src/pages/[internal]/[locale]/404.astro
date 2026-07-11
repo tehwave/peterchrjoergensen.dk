@@ -1,15 +1,29 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "../../../layouts/Layout.astro";
+import type { Locale } from "../../../i18n/locale";
+import { LOCALES } from "../../../i18n/locale";
+import { getMessages } from "../../../i18n/messages";
+
+export function getStaticPaths() {
+  return LOCALES.map((locale) => ({ params: { internal: "__i18n", locale }, props: { locale } }));
+}
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = getMessages(locale);
 ---
 
-<Layout title="Page not found" description="No page found at this address.">
+<Layout locale={locale} localized title={copy.metadata.notFoundTitle} description={copy.metadata.notFoundDescription}>
   <section class="not-found">
     <div class="not-found__container">
-      <h1 class="not-found__title">No page found at this address.</h1>
-      <p class="not-found__description">The link might be outdated or mistyped. Head back home or read the blog instead.</p>
+      <h1 class="not-found__title">{copy.notFound.heading}</h1>
+      <p class="not-found__description">{copy.notFound.body}</p>
       <div class="not-found__actions">
-        <a class="not-found__link not-found__link--primary" href="/">Back to home</a>
-        <a class="not-found__link not-found__link--secondary" href="/blog/">Read the blog</a>
+        <a class="not-found__link not-found__link--primary" href="/">{copy.notFound.home}</a>
+        <a class="not-found__link not-found__link--secondary" href="/blog/">{copy.navigation.blog}</a>
       </div>
     </div>
   </section>
@@ -20,14 +34,14 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <style lang="scss">
-  @use "../styles/variables" as *;
-  @use "../styles/mixins" as *;
+  @use "../../../styles/variables" as *;
+  @use "../../../styles/mixins" as *;
 
   .not-found {
-    padding: calc(#{$header-height} + #{$space-3xl}) 0 $space-3xl;
-    min-height: calc(100vh - #{$header-height});
     display: grid;
     align-content: center;
+    min-height: calc(100vh - #{$header-height});
+    padding: calc(#{$header-height} + #{$space-3xl}) 0 $space-3xl;
     background: $color-bg;
 
     @include respond-to(md) {
@@ -37,33 +51,33 @@ import Layout from "../layouts/Layout.astro";
     &__container {
       @include container;
       display: grid;
+      align-content: center;
       gap: $space-lg;
       max-width: $max-width-text;
-      align-content: center;
     }
 
     &__title {
       @include section-heading;
+      margin: 0 0 $space-xs;
+      color: $color-text-primary;
       font-size: $font-size-4xl;
       font-weight: $font-weight-bold;
-      color: $color-text-primary;
-      line-height: $leading-snug;
       letter-spacing: $tracking-tight;
-      margin: 0 0 $space-xs;
+      line-height: $leading-snug;
     }
 
     &__description {
+      max-width: 52ch;
       margin: 0 0 $space-md;
       color: $color-text-secondary;
       font-size: $font-size-lg;
       line-height: $leading-relaxed;
-      max-width: 52ch;
     }
 
     &__actions {
       display: flex;
-      gap: $space-md;
       flex-wrap: wrap;
+      gap: $space-md;
     }
 
     &__link {
@@ -71,10 +85,10 @@ import Layout from "../layouts/Layout.astro";
       align-items: center;
       gap: $space-sm;
       padding: $space-sm $space-lg;
-      border-radius: 999px;
+      font-size: $font-size-base;
       font-weight: $font-weight-semibold;
       text-decoration: none;
-      font-size: $font-size-base;
+      border-radius: 999px;
       @include transition(transform, var(--duration-fast), var(--ease-out));
 
       &:hover {
@@ -87,13 +101,13 @@ import Layout from "../layouts/Layout.astro";
       }
 
       &--primary {
-        background: $color-orange;
         color: $color-white;
+        background: $color-orange;
       }
 
       &--secondary {
-        background: $color-bg-alt;
         color: $color-text-primary;
+        background: $color-bg-alt;
         border: 1px solid $color-border;
       }
     }

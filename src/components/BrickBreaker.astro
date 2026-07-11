@@ -10,6 +10,8 @@
  * <BrickBreaker profiles={["tehwave", "peterchrjoergensen"]} />
  */
 import { fetchMultipleContributions, CONTRIBUTION_LEVEL_HITS } from "../utils/github";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
 interface Props {
   /** GitHub usernames to fetch contributions for */
@@ -18,9 +20,11 @@ interface Props {
   heading?: string;
   /** Optional subtitle text. If not provided, no header section is rendered */
   subtitle?: string;
+  locale?: Locale;
 }
 
-const { profiles = ["tehwave", "peterchrjoergensen"], heading, subtitle } = Astro.props;
+const { profiles = ["tehwave", "peterchrjoergensen"], heading, subtitle, locale = "en" } = Astro.props;
+const copy = getMessages(locale).brickBreaker;
 
 // Fetch contribution data at build time
 const contributionData = await fetchMultipleContributions(profiles);
@@ -144,29 +148,29 @@ contributionMap.forEach((contribution) => {
 const totalContributions = contributionData.reduce((sum, d) => sum + d.calendar.totalContributions, 0);
 
 // Set default heading and subtitle if not provided
-const finalHeading = heading ?? "My GitHub Contributions";
+const finalHeading = heading ?? copy.heading;
 const finalSubtitle =
   subtitle ??
-  `Play this brick breaker made from <a href="https://github.com/tehwave" target="_blank" rel="noopener me">my ${totalContributions.toLocaleString()} GitHub contributions</a>. Each brick represents a day of building.`;
+  `${copy.subtitleBefore} <a href="https://github.com/tehwave" target="_blank" rel="noopener me">${totalContributions.toLocaleString(locale === "da" ? "da-DK" : "en-US")} ${locale === "da" ? "GitHub-bidrag" : "GitHub contributions"}</a>. ${copy.subtitleAfter}`;
 ---
 
-<div class="brick-breaker" id="brick-breaker" data-bricks={JSON.stringify(bricks)} data-profiles={JSON.stringify(profiles)}>
+<div class="brick-breaker" id="brick-breaker" data-bricks={JSON.stringify(bricks)} data-profiles={JSON.stringify(profiles)} data-locale={locale} data-copy={JSON.stringify(copy)}>
   {
     (finalHeading || finalSubtitle) && (
       <div class="brick-breaker__header">
         {finalHeading && <h2 class="brick-breaker__title">{finalHeading}</h2>}
         {finalSubtitle && <p class="brick-breaker__subtitle" set:html={finalSubtitle} />}
         <div class="brick-breaker__sr-only" role="alert">
-          Accessibility notice: This game requires mouse or touch input and contains animations. It may not be fully accessible to all users.
+          {copy.accessibility}
         </div>
       </div>
     )
   }
 
   <div class="brick-breaker__game-container">
-    <canvas id="game-canvas" class="brick-breaker__canvas" aria-label="Brick breaker game canvas showing GitHub contribution bricks. Use mouse or touch to control paddle."></canvas>
+    <canvas id="game-canvas" class="brick-breaker__canvas" aria-label={copy.canvasLabel}></canvas>
 
-    <button class="brick-breaker__circle-play" id="game-circle-play-btn" type="button" aria-label="Start game">
+    <button class="brick-breaker__circle-play" id="game-circle-play-btn" type="button" aria-label={copy.startLabel}>
       <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
         <path d="M8 5v14l11-7z"></path>
       </svg>
@@ -174,9 +178,9 @@ const finalSubtitle =
 
     <div class="brick-breaker__overlay" id="game-overlay">
       <div class="brick-breaker__overlay-content">
-        <h3 class="brick-breaker__overlay-title" id="overlay-title">Ready to Play?</h3>
-        <p class="brick-breaker__overlay-text" id="overlay-text">Break bricks made from GitHub contributions</p>
-        <button class="brick-breaker__button" id="game-start-btn" type="button"> Start Game </button>
+        <h3 class="brick-breaker__overlay-title" id="overlay-title">{copy.ready}</h3>
+        <p class="brick-breaker__overlay-text" id="overlay-text">{copy.breakBricks}</p>
+        <button class="brick-breaker__button" id="game-start-btn" type="button"> {copy.start} </button>
       </div>
     </div>
 
@@ -187,8 +191,8 @@ const finalSubtitle =
           <path d="M9 10L12 7L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
           <path d="M9 14L12 17L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
-        <h3 class="brick-breaker__rotate-title">Please Rotate Your Device</h3>
-        <p class="brick-breaker__rotate-text">This game works best in landscape mode</p>
+        <h3 class="brick-breaker__rotate-title">{copy.rotateTitle}</h3>
+        <p class="brick-breaker__rotate-text">{copy.rotateText}</p>
       </div>
     </div>
   </div>
@@ -196,27 +200,29 @@ const finalSubtitle =
   <div class="brick-breaker__controls">
     <div class="brick-breaker__stats">
       <span class="brick-breaker__stat">
-        Score: <strong id="score-display" aria-live="polite" aria-atomic="true">0</strong>
+        {copy.score}: <strong id="score-display" aria-live="polite" aria-atomic="true">0</strong>
       </span>
       <span class="brick-breaker__stat">
-        Lives: <span id="lives-display" aria-live="assertive" aria-atomic="true">❤️❤️❤️</span>
+        {copy.lives}: <span id="lives-display" aria-live="assertive" aria-atomic="true">❤️❤️❤️</span>
       </span>
       <span class="brick-breaker__stat">
-        Bricks: <strong id="bricks-display" aria-live="polite" aria-atomic="true">{bricks.length}</strong>
+        {copy.bricks}: <strong id="bricks-display" aria-live="polite" aria-atomic="true">{bricks.length}</strong>
       </span>
       <span class="brick-breaker__stat">
-        High Score: <strong id="high-score-display" aria-live="polite" aria-atomic="true">0</strong>
+        {copy.highScore}: <strong id="high-score-display" aria-live="polite" aria-atomic="true">0</strong>
       </span>
     </div>
     <div class="brick-breaker__actions">
-      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-pause-btn" type="button" disabled> Pause </button>
-      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-reset-btn" type="button"> Reset </button>
-      <a href="/projects/github-brick-breaker/" class="brick-breaker__button brick-breaker__button--secondary">How It's Made</a>
+      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-pause-btn" type="button" disabled> {copy.pause} </button>
+      <button class="brick-breaker__button brick-breaker__button--secondary" id="game-reset-btn" type="button"> {copy.reset} </button>
+      <a href="/projects/github-brick-breaker/" class="brick-breaker__button brick-breaker__button--secondary">{copy.howMade}</a>
     </div>
   </div>
 </div>
 
 <script>
+  import { formatShortMonth } from "../i18n/locale";
+
   // ============================================================================
   // BRICK BREAKER GAME ENGINE
   // ============================================================================
@@ -226,6 +232,9 @@ const finalSubtitle =
   if (!gameContainer) throw new Error("Game container not found");
 
   const bricksData = JSON.parse(gameContainer.dataset.bricks || "[]");
+  const gameCopy = JSON.parse(gameContainer.dataset.copy || "{}") as Record<string, string>;
+  const gameLanguage = gameContainer.dataset.locale === "da" ? "da" : "en";
+  const gameLocale = gameLanguage === "da" ? "da-DK" : "en-US";
 
   // ============================================================================
   // TYPE DEFINITIONS
@@ -833,7 +842,7 @@ const finalSubtitle =
     bricksData.forEach((brick: any) => {
       const date = new Date(brick.date);
       const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-      const monthName = date.toLocaleString("en", { month: "short" });
+      const monthName = formatShortMonth(date, gameLanguage);
 
       if (!monthMap.has(monthKey)) {
         monthMap.set(monthKey, {
@@ -1308,7 +1317,7 @@ const finalSubtitle =
     hideNavbar();
     pauseBtn!.disabled = false;
     resetBtn!.disabled = false;
-    pauseBtn!.textContent = "Pause";
+    pauseBtn!.textContent = gameCopy.pause;
 
     // Start countdown before releasing ball
     startCountdown();
@@ -1327,8 +1336,8 @@ const finalSubtitle =
 
     gameState = GameState.PAUSED;
     showNavbar();
-    pauseBtn!.textContent = "Resume";
-    showOverlay("Paused", "Your princess is in another castle... but this game is waiting!", "Resume");
+    pauseBtn!.textContent = gameCopy.resume;
+    showOverlay(gameCopy.paused, gameCopy.pausedText, gameCopy.resume);
   }
 
   /**
@@ -1341,7 +1350,7 @@ const finalSubtitle =
     gameState = GameState.PLAYING;
     hideOverlay();
     hideNavbar();
-    pauseBtn!.textContent = "Pause";
+    pauseBtn!.textContent = gameCopy.pause;
 
     if (!animationFrameId) {
       gameLoop();
@@ -1384,15 +1393,15 @@ const finalSubtitle =
 
     if (won) {
       if (isNewHighScore) {
-        showOverlay("🎉 New High Score!", `Cleared all bricks with ${score.toLocaleString()} points!`, "Play Again");
+        showOverlay(gameCopy.newHighScore, `${gameCopy.clearedWith} ${score.toLocaleString(gameLocale)} ${gameCopy.points}`, gameCopy.playAgain);
       } else {
-        showOverlay("🎉 You Won!", `Cleared all bricks with ${score.toLocaleString()} points!`, "Play Again");
+        showOverlay(gameCopy.won, `${gameCopy.clearedWith} ${score.toLocaleString(gameLocale)} ${gameCopy.points}`, gameCopy.playAgain);
       }
     } else {
       if (isNewHighScore) {
-        showOverlay("Game Over", `Final score: ${score.toLocaleString()} - a new High Score! 🎉`, "Try Again");
+        showOverlay(gameCopy.gameOver, `${gameCopy.finalScore}: ${score.toLocaleString(gameLocale)} - ${gameCopy.newHighScoreSuffix}`, gameCopy.tryAgain);
       } else {
-        showOverlay("Game Over", `Final score: ${score.toLocaleString()}`, "Try Again");
+        showOverlay(gameCopy.gameOver, `${gameCopy.finalScore}: ${score.toLocaleString(gameLocale)}`, gameCopy.tryAgain);
       }
     }
   }

@@ -9,30 +9,39 @@ import AnimateOnScroll from "./AnimateOnScroll.astro";
 import BlogPostCard from "./BlogPostCard.astro";
 import Button from "./Button.astro";
 import { getReadingTime } from "../utils/reading-time";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
+import { groupTranslations, selectTranslation } from "../i18n/content";
 
-type Props = Record<string, never>;
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).blog;
 
 // Get all blog posts, sorted by date (newest first)
 const allPosts = await getCollection("blog");
-const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()).slice(0, 3);
+const localizedPosts = Array.from(groupTranslations(allPosts).values()).map((group) => ({ ...selectTranslation(group, locale), translationKey: group.translationKey }));
+const sortedPosts = localizedPosts.sort((a, b) => b.entry.data.pubDate.getTime() - a.entry.data.pubDate.getTime()).slice(0, 3);
 
 // Calculate remaining reading time for posts not shown
-const remainingPosts = allPosts.slice(3);
+const remainingPosts = localizedPosts.slice(3);
 const remainingMinutes = remainingPosts.reduce((total, post) => {
-  return total + getReadingTime(post.body || "");
+  return total + getReadingTime(post.entry.body || "");
 }, 0);
 ---
 
 <section class="blog" id="blog">
   <div class="blog__container">
     <div class="blog__header">
-      <span class="blog__label">MY WRITING</span>
-      <h2 class="blog__heading">Latest from the blog</h2>
+      <span class="blog__label">{copy.label}</span>
+      <h2 class="blog__heading">{copy.latest}</h2>
     </div>
 
     <div class="blog__grid">
       {
-        sortedPosts.map((post, index) => {
+        sortedPosts.map(({ entry: post, translationKey, isFallback }, index) => {
           const readingTime = getReadingTime(post.body || "");
           const animationDelay = index * 0.1; // 100ms = 0.1s per post
 
@@ -44,9 +53,11 @@ const remainingMinutes = remainingPosts.reduce((total, post) => {
                 pubDate={post.data.pubDate}
                 readingTime={readingTime}
                 tags={post.data.tags}
-                href={`/blog/${post.id}/`}
+                href={`/blog/${translationKey}/`}
                 heroImage={post.data.heroImage}
                 heroImageAlt={post.data.heroImageAlt}
+                locale={locale}
+                englishOnly={isFallback}
               />
             </AnimateOnScroll>
           );
@@ -55,9 +66,9 @@ const remainingMinutes = remainingPosts.reduce((total, post) => {
     </div>
 
     <div class="blog__footer">
-      <p class="blog__thanks">Thanks for reading this far.</p>
+      <p class="blog__thanks">{copy.thanks}</p>
       <Button as="a" href="/blog/" waveState="hover" class="blog__view-all">
-        {remainingMinutes > 0 ? `There's ${remainingMinutes} more minutes of blog posts in here →` : "View all posts →"}
+        {remainingMinutes > 0 ? `${copy.moreMinutesPrefix} ${remainingMinutes} ${copy.moreMinutesSuffix}` : copy.viewAll}
       </Button>
     </div>
   </div>
