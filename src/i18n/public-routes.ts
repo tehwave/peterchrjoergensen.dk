@@ -2,6 +2,7 @@ export const BLOG_TRANSLATION_KEYS = [
   "adding-comments-with-giscus",
   "building-performance-first-websites",
   "godot-cli-on-macos-zsh",
+  "localizing-this-website-without-changing-its-urls",
   "quick-dirty-webrtc-manual-signaling",
   "rebuilt-my-site-with-astro",
   "welcome",

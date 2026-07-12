@@ -1,6 +1,6 @@
 ---
 name: peterchrjoergensen-dk
-description: Use when working anywhere in the peterchrjoergensen.dk repository or when a request mixes portfolio strategy, writing, SEO, performance, documentation, instructions, Lovable prompts, or Cloudflare deployment concerns.
+description: Use when working anywhere in the peterchrjoergensen.dk repository or when a request mixes portfolio strategy, writing, SEO, performance, documentation, instructions, browser experiments, tracker work, or Cloudflare deployment concerns.
 ---
 
 # peterchrjoergensen.dk
@@ -25,17 +25,18 @@ Repository code, manifests, schemas, README rollout notes, and scoped instructio
 
 Load the smallest set of project-local skills that covers the task:
 
-| Task                                                             | Skill                      |
-| ---------------------------------------------------------------- | -------------------------- |
-| Portfolio positioning, audience, sections, messaging             | `portfolio-advisor`        |
-| Blog MDX, translations, technical articles, article images       | `blog-post-writer`         |
-| Project cards, case studies, project research, tags and alt text | `project-portfolio-writer` |
-| SEO, metadata, structured data, crawl/index behavior             | `seo-specialist`           |
-| Lighthouse and performance analysis without implementation       | `lighthouse-auditor`       |
-| Workers, Pages, DNS, domains, caching, security, deployment      | `cloudflare-deployment`    |
-| README, API docs, comments, JSDoc/TSDoc                          | `documenting-project`      |
-| Copilot instructions, path instructions, `AGENTS.md`             | `instruction-architect`    |
-| Copy-paste prompts for Lovable.dev                               | `lovable-prompting`        |
+| Task                                                             | Skill                            |
+| ---------------------------------------------------------------- | -------------------------------- |
+| Portfolio positioning, audience, sections, messaging             | `portfolio-advisor`              |
+| Blog MDX, translations, technical articles, article images       | `blog-post-writer`               |
+| Project cards, case studies, project research, tags and alt text | `project-portfolio-writer`       |
+| SEO, metadata, structured data, crawl/index behavior             | `seo-specialist`                 |
+| Lighthouse and performance analysis without implementation       | `lighthouse-auditor`             |
+| Workers, Pages, DNS, domains, caching, security, deployment      | `cloudflare-deployment`          |
+| Browser multiplayer, WebRTC, PixiJS, game feel, mobile testing   | `browser-multiplayer-experiment` |
+| Private tracker state, components, imports, toasts, gamification | `tracker-app`                    |
+| README, API docs, comments, JSDoc/TSDoc                          | `documenting-project`            |
+| Copilot instructions, path instructions, `AGENTS.md`             | `instruction-architect`          |
 
 For mixed tasks: establish strategy and facts, edit content, apply SEO, inspect rendered output, measure, then prepare deployment. Respect each skill's boundary.
 
