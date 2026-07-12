@@ -7,16 +7,14 @@
  * scroll position to provide orientation on long pages.
  */
 import Button from "./Button.astro";
-import LocaleSwitch from "./LocaleSwitch.astro";
 import type { Locale } from "../i18n/locale";
 import { getMessages } from "../i18n/messages";
 
 interface Props {
   locale?: Locale;
-  showLocaleSwitch?: boolean;
 }
 
-const { locale = "en", showLocaleSwitch = false } = Astro.props;
+const { locale = "en" } = Astro.props;
 const copy = getMessages(locale).navigation;
 ---
 
@@ -27,7 +25,6 @@ const copy = getMessages(locale).navigation;
       <a href="/#projects" class="header__nav-link">{copy.projects}</a>
       <a href="/#ai" class="header__nav-link">{copy.ai}</a>
       <a href="/#blog" class="header__nav-link">{copy.blog}</a>
-      {showLocaleSwitch && <LocaleSwitch locale={locale} />}
     </nav>
   </div>
 </header>

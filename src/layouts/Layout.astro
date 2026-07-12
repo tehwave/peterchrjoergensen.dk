@@ -183,11 +183,11 @@ const socialImageURL = new URL(image, Astro.site);
       }
     </style>
     <a href="#main-content" class="skip-link">{copy.navigation.skipToContent}</a>
-    <Header locale={locale} showLocaleSwitch={localized} />
+    <Header locale={locale} />
     <Surface as="main" tone="light" width="full" height="auto" depth="end" id="main-content" class="page-surface">
       <slot />
     </Surface>
-    <Footer locale={locale} />
+    <Footer locale={locale} showLocaleSwitch={localized} />
     <script>
       import "../utils/analytics";
     </script>
