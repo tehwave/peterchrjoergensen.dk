@@ -1,0 +1,56 @@
+---
+locale: en
+translationKey: localizing-this-website-without-changing-its-urls
+title: "How I Localized This Website Without Changing Existing URLs"
+description: "The prompt, architecture, and review process I used to add English and Danish to this Astro site while keeping every existing public URL stable."
+pubDate: 2026-07-12
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "localization", "cloudflare", "ai"]
+heroImage: "../../assets/blog/localizing-this-website-without-changing-its-urls/hero.jpg"
+heroImageAlt: "A single building facade divided down the middle, orange with a window on the left and green with a door on the right"
+heroImageCaption: "Photo by [Martin LONGIN](https://unsplash.com/@maralalon) on [Unsplash](https://unsplash.com/photos/a-green-and-orange-building-with-a-window-j-DcciPBx-Y)"
+---
+
+Adding a language switch is easy. Keeping every existing link intact is the hard part.
+
+I wanted English and Danish on this website without making every address choose a language.
+
+## Why we are doing this
+
+The starting prompt was one sentence:
+
+> “I need a way to automatically switch between English and Danish content on the same domain and without any domain pathing.”
+
+Most visits do not start at the homepage. They start at an old bookmark, a project page, a search result, or a link someone shared. Keeping those addresses stable was more important to me than having a perfectly separated URL for each language.
+
+I wanted the browser language to be a useful default, but a deliberate choice should win and stay remembered. The page should also arrive in the right language. Changing all the text after the page has loaded would leave the first HTML response, metadata, and social previews in the wrong language.
+
+## How Astro and Cloudflare helped
+
+Astro was already handling the content and page building, so it could do most of this without changing what the site is. The site is mostly pages, articles, and projects that can be prepared before anyone visits. Astro builds an English edition and a Danish edition ahead of time, using the same layouts and navigation for both.
+
+That means I can review the translations as part of the normal build. There is no runtime translation, database, or large server application involved. The deployment simply has two finished versions of each page ready to serve.
+
+Cloudflare handles the one thing a static build cannot decide in advance. A small Worker sits in front of the finished pages and chooses which version to return for this visitor. It checks a saved choice first and the browser language second. The address in the browser stays exactly as it was.
+
+That split is what makes the solution fit. Astro prepares the content. Cloudflare makes the small request-time choice. Everything else, including images, experiments, and the private tracker, can keep using the normal static path.
+
+## How I implemented it
+
+I added English and Danish as two versions of the same content. The navigation, footer, headings, notices, and accessibility text have translations too, so the surrounding site does not switch language halfway through a page.
+
+When someone visits, a saved language choice wins. If there is no saved choice, the browser preference is used. English is the fallback when neither says anything useful. The language switcher stores the choice and reloads the same address.
+
+The language decision only applies to public content. Experiments, the tracker, images, and other static files keep their existing behaviour. If a Danish article is not ready, the rest of the page can still be Danish while that article falls back to English.
+
+The selected language also follows through to the document itself: the visible copy, page title, description, dates, sharing information, and the language metadata. I tested old links, missing translations, browser preferences, saved choices, redirects, and routes that should not be translated.
+
+## Takeaways
+
+The same-URL requirement ended up choosing the architecture for me. Astro gives me finished language versions without making the site heavier. Cloudflare adds just enough logic to choose between them when a request arrives.
+
+There is a trade-off. Search engines and caching have an easier time when each language has its own address. I accepted that complexity because keeping the existing links working matters more for this site.
+
+The agent handled a lot of repetitive changes across the project, but it did not decide that trade-off. That part was still mine, as were the review and the tests around old links and unrelated routes.
+
+Now someone can open an existing link and get the language they expect without the address changing. That is the whole feature.

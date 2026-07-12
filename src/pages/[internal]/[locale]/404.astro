@@ -1,0 +1,115 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import type { Locale } from "../../../i18n/locale";
+import { LOCALES } from "../../../i18n/locale";
+import { getMessages } from "../../../i18n/messages";
+
+export function getStaticPaths() {
+  return LOCALES.map((locale) => ({ params: { internal: "__i18n", locale }, props: { locale } }));
+}
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = getMessages(locale);
+---
+
+<Layout locale={locale} localized title={copy.metadata.notFoundTitle} description={copy.metadata.notFoundDescription}>
+  <section class="not-found">
+    <div class="not-found__container">
+      <h1 class="not-found__title">{copy.notFound.heading}</h1>
+      <p class="not-found__description">{copy.notFound.body}</p>
+      <div class="not-found__actions">
+        <a class="not-found__link not-found__link--primary" href="/">{copy.notFound.home}</a>
+        <a class="not-found__link not-found__link--secondary" href="/blog/">{copy.navigation.blog}</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline type="module">
+    window.trackEvent?.(`404: ${window.location.pathname}`);
+  </script>
+</Layout>
+
+<style lang="scss">
+  @use "../../../styles/variables" as *;
+  @use "../../../styles/mixins" as *;
+
+  .not-found {
+    display: grid;
+    align-content: center;
+    min-height: calc(100vh - #{$header-height});
+    padding: calc(#{$header-height} + #{$space-3xl}) 0 $space-3xl;
+    background: $color-bg;
+
+    @include respond-to(md) {
+      padding: calc(#{$header-height} + #{$space-2xl}) 0 $space-3xl;
+    }
+
+    &__container {
+      @include container;
+      display: grid;
+      align-content: center;
+      gap: $space-lg;
+      max-width: $max-width-text;
+    }
+
+    &__title {
+      @include section-heading;
+      margin: 0 0 $space-xs;
+      color: $color-text-primary;
+      font-size: $font-size-4xl;
+      font-weight: $font-weight-bold;
+      letter-spacing: $tracking-tight;
+      line-height: $leading-snug;
+    }
+
+    &__description {
+      max-width: 52ch;
+      margin: 0 0 $space-md;
+      color: $color-text-secondary;
+      font-size: $font-size-lg;
+      line-height: $leading-relaxed;
+    }
+
+    &__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-md;
+    }
+
+    &__link {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-sm;
+      padding: $space-sm $space-lg;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      text-decoration: none;
+      border-radius: 999px;
+      @include transition(transform, var(--duration-fast), var(--ease-out));
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      &:focus-visible {
+        outline: 2px solid $color-orange;
+        outline-offset: 3px;
+      }
+
+      &--primary {
+        color: $color-white;
+        background: $color-orange;
+      }
+
+      &--secondary {
+        color: $color-text-primary;
+        background: $color-bg-alt;
+        border: 1px solid $color-border;
+      }
+    }
+  }
+</style>

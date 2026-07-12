@@ -1,0 +1,685 @@
+---
+/**
+ * Dynamic Blog Post Page
+ *
+ * Renders individual blog posts with full SEO optimization.
+ * Supports both Markdown (.md) and MDX (.mdx) formats.
+ *
+ * Features:
+ * - Full Open Graph and Twitter Card meta tags
+ * - JSON-LD structured data for search engines
+ * - Automatic table of contents generation from headings
+ * - Hero image support with optimization
+ * - Author and publication date metadata
+ * - Tag display for categorization
+ *
+ * The [...slug] pattern creates a catch-all route that matches any blog post ID.
+ */
+import { getCollection, type CollectionEntry, render } from "astro:content";
+import Layout from "../../../../layouts/Layout.astro";
+import { Picture } from "astro:assets";
+import AuthorBio from "../../../../components/AuthorBio.astro";
+import { getReadingTime, getWordCount } from "../../../../utils/reading-time";
+import { fadeAnimation } from "../../../../utils/transitions";
+import { parseInlineMarkdown } from "../../../../utils/markdown";
+import TranslationNotice from "../../../../components/TranslationNotice.astro";
+import type { Locale } from "../../../../i18n/locale";
+import { LOCALES, localeMetadata } from "../../../../i18n/locale";
+import { getMessages } from "../../../../i18n/messages";
+import { groupTranslations, selectTranslation } from "../../../../i18n/content";
+
+/**
+ * Generate static paths for all blog posts at build time
+ *
+ * Astro calls this function during the build process to create
+ * a static HTML file for each blog post.
+ */
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  const groups = Array.from(groupTranslations(posts).values()).sort((a, b) => b.en.data.pubDate.valueOf() - a.en.data.pubDate.valueOf());
+
+  return LOCALES.flatMap((locale) =>
+    groups.map((group) => {
+      const selection = selectTranslation(group, locale);
+      return {
+        params: { internal: "__i18n", locale, slug: group.translationKey },
+        props: { locale, translationKey: group.translationKey, ...selection },
+      };
+    }),
+  );
+}
+
+type Props = {
+  locale: Locale;
+  translationKey: string;
+  entry: CollectionEntry<"blog">;
+  contentLocale: Locale;
+  isFallback: boolean;
+};
+
+const { locale, translationKey, entry: post, contentLocale, isFallback } = Astro.props;
+const copy = getMessages(locale);
+
+// Render the Markdown/MDX content into HTML
+// Content: The rendered component to display the post body
+const { Content } = await render(post);
+
+// Calculate reading time and word count from post body
+const readingTime = getReadingTime(post.body ?? "");
+const wordCount = getWordCount(post.body ?? "");
+
+// Generate canonical URL for SEO
+const canonicalURL = new URL(`/blog/${translationKey}/`, Astro.site);
+
+// Extract frontmatter data from the post
+const { title, description, pubDate, updatedDate, author, tags, heroImage, heroImageAlt, heroImageCaption } = post.data;
+
+/**
+ * Generate JSON-LD structured data for search engines
+ *
+ * This helps Google and other search engines understand the content
+ * and display rich results in search (author, date, etc.)
+ *
+ * @see https://schema.org/BlogPosting
+ * @see https://schema.org/BreadcrumbList
+ */
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": canonicalURL + "#article",
+      headline: title,
+      description: description,
+      url: canonicalURL.toString(),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalURL.toString(),
+      },
+      author: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: author,
+      },
+      publisher: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: "Peter Chr. Jørgensen",
+        url: "https://peterchrjoergensen.dk",
+      },
+      datePublished: pubDate.toISOString(),
+      ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+      inLanguage: localeMetadata[contentLocale].inLanguage,
+      wordCount: wordCount,
+      keywords: tags?.join(", ") || "",
+      articleSection: "Blog",
+      articleBody: post.body,
+      ...(heroImage && {
+        image: {
+          "@type": "ImageObject",
+          url: new URL(heroImage.src, Astro.site).toString(),
+          width: heroImage.width,
+          height: heroImage.height,
+        },
+        thumbnailUrl: new URL(heroImage.src, Astro.site).toString(),
+      }),
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: copy.article.homeBreadcrumb,
+          item: "https://peterchrjoergensen.dk",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Blog",
+          item: "https://peterchrjoergensen.dk/blog",
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: title,
+          item: canonicalURL.toString(),
+        },
+      ],
+    },
+  ],
+};
+---
+
+<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={description}>
+  <Fragment slot="head">
+    <!-- 
+			Social Media Meta Tags
+			These control how the post appears when shared on social platforms
+		-->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {heroImage && <meta property="og:image" content={new URL(heroImage.src, Astro.site)} />}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content={heroImage ? "summary_large_image" : "summary"} />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    {heroImage && <meta property="twitter:image" content={new URL(heroImage.src, Astro.site)} />}
+
+    <!-- Article metadata -->
+    <meta property="article:published_time" content={pubDate.toISOString()} />
+    {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
+    <meta property="article:author" content={author} />
+    {tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Structured data -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </Fragment>
+
+  <article class="blog-post" lang={contentLocale} transition:animate={fadeAnimation}>
+    <div class="blog-post__header-container">
+      <header class="blog-post__header">
+        <div class="blog-post__meta">
+          <a href="/blog/" class="blog-post__back-link">
+            <span aria-hidden="true">&larr;</span>
+            {copy.navigation.blog}
+          </a>
+          <span class="meta-separator" aria-hidden="true">&middot;</span>
+          <time datetime={pubDate.toISOString()} class="meta-item">
+            {
+              pubDate.toLocaleDateString(locale === "da" ? "da-DK" : "en-US", {
+                year: "numeric",
+                month: "long",
+              })
+            }
+          </time>
+          <span class="meta-separator" aria-hidden="true">&middot;</span>
+          <span class="meta-item read-time" aria-label={`${readingTime} ${copy.article.minuteReadLabel}`}>
+            {readingTime}
+            {copy.article.minuteRead}
+          </span>
+        </div>
+
+        <h1>{title}</h1>
+
+        <p class="blog-post__description">
+          {description}
+        </p>
+
+        <div class="blog-post__divider" aria-hidden="true">&middot;</div>
+      </header>
+    </div>
+
+    {
+      heroImage && (
+        <figure class="blog-post__hero-figure">
+          <div class="blog-post__hero">
+            <Picture src={heroImage} alt={heroImageAlt || title} formats={["avif", "webp"]} widths={[800, 1200, 1600, 2400]} sizes="100vw" loading="eager" fetchpriority="high" inferSize={true} />
+          </div>
+          {heroImageCaption && <figcaption class="blog-post__hero-caption" set:html={parseInlineMarkdown(heroImageCaption)} />}
+        </figure>
+      )
+    }
+
+    <div class="blog-post__content">
+      {isFallback && <TranslationNotice locale={locale} />}
+      <div class="blog-post__prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  <AuthorBio locale={locale} />
+
+  <section class="blog-post__comments">
+    <div class="blog-post__giscus" id="giscus" data-locale={locale}></div>
+  </section>
+</Layout>
+
+<script>
+  /**
+   * Initialize Giscus comments system
+   * Handles both initial load and re-initialization on view transitions
+   */
+  function initGiscus() {
+    const container = document.getElementById("giscus");
+    if (!container) return;
+
+    // Clear existing giscus iframe if it exists
+    container.innerHTML = "";
+
+    // Create and configure giscus script
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.setAttribute("data-repo", "tehwave/peterchrjoergensen.dk");
+    script.setAttribute("data-repo-id", "MDEwOlJlcG9zaXRvcnk5NjI0MTM2Mw==");
+    script.setAttribute("data-category", "Blog Post Comments");
+    script.setAttribute("data-category-id", "DIC_kwDOBbyG084C09L1");
+    script.setAttribute("data-mapping", "pathname");
+    script.setAttribute("data-strict", "0");
+    script.setAttribute("data-reactions-enabled", "1");
+    script.setAttribute("data-emit-metadata", "0");
+    script.setAttribute("data-input-position", "top");
+    script.setAttribute("data-theme", "light");
+    script.setAttribute("data-lang", container.dataset.locale === "da" ? "da" : "en");
+    script.setAttribute("data-loading", "lazy");
+    script.setAttribute("crossorigin", "anonymous");
+    script.async = true;
+
+    container.appendChild(script);
+  }
+
+  /**
+   * Simple parallax effect for blog post hero image
+   * Adapted from Hero.astro but without 3D tilt complexity
+   */
+  function initParallax() {
+    const hero = document.querySelector(".blog-post__hero") as HTMLElement;
+
+    // Early return if hero image doesn't exist on this page
+    if (!hero) return;
+
+    // Respect user's motion preferences (WCAG 2.3.3)
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) return;
+
+    function handleParallax() {
+      const scrollY = window.scrollY;
+      const heroBottom = hero.offsetTop + hero.offsetHeight;
+
+      // Only apply parallax while hero is visible
+      if (scrollY < heroBottom) {
+        // Subtle parallax - reduced on mobile for better performance
+        const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+        const parallaxFactor = isMobile ? 0.015 : 0.05;
+        const parallaxOffset = scrollY * parallaxFactor;
+        // Reverse parallax - image moves up as you scroll down
+        hero.style.transform = `translateY(-${parallaxOffset}px)`;
+      }
+    }
+
+    // Attach scroll listener with passive flag for better performance
+    window.addEventListener("scroll", handleParallax, { passive: true });
+
+    // Cleanup function for view transitions
+    const cleanup = () => {
+      window.removeEventListener("scroll", handleParallax);
+      // Reset transform on cleanup
+      if (hero) {
+        hero.style.transform = "";
+      }
+    };
+
+    // Register cleanup before navigation
+    document.addEventListener("astro:before-preparation", cleanup, {
+      once: true,
+    });
+  }
+
+  // Run on initial page load
+  initGiscus();
+  initParallax();
+
+  // Re-initialize after view transitions
+  document.addEventListener("astro:page-load", () => {
+    initGiscus();
+    initParallax();
+  });
+</script>
+
+<style lang="scss">
+  @use "../../../../styles/variables" as *;
+  @use "../../../../styles/mixins" as *;
+
+  // Layout
+  .blog-post {
+    padding-top: $header-height;
+
+    @include respond-to(md) {
+      padding-top: calc($header-height - 20px);
+    }
+  }
+
+  // Post header section
+  .blog-post__header-container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-4xl $space-xl $space-3xl;
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg $space-2xl;
+    }
+  }
+
+  .blog-post__header {
+    max-width: calc($max-width-text * 1.4);
+    margin: 0 auto;
+    text-align: center;
+
+    h1 {
+      font-size: 4.5rem;
+      font-weight: $font-weight-bold;
+      line-height: 1.1;
+      margin: 0 0 $space-lg 0;
+      color: $color-text-primary;
+
+      @include respond-to(md) {
+        font-size: $font-size-3xl;
+      }
+    }
+  }
+
+  .blog-post__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    color: $color-text-secondary;
+    font-size: inherit;
+    text-decoration: none;
+    @include transition(color);
+    @include focus-visible;
+
+    &:hover {
+      color: $color-orange;
+    }
+  }
+
+  .blog-post__description {
+    font-size: $font-size-xl;
+    line-height: 1.5;
+    color: $color-text-secondary;
+    margin: 0 auto $space-2xl auto;
+    max-width: $max-width-text;
+
+    @include respond-to(md) {
+      font-size: $font-size-lg;
+    }
+  }
+
+  .blog-post__meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $space-sm;
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    margin-bottom: $space-3xl;
+
+    .meta-separator {
+      color: $color-text-muted;
+    }
+  }
+
+  .blog-post__divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: $space-3xl auto 0;
+    color: $color-text-muted;
+
+    &::before,
+    &::after {
+      content: "";
+      width: 48px;
+      height: 1px;
+      background-color: $color-border;
+    }
+
+    &::before {
+      margin-right: $space-lg;
+    }
+
+    &::after {
+      margin-left: $space-lg;
+    }
+  }
+
+  // Hero image section
+  .blog-post__hero-figure {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 $space-xl;
+
+    @include respond-to(md) {
+      padding: 0 $space-lg;
+    }
+  }
+
+  .blog-post__hero {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    border-radius: 24px;
+    will-change: transform;
+
+    // Only apply transition if user hasn't requested reduced motion
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.1s ease-out;
+    }
+
+    @include respond-to(lg) {
+      aspect-ratio: 16 / 9;
+    }
+
+    @include respond-to(md) {
+      aspect-ratio: 3 / 2;
+      border-radius: 16px;
+    }
+
+    :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .blog-post__hero-caption {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-sm $space-xl 0;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-align: center;
+    font-style: italic;
+
+    @include respond-to(md) {
+      padding: $space-xs $space-lg 0;
+    }
+  }
+
+  // Content section
+  .blog-post__content {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $space-4xl $space-xl $space-2xl; // reduced bottom padding
+
+    @include respond-to(md) {
+      padding: $space-3xl $space-lg $space-xl; // reduced bottom padding
+    }
+  }
+
+  // Prose styles
+  .blog-post__prose {
+    max-width: $max-width-text;
+    margin: 0 auto;
+    font-size: $font-size-lg;
+    line-height: 1.75;
+    color: $color-text-primary;
+
+    @include respond-to(md) {
+      font-size: $font-size-base;
+    }
+
+    // Typography
+    :global(h2),
+    :global(h3),
+    :global(h4) {
+      font-weight: $font-weight-bold;
+      line-height: 1.3;
+      color: $color-text-primary;
+    }
+
+    :global(h2) {
+      font-size: $font-size-2xl;
+      margin-top: $space-4xl;
+      margin-bottom: $space-lg;
+
+      @include respond-to(md) {
+        font-size: $font-size-xl;
+        margin-top: $space-3xl;
+      }
+    }
+
+    :global(h3) {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      margin-top: $space-3xl;
+      margin-bottom: $space-md;
+
+      @include respond-to(md) {
+        font-size: $font-size-lg;
+        margin-top: $space-2xl;
+      }
+    }
+
+    :global(h4) {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      margin-top: $space-2xl;
+      margin-bottom: $space-sm;
+    }
+
+    :global(p) {
+      margin-bottom: $space-xl;
+    }
+
+    // Links
+    :global(a) {
+      color: $color-accent;
+      text-decoration: underline;
+      @include transition(opacity);
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    // Lists
+    :global(ul),
+    :global(ol) {
+      margin-bottom: $space-xl;
+      padding-left: $space-2xl;
+    }
+
+    :global(li) {
+      margin-bottom: $space-sm;
+    }
+
+    // Code
+    :global(code) {
+      background: $color-cream;
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: ui-monospace, "Courier New", monospace;
+      color: $color-text-primary;
+      font-weight: 600;
+    }
+
+    :global(pre) {
+      background: $color-code-bg;
+      padding: $space-xl;
+      border-radius: 16px;
+      overflow-x: auto;
+      margin: $space-2xl 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      @include respond-to(md) {
+        padding: $space-lg;
+        border-radius: 12px;
+      }
+
+      :global(code) {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        color: $color-code-text;
+        line-height: 1.6;
+      }
+    }
+
+    // Blockquotes
+    :global(blockquote) {
+      border-left: 4px solid $color-accent;
+      padding-left: $space-xl;
+      margin: $space-2xl 0;
+      font-style: italic;
+      color: $color-text-secondary;
+    }
+
+    // Images and figures
+    :global(img),
+    :global(figure) {
+      margin-block: $space-3xl;
+
+      @include respond-to(lg) {
+        margin-block: $space-2xl;
+      }
+    }
+
+    :global(img) {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 24px;
+
+      @include respond-to(md) {
+        border-radius: 16px;
+      }
+    }
+
+    :global(figcaption) {
+      max-width: $max-width;
+      margin: 0 auto;
+      padding: $space-lg $space-xl 0;
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      text-align: center;
+      font-style: italic;
+
+      @include respond-to(md) {
+        padding: $space-md $space-lg 0;
+      }
+    }
+  }
+
+  // Comments section
+  .blog-post__comments {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $space-xl $space-4xl;
+
+    @include respond-to(md) {
+      padding: 0 $space-lg $space-3xl;
+    }
+  }
+
+  .blog-post__giscus {
+    max-width: $max-width-text;
+    margin: 0 auto;
+  }
+</style>

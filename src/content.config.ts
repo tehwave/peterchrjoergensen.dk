@@ -19,6 +19,8 @@ const blog = defineCollection({
   schema: ({ image }) =>
     z.object({
       // Required fields
+      locale: z.enum(["en", "da"]),
+      translationKey: z.string().min(1),
       title: z.string(),
       description: z.string(), // Used for meta description and post previews
       pubDate: z.coerce.date(), // Automatically coerced from string to Date object
@@ -45,6 +47,8 @@ const projectsFeatured = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
   schema: ({ image }) =>
     z.object({
+      locale: z.enum(["en", "da"]),
+      translationKey: z.string().min(1),
       title: z.string(),
       description: z.string(),
       category: z.enum(["web", "games", "creative"]),

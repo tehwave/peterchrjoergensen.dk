@@ -1,0 +1,28 @@
+---
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = getMessages(locale).article;
+---
+
+<aside class="translation-notice" role="note">{copy.translationNotice}</aside>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .translation-notice {
+    max-width: $max-width-text;
+    margin: 0 auto $space-xl;
+    padding: $space-md $space-lg;
+    color: $color-text-primary;
+    background: rgba($color-orange, 0.12);
+    border-inline-start: 4px solid $color-orange;
+    border-radius: $radius-sm;
+  }
+</style>

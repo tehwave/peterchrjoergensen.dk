@@ -1,0 +1,156 @@
+---
+import Surface from "../../components/Surface.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Material surfaces · Peter Chr. Jørgensen" description="A rendered specimen of the site's reusable dark, blue and light material surfaces.">
+  <div class="surface-lab">
+    <Surface as="section" tone="dark" depth="start" labelledby="dark-surface-heading">
+      <div class="surface-lab__section">
+        <p class="surface-lab__eyebrow">Full-width dark</p>
+        <h1 id="dark-surface-heading">Deep blue, quiet depth.</h1>
+        <p>Cool type, repeated ripples and a restrained wash of light give focused sections a material presence.</p>
+      </div>
+    </Surface>
+
+    <Surface as="section" tone="blue" depth="end" labelledby="blue-surface-heading">
+      <div class="surface-lab__section">
+        <p class="surface-lab__eyebrow">Full-width blue</p>
+        <h2 id="blue-surface-heading">The brighter blue from the original hero.</h2>
+        <p>More open and energetic than the deep-blue surface, while keeping the same cool type, ripples and grain.</p>
+      </div>
+    </Surface>
+
+    <Surface as="section" tone="light" depth="end" labelledby="light-surface-heading">
+      <div class="surface-lab__section">
+        <p class="surface-lab__eyebrow">Full-width light</p>
+        <h2 id="light-surface-heading">Warm paper for the longer story.</h2>
+        <p>The fibre and pulp texture keeps reading surfaces tactile without competing with the content.</p>
+      </div>
+    </Surface>
+
+    <section class="surface-lab__cards" aria-labelledby="surface-card-heading">
+      <div class="surface-lab__cards-intro">
+        <p class="surface-lab__eyebrow">Contained examples</p>
+        <h2 id="surface-card-heading">The same material, at card scale.</h2>
+      </div>
+
+      <div class="surface-lab__card-grid">
+        <Surface as="article" tone="dark" depth="end" class="surface-lab__card" labelledby="dark-card-heading">
+          <div class="surface-lab__card-content">
+            <h3 id="dark-card-heading">Dark card</h3>
+            <p>Consumers define the card padding, size and corners.</p>
+            <a href="#light-card-heading">See its light counterpart</a>
+          </div>
+        </Surface>
+
+        <Surface as="article" tone="light" depth="start" class="surface-lab__card" labelledby="light-card-heading">
+          <div class="surface-lab__card-content">
+            <h3 id="light-card-heading">Light card</h3>
+            <p>The primitive only supplies material, color and depth.</p>
+            <a href="#dark-surface-heading">Back to the dark section</a>
+          </div>
+        </Surface>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style lang="scss">
+  @use "../../styles/variables" as *;
+  @use "../../styles/mixins" as *;
+
+  .surface-lab {
+    &__section,
+    &__cards {
+      padding: clamp(5rem, 11vw, 9rem) max($space-lg, calc((100vw - #{$max-width}) / 2));
+    }
+
+    &__section {
+      display: grid;
+      gap: $space-lg;
+      min-height: min(70svh, 48rem);
+      align-content: center;
+
+      h1,
+      h2 {
+        max-width: 12ch;
+        color: var(--surface-heading);
+        font-size: clamp(3rem, 8vw, 7rem);
+        line-height: 0.96;
+      }
+
+      p:last-child {
+        max-width: 40rem;
+        color: var(--surface-text);
+        font-size: clamp($font-size-lg, 2vw, $font-size-2xl);
+      }
+    }
+
+    &__eyebrow {
+      color: var(--surface-accent, $color-orange-dark);
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      letter-spacing: $tracking-widest;
+      text-transform: uppercase;
+    }
+
+    &__cards {
+      display: grid;
+      gap: $space-2xl;
+    }
+
+    &__cards-intro {
+      display: grid;
+      gap: $space-sm;
+
+      h2 {
+        max-width: 18ch;
+        color: $color-blue-dark;
+        font-size: $font-size-4xl;
+      }
+    }
+
+    &__card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: $space-xl;
+
+      @include respond-to(md) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    :global(.surface-lab__card) {
+      min-height: 22rem;
+      border: 1px solid var(--surface-border);
+      border-radius: $radius-xl;
+      box-shadow: $shadow-lg;
+    }
+
+    &__card-content {
+      display: grid;
+      gap: $space-md;
+      min-height: 22rem;
+      align-content: end;
+      padding: clamp($space-xl, 5vw, $space-3xl);
+
+      h3 {
+        color: var(--surface-heading);
+        font-size: $font-size-3xl;
+      }
+
+      p {
+        max-width: 30ch;
+        color: var(--surface-text);
+      }
+
+      a {
+        width: fit-content;
+        color: var(--surface-link);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+  }
+</style>

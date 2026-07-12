@@ -9,32 +9,37 @@
  */
 import "../styles/global.scss";
 import { Font } from "astro:assets";
-import { getImage } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
-import textureSource from "../assets/black-paper.png";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-
-// Generate optimized texture images at build time
-const textureAVIF = await getImage({ src: textureSource, format: "avif" });
-const textureWebP = await getImage({ src: textureSource, format: "webp" });
-const textureFallback = await getImage({ src: textureSource, format: "png" });
+import Surface from "../components/Surface.astro";
+import type { Locale } from "../i18n/locale";
+import { localeMetadata } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
 interface Props {
   title: string;
   description?: string;
   image?: string;
   type?: "website" | "article";
+  locale?: Locale;
+  contentLocale?: Locale;
+  localized?: boolean;
 }
 
-const { title, description = "Personal website built with Astro", image = "/og-image.png", type = "website" } = Astro.props;
+const { title, description, image = "/og-image.png", type = "website", locale = "en", contentLocale = locale, localized = false } = Astro.props;
+const copy = getMessages(locale);
+const resolvedDescription = description ?? copy.metadata.siteDescription;
+const documentLanguage = localeMetadata[locale];
+const contentLanguage = localeMetadata[contentLocale];
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const publicPath = Astro.url.pathname.replace(/^\/__i18n\/(?:en|da)(?=\/|$)/, "") || "/";
+const canonicalURL = new URL(publicPath, Astro.site);
 const socialImageURL = new URL(image, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={documentLanguage.htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,7 +47,7 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
-    <meta name="description" content={description} />
+    <meta name="description" content={resolvedDescription} />
     <meta name="author" content="Peter Chr. Jørgensen" />
     <meta name="robots" content="index, follow" />
     <meta name="generator" content={Astro.generator} />
@@ -72,16 +77,16 @@ const socialImageURL = new URL(image, Astro.site);
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={resolvedDescription} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:site_name" content="Peter Chr. Jørgensen" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={contentLanguage.openGraphLocale} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={resolvedDescription} />
     <meta name="twitter:image" content={socialImageURL} />
 
     <!-- Sitemap -->
@@ -99,8 +104,8 @@ const socialImageURL = new URL(image, Astro.site);
             "@id": "https://peterchrjoergensen.dk/#website",
             name: "Peter Chr. Jørgensen",
             url: "https://peterchrjoergensen.dk",
-            description: "Personal website built with Astro",
-            inLanguage: "en-US",
+            description: copy.metadata.siteDescription,
+            inLanguage: documentLanguage.inLanguage,
             publisher: {
               "@id": "https://peterchrjoergensen.dk/#person",
             },
@@ -111,8 +116,8 @@ const socialImageURL = new URL(image, Astro.site);
             name: "Peter Chr. Jørgensen",
             url: "https://peterchrjoergensen.dk",
             image: "https://peterchrjoergensen.dk/og-image.png",
-            jobTitle: "Web Developer",
-            description: "Web developer and game developer from Denmark specializing in Laravel, WordPress, Unity, and Vue.js",
+            jobTitle: copy.metadata.jobTitle,
+            description: copy.metadata.personDescription,
             knowsAbout: ["Laravel", "WordPress", "Unity", "Vue.js", "TypeScript", "PHP", "JavaScript", "C#", "Web Development", "Game Development"],
             sameAs: ["https://www.linkedin.com/in/peterchrjoergensen", "https://github.com/peterchrjoergensen", "https://twitter.com/tehwave"],
             mainEntityOfPage: {
@@ -124,14 +129,14 @@ const socialImageURL = new URL(image, Astro.site);
             "@id": canonicalURL + "#webpage",
             url: canonicalURL,
             name: title,
-            description: description,
+            description: resolvedDescription,
             isPartOf: {
               "@id": "https://peterchrjoergensen.dk/#website",
             },
             about: {
               "@id": "https://peterchrjoergensen.dk/#person",
             },
-            inLanguage: "en-US",
+            inLanguage: contentLanguage.inLanguage,
           },
         ],
       })}
@@ -148,13 +153,7 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- Page-specific head content -->
     <slot name="head" />
   </head>
-  <body
-    style={{
-      "--texture-avif": `url(${textureAVIF.src})`,
-      "--texture-webp": `url(${textureWebP.src})`,
-      "--texture-fallback": `url(${textureFallback.src})`,
-    }}
-  >
+  <body>
     <!-- 
       Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
       Allows keyboard users to skip navigation and jump directly to main content.
@@ -183,12 +182,12 @@ const socialImageURL = new URL(image, Astro.site);
         top: 0;
       }
     </style>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <Header />
-    <main id="main-content">
+    <a href="#main-content" class="skip-link">{copy.navigation.skipToContent}</a>
+    <Header locale={locale} showLocaleSwitch={localized} />
+    <Surface as="main" tone="light" width="full" height="auto" depth="end" id="main-content" class="page-surface">
       <slot />
-    </main>
-    <Footer />
+    </Surface>
+    <Footer locale={locale} />
     <script>
       import "../utils/analytics";
     </script>

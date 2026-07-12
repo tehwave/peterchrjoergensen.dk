@@ -11,6 +11,8 @@
 import { Picture } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import type { ProjectCategory } from "../types";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
 interface Props {
   title: string;
@@ -24,9 +26,12 @@ interface Props {
   animationDelay?: number;
   /** Category (or categories) used to drive the colored image backdrop. */
   category?: ProjectCategory | ProjectCategory[];
+  locale?: Locale;
+  englishOnly?: boolean;
 }
 
-const { title, description, alt, tags = [], image, link, isInternal = false, hasPage = false, category } = Astro.props;
+const { title, description, alt, tags = [], image, link, isInternal = false, hasPage = false, category, locale = "en", englishOnly = false } = Astro.props;
+const copy = getMessages(locale);
 
 // "#" is used in data to indicate "no link yet" — treat as missing
 const hasLink = link && link !== "#";
@@ -52,7 +57,12 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
 
 {
   hasPage && hasLink ? (
-    <a href={linkUrl} class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage }]} data-category={dataCategory} aria-label={`View ${title} case study`}>
+    <a
+      href={linkUrl}
+      class:list={["project-card", "project-card--clickable", { "project-card--featured": hasPage }]}
+      data-category={dataCategory}
+      aria-label={locale === "da" ? `Se casen ${title}` : `View ${title} case study`}
+    >
       <div class="project-card__image-wrapper">
         {image ? (
           <Picture src={image} formats={["avif", "webp"]} alt={alt} class="project-card__image" loading="lazy" quality="mid" widths={imageWidths} sizes={imageSizes} />
@@ -62,7 +72,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
           </div>
         )}
         <span class="project-card__image-badge" aria-hidden="true">
-          View case study
+          {locale === "da" ? "Se case" : "View case study"}
         </span>
         {tags.length > 0 && (
           <div class="project-card__tags project-card__tags--featured">
@@ -92,6 +102,7 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
           </svg>
         </h3>
         <p class="project-card__description">{description}</p>
+        {englishOnly && <span class="project-card__language-badge">{copy.blog.englishOnly}</span>}
         {tags.length > 0 && (
           <div class:list={["project-card__tags", { "project-card__tags--content-featured": hasPage }]}>
             {tags.map((tag) => (
@@ -463,6 +474,16 @@ const dataCategory = categoryList.length > 0 ? categoryList.join(" ") : undefine
       font-size: $font-size-base;
       line-height: 1.75;
       max-width: 58ch;
+    }
+
+    &__language-badge {
+      align-self: flex-start;
+      padding: $space-xs $space-sm;
+      color: $color-blue-dark;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      background: $color-blue-pale;
+      border-radius: 999px;
     }
 
     &__tags {

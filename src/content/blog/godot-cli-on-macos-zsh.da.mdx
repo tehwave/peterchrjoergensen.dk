@@ -1,0 +1,65 @@
+---
+locale: da
+translationKey: godot-cli-on-macos-zsh
+title: "Kør Godot fra macOS-terminalen"
+description: "En hurtig zsh-funktion til at køre Godot fra macOS-terminalen, når app-pakken ikke allerede findes i din PATH."
+pubDate: 2026-05-09
+author: "Peter Chr. Jørgensen"
+tags: ["godot", "macos", "cli", "zsh", "spiludvikling"]
+---
+
+Jeg ville bare skrive `godot` i min terminal og komme videre.
+
+På macOS er det en smule irriterende, hvis du har hentet Godot som en app. Den eksekverbare fil ligger ikke direkte i `/Applications`. Den ligger inde i `.app`-pakken, som i virkeligheden er en mappe.
+
+Stien ser som regel sådan ud:
+
+```bash
+/Applications/Godot.app/Contents/MacOS/Godot
+```
+
+På min maskine hed appen `Godot 2.app`, så min sti så i stedet sådan ud:
+
+```bash
+/Applications/Godot 2.app/Contents/MacOS/Godot
+```
+
+Kontrollér appens præcise navn, før du kopierer kommandoen. Hvis du har omdøbt pakken, skal stien passe til navnet.
+
+## Tilføj en zsh-funktion
+
+Tilføj dette i `~/.zshrc`:
+
+```bash
+godot() {
+  "/Applications/Godot 2.app/Contents/MacOS/Godot" "$@"
+}
+```
+
+Skift `Godot 2.app` ud med navnet på din app-pakke.
+
+Jeg foretrækker en funktion frem for et alias her, fordi `"$@"` sender argumenterne ordentligt videre. Det betyder, at `--version`, `--path`, `--headless`, eksportflag og resten opfører sig, som de ville med en normal binær fil.
+
+Genindlæs din shell-konfiguration, og test den:
+
+```bash
+source "$HOME/.zshrc"
+type -a godot
+godot --version | head -n 1
+```
+
+Hos mig returnerede `godot --version`:
+
+```text
+4.6.2.stable
+```
+
+Det var alt, jeg havde brug for.
+
+Hvis det stadig ikke virker, så kontrollér disse tre ting:
+
+- App-stien matcher pakkens rigtige navn i `/Applications`
+- Du har redigeret den shell-fil, din terminal faktisk indlæser, som regel `~/.zshrc`
+- `type -a godot` viser funktionen i stedet for et gammelt alias eller en gammel kommando
+
+Den officielle [Godot-dokumentation om kommandolinjen](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html) nævner også Homebrew som en mulighed på macOS. Hvis du installerer Godot på den måde, kan `godot` automatisk blive føjet til din PATH. Jeg brugte funktionen, fordi den løste problemet med den app, jeg allerede havde hentet.

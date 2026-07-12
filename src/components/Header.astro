@@ -7,17 +7,27 @@
  * scroll position to provide orientation on long pages.
  */
 import Button from "./Button.astro";
+import LocaleSwitch from "./LocaleSwitch.astro";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
 
-type Props = Record<string, never>;
+interface Props {
+  locale?: Locale;
+  showLocaleSwitch?: boolean;
+}
+
+const { locale = "en", showLocaleSwitch = false } = Astro.props;
+const copy = getMessages(locale).navigation;
 ---
 
 <header class="header">
   <div class="header__container">
     <Button as="a" href="/" waveState="hover" class="header__logo-button">Peter Chr. Jørgensen</Button>
-    <nav class="header__nav" aria-label="Main navigation">
-      <a href="/#projects" class="header__nav-link">Projects</a>
-      <a href="/#ai" class="header__nav-link">AI</a>
-      <a href="/#blog" class="header__nav-link">Blog</a>
+    <nav class="header__nav" aria-label={copy.mainLabel}>
+      <a href="/#projects" class="header__nav-link">{copy.projects}</a>
+      <a href="/#ai" class="header__nav-link">{copy.ai}</a>
+      <a href="/#blog" class="header__nav-link">{copy.blog}</a>
+      {showLocaleSwitch && <LocaleSwitch locale={locale} />}
     </nav>
   </div>
 </header>
@@ -210,8 +220,15 @@ type Props = Record<string, never>;
       top: $space-md;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba($color-blue, 0.95);
-      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='52' height='26' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4a6 6 0 01-6-6h2c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4a6 6 0 016 6c0 2.21 1.79 4 4 4v2a6 6 0 01-6-6c0-2.21-1.79-4-4-4a6 6 0 01-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' fill='%23DCEEFB' fill-opacity='.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      background-color: rgba($color-blue, 0.96);
+      background-image: url("/hero-texture.svg"), url("/hero-grain.svg");
+      background-repeat: repeat;
+      background-position:
+        center -3.5rem,
+        center;
+      background-size:
+        clamp(30rem, 58vw, 46rem) auto,
+        26rem 26rem;
       backdrop-filter: blur(10px);
       border-radius: 50px;
 

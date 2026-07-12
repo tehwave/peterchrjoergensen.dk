@@ -1,16 +1,25 @@
 ---
 import { Picture } from "astro:assets";
 import authorImage from "../assets/author-bio.png";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).article;
 
 const name = "Peter Chr. Jørgensen";
-const bio = "Thanks for reading! I appreciate you taking the time. If you have thoughts, questions, or experiences to share, I'd love to hear them in the comments below.";
+const bio = copy.authorBio;
 ---
 
 <section class="author-bio" itemscope itemtype="https://schema.org/Person" itemid="https://peterchrjoergensen.dk/#person">
   <div class="author-bio__container">
-    <Picture src={authorImage} alt={`Photo of ${name}`} formats={["avif", "webp"]} widths={[80, 160]} sizes="80px" class="author-bio__image" loading="lazy" inferSize={true} itemprop="image" />
+    <Picture src={authorImage} alt={copy.authorImageAlt} formats={["avif", "webp"]} widths={[80, 160]} sizes="80px" class="author-bio__image" loading="lazy" inferSize={true} itemprop="image" />
     <div class="author-bio__content">
-      <span class="author-bio__label">Written by</span>
+      <span class="author-bio__label">{copy.writtenBy}</span>
       <h3 class="author-bio__name" itemprop="name">
         {name}
       </h3>

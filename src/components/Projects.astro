@@ -10,27 +10,41 @@
  */
 import ProjectCard from "./ProjectCard.astro";
 import AnimateOnScroll from "./AnimateOnScroll.astro";
-import { projects as simpleProjects } from "../data/projects";
+import { getProjects } from "../data/projects";
 import { getCollection } from "astro:content";
+import type { Locale } from "../i18n/locale";
+import { getMessages } from "../i18n/messages";
+import { groupTranslations, selectTranslation } from "../i18n/content";
 
-type Props = Record<string, never>;
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const copy = getMessages(locale).projects;
+const simpleProjects = getProjects(locale);
 
 // Get featured projects (MDX with dedicated pages)
 const featuredProjects = await getCollection("projects");
+const featuredGroups = groupTranslations(featuredProjects);
 
 // Merge both sources: featured MDX projects + simple data projects
 const allProjects = [
   // Featured projects with internal pages
-  ...featuredProjects.map((p) => ({
-    title: p.data.title,
-    description: p.data.description,
-    alt: p.data.heroImageAlt || p.data.title,
-    tags: p.data.tags,
-    image: p.data.heroImage,
-    link: p.id,
-    category: p.data.category,
-    hasPage: true,
-  })),
+  ...Array.from(featuredGroups.values()).map((group) => {
+    const { entry: p, isFallback } = selectTranslation(group, locale);
+    return {
+      title: p.data.title,
+      description: p.data.description,
+      alt: p.data.heroImageAlt || p.data.title,
+      tags: p.data.tags,
+      image: p.data.heroImage,
+      link: group.translationKey,
+      category: p.data.category,
+      hasPage: true,
+      englishOnly: isFallback,
+    };
+  }),
   // Simple projects with external links
   ...simpleProjects.map((p) => ({
     ...p,
@@ -51,10 +65,10 @@ function shuffle<T>(array: T[]): T[] {
 const randomizedProjects = shuffle(allProjects);
 
 const categories = [
-  { id: "all", label: "All" },
-  { id: "web", label: "Web" },
-  { id: "games", label: "Games" },
-  { id: "creative", label: "Creative" },
+  { id: "all", label: copy.all },
+  { id: "web", label: copy.web },
+  { id: "games", label: copy.games },
+  { id: "creative", label: copy.creative },
 ] as const;
 ---
 
@@ -62,12 +76,10 @@ const categories = [
   <div class="projects__container">
     <div class="projects__header">
       <div class="projects__header-content">
-        <span class="projects__label">MY WORK</span>
-        <h2 class="projects__heading">
-          Projects I've built<br />over the years
-        </h2>
+        <span class="projects__label">{copy.label}</span>
+        <h2 class="projects__heading">{copy.heading}</h2>
       </div>
-      <div class="projects__filters" role="group" aria-label="Filter projects by category">
+      <div class="projects__filters" role="group" aria-label={copy.filterLabel}>
         {
           categories.map((cat) => (
             <button class:list={["projects__filter", { "projects__filter--active": cat.id === "all" }]} data-filter={cat.id} type="button" aria-pressed={cat.id === "all" ? "true" : "false"}>
@@ -92,13 +104,15 @@ const categories = [
                 isInternal={"isInternal" in project ? project.isInternal : false}
                 hasPage={project.hasPage}
                 category={project.category}
+                locale={locale}
+                englishOnly={"englishOnly" in project ? project.englishOnly : false}
               />
             </AnimateOnScroll>
           </div>
         ))
       }
     </div>
-    <button class="projects__skip-to-end" id="projects-skip-to-end" type="button" aria-label="Skip to end of projects section" aria-hidden="true" tabindex="-1"> Seen enough? Skip ahead </button>
+    <button class="projects__skip-to-end" id="projects-skip-to-end" type="button" aria-label={copy.skipLabel} aria-hidden="true" tabindex="-1"> {copy.skip} </button>
     <div class="projects__end-anchor" id="projects-end" aria-hidden="true"></div>
   </div>
 </section>

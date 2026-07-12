@@ -4,6 +4,7 @@ dist/
 
 # generated types
 .astro/
+.wrangler/
 
 # dependencies
 node_modules/
@@ -23,3 +24,4 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+/docs/superpowers

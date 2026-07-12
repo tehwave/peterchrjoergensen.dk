@@ -1,0 +1,56 @@
+---
+locale: da
+translationKey: localizing-this-website-without-changing-its-urls
+title: "Sådan lokaliserede jeg hjemmesiden uden at ændre eksisterende URL'er"
+description: "Prompten, arkitekturen og review-processen bag engelsk og dansk på denne Astro-hjemmeside, mens alle eksisterende offentlige URL'er forblev stabile."
+pubDate: 2026-07-12
+author: "Peter Chr. Jørgensen"
+tags: ["astro", "lokalisering", "cloudflare", "ai"]
+heroImage: "../../assets/blog/localizing-this-website-without-changing-its-urls/hero.jpg"
+heroImageAlt: "En enkelt bygningsfacade delt på midten, orange med et vindue til venstre og grøn med en dør til højre"
+heroImageCaption: "Foto af [Martin LONGIN](https://unsplash.com/@maralalon) på [Unsplash](https://unsplash.com/photos/a-green-and-orange-building-with-a-window-j-DcciPBx-Y)"
+---
+
+Det er nemt at tilføje en sprogskifter. Det svære er at lade alle eksisterende links være urørte.
+
+Jeg ville have engelsk og dansk på hjemmesiden uden at tvinge hver adresse til at vælge et sprog.
+
+## Hvorfor gør vi det?
+
+Den oprindelige prompt var én sætning:
+
+> “I need a way to automatically switch between English and Danish content on the same domain and without any domain pathing.”
+
+De fleste besøg starter ikke på forsiden. De starter ved et gammelt bogmærke, en projektside, et søgeresultat eller et link, nogen har delt. Det var vigtigere for mig at holde adresserne stabile end at have en perfekt adskilt URL for hvert sprog.
+
+Browserens sprog skulle være et brugbart standardvalg, men et bevidst valg skulle vinde og huskes. Siden skulle også komme på det rigtige sprog. Hvis al teksten først skiftes efter indlæsning, er det første HTML-svar, metadata og delingsvisninger på det forkerte sprog.
+
+## Hvordan hjalp Astro og Cloudflare?
+
+Astro håndterede allerede indholdet og opbygningen af siderne, så det kunne løse det meste uden at ændre, hvad siden er. Siden består hovedsageligt af sider, artikler og projekter, som kan gøres klar, før nogen besøger den. Astro bygger en engelsk og en dansk udgave på forhånd med samme layouts og navigation.
+
+Det betyder, at oversættelserne kan gennemgås som en del af det normale build. Der er ingen runtime-oversættelse, database eller stor serverapplikation. Deploymentet har bare to færdige versioner af hver side, der kan vises.
+
+Cloudflare håndterer det ene, som et statisk build ikke kan beslutte på forhånd. En lille Worker ligger foran de færdige sider og vælger, hvilken version denne besøgende skal have. Den tjekker først et gemt valg og derefter browserens sprog. Adressen i browseren forbliver den samme.
+
+Det er den opdeling, der får løsningen til at passe. Astro forbereder indholdet. Cloudflare træffer det lille valg på request-tidspunktet. Alt andet, inklusive billeder, eksperimenter og den private tracker, kan fortsætte ad den normale statiske vej.
+
+## Hvordan implementerede jeg det?
+
+Jeg tilføjede engelsk og dansk som to versioner af det samme indhold. Navigation, footer, overskrifter, beskeder og accessibility-tekst har også oversættelser, så resten af siden ikke skifter sprog midt i en artikel.
+
+Når nogen besøger siden, vinder et gemt sprogvalg. Hvis der ikke er et valg, bruges browserens præference. Engelsk er fallback, når ingen af delene giver et brugbart svar. Sprogskifteren gemmer valget og genindlæser den samme adresse.
+
+Sprogvalget gælder kun hjemmesidens offentlige indhold. Eksperimenter, tracker, billeder og andre statiske filer beholder deres eksisterende opførsel. Hvis en dansk artikel ikke er klar, kan resten af siden stadig være dansk, mens artiklen falder tilbage til engelsk.
+
+Det valgte sprog følger også med ind i selve dokumentet: den synlige tekst, sidetitel, beskrivelse, datoer, delingsinformation og sprogets metadata. Jeg testede gamle links, manglende oversættelser, browserpræferencer, gemte valg, redirects og ruter, der ikke skal oversættes.
+
+## Takeaways
+
+Kravet om samme URL valgte egentlig arkitekturen for mig. Astro giver mig færdige sprogversioner uden at gøre siden tungere. Cloudflare tilføjer lige præcis nok logik til at vælge mellem dem, når requesten kommer.
+
+Der er en pris. Søgemaskiner og caching har lettere ved det, når hvert sprog har sin egen adresse. Jeg accepterede den kompleksitet, fordi det er vigtigere for denne side at holde de eksisterende links i live.
+
+Agenten tog sig af mange gentagne ændringer på tværs af projektet, men det var ikke den, der valgte den afvejning. Den del var stadig min, ligesom review og test af gamle links og urelaterede ruter.
+
+Nu kan man åbne et eksisterende link og få det sprog, man forventer, uden at adressen ændrer sig. Det er hele funktionen.

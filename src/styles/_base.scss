@@ -14,7 +14,7 @@
 html {
   font-family: $font-sans;
   color: $color-text-primary;
-  background-color: $color-bg;
+  background-color: #fff4e3;
   line-height: $leading-relaxed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -27,7 +27,7 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  @include textured-background($color-cream);
+  background-color: #fff4e3;
 }
 
 a {

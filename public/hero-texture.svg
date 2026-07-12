@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+	<defs>
+		<path id="ripple" d="M10 10c0-2.21-1.79-4-4-4a6 6 0 0 1-6-6h2c0 2.21 1.79 4 4 4a6 6 0 0 1 6 6c0 2.21 1.79 4 4 4a6 6 0 0 1 6 6c0 2.21 1.79 4 4 4v2a6 6 0 0 1-6-6c0-2.21-1.79-4-4-4a6 6 0 0 1-6-6zm25.464-1.95 8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z" />
+	</defs>
+	<g fill="#dceefb" fill-rule="evenodd">
+		<use href="#ripple" opacity="0.061" transform="translate(155 327) rotate(-1.5 24 13) scale(1.03)" />
+		<use href="#ripple" opacity="0.051" transform="translate(529 66) rotate(-1.5 24 13) scale(0.95)" />
+		<use href="#ripple" opacity="0.040" transform="translate(422 96) rotate(-0.7 24 13) scale(1.05)" />
+		<use href="#ripple" opacity="0.070" transform="translate(17 71) rotate(-1.8 24 13) scale(0.99)" />
+		<use href="#ripple" opacity="0.051" transform="translate(221 308) rotate(-0.9 24 13) scale(1.07)" />
+		<use href="#ripple" opacity="0.048" transform="translate(396 299) rotate(0.4 24 13) scale(1.08)" />
+		<use href="#ripple" opacity="0.067" transform="translate(223 207) rotate(-1.1 24 13) scale(1.06)" />
+		<use href="#ripple" opacity="0.045" transform="translate(584 307) rotate(1.8 24 13) scale(0.97)" />
+		<use href="#ripple" opacity="0.069" transform="translate(374 7) rotate(2.1 24 13) scale(1.07)" />
+		<use href="#ripple" opacity="0.051" transform="translate(510 205) rotate(1.4 24 13) scale(0.97)" />
+		<use href="#ripple" opacity="0.051" transform="translate(490 128) rotate(2.2 24 13) scale(0.97)" />
+		<use href="#ripple" opacity="0.064" transform="translate(392 149) rotate(-1.4 24 13) scale(1.06)" />
+		<use href="#ripple" opacity="0.051" transform="translate(262 129) rotate(-1.9 24 13) scale(0.97)" />
+		<use href="#ripple" opacity="0.053" transform="translate(174 153) rotate(1.3 24 13) scale(1.00)" />
+		<use href="#ripple" opacity="0.056" transform="translate(322 210) rotate(-1.1 24 13) scale(1.06)" />
+		<use href="#ripple" opacity="0.066" transform="translate(304 17) rotate(2.9 24 13) scale(0.99)" />
+		<use href="#ripple" opacity="0.050" transform="translate(22 139) rotate(-2 24 13) scale(1.06)" />
+		<use href="#ripple" opacity="0.067" transform="translate(574 166) rotate(-1.8 24 13) scale(1.01)" />
+		<use href="#ripple" opacity="0.043" transform="translate(324 158) rotate(-0.2 24 13) scale(1.04)" />
+		<use href="#ripple" opacity="0.042" transform="translate(338 308) rotate(-2.4 24 13) scale(0.96)" />
+		<use href="#ripple" opacity="0.066" transform="translate(84 272) rotate(-2.3 24 13) scale(0.95)" />
+		<use href="#ripple" opacity="0.048" transform="translate(455 192) rotate(-0.8 24 13) scale(1.01)" />
+		<use href="#ripple" opacity="0.054" transform="translate(206 48) rotate(-2.3 24 13) scale(1.06)" />
+		<use href="#ripple" opacity="0.066" transform="translate(342 74) rotate(1.2 24 13) scale(0.98)" />
+		<use href="#ripple" opacity="0.043" transform="translate(129 12) rotate(-0.6 24 13) scale(0.96)" />
+		<use href="#ripple" opacity="0.040" transform="translate(71 220) rotate(-1.3 24 13) scale(1.01)" />
+		<use href="#ripple" opacity="0.056" transform="translate(158 238) rotate(1 24 13) scale(0.93)" />
+		<use href="#ripple" opacity="0.067" transform="translate(533 283) rotate(2.7 24 13) scale(1.03)" />
+		<use href="#ripple" opacity="0.058" transform="translate(586 66) rotate(1.7 24 13) scale(1.04)" />
+		<use href="#ripple" opacity="0.058" transform="translate(38 323) rotate(0.7 24 13) scale(1.07)" />
+		<use href="#ripple" opacity="0.051" transform="translate(128 120) rotate(-2.7 24 13) scale(1.03)" />
+		<use href="#ripple" opacity="0.064" transform="translate(280 320) rotate(-2 24 13) scale(0.93)" />
+		<use href="#ripple" opacity="0.053" transform="translate(473 295) rotate(-1.2 24 13) scale(0.98)" />
+		<use href="#ripple" opacity="0.042" transform="translate(92 326) rotate(-1.5 24 13) scale(1.05)" />
+		<use href="#ripple" opacity="0.064" transform="translate(20 255) rotate(-1.9 24 13) scale(1.04)" />
+		<use href="#ripple" opacity="0.062" transform="translate(295 261) rotate(2.3 24 13) scale(0.96)" />
+		<use href="#ripple" opacity="0.059" transform="translate(426 25) rotate(-0.3 24 13) scale(1.03)" />
+		<use href="#ripple" opacity="0.053" transform="translate(281 66) rotate(-0.2 24 13) scale(0.98)" />
+		<use href="#ripple" opacity="0.064" transform="translate(555 20) rotate(0.7 24 13) scale(0.96)" />
+		<use href="#ripple" opacity="0.040" transform="translate(467 64) rotate(-2.5 24 13) scale(1.01)" />
+		<use href="#ripple" opacity="0.048" transform="translate(384 210) rotate(-0.5 24 13) scale(0.95)" />
+		<use href="#ripple" opacity="0.056" transform="translate(78 31) rotate(1.2 24 13) scale(1.08)" />
+		<use href="#ripple" opacity="0.045" transform="translate(482 8) rotate(-0.9 24 13) scale(1.05)" />
+		<use href="#ripple" opacity="0.050" transform="translate(106 177) rotate(-1.2 24 13) scale(1.08)" />
+		<use href="#ripple" opacity="0.046" transform="translate(587 242) rotate(-1.5 24 13) scale(0.95)" />
+		<use href="#ripple" opacity="0.038" transform="translate(173 91) rotate(1.5 24 13) scale(0.98)" />
+		<use href="#ripple" opacity="0.045" transform="translate(245 7) rotate(1.1 24 13) scale(1.07)" />
+		<use href="#ripple" opacity="0.062" transform="translate(74 94) rotate(-1.4 24 13) scale(0.92)" />
+		<use href="#ripple" opacity="0.059" transform="translate(453 245) rotate(-2.3 24 13) scale(0.98)" />
+		<use href="#ripple" opacity="0.040" transform="translate(277 180) rotate(-1.1 24 13) scale(0.93)" />
+		<use href="#ripple" opacity="0.046" transform="translate(361 257) rotate(1.5 24 13) scale(0.94)" />
+		<use href="#ripple" opacity="0.059" transform="translate(10 197) rotate(-2 24 13) scale(1.02)" />
+		<use href="#ripple" opacity="0.053" transform="translate(121 67) rotate(-0.2 24 13) scale(0.97)" />
+		<use href="#ripple" opacity="0.061" transform="translate(11 19) rotate(-2.6 24 13) scale(1.07)" />
+		<use href="#ripple" opacity="0.043" transform="translate(565 114) rotate(-2.6 24 13) scale(0.95)" />
+		<use href="#ripple" opacity="0.043" transform="translate(240 259) rotate(2.3 24 13) scale(0.98)" />
+	</g>
+</svg>
