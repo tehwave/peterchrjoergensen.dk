@@ -3,13 +3,21 @@ import Surface from "../../components/Surface.astro";
 import Layout from "../../layouts/Layout.astro";
 ---
 
-<Layout title="Material surfaces · Peter Chr. Jørgensen" description="A rendered specimen of the site's reusable light and dark material surfaces.">
+<Layout title="Material surfaces · Peter Chr. Jørgensen" description="A rendered specimen of the site's reusable dark, blue and light material surfaces.">
   <div class="surface-lab">
     <Surface as="section" tone="dark" depth="start" labelledby="dark-surface-heading">
       <div class="surface-lab__section">
         <p class="surface-lab__eyebrow">Full-width dark</p>
         <h1 id="dark-surface-heading">Deep blue, quiet depth.</h1>
         <p>Cool type, repeated ripples and a restrained wash of light give focused sections a material presence.</p>
+      </div>
+    </Surface>
+
+    <Surface as="section" tone="blue" depth="end" labelledby="blue-surface-heading">
+      <div class="surface-lab__section">
+        <p class="surface-lab__eyebrow">Full-width blue</p>
+        <h2 id="blue-surface-heading">The brighter blue from the original hero.</h2>
+        <p>More open and energetic than the deep-blue surface, while keeping the same cool type, ripples and grain.</p>
       </div>
     </Surface>
 

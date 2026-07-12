@@ -2,7 +2,7 @@
 type SurfaceElement = "div" | "section" | "article" | "aside" | "main" | "footer";
 
 interface Props {
-  tone: "dark" | "light";
+  tone: "dark" | "blue" | "light";
   as?: SurfaceElement;
   width?: "full" | "contained";
   height?: "auto" | "viewport";
@@ -104,6 +104,38 @@ const { tone, as: Tag = "div", width = "full", height = "auto", depth = "none", 
           clamp(46rem, 78vw, 68rem) auto,
           26rem 26rem;
         opacity: 0.32;
+      }
+    }
+
+    &--blue {
+      --surface-radiance: 139, 242, 243;
+      --surface-highlight: 255, 255, 255;
+      --surface-shadow: 9, 16, 87;
+      --surface-background: #0a49b1;
+      --surface-heading: #f7fbff;
+      --surface-text: #e3f1ff;
+      --surface-muted: rgba(227, 241, 255, 0.76);
+      --surface-border: rgba(227, 241, 255, 0.26);
+      --surface-link: #bdf8f8;
+      --surface-accent: #ffad45;
+
+      &::before {
+        background-image: url("/hero-texture.svg");
+        background-repeat: repeat;
+        background-position: center -3.5rem;
+        background-size: clamp(30rem, 58vw, 46rem) auto;
+      }
+
+      &::after {
+        background-image: url("/hero-texture.svg"), url("/hero-grain.svg");
+        background-repeat: repeat;
+        background-position:
+          calc(50% + 9rem) 4rem,
+          center;
+        background-size:
+          clamp(46rem, 78vw, 68rem) auto,
+          26rem 26rem;
+        opacity: 0.26;
       }
     }
 

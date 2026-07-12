@@ -58,6 +58,16 @@ describe("Surface", () => {
     expect(html).toContain('<h2 id="paper-card-title">Paper card</h2>');
   });
 
+  test("provides the former light-blue hero material as a third tone", async () => {
+    const html = await renderSurface({ tone: "blue" });
+    const source = await readFile(new URL("../src/components/Surface.astro", import.meta.url), "utf8");
+
+    expect(html).toContain("surface--blue");
+    expect(html).toContain('data-surface="blue"');
+    expect(source).toContain("&--blue");
+    expect(source).toContain("--surface-background: #0a49b1;");
+  });
+
   test.each(["section", "aside", "main", "footer"])("supports a semantic %s element", async (element) => {
     const html = await renderSurface({ tone: "light", as: element });
 
