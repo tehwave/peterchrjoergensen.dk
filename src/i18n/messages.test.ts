@@ -36,7 +36,8 @@ describe("messages", () => {
     expect(copy.blog.englishOnly).toContain("engelsk");
     expect(copy.article.translationNotice).toContain("engelsk");
     expect(copy.metadata.homeDescription).toContain("webudvikler");
-    expect(copy.footer.contact).toContain("mail");
+    expect(copy.footer.contact.emailLabel).toBe("mail");
+    expect(copy.currentWork.heading).toBe("Hvad jeg arbejder på lige nu");
   });
 });
 

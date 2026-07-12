@@ -86,8 +86,9 @@ export function resolveLocale(request: Request): Locale {
   return parseLocaleCookie(request.headers.get("Cookie")) ?? parseAcceptLanguage(request.headers.get("Accept-Language")) ?? DEFAULT_LOCALE;
 }
 
-export function serializeLocaleCookie(locale: Locale): string {
-  return `pcj_locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`;
+export function serializeLocaleCookie(locale: Locale, options: { secure?: boolean } = {}): string {
+  const secure = options.secure ?? true;
+  return `pcj_locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${secure ? "; Secure" : ""}`;
 }
 
 export function formatShortMonth(date: Date, locale: Locale): string {

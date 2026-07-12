@@ -48,6 +48,15 @@ describe("localized build output", () => {
     expect(danish).toContain("Senior webudvikler");
     expect(danish).toMatch(/<button(?=[^>]*data-locale=da)(?=[^>]*aria-pressed=true)[^>]*>/);
     expect(danish).toContain("Vis denne side på dansk");
+
+    expect(english).toContain("Feel free to reach out via");
+    expect(english).toContain("Built with");
+    expect(danish).toContain("Du er velkommen til at skrive en");
+    expect(danish).toContain("Bygget med");
+    expect(danish).toMatch(/Jeg er <strong[^>]*>Peter<\/strong> <span[^>]*>—(?:&nbsp;|\u00a0)<\/span>/);
+    expect(danish).toMatch(/<\/span><\/strong> fra <strong[^>]*>Danmark\.<\/strong>/);
+    expect(danish).toContain("Hvad jeg arbejder på lige nu");
+    expect(danish).toMatch(/Lavet med\s*<span[^>]*>♥<\/span>\s*og AI i Danmark/);
   });
 
   it("builds localized internal 404 documents", () => {

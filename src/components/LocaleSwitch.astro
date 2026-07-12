@@ -32,7 +32,7 @@ const copy = getMessages(locale).localeSwitch;
           const locale = button.dataset.locale;
           if (locale !== "en" && locale !== "da") return;
 
-          document.cookie = serializeLocaleCookie(locale satisfies Locale);
+          document.cookie = serializeLocaleCookie(locale satisfies Locale, { secure: window.location.protocol === "https:" });
           window.location.reload();
         },
         { signal: controller.signal },

@@ -33,9 +33,7 @@ const { label = copy.label, heading = copy.heading } = Astro.props;
       </div>
       <div class="footer__info">
         <p class="footer__text">
-          {locale === "da" ? "Du er velkommen til at skrive en " : "Feel free to reach out via "}<a href="mailto:hello@peterchrjoergensen.dk" class="footer__email"
-            >{locale === "da" ? "mail" : "email"}</a
-          >{locale === "da" ? " eller finde mig på sociale medier, hvis vi skal samarbejde." : " or connect with me on social media to collaborate."}
+          {copy.contact.beforeEmail}<a href="mailto:hello@peterchrjoergensen.dk" class="footer__email">{copy.contact.emailLabel}</a>{copy.contact.afterEmail}
         </p>
         <div class="footer__social-links">
           <a href="https://www.linkedin.com/in/peterchrjoergensen" aria-label="LinkedIn" target="_blank" rel="noopener me" class="footer__social-link">
@@ -62,14 +60,17 @@ const { label = copy.label, heading = copy.heading } = Astro.props;
     </div>
     <div class="footer__meta">
       <p class="footer__tagline">
-        {locale === "da" ? "Lavet med" : "Made with"}
+        {copy.tagline.beforeHeart}{" "}
         <span class="footer__heart">♥</span>
-        {locale === "da" ? "og AI i Danmark" : "and AI in Denmark"}
+        {" "}{copy.tagline.afterHeart}
       </p>
       <p class="footer__credits">
-        {locale === "da" ? "Bygget med " : "Built with "}<a href="https://astro.build" target="_blank" rel="noopener" class="footer__link">Astro</a>. {
-          locale === "da" ? "Udrullet på " : "Deployed on "
-        }<a href="https://cloudflare.com" target="_blank" rel="noopener" class="footer__link">Cloudflare</a>.
+        {copy.credits.beforeAstro}<a href="https://astro.build" target="_blank" rel="noopener" class="footer__link">Astro</a>{copy.credits.betweenLinks}<a
+          href="https://cloudflare.com"
+          target="_blank"
+          rel="noopener"
+          class="footer__link">Cloudflare</a
+        >{copy.credits.afterCloudflare}
       </p>
     </div>
   </div>

@@ -110,8 +110,20 @@ const english = {
   footer: {
     label: "Websites. Games. Good ideas.",
     heading: "Got something worth building?",
-    contact: "Feel free to reach out via email or connect with me on social media to collaborate.",
-    builtWith: "Built with Astro. Deployed on Cloudflare.",
+    contact: {
+      beforeEmail: "Feel free to reach out via ",
+      emailLabel: "email",
+      afterEmail: " or connect with me on social media to collaborate.",
+    },
+    tagline: {
+      beforeHeart: "Made with",
+      afterHeart: "and AI in Denmark",
+    },
+    credits: {
+      beforeAstro: "Built with ",
+      betweenLinks: ". Deployed on ",
+      afterCloudflare: ".",
+    },
   },
   notFound: {
     heading: "Page not found",
@@ -201,7 +213,7 @@ const danish = {
   },
   currentWork: {
     label: "Mit aktuelle projekt",
-    heading: "Det arbejder jeg på lige nu",
+    heading: "Hvad jeg arbejder på lige nu",
     linkLabel: "gm48.net - Game jam-platform (åbner i et nyt vindue)",
     imageAlt: "gm48.net, GameMaker game jam-platform",
     paragraph1:
@@ -265,8 +277,20 @@ const danish = {
   footer: {
     label: "Hjemmesider. Spil. Gode idéer.",
     heading: "Har du noget, der er værd at bygge?",
-    contact: "Du er velkommen til at skrive en mail eller finde mig på sociale medier, hvis vi skal samarbejde.",
-    builtWith: "Bygget med Astro. Udrullet på Cloudflare.",
+    contact: {
+      beforeEmail: "Du er velkommen til at skrive en ",
+      emailLabel: "mail",
+      afterEmail: " eller finde mig på sociale medier, hvis vi skal samarbejde.",
+    },
+    tagline: {
+      beforeHeart: "Lavet med",
+      afterHeart: "og AI i Danmark",
+    },
+    credits: {
+      beforeAstro: "Bygget med ",
+      betweenLinks: ". Udrullet på ",
+      afterCloudflare: ".",
+    },
   },
   notFound: {
     heading: "Siden blev ikke fundet",

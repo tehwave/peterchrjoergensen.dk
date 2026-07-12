@@ -100,7 +100,11 @@ describe("locale metadata and cookie output", () => {
     expect(localeMetadata.da).toEqual({ htmlLang: "da", openGraphLocale: "da_DK", inLanguage: "da-DK" });
   });
 
-  it("serializes the exact one-year secure locale cookie", () => {
+  it("serializes the exact one-year secure locale cookie by default", () => {
     expect(serializeLocaleCookie("da")).toBe("pcj_locale=da; Path=/; Max-Age=31536000; SameSite=Lax; Secure");
+  });
+
+  it("can serialize a locale cookie for an HTTP development origin", () => {
+    expect(serializeLocaleCookie("da", { secure: false })).toBe("pcj_locale=da; Path=/; Max-Age=31536000; SameSite=Lax");
   });
 });

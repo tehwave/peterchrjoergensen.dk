@@ -29,14 +29,14 @@ const roles = copy.roles.split("|");
         <h1 class="hero__title hero__title--handwriting">{copy.greeting}</h1>
         <div class="hero__intro">
           <p>
-            {copy.intro}
-            <strong>Peter</strong>
-            <span>—{" "}</span>
+            {copy.intro}{" "}
+            <strong>Peter</strong>{" "}
+            <span>—&nbsp;</span>
             <br class="mobile-break" />
             <strong class="hero__role-wrapper" data-roles={JSON.stringify(roles)}>
               <span id="typed-roles" aria-live="polite" aria-atomic="true"></span>
             </strong>{" "}
-            {copy.from}
+            {copy.from}{" "}
             <strong>{copy.country}</strong>
           </p>
         </div>
