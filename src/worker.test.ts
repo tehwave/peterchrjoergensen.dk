@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 import worker, { contentLanguageForPath, mapPublicContentPath } from "./worker";
 
 type RecordedAsset = { request: Request };
+type WorkerRequest = Parameters<NonNullable<ExportedHandler<Env>["fetch"]>>[0];
+
+function fetchWorker(request: Request, env: Env): Promise<Response> {
+  return worker.fetch(request as WorkerRequest, env);
+}
 
 function assetEnvironment(responseForPath?: (pathname: string) => Response) {
   const recorded: RecordedAsset[] = [];
@@ -45,7 +50,7 @@ describe("contentLanguageForPath", () => {
 describe("worker", () => {
   it.each(["/blog", "/blog/welcome", "/projects/browser-multiplayer"])("redirects %s to its canonical trailing-slash URL", async (pathname) => {
     const { env, recorded } = assetEnvironment();
-    const response = await worker.fetch(new Request(`https://example.com${pathname}?ref=test`), env);
+    const response = await fetchWorker(new Request(`https://example.com${pathname}?ref=test`), env);
 
     expect(response.status).toBe(308);
     expect(response.headers.get("Location")).toBe(`https://example.com${pathname}/?ref=test`);
@@ -59,7 +64,7 @@ describe("worker", () => {
     ["/blog/%77elcome/", "/blog/welcome/"],
   ])("redirects noncanonical content path %s to %s", async (pathname, canonicalPathname) => {
     const { env, recorded } = assetEnvironment();
-    const response = await worker.fetch(new Request(`https://example.com${pathname}?ref=test`), env);
+    const response = await fetchWorker(new Request(`https://example.com${pathname}?ref=test`), env);
 
     expect(response.status).toBe(308);
     expect(response.headers.get("Location")).toBe(`https://example.com${canonicalPathname}?ref=test`);
@@ -68,7 +73,7 @@ describe("worker", () => {
 
   it("redirects the production www host to HTTPS on the apex domain", async () => {
     const { env, recorded } = assetEnvironment();
-    const response = await worker.fetch(new Request("http://www.peterchrjoergensen.dk/blog/?ref=test"), env);
+    const response = await fetchWorker(new Request("http://www.peterchrjoergensen.dk/blog/?ref=test"), env);
 
     expect(response.status).toBe(301);
     expect(response.headers.get("Location")).toBe("https://peterchrjoergensen.dk/blog/?ref=test");
@@ -79,7 +84,7 @@ describe("worker", () => {
     const { env, recorded } = assetEnvironment(() => new Response("<html>da</html>", { headers: { "Content-Type": "text/html" } }));
     const request = new Request("https://example.com/blog/welcome/?ref=test", { headers: { "Accept-Language": "da-DK, en;q=0.5" } });
 
-    const response = await worker.fetch(request, env);
+    const response = await fetchWorker(request, env);
 
     expect(recorded).toHaveLength(1);
     expect(recorded[0]!.request.url).toBe("https://example.com/__i18n/da/blog/welcome/?ref=test");
@@ -90,23 +95,23 @@ describe("worker", () => {
 
   it("defaults to English and lets a valid cookie override Danish negotiation", async () => {
     const first = assetEnvironment(() => new Response("<html>en</html>", { headers: { "Content-Type": "text/html" } }));
-    await worker.fetch(new Request("https://example.com/"), first.env);
+    await fetchWorker(new Request("https://example.com/"), first.env);
     expect(new URL(first.recorded[0]!.request.url).pathname).toBe("/__i18n/en/");
 
     const second = assetEnvironment(() => new Response("<html>en</html>", { headers: { "Content-Type": "text/html" } }));
-    await worker.fetch(new Request("https://example.com/", { headers: { Cookie: "pcj_locale=en", "Accept-Language": "da" } }), second.env);
+    await fetchWorker(new Request("https://example.com/", { headers: { Cookie: "pcj_locale=en", "Accept-Language": "da" } }), second.env);
     expect(new URL(second.recorded[0]!.request.url).pathname).toBe("/__i18n/en/");
   });
 
   it("supports HEAD requests without changing the method", async () => {
     const { env, recorded } = assetEnvironment(() => new Response(null, { headers: { "Content-Type": "text/html" } }));
-    await worker.fetch(new Request("https://example.com/blog/", { method: "HEAD" }), env);
+    await fetchWorker(new Request("https://example.com/blog/", { method: "HEAD" }), env);
     expect(recorded[0]!.request.method).toBe("HEAD");
   });
 
   it.each(["POST", "OPTIONS", "DELETE"])("rejects %s requests to localized content without serving article HTML", async (method) => {
     const { env, recorded } = assetEnvironment();
-    const response = await worker.fetch(new Request("https://example.com/blog/welcome/", { method }), env);
+    const response = await fetchWorker(new Request("https://example.com/blog/welcome/", { method }), env);
 
     expect(response.status).toBe(405);
     expect(response.headers.get("Allow")).toBe("GET, HEAD");
@@ -115,7 +120,7 @@ describe("worker", () => {
 
   it("blocks direct internal paths with a localized 404 asset", async () => {
     const { env, recorded } = assetEnvironment(() => new Response("not found", { status: 200, headers: { "Content-Type": "text/html" } }));
-    const response = await worker.fetch(new Request("https://example.com/__i18n/en/blog/secret/", { headers: { "Accept-Language": "da" } }), env);
+    const response = await fetchWorker(new Request("https://example.com/__i18n/en/blog/secret/", { headers: { "Accept-Language": "da" } }), env);
 
     expect(new URL(recorded[0]!.request.url).pathname).toBe("/__i18n/da/404/");
     expect(response.status).toBe(404);
@@ -126,7 +131,7 @@ describe("worker", () => {
     const { env, recorded } = assetEnvironment((pathname) =>
       pathname.endsWith("/missing/") ? new Response("missing", { status: 404 }) : new Response("localized 404", { headers: { "Content-Type": "text/html" } }),
     );
-    const response = await worker.fetch(new Request("https://example.com/blog/missing/", { headers: { "Accept-Language": "da" } }), env);
+    const response = await fetchWorker(new Request("https://example.com/blog/missing/", { headers: { "Accept-Language": "da" } }), env);
 
     expect(recorded.map(({ request }) => new URL(request.url).pathname)).toEqual(["/__i18n/da/blog/missing/", "/__i18n/da/404/"]);
     expect(response.status).toBe(404);
@@ -143,7 +148,7 @@ describe("worker", () => {
       headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept-Language": "da" },
     });
 
-    const response = await worker.fetch(request, env);
+    const response = await fetchWorker(request, env);
 
     expect(recorded.map(({ request: assetRequest }) => [new URL(assetRequest.url).pathname, assetRequest.method])).toEqual([
       ["/missing", method],
@@ -156,7 +161,7 @@ describe("worker", () => {
   it("passes non-content assets through unchanged", async () => {
     const original = new Response("image", { headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=3600" } });
     const { env, recorded } = assetEnvironment(() => original);
-    const response = await worker.fetch(new Request("https://example.com/images/photo.png"), env);
+    const response = await fetchWorker(new Request("https://example.com/images/photo.png"), env);
 
     expect(new URL(recorded[0]!.request.url).pathname).toBe("/images/photo.png");
     expect(response).toBe(original);

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+	<defs>
+		<path id="fibre" d="M1 12c9-8 17 6 27-1s18-1 27 4 17-6 26-2" />
+		<path id="thread" d="M1 5c8 3 13-5 21-2s14 8 23 2" />
+		<g id="pulp">
+			<ellipse cx="4" cy="3" rx="4" ry="2.2" />
+			<ellipse cx="10" cy="7" rx="2.5" ry="1.5" />
+			<circle cx="1" cy="9" r="1.4" />
+		</g>
+	</defs>
+
+	<g fill="none" stroke="#a95d20" stroke-linecap="round" stroke-linejoin="round">
+		<use href="#fibre" opacity=".26" transform="translate(18 35) rotate(-8) scale(.82)" />
+		<use href="#thread" opacity=".19" transform="translate(168 24) rotate(12) scale(1.12)" />
+		<use href="#fibre" opacity=".2" transform="translate(363 46) rotate(4) scale(.68)" />
+		<use href="#thread" opacity=".28" transform="translate(526 18) rotate(-14) scale(1.3)" />
+		<use href="#fibre" opacity=".18" transform="translate(91 111) rotate(7) scale(1.18)" />
+		<use href="#thread" opacity=".24" transform="translate(284 126) rotate(-11) scale(.92)" />
+		<use href="#fibre" opacity=".3" transform="translate(454 98) rotate(16) scale(.72)" />
+		<use href="#thread" opacity=".2" transform="translate(585 143) rotate(-5) scale(.76)" />
+		<use href="#fibre" opacity=".22" transform="translate(29 204) rotate(13) scale(.65)" />
+		<use href="#thread" opacity=".3" transform="translate(183 196) rotate(-4) scale(1.18)" />
+		<use href="#fibre" opacity=".19" transform="translate(345 224) rotate(-12) scale(1.06)" />
+		<use href="#thread" opacity=".23" transform="translate(525 205) rotate(9) scale(.92)" />
+		<use href="#fibre" opacity=".27" transform="translate(104 293) rotate(-15) scale(.9)" />
+		<use href="#thread" opacity=".18" transform="translate(278 316) rotate(6) scale(1.34)" />
+		<use href="#fibre" opacity=".24" transform="translate(483 294) rotate(-2) scale(1.02)" />
+	</g>
+
+	<g fill="none" stroke="#fffaf0" stroke-linecap="round" opacity=".72">
+		<use href="#thread" transform="translate(66 73) rotate(18) scale(.65)" />
+		<use href="#thread" transform="translate(246 72) rotate(-9) scale(.52)" />
+		<use href="#thread" transform="translate(414 169) rotate(7) scale(.72)" />
+		<use href="#thread" transform="translate(69 254) rotate(-13) scale(.82)" />
+		<use href="#thread" transform="translate(391 284) rotate(14) scale(.58)" />
+		<use href="#thread" transform="translate(568 329) rotate(-7) scale(.7)" />
+	</g>
+
+	<g fill="#995019">
+		<use href="#pulp" opacity=".18" transform="translate(135 61) rotate(18)" />
+		<use href="#pulp" opacity=".25" transform="translate(318 23) rotate(-12) scale(.7)" />
+		<use href="#pulp" opacity=".16" transform="translate(570 82) rotate(7) scale(1.1)" />
+		<use href="#pulp" opacity=".22" transform="translate(24 152) rotate(-16) scale(.8)" />
+		<use href="#pulp" opacity=".17" transform="translate(224 154) rotate(21) scale(1.2)" />
+		<use href="#pulp" opacity=".26" transform="translate(503 177) rotate(-4) scale(.65)" />
+		<use href="#pulp" opacity=".2" transform="translate(145 245) rotate(11) scale(.85)" />
+		<use href="#pulp" opacity=".16" transform="translate(312 266) rotate(-19) scale(1.15)" />
+		<use href="#pulp" opacity=".24" transform="translate(607 263) rotate(13) scale(.72)" />
+		<use href="#pulp" opacity=".18" transform="translate(41 334) rotate(-8) scale(1.05)" />
+		<use href="#pulp" opacity=".23" transform="translate(448 340) rotate(17) scale(.78)" />
+	</g>
+</svg>

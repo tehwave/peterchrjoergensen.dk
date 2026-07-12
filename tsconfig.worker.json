@@ -8,5 +8,5 @@
     "skipLibCheck": true,
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["worker-configuration.d.ts", "src/worker.ts", "src/i18n/locale.ts"]
+  "include": ["worker-configuration.d.ts", "src/worker.ts", "src/worker.test.ts", "src/i18n/locale.ts"]
 }

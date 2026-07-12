@@ -9,19 +9,13 @@
  */
 import "../styles/global.scss";
 import { Font } from "astro:assets";
-import { getImage } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
-import textureSource from "../assets/black-paper.png";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import Surface from "../components/Surface.astro";
 import type { Locale } from "../i18n/locale";
 import { localeMetadata } from "../i18n/locale";
 import { getMessages } from "../i18n/messages";
-
-// Generate optimized texture images at build time
-const textureAVIF = await getImage({ src: textureSource, format: "avif" });
-const textureWebP = await getImage({ src: textureSource, format: "webp" });
-const textureFallback = await getImage({ src: textureSource, format: "png" });
 
 interface Props {
   title: string;
@@ -159,13 +153,7 @@ const socialImageURL = new URL(image, Astro.site);
     <!-- Page-specific head content -->
     <slot name="head" />
   </head>
-  <body
-    style={{
-      "--texture-avif": `url(${textureAVIF.src})`,
-      "--texture-webp": `url(${textureWebP.src})`,
-      "--texture-fallback": `url(${textureFallback.src})`,
-    }}
-  >
+  <body>
     <!-- 
       Skip Link - WCAG 2.4.1 Bypass Blocks (Level A)
       Allows keyboard users to skip navigation and jump directly to main content.
@@ -196,9 +184,9 @@ const socialImageURL = new URL(image, Astro.site);
     </style>
     <a href="#main-content" class="skip-link">{copy.navigation.skipToContent}</a>
     <Header locale={locale} showLocaleSwitch={localized} />
-    <main id="main-content">
+    <Surface as="main" tone="light" width="full" height="auto" depth="end" id="main-content" class="page-surface">
       <slot />
-    </main>
+    </Surface>
     <Footer locale={locale} />
     <script>
       import "../utils/analytics";
