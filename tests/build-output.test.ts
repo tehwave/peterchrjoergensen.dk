@@ -53,7 +53,7 @@ describe("localized build output", () => {
     expect(english).toContain("Built with");
     expect(danish).toContain("Du er velkommen til at skrive en");
     expect(danish).toContain("Bygget med");
-    expect(danish).toMatch(/Jeg er <strong[^>]*>Peter<\/strong> <span[^>]*>—(?:&nbsp;|\u00a0)<\/span>/);
+    expect(danish).toMatch(/Jeg hedder <strong[^>]*>Peter<\/strong> <span[^>]*>—(?:&nbsp;|\u00a0)<\/span>/);
     expect(danish).toMatch(/<\/span><\/strong> fra <strong[^>]*>Danmark\.<\/strong>/);
     expect(danish).toContain("Hvad jeg arbejder på lige nu");
     expect(danish).toMatch(/Lavet med\s*<span[^>]*>♥<\/span>\s*og AI i Danmark/);
@@ -75,7 +75,7 @@ describe("localized build output", () => {
     const listing = readOutput("__i18n/da/index.html");
 
     expect(translated).toMatch(/<html\b[^>]*\blang=da(?:\s|>)/);
-    expect(translated).toContain("Begyndelsen på denne journal");
+    expect(translated).toContain("Her begynder bloggen");
     expect(translated).toContain('alt="Foto af Peter Chr. Jørgensen"');
     expect(project).toMatch(/<html\b[^>]*\blang=da(?:\s|>)/);
     expect(project).toContain("Jeg byggede et multiplayer-spil i browseren uden en server");

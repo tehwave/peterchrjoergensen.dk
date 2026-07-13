@@ -1,11 +1,11 @@
 ---
 locale: da
 translationKey: rebuilt-my-site-with-astro
-title: "Hvorfor jeg byggede min hjemmeside om i Astro — og hvad der ændrede sig"
-description: "Jeg rev min gamle portfolio ned og byggede den om i Astro for at skære JavaScript væk, forenkle indholdet og holde ydeevnen ærlig."
+title: "Hvorfor jeg byggede min hjemmeside om i Astro, og hvad der ændrede sig"
+description: "Jeg rev min gamle portefølje ned og byggede den om i Astro for at skære ned på JavaScript, forenkle indholdet og sikre, at siden blev ved med at være hurtig."
 pubDate: 2025-12-25
 author: "Peter Chr. Jørgensen"
-tags: ["astro", "portfolio", "ydeevne", "dx"]
+tags: ["astro", "portefølje", "ydeevne", "dx"]
 heroImage: "../../assets/blog/rebuilt-my-site-with-astro/hero.jpg"
 heroImageAlt: "En Space Gray-laptop, der viser Mars mod en stjerneklar nattehimmel i lyset fra en skrivebordslampe"
 heroImageCaption: "Foto af [Tomáš Stanislavský
@@ -17,9 +17,9 @@ import Figure from "../../components/Figure.astro";
 
 ## Beslutningen om at begynde forfra
 
-Jeg byggede siden om, fordi den gamle var udløbet. Den var fra 2021 og viste ikke længere, hvad jeg kan. Den stemte heller ikke overens med det, jeg går op i: at sende mindre, bygge ting med god ydeevne og holde hjemmesider tilgængelige.
+Jeg byggede siden om, fordi den gamle ikke længere passede til mig. Den var fra 2021 og viste ikke længere, hvad jeg kan. Den stemte heller ikke overens med det, jeg går op i: at sende mindre data, bygge hurtige løsninger og holde hjemmesider tilgængelige.
 
-Arbejdsgangen var blevet besværlig. Nova var et stort værktøj til et lille problem, men jeg gad ikke bygge et administrationssystem. Laravel havde brug for en database, fordi indholdet håndteres gennem modeller og MVC. Jeg sendte tung JavaScript — jQuery og Bootstrap — til ting, der slet ikke behøvede være interaktive. Jeg ville have noget moderne, der føltes rigtigt at arbejde med. Det gav Astro mig.
+Arbejdsgangen var blevet besværlig. Nova var et stort værktøj til et lille problem, men jeg gad ikke bygge et administrationssystem. Laravel havde brug for en database, fordi indholdet blev håndteret gennem modeller og MVC. Jeg sendte store mængder JavaScript til browseren i form af jQuery og Bootstrap, også til ting der slet ikke behøvede at være interaktive. Jeg ville have noget moderne, der føltes rigtigt at arbejde med. Det gav Astro mig.
 
 ## Hvad der var galt med den gamle løsning
 
@@ -31,15 +31,15 @@ Siden så fin ud. Det gjorde vedligeholdelsen ikke.
 
 **Besværlig udgivelse.** Et nyt udkast betød jonglering med Markdown, billedhåndtering og manuelle kontroller af metadata. Glemte jeg ét felt, gik forhåndsvisningerne i stykker.
 
-**Bekymring ved deploy.** Jeg håndterer produktionsproblemer på arbejdet, når ting går i stykker. Den energi vil jeg ikke bruge på en personlig hjemmeside.
+**Uro ved udgivelse.** Jeg håndterer produktionsproblemer på arbejdet, når ting går i stykker. Jeg har nok af den slags dér og vil ikke også bruge energien på min personlige hjemmeside.
 
-## Sådan så den tidligere stack ud
+## Den gamle tekniske løsning
 
-Den gamle side var fra 2021, og den var helt bevidst en slags bevisførelse. Dengang skulle selve repositoriet kommunikere: Jeg kan levere rigtig Laravel.
+Den gamle side var fra 2021 og var helt bevidst bygget som et bevis på mine evner. Selve repositoriet skulle sige: Jeg kan bygge og levere en rigtig Laravel-løsning.
 
 Det var Laravel 5.8 med hele produktionsopsætningen: Nova-administration til at oprette indlæg, MySQL, Redis, Forge-deployscripts, bundling med Laravel Mix og caching af FPM-konfiguration. Klassisk full-stack PHP. Blade, jQuery og Bootstrap i frontenden. Jeg brugte PHP Parsedown til at rendere mit Markdown-indhold og Spaties Laravel MediaLibrary til billedhåndtering.
 
-Der var ikke noget forkert ved den stack. Den viste, at jeg kunne bygge og drive en rigtig Laravel-applikation. Men PHP bevæger sig hurtigt. Økosystemet blev ældre, afhængighederne krævede opdateringer, og det hele føltes komplekst i forhold til opgaven. I 2025 havde formålet ændret sig. Jeg har ikke brug for databasemigreringer og queue workers til en portfolio. Jeg har brug for et hurtigt sted med lav vedligeholdelse, hvor jeg kan skrive og vise projekter frem.
+Der var ikke noget forkert ved den løsning. Den viste, at jeg kunne bygge og drive en rigtig Laravel-applikation. Men økosystemet udviklede sig, afhængighederne krævede opdateringer, og det hele føltes efterhånden for komplekst til opgaven. I 2025 havde formålet ændret sig. Jeg har ikke brug for databasemigreringer og queue workers til en portefølje. Jeg har brug for et hurtigt sted med lav vedligeholdelse, hvor jeg kan skrive og vise projekter frem.
 
 <Wide>
   <Figure
@@ -55,62 +55,62 @@ Jeg fandt ikke Astro gennem en omhyggelig evaluering. Jeg faldt over https://jus
 
 Argumentet er enkelt: Hvis du bygger en indholdsside og automatisk vælger en SPA, optimerer du udviklerens bekvemmelighed på bekostning af brugeroplevelsen. En hjemmeside skal opføre sig som en hjemmeside. HTML først. JavaScript kun, hvor det gør sig fortjent til pladsen.
 
-Det stemte overens med det, jeg går op i: **ydeevne**. Mindre payloads betyder hurtigere indlæsning. Mindre parsing, mindre afvikling, mindre ventetid. Som bonus er det også bedre for klimaet at sende mindre. Når jeg bygger portfolioer eller indholdssider, vil jeg have den letteste løsning, der virker.
+Det stemte overens med det, jeg går op i: **ydeevne**. Mindre data til browseren betyder hurtigere indlæsning. Mindre parsing, mindre afvikling, mindre ventetid. Som bonus er det også bedre for klimaet at sende mindre. Når jeg bygger porteføljer eller indholdssider, vil jeg have den letteste løsning, der virker.
 
 Da jeg begyndte at lave prototyper, passede Astro til den måde, jeg ville bygge på:
 
 **Som udgangspunkt ingen JavaScript.** Alt interaktivt skal retfærdiggøre sig med et `client:`-direktiv. Det holder udgangspunktet ærligt.
 
-**Content Collections med validering.** Typekontrolleret frontmatter betyder, at manglende felter bliver fanget under buildet og ikke i produktion.
+**Content Collections med validering.** Typekontrolleret frontmatter betyder, at manglende felter bliver fanget, når siden bygges, og ikke i produktion.
 
-**Afgrænsede komponenter med SASS.** Designsystemet bor ét sted. Mindre afdrift og færre overraskelser.
+**Afgrænsede komponenter med SASS.** Designsystemet bor ét sted. Det giver færre uoverensstemmelser og færre overraskelser.
 
-**Udrulning på Cloudflare Pages.** Jeg ville udgive via Cloudflare Workers og Pages, og det gør Astro helt enkelt. De fungerer godt sammen. Det kunne næsten ikke være lettere.
+**Udgivelse via Cloudflare Pages.** Jeg ville bruge Cloudflare Workers og Pages, og det gør Astro helt enkelt. De fungerer godt sammen. Det kunne næsten ikke være lettere.
 
 **Billedoptimering fra starten.** Astro håndterer responsive `srcset`, formatkonvertering til AVIF og WebP samt optimering automatisk. Jeg behøver ikke tænke over det.
 
-Der var også en praktisk accelerator: AI fungerer godt her.
+AI gav også ekstra fart til arbejdet.
 
-Astro hører hjemme i JavaScript-økosystemet, men outputtet er kedeligt på den bedst tænkelige måde: HTML og CSS med tydeligt afgrænsede komponenter. Det gør det let at bede en AI om ændringer og hurtigt gennemgå resultatet.
+Astro hører hjemme i JavaScript-økosystemet, men resultatet er kedeligt på den bedst tænkelige måde: HTML og CSS med tydeligt afgrænsede komponenter. Det gør det let at bede en AI om ændringer og hurtigt gennemgå dem.
 
-At have et MCP-værktøj til Astro-dokumentationen direkte i min editor er en reel forbedring af arbejdsgangen. Når jeg kan slå dokumentationen op direkte, mens jeg skriver en komponent, bliver jeg i flowet.
+Et MCP-værktøj til Astro-dokumentationen direkte i min editor er en reel forbedring af arbejdsgangen. Når jeg kan slå dokumentationen op, mens jeg skriver en komponent, kan jeg blive i arbejdet.
 
 ## Sådan greb jeg ombygningen an
 
-Astro var helt nyt for mig. Jeg havde aldrig rørt det før dette projekt. Derfor gik jeg til det med lyst til at lære: Prøv noget, se om det virker, eksperimentér.
+Astro var helt nyt for mig. Jeg havde aldrig rørt det før dette projekt. Derfor gik jeg undersøgende til værks: Prøv noget, se om det virker, og eksperimentér videre.
 
-AI hjalp meget. Den kendte allerede Astro, så jeg kunne bevæge mig hurtigt uden at sidde fast i syntaks eller mønstre. Jeg spurgte, itererede og byggede videre.
+AI hjalp meget. Den kendte allerede Astro, så jeg kunne komme hurtigt frem uden at sidde fast i syntaks eller mønstre. Jeg spurgte, rettede til og byggede videre.
 
-Det blå hero-kort var det eneste, der overlevede fra det gamle design, og selv det blev bygget helt om med 3D-perspektiv og parallakseeffekter. Alt andet udviklede sig gennem eksperimenter.
+Det blå intro-kort var det eneste, der overlevede fra det gamle design, og selv det blev bygget helt om med 3D-perspektiv og parallakseeffekter. Alt andet udviklede sig gennem eksperimenter.
 
 Kildekoden ligger på [GitHub](https://github.com/peterchrjoergensen/peterchrjoergensen.dk). Kig gerne. Feedback er velkommen.
 
 ## Ydeevnen efter skiftet
 
-Den gamle side havde elendige Lighthouse-resultater. jQuery og Bootstrap som designsystem betød tunge payloads og langsom første rendering.
+Den gamle side havde elendige Lighthouse-resultater. jQuery og Bootstrap som designsystem betød store mængder data og en langsom første visning.
 
-Den nye side er det modsatte. Forsiden sender minimal JavaScript. Hero-komponenten bruger kode i browseren til animationen med skiftende roller. Alt andet er statisk HTML og CSS.
+Den nye side er det modsatte. Forsiden sender meget lidt JavaScript. Hero-komponenten bruger kode i browseren til animationen med skiftende roller. Alt andet er statisk HTML og CSS.
 
-LCP holder sig under et sekund uden krumspring med hero-billedet. CLS er reelt nul, fordi intet venter på, at scripts i browseren falder på plads.
+LCP holder sig under et sekund uden akrobatik med billedet øverst på siden. CLS er reelt nul, fordi intet venter på, at scripts i browseren falder på plads.
 
-Lighthouse landede i de høje 90'ere uden finjustering. Endnu bedre: Resultatet bliver der mellem deploys, fordi grundlaget er statisk.
+Lighthouse landede i den høje ende af 90'erne uden finjustering. Endnu bedre: Resultatet holder sig der mellem udgivelser, fordi grundlaget er statisk.
 
 ## Arbejdsgangen med indhold nu
 
-Jeg elsker den nye arbejdsgang. Ingen database. Indholdet bor i Markdown-filer i git, og Astro understøtter det fra starten.
+Jeg elsker den nye arbejdsgang. Ingen database. Indholdet bor i Markdown-filer i Git, og Astro understøtter det fra starten.
 
-**Frontmatter håndhæver typer.** Content collection-skemaet fanger manglende felter under buildet. Strukturen bliver fulgt uden manuel validering.
+**Frontmatter håndhæver typer.** Content collection-skemaet fanger manglende felter, når siden bygges. Strukturen bliver fulgt uden manuel validering.
 
 **Billeder forbliver ensartede.** Når jeg har brug for et visuelt element, bruger jeg den indbyggede `<Picture />`-komponent med ordentlig alt-tekst. Astro håndterer responsive `srcset`, formatoptimering til AVIF og WebP og størrelser automatisk. Det er jeg vild med.
 
-**MDX giver fleksibilitet.** Jeg kan indlejre komponenter, når jeg har brug for dem — demoer, diagrammer — uden at række ud efter en hel SPA.
+**MDX giver fleksibilitet.** Jeg kan indlejre komponenter som demoer og diagrammer, når jeg har brug for dem, uden at vælge en hel SPA.
 
 Ingen Nova-administration. Ingen databaseforespørgsler. Bare filer i versionsstyring. Det føles let at udgive nu.
 
 ## Det lærte jeg
 
-Glem ikke at levere grundlæggende HTML. Du behøver ikke alt det smarte. Det meste af det, vi bygger, har ikke brug for JavaScript i browseren. Det har ikke brug for hydration. Det har ikke brug for en runtime.
+Glem ikke den almindelige HTML. Du behøver ikke alt det smarte. Det meste af det, vi bygger, har hverken brug for JavaScript i browseren, hydration eller en runtime.
 
-Det rigtige værktøj til den rigtige opgave. Astro er det rigtige værktøj til portfoliosider. Det træder til side og lader dig bygge det, der betyder noget.
+Det rigtige værktøj til den rigtige opgave. Astro er det rigtige værktøj til porteføljesider. Det holder sig i baggrunden og lader dig bygge det, der betyder noget.
 
 Tak til Astros bidragydere og skabere for at bygge noget så godt.

@@ -2,7 +2,7 @@
 locale: da
 translationKey: github-brick-breaker
 title: "Jeg gjorde mine GitHub-bidrag til et spilbart brick breaker-spil"
-description: "Jeg gjorde et års daglige GitHub-bidrag til et spilbart brick breaker-spil. Hver grøn firkant bliver en mursten — ødelæg beviset på din egen vedholdenhed med bevægelsesspor, partikelfysik og tilfredsstillende arkadefølelse."
+description: "Jeg gjorde et års daglige GitHub-bidrag til et spilbart brick breaker-spil. Hver grøn firkant bliver til en mursten, så man kan spille sig gennem et helt års arbejde med bevægelsesspor, partikelfysik og god arkadefølelse."
 category: "games"
 tags: ["Canvas API", "Cellulær automat", "GitHub API", "AI-assisteret", "Spilfølelse"]
 publishedDate: 2026-01-07
@@ -20,9 +20,9 @@ import firstPrototype from "../../assets/projects/brick-breaker-first-prototype.
 
 ## Idéen
 
-Jeg så en på Reddit, der havde gjort sin GitHub-bidragsgraf til et brick breaker-spil. Jeg syntes, det var genialt. Spil og webudvikling, to ting jeg elsker, smækket sammen.
+Jeg så en på Reddit, der havde gjort sin GitHub-bidragsgraf til et brick breaker-spil. Jeg syntes, det var genialt. Spil og webudvikling, to ting jeg elsker, slået sammen.
 
-Jeg bygger hver eneste dag. Den grønne graf er et års arbejde presset sammen til firkanter. Det føltes rigtigt at gøre den spilbar. Mere end det: Det føltes _meningsfuldt_. Hver mursten er en dag, hvor jeg mødte op. At knuse dem er ikke bare tilfredsstillende. Det er at ødelægge beviset på min egen vedholdenhed på den sjovest mulige måde.
+Jeg bygger hver eneste dag. Den grønne graf er et års arbejde presset sammen til firkanter. Det føltes rigtigt at gøre den spilbar. Mere end det: Det føltes _meningsfuldt_. Hver mursten er en dag, hvor jeg mødte op. At knuse dem er både tilfredsstillende og en ret sjov måde at smadre beviset på min egen vedholdenhed.
 
 ## Sådan virker det
 
@@ -33,17 +33,17 @@ Hver dag med bidrag bliver til en mursten. Farven og styrken følger GitHubs bid
 - **Mørkegrøn** (7-9 bidrag) = 3 træf
 - **Mørkeste grøn** (10+ bidrag) = 4 træf
 
-Spillet henter bidragsdata fra begge mine GitHub-konti (`tehwave` og `peterchrjoergensen`) og lægger dem sammen. Hvis jeg lavede tre bidrag på den ene konto og fem på den anden, bliver dagen til én mursten med otte bidrag — sværere at knuse og flere point værd. Sammenlægningen sker under buildet, så spillet indlæses med det samme uden API-kald.
+Spillet henter bidragsdata fra begge mine GitHub-konti (`tehwave` og `peterchrjoergensen`) og lægger dem sammen. Hvis jeg lavede tre bidrag på den ene konto og fem på den anden, bliver dagen til én mursten med otte bidrag. Den er sværere at knuse og giver flere point. Sammenlægningen sker under buildet, så spillet indlæses med det samme uden API-kald.
 
 <Wide>
   <Figure
     src={firstPrototype}
     alt="Tidlig prototype af brick breaker-spillet med enkle grønne mursten og et bat"
-    caption="Den første fungerende prototype — de grundlæggende kollisioner virkede, men der var ingen effekter endnu."
+    caption="Den første fungerende prototype. De grundlæggende kollisioner virkede, men der var ingen effekter endnu."
   />
 </Wide>
 
-## Den tekniske stack
+## Teknikken bag
 
 Det hele kører i én Astro-komponent. Under buildet henter frontmatter bidragsdata fra GitHubs GraphQL-API:
 
@@ -51,13 +51,13 @@ Det hele kører i én Astro-komponent. Under buildet henter frontmatter bidragsd
 const contributionData = await fetchMultipleContributions(profiles);
 ```
 
-Dataene bliver bagt ind i en JSON-klump, som spillet i browseren læser fra attributten `data-bricks`. Ingen API-kald under kørsel. Spillet virker offline, når det først er indlæst.
+Dataene bliver bygget ind som JSON, som spillet i browseren læser fra attributten `data-bricks`. Der er ingen API-kald, mens spillet kører. Spillet virker offline, når det først er indlæst.
 
-Selve spillet er cirka 2.400 linjer almindelig JavaScript i et `<script>`-tag — ingen React og ingen spilframeworks. Kun Canvas API og `requestAnimationFrame`. Jeg ville have noget selvstændigt, der ikke pustede bundlen op.
+Selve spillet er cirka 2.400 linjer almindelig JavaScript i et `<script>`-tag. Ingen React og ingen spilframeworks. Kun Canvas API og `requestAnimationFrame`. Jeg ville have noget selvstændigt, der ikke pustede bundlen op.
 
-### Spilloopet
+### Spillets hovedloop
 
-Standardmønstret: `requestAnimationFrame` driver loopet og kalder `update()` og derefter `render()` for hver frame. Fysikken kører med skærmens opdateringsfrekvens, normalt 60 fps.
+Hovedloopet følger standardmønstret: `requestAnimationFrame` kalder først `update()` og derefter `render()` for hvert billede. Fysikken følger skærmens opdateringsfrekvens, normalt 60 fps.
 
 ```javascript
 function gameLoop() {
@@ -70,7 +70,7 @@ function gameLoop() {
 
 ### Kollisionsregistrering
 
-Til murstenene bruger jeg AABB-kollision — Axis-Aligned Bounding Box — hvor jeg kontrollerer, om boldens afgrænsning overlapper murstenens. Det er hurtigt og godt nok til rektangler.
+Til murstenene bruger jeg AABB-kollision, Axis-Aligned Bounding Box, hvor jeg kontrollerer, om boldens afgrænsning overlapper murstenens. Det er hurtigt og godt nok til rektangler.
 
 Det svære er at finde ud af, _hvilken side_ bolden ramte. Retningen på opspringet afhænger af det. Jeg beregner indtrængningsdybden på alle fire sider og lader bolden hoppe fra den side, der har det mindste overlap:
 
@@ -102,7 +102,7 @@ const angle = -Math.PI / 2 + (hitPos - 0.5) * Math.PI * 0.7;
 
 ## Effekterne, der får det til at føles godt
 
-Jeg brugte det meste af tiden på den visuelle finish. Et brick breaker-spil uden saft føles dødt. Du har brug for det tilfredsstillende _dunk_, når bolden rammer battet, fornemmelsen af fart ved en serie af træf og panikken, når du er nede på dit sidste liv.
+Jeg brugte det meste af tiden på den visuelle finish og spilfølelsen. Et brick breaker-spil uden feedback føles dødt. Du har brug for det tilfredsstillende _dunk_, når bolden rammer battet, fornemmelsen af fart ved en serie af træf og panikken, når du er nede på dit sidste liv.
 
 Det er ikke bare pynt. Det er forskellen på et spil, man prøver én gang, og et spil, der får en til at sige "bare ét forsøg mere".
 
@@ -120,7 +120,7 @@ ballTrail.forEach((pos, i) => {
 
 Det skaber en komethale, der gør hurtige bolde lettere at følge.
 
-### En aflang bold — squash og stretch
+### En aflang bold med squash og stretch
 
 Over 1,5 gange grundfarten strækker bolden sig til en ellipse i bevægelsesretningen. Det er et klassisk animationsprincip: Hurtige objekter ser aflange ud.
 
@@ -159,7 +159,7 @@ if (lives === 1) {
 }
 ```
 
-### Faldende sand — cellulær automat
+### Faldende sand med en cellulær automat
 
 Det er min yndlingseffekt. Knuste mursten forsvinder ikke bare. De eksploderer i partikler, der falder og lægger sig.
 
@@ -182,7 +182,7 @@ if (sandGrid[y + 1][x] === null) {
 }
 ```
 
-Behandlingen nedefra og op forhindrer partikler i at bevæge sig flere gange i samme frame. Gittertilgangen er O(celler) i stedet for O(n²) til kollisionskontroller — hundredvis af partikler uden mærkbar påvirkning af ydeevnen.
+Behandlingen nedefra og op forhindrer partikler i at bevæge sig flere gange i samme frame. Gittertilgangen er O(celler) i stedet for O(n²) til kollisionskontroller. Det giver hundredvis af partikler uden mærkbar påvirkning af ydeevnen.
 
 <Wide>
   <Figure
@@ -192,27 +192,27 @@ Behandlingen nedefra og op forhindrer partikler i at bevæge sig flere gange i s
   />
 </Wide>
 
-For at gøre udtrykket blødere blander nabopartikler farver — 70 procent egen farve og 30 procent fra naboerne. Det skaber bløde overgange i stedet for hårde pixelkanter.
+For at gøre udtrykket blødere blander nabopartikler farver: 70 procent egen farve og 30 procent fra naboerne. Det skaber bløde overgange i stedet for hårde pixelkanter.
 
-### Ekstra visuelle partikler — glimt
+### Ekstra visuelle partikler og glimt
 
-Oven på sandet tilføjede jeg små rent visuelle partikler, der toner ud og aldrig bliver en del af gitteret. De opstår ved træf på mursten, falder med tyngdekraften og forsvinder hurtigt — lige præcis nok glimt til at sælge sammenstødet uden rod. De er bittesmå med en radius på to pixels og alpha-udtoning, så træffet kan mærkes uden at gøre spillefeltet uklart.
+Oven på sandet tilføjede jeg små rent visuelle partikler, der toner ud og aldrig bliver en del af gitteret. De opstår ved træf på mursten, falder med tyngdekraften og forsvinder hurtigt. Det giver lige præcis nok glimt til at understrege sammenstødet uden rod. De er bittesmå med en radius på to pixels og alpha-udtoning, så træffet kan mærkes uden at gøre spillefeltet uklart.
 
 ## Point og progression
 
 ### Highscore
 
-Jeg gemmer den bedste score lokalt og opdaterer den både ved sejr og nederlag. Det er bare `localStorage` med én nøgle, `brick-breaker-high-score`, som indlæses ved start og skrives, når den tidligere rekord bliver slået. Brugerfladen opdateres gennem `aria-live`, så skærmlæsere annoncerer ændringer, og overlayet viser "Ny highscore!", når man opnår den.
+Jeg gemmer den bedste score lokalt og opdaterer den både ved sejr og nederlag. Det er bare `localStorage` med én nøgle, `brick-breaker-high-score`, som indlæses ved start og skrives, når den tidligere rekord bliver slået. Brugerfladen opdateres gennem `aria-live`, så skærmlæsere annoncerer ændringer, og overlayet viser "Ny highscore!", når man slår rekorden.
 
 ### Power-up: dagens mursten
 
-GitHub viser dagens firkant. Jeg giver den en orange accent og ét liv, og når den knuses, udløser den en kort power-up. I ti sekunder fordobles pointene, og canvaset får en diskret animeret kant med kromatisk aberration — røde, grønne og blå streger forskudt med sinusbølger, så det føles levende uden at larme.
+GitHub viser dagens firkant. Jeg giver den en orange accent og ét liv, og når den knuses, udløser den en kort power-up. I ti sekunder fordobles pointene, og canvaset får en diskret animeret kant med kromatisk aberration: røde, grønne og blå streger forskudt med sinusbølger, så det føles levende uden at larme.
 
 ## Beslutninger om responsivt design
 
-Spillet tilpasser sig skærmstørrelsen. Canvasbredden er begrænset til 320-1.000 pixels. Murstenenes størrelse skalerer proportionalt; de er altid kvadratiske ligesom GitHubs graf.
+Spillet tilpasser sig skærmstørrelsen. Canvasbredden er begrænset til mellem 320 og 1.000 pixels. Murstenenes størrelse skalerer proportionalt; de er altid kvadratiske ligesom GitHubs graf.
 
-På små skærme — telefoner i portrættilstand — viser spillet beskeden "drej din enhed" og sætter spillet på pause. Registreringen er enkel:
+På små skærme, altså telefoner i portrættilstand, viser spillet beskeden "drej din enhed" og sætter spillet på pause. Registreringen er enkel:
 
 ```javascript
 function shouldShowRotateMessage() {
@@ -228,12 +228,12 @@ Jeg lavede det på én onsdag aften. Jeg skrev næsten ingen kode i hånden. I s
 
 Min arbejdsgang:
 
-1. **Beskriv det, jeg vil have** — "Tilføj et bevægelsesspor til bolden, når den bevæger sig hurtigt"
-2. **Gennemgå implementeringen** — Læs den genererede kode, og forstå tilgangen
-3. **Test og giv feedback** — "Sporet er for langt og føles forsinket. Gør det kortere, og lad det tone hurtigere ud"
-4. **Iterér** — Gentag, indtil det føles rigtigt
+1. **Beskriv det, jeg vil have:** "Tilføj et bevægelsesspor til bolden, når den bevæger sig hurtigt"
+2. **Gennemgå implementeringen:** Læs den genererede kode, og forstå tilgangen
+3. **Test og giv feedback:** "Sporet er for langt og føles forsinket. Gør det kortere, og lad det tone hurtigere ud"
+4. **Ret til:** Gentag, indtil det føles rigtigt
 
-AI'en håndterede detaljerne i Canvas API'et, matematikken til kollisioner og partikelsystemerne. Jeg fokuserede på spilfølelse: test, justering af konstanter og afvisning af tilgange, der så forkerte ud.
+AI'en stod for detaljerne i Canvas API'et, matematikken til kollisioner og partikelsystemerne. Jeg fokuserede på spilfølelse: test, justering af konstanter og afvisning af tilgange, der så forkerte ud.
 
 Nogle ting krævede flere forsøg. Battets vuggen skulle gennem nogle iterationer, før fjederfysikken føltes hoppende uden at flimre. Sandsimuleringen skulle justeres, før den så naturlig og ikke mekanisk ud.
 
@@ -259,7 +259,7 @@ intersectionObserver = new IntersectionObserver((entries) => {
 });
 ```
 
-Når canvaset forlader viewporten, stopper spilloopet. Scroll tilbage, og fortsæt, hvor du slap. Det er især vigtigt på lange sider, hvor spillet ligger i en sektion. Der er ingen grund til at brænde CPU-cyklusser af, mens brugeren læser andet indhold.
+Når canvaset ikke længere er synligt, stopper spillets loop. Scroll tilbage, og spillet fortsætter, hvor du slap. Det er især vigtigt på lange sider, hvor spillet ligger i en sektion. Der er ingen grund til at brænde CPU-cyklusser af, mens brugeren læser andet indhold.
 
 ### Page Visibility API
 
@@ -273,17 +273,17 @@ document.addEventListener("visibilitychange", () => {
 });
 ```
 
-Det forhindrer spillet i at køre i baggrunden og spise batteri på mobilen.
+Det forhindrer spillet i at køre i baggrunden og bruge batteri på mobilen.
 
 ### Debounced resize-handler
 
-Resize-events på vinduet affyres konstant, mens man trækker. Det er spild at genberegne murstenenes position i hver eneste frame under en ændring af størrelsen:
+Browseren sender hele tiden resize-events, mens man ændrer vinduets størrelse. Det er spild at genberegne murstenenes position i hvert eneste billede undervejs:
 
 ```javascript
 handleResize = debounce(resizeCanvasHandler, 100);
 ```
 
-I stedet venter jeg 100 millisekunder efter den sidste resize-event, før jeg beregner igen. Trækket er jævnt uden hak, og gitteret bliver opdateret i det øjeblik, man stopper.
+I stedet venter jeg 100 millisekunder efter den sidste resize-event, før jeg beregner igen. Ændringen er jævn uden hak, og gitteret bliver opdateret i det øjeblik, man stopper.
 
 ### Cellulær automat til partikler
 
@@ -299,23 +299,23 @@ GitHub-bidragene hentes én gang under buildet og ikke ved hver sideindlæsning:
 const contributionData = await fetchMultipleContributions(profiles);
 ```
 
-Dataene bliver bagt ind i en JSON-klump i HTML'en. Ingen API-kald under kørsel. Spillet virker offline. Første rendering er øjeblikkelig.
+Dataene bliver bygget ind som JSON i HTML'en. Ingen API-kald, mens spillet kører. Spillet virker offline. Den første visning er øjeblikkelig.
 
 ## Det ville jeg ændre
 
 Spillet er ikke perfekt:
 
-- **Ingen lyd** — Lyd ville tilføre meget saft: knuste mursten, træf på battet og musik ved game over. Lige nu mangler halvdelen af feedbackloopet.
-- **Touch på mobil kunne være blødere** — Touchinput virker, men er ikke lige så responsivt som musen. Den taktile forbindelse er ikke helt på plads endnu.
-- **Sværhedsgraden** — Dage med mange bidrag og mursten med fire liv er måske for svære. Jeg har ikke testet nok til at vide, om succes føles opnåelig eller frustrerende.
+- **Ingen lyd.** Lyd ville give langt mere feedback: knuste mursten, træf på battet og musik ved game over. Lige nu mangler halvdelen af spiloplevelsen.
+- **Touch på mobil kunne være blødere.** Touchinput virker, men er ikke lige så responsivt som musen. Den taktile forbindelse er ikke helt på plads endnu.
+- **Sværhedsgraden.** Dage med mange bidrag og mursten med fire liv er måske for svære. Jeg har ikke testet nok til at vide, om en sejr føles opnåelig eller frustrerende langt væk.
 
 Men det virker. Og det viser noget virkeligt: Jeg møder op og bygger hver dag. Nu kan du spille dig gennem den vedholdenhed.
 
 ## Kildekode
 
-Hele spillet bor i [én Astro-komponent på GitHub](https://github.com/tehwave/peterchrjoergensen.dk/blob/master/src/components/BrickBreaker.astro). Alle 2.400 linjer med canvas-rendering, fysik og partikeleffekter.
+Hele spillet ligger i [én Astro-komponent på GitHub](https://github.com/tehwave/peterchrjoergensen.dk/blob/master/src/components/BrickBreaker.astro). Alle 2.400 linjer med canvas-rendering, fysik og partikeleffekter.
 
-Hvis du opdager noget, der er i stykker, har idéer til forbedringer eller bare vil se, hvordan den cellulære automat virker, så dyk ned i koden. Feedback er velkommen.
+Hvis du opdager noget, der er i stykker, har idéer til forbedringer eller bare vil se, hvordan den cellulære automat virker, så gå på opdagelse i koden. Feedback er velkommen.
 
 ## Spil det
 

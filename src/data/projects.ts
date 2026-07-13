@@ -300,59 +300,69 @@ export const projects: Project[] = [
 
 const danishProjectCopy: Record<string, Pick<Project, "description" | "alt">> = {
   Janchart: {
-    description: "Jeg byggede hjemmesiden i Laravel, Bootstrap og jQuery for denne virksomhed inden for befragtning, shipping og rederidrift.",
-    alt: "Skærmbillede af forsiden på Jancharts hjemmeside for shippingvirksomheden",
+    description: "Jeg byggede Jancharts hjemmeside i Laravel, Bootstrap og jQuery. Virksomheden arbejder med befragtning, shipping og rederidrift.",
+    alt: "Skærmbillede af forsiden på shippingvirksomheden Jancharts hjemmeside",
   },
   "Grundfos Safety": {
-    description: "En gamificeret quiz-webapplikation bygget i Vue.js med understøttelse af ældre browsere, som lærer medarbejdere om sikkerhed hos Grundfos.",
+    description: "En quiz i Vue.js, der lærer Grundfos-medarbejdere om sikkerhed gennem spilmekanik. Den understøtter også ældre browsere.",
     alt: "Skærmbillede af brugerfladen i quizapplikationen Grundfos Safety",
   },
   "gm48.net": {
-    description: "Hjemsted for et game jam-fællesskab, jeg har drevet siden 2013. Bygget i Laravel med mere end 48 afholdte jams og tusindvis af indsendte spil.",
-    alt: "Skærmbillede af forsiden på game jam-hjemmesiden gm48.net",
+    description: "Jeg har drevet game jam-fællesskabet gm(48) siden 2013. Platformen er bygget i Laravel og har lagt rammer til mere end 48 jams og tusindvis af spil.",
+    alt: "Skærmbillede af forsiden på game jam-platformen gm48.net",
   },
-  "This Website": { description: "Bygget med Astro, TypeScript og SCSS med AI-hjælp til komponentstruktur og designbeslutninger.", alt: "Skærmbillede af min personlige portfoliohjemmeside" },
+  "This Website": {
+    description: "Min egen hjemmeside er bygget med Astro, TypeScript og SCSS. Jeg har brugt AI som sparringspartner til komponentstruktur og designvalg.",
+    alt: "Skærmbillede af min personlige portefølje",
+  },
   "Groovy Waves": {
-    description: "Et bølgedesignlaboratorium til at afprøve canvas-drevne UI-motiver, indlejrede kanter, bevægelsestilstande og mindre firkantede komponentflader.",
+    description: "Et designlaboratorium, hvor jeg afprøver bølger tegnet på canvas, integrerede kanter, bevægelse og komponenter, der ikke bare ligner firkantede kasser.",
     alt: "Skærmbillede af Groovy Waves-eksperimentet med lagdelte bølgepaneler",
   },
   "Solgt.com": {
-    description: "Tech lead for Danmarks førende platform til bilsalg. Full-stack-udvikling på tværs af WordPress og Laravel.",
+    description: "Jeg var tech lead på Danmarks førende platform til bilsalg og arbejdede med både WordPress og Laravel på tværs af hele løsningen.",
     alt: "Skærmbillede af forsiden på bilsalgsplatformen Solgt.com",
   },
   VillaVilla: {
-    description: "Senior webudvikler og tech lead for en virksomhed med luksusferiehuse. Full-stack WordPress og Laravel.",
+    description: "Som senior webudvikler og tech lead byggede jeg løsninger i WordPress og Laravel for en udlejer af luksusferiehuse.",
     alt: "Skærmbillede af VillaVillas hjemmeside for luksusferiehuse",
   },
   "C&C Travel": {
-    description: "Laravel-administrationssystem med AI-integrationer til et 35 år gammelt rejsebureau med skræddersyede rejser. WordPress-frontend med specialbygget bookingflow.",
+    description:
+      "Jeg byggede et administrationssystem i Laravel med AI-integrationer for et rejsebureau med 35 års erfaring i skræddersyede rejser. Hjemmesiden bruger WordPress og har et specialbygget bookingforløb.",
     alt: "Skærmbillede af C&C Travels specialbyggede rejsehjemmeside",
   },
   "DM Greenkeeping": {
-    description: "Jeg byggede Laravel-CRM'et og tilbudssystemet, som nu understøtter denne plæneplejevirksomhed med millionomsætning.",
+    description: "Jeg byggede virksomhedens CRM og tilbudssystem i Laravel. I dag er det en central del af driften i en plæneplejevirksomhed med millionomsætning.",
     alt: "Skærmbillede af DM Greenkeepings hjemmeside for plænepleje",
   },
-  Restudy: { description: "Læringsplatform med WordPress-frontend og Laravel-backend. Danmarks største portal for videoundervisning.", alt: "Skærmbillede af Restudys platform for videoundervisning" },
+  Restudy: {
+    description: "Danmarks største portal for videoundervisning, bygget med WordPress til hjemmesiden og Laravel bag kulissen.",
+    alt: "Skærmbillede af Restudys platform for videoundervisning",
+  },
   Kirppu: {
     description: "Danmarks største genbrugskæde med 34 butikker. AI-baseret billedanalyse og Algolia-søgning på deres WordPress-platform.",
     alt: "Skærmbillede af Kirppus hjemmeside for genbrugsmarkedet",
   },
-  SkiOutlet: { description: "WordPress-webshop med tusindvis af varenumre importeret fra Microsoft NAV. Danmarks største skioutlet.", alt: "Skærmbillede af SkiOutlets webshop for skiudstyr" },
+  SkiOutlet: { description: "Danmarks største skioutlet. Webshoppen er bygget i WordPress og får tusindvis af varenumre fra Microsoft NAV.", alt: "Skærmbillede af SkiOutlets webshop for skiudstyr" },
   "Slagter Lampe": { description: "WordPress-webshop for en traditionsrig familieslagter fra 1939, kendt for sine prisvindende pølser.", alt: "Skærmbillede af Slagter Lampes webshop" },
-  AutoProff: { description: "Laravel-udviklersupport til denne B2B-platform for bilhandel på 12 europæiske markeder.", alt: "Skærmbillede af AutoProffs B2B-platform for bilhandel" },
+  AutoProff: { description: "Jeg bidrog med Laravel-udvikling til AutoProffs B2B-platform for bilhandel på 12 europæiske markeder.", alt: "Skærmbillede af AutoProffs B2B-platform for bilhandel" },
   "Din Bilpartner": {
     description: "WordPress- og Laravel-udvikling for Danmarks ældste frie værkstedskæde. Jeg byggede API-integrationer og den eksklusive Express-medlemsklub.",
     alt: "Skærmbillede af forsiden på Din Bilpartners værkstedshjemmeside",
   },
   "Planet Huse": { description: "WordPress-hjemmeside for en sommerhusbygger med mere end 37 års erfaring.", alt: "Skærmbillede af Planet Huses hjemmeside for sommerhusbyggeri" },
-  "Planet Living": { description: "WordPress-hjemmeside for modulære tiny houses og haveværelser.", alt: "Skærmbillede af Planet Livings hjemmeside for tiny houses" },
+  "Planet Living": { description: "WordPress-hjemmeside for modulære minihuse og ekstra rum til haven.", alt: "Skærmbillede af Planet Livings hjemmeside for minihuse" },
   Forsia: { description: "Migrering fra Drupal til WordPress for dette danske forsikringsselskab, tidligere Sønderjysk Forsikring.", alt: "Skærmbillede af forsikringsselskabet Forsias hjemmeside" },
   Autocentralen: { description: "WordPress-vedligeholdelse og support for en stor dansk bilforhandler med flere afdelinger.", alt: "Skærmbillede af Autocentralens bilforhandlerhjemmeside" },
   Renell: {
     description: "WordPress-support for et svanemærket rengøringsselskab med mere end 700 medarbejdere og historie tilbage til 1987.",
     alt: "Skærmbillede af rengøringsselskabet Renells hjemmeside",
   },
-  "Hørning Parket": { description: "WordPress-support for en 90 år gammel producent af premiumgulve målrettet arkitekter.", alt: "Skærmbillede af Hørning Parkets hjemmeside for parketgulve" },
+  "Hørning Parket": {
+    description: "WordPress-support for en gulvproducent med 90 års historie og arkitekter som en vigtig målgruppe.",
+    alt: "Skærmbillede af Hørning Parkets hjemmeside for parketgulve",
+  },
   "BSI Marine Equipment Group": {
     description: "WordPress-hjemmeside for en marineudstyrsgruppe med ni specialiserede brands til sejlbåde og superyachter verden over.",
     alt: "Skærmbillede af BSI Marine Equipment Groups hjemmeside",
@@ -362,7 +372,8 @@ const danishProjectCopy: Record<string, Pick<Project, "description" | "alt">> = 
     alt: "Skærmbillede af platformspillet FIRKANT med farverig pixelgrafik",
   },
   "Idle Game": {
-    description: "En pastelfarvet PixiJS-prototype på et idle-spil med hoppende dyr, lokal lagring, butiksprogression og en bevidst hyggelig mobile-first-ramme.",
+    description:
+      "En pastelfarvet prototype på et idle-spil i PixiJS med hoppende dyr, lokal lagring og en butik, der åbner nye muligheder undervejs. Udtrykket er bevidst hyggeligt og skabt til mobilen først.",
     alt: "Skærmbillede af Idle Game-eksperimentet med en pasteleng, dyresprites og HUD-elementer",
   },
   "Mord Ombord": {
@@ -370,11 +381,11 @@ const danishProjectCopy: Record<string, Pick<Project, "description" | "alt">> = 
     alt: "Skærmbillede af VR-mordmysteriespillet Mord Ombord",
   },
   "Western World": {
-    description: "Et Unity3D-miljø, der undersøger asset-pipelinen fra Maya til Unity. Støvede salooner og tumbleweeds er inkluderet.",
+    description: "Et Unity3D-miljø, hvor jeg afprøvede arbejdsgangen fra Maya til Unity. Der er selvfølgelig både støvede salooner og tumbleweeds.",
     alt: "Skærmbillede af 3D-miljøet Western World i Unity",
   },
   "Odense Golfklub": {
-    description: "En Unity3D-mobilapp med 360-graders banebilleder og 3D-overflyvninger, bygget så klubbens medlemmer kan se hullerne før spillet.",
+    description: "En mobilapp i Unity3D med 360-graders billeder og overflyvninger i 3D, så klubbens medlemmer kan se hvert hul, før de spiller det.",
     alt: "Skærmbillede af Odense Golfklubs mobilapp med en golfbane i 3D",
   },
   "Torpedo Trump": {

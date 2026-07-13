@@ -2,14 +2,14 @@
 locale: da
 translationKey: browser-multiplayer
 title: "Jeg byggede et multiplayer-spil i browseren uden en server"
-description: "Jeg byggede et WebRTC-airhockeyeksperiment helt uden server med AI-assisteret kode. Jeg kendte ikke WebRTC på forhånd, så projektet blev både en spilbar prototype og en praktisk måde at lære peer-to-peer-arkitektur i browseren."
+description: "Jeg byggede et WebRTC-airhockeyeksperiment helt uden en server og med AI-assisteret kode. Jeg kendte ikke WebRTC på forhånd, så projektet blev både en spilbar prototype og en praktisk vej ind i peer-to-peer-arkitektur i browseren."
 category: "games"
 tags: ["WebRTC", "PixiJS", "TypeScript", "AI-assisteret", "Spildesign"]
 externalUrl: "https://peterchrjoergensen.dk/experiments/browser-multiplayer/"
 publishedDate: 2026-05-06
 heroImage: ../../assets/projects/browser-multiplayer.png
 heroImageAlt: "Skærmbillede af Browser Multiplayer-eksperimentet med airhockey uden server"
-ogDescription: "En case om at bygge et WebRTC-multiplayer-eksperiment i browseren uden server med AI-agenter, manuel signalering, PixiJS-rendering og mobile-first-spilfølelse."
+ogDescription: "En case om et WebRTC-multiplayer-eksperiment uden server, bygget med AI-agenter, manuel signalering, PixiJS og fokus på spilfølelse på mobilen."
 ---
 
 import Wide from "../../components/Wide.astro";
@@ -21,19 +21,19 @@ import earlyHandshakeUi from "../../assets/projects/browser-multiplayer/Screensh
 
 Jeg ville bygge et lille browsereksperiment, hvor to telefoner kunne spille sammen uden en backend. Ingen lobbyserver. Intet kontosystem. Ingen database. Bare to browsere, WebRTC, en manuel invitationskode og nok spilfølelse til, at det blev mere end en netværksdemo.
 
-Jeg kendte ikke WebRTC før projektet. Det var hele pointen. Jeg ville bruge AI-agenter som iterationspartner, levere en konkret ting og derefter lære teknologien ved at læse den kode, processen skabte.
+Jeg kendte ikke WebRTC før projektet. Det var hele pointen. Jeg ville bruge AI-agenter som sparringspartnere, bygge noget konkret og derefter lære teknologien ved at læse den kode, processen skabte.
 
-Det overraskende er, hvor projektet _ikke_ gik i stykker. WebRTC-implementeringen virkede i første forsøg. Det manuelle håndtryk virkede. Synkroniseringen af peer-to-peer-tilstand virkede. Den centrale spilloop virkede. Det, der fejlede, var produktet omkring det, fordi min plan havde detaljerede arkitekturbeslutninger og næsten ingen beslutninger om brugerfladen.
+Det overraskende er, hvor projektet _ikke_ gik i stykker. WebRTC-implementeringen virkede i første forsøg. Det manuelle håndtryk virkede. Synkroniseringen af peer-to-peer-tilstand virkede. Spillets hovedloop virkede. Problemerne lå i produktet omkring teknikken, fordi min plan havde detaljerede arkitekturbeslutninger og næsten ingen beslutninger om brugerfladen.
 
-Resultatet er et lille mobile-first-airhockeyspil, hvor to telefoner forbinder direkte gennem WebRTC. Den ene spiller opretter en invitation, sender den til den anden, modtager en svarkode og starter kampen. Spillet bruger WebRTC-datakanaler til peer-to-peer-opdateringer og PixiJS til handlingslaget.
+Resultatet er et lille airhockeyspil bygget til mobilen først, hvor to telefoner forbinder direkte gennem WebRTC. Den ene spiller opretter en invitation, sender den til den anden, modtager en svarkode og starter kampen. Spillet bruger WebRTC-datakanaler til peer-to-peer-opdateringer og PixiJS til selve spilfladen.
 
 [Spil WebRTC-multiplayer-eksperimentet uden server](/experiments/browser-multiplayer/)
 
 ## Hvorfor det var et godt AI-projekt
 
-Projektet havde den rigtige form til agentisk kodning.
+Projektet var velegnet til at bygge med AI-agenter.
 
-Det var afgrænset. Spillet havde kun brug for én puck, to bat, simpel pointgivning og et manuelt forbindelsesflow. Samtidig var det ukendt nok til, at jeg ikke bare kunne implementere det fra hukommelsen. WebRTC tvang tidligt rigtige arkitekturbeslutninger frem: Hvem ejer simuleringen? Hvordan fungerer signaleringen? Hvad sker der, når en pakke forsvinder? Hvor meget tilstand skal sendes over forbindelsen?
+Det var afgrænset. Spillet havde kun brug for én puck, to bat, simpel pointgivning og et manuelt forbindelsesforløb. Samtidig var det ukendt nok til, at jeg ikke bare kunne implementere det fra hukommelsen. WebRTC tvang tidligt rigtige arkitekturbeslutninger frem: Hvem ejer simuleringen? Hvordan fungerer signaleringen? Hvad sker der, når en pakke forsvinder? Hvor meget tilstand skal sendes over forbindelsen?
 
 Den kombination fungerede godt. Omfanget var lille nok til, at agenterne kunne udføre arbejdet, men ukendt nok til, at jeg stadig skulle være opmærksom. Jeg kunne ikke bare godkende ændringer på autopilot.
 
@@ -44,17 +44,17 @@ Min rolle var ikke at skrive hver linje. Den var at sætte rammer, afvise dårli
 Jeg fordelte arbejdet på en håndfuld fokuserede samtaler:
 
 1. **Brainstorm eksperimentet.** Definér spillet, mobilbegrænsningerne, læringsmålet med WebRTC og arkitekturretningen.
-2. **Byg ud fra planen.** Brug GDD/TDD som implementeringsbrief, og lad agenten bygge den første fungerende version.
-3. **Design brugerfladen om.** Ret håndtryksflow, knaptilstande, viewportproblemer, tilbage-navigation og layoutfejl på små skærme.
+2. **Byg ud fra planen.** Brug GDD/TDD som arbejdsgrundlag, og lad agenten bygge den første fungerende version.
+3. **Design brugerfladen om.** Ret forbindelsesforløbet, knaptilstande, problemer med skærmstørrelsen, tilbage-navigation og layoutfejl på små skærme.
 4. **Pres den visuelle retning.** Flyt udtrykket fra generisk prototype til et klart pop-art-sportslegetøj med en læsbar arena.
-5. **Udgiv det som projekt.** Føj det til portfolioen, da det føltes værd at vise frem.
-6. **Ryd valideringen op.** Kør projektets checks, og ret problemerne i browser-multiplayer i stedet for at efterlade repositoriet rodet.
+5. **Udgiv det som projekt.** Føj det til porteføljen, da det føltes værd at vise frem.
+6. **Få valideringen på plads.** Kør projektets kontroller, og ret problemerne i browser-multiplayer i stedet for at efterlade repositoriet rodet.
 
-Implementeringspasset er næsten den mindst interessante samtale, men af en god grund: Det udførte stort set bare planen. Der var ingen særlige fejlfindingsværktøjer involveret, kun det normale VS Code-flow og `npm run check` fra projektscripts.
+Implementeringsrunden er næsten den mindst interessante samtale, men af en god grund: Den udførte stort set bare planen. Der var ingen særlige fejlfindingsværktøjer involveret, kun den normale arbejdsgang i VS Code og `npm run check` fra projektets scripts.
 
 Den grove del var alt omkring spillet. Planen havde stærke holdninger til netværk, simulering, autoritet, mobilstyring og grænserne omkring rendereren, men den traf ikke nok produktbeslutninger om brugerfladen. Den første version beviste derfor den svære tekniske del og afslørede den bløde, rodede del: Spillet virkede, men brugerfladen var elendig.
 
-Derfor var de længste sessioner feedbackloops og ikke implementering. UI/UX-passet alene havde 21 brugerbeskeder og 289 værktøjskald. Pop-art-passet havde 15 brugerbeskeder og 139 værktøjskald.
+Derfor gik mest tid med løbende feedback og ikke med den første implementering. UI/UX-runden alene havde 21 brugerbeskeder og 289 værktøjskald. Pop-art-runden havde 15 brugerbeskeder og 139 værktøjskald.
 
 Det lyder støjende, men det er også pointen. Værdien var ikke én perfekt prompt. Værdien var hurtig, konkret iteration.
 
@@ -64,14 +64,14 @@ Agenterne bevægede sig hurtigt, men de vidste ikke, hvad der betød noget. Det 
 
 ## De kodegrænser, jeg ville have
 
-Det vigtigste var adskillelse. Rendereren skulle ikke bestemme scoren, netværkslaget skulle ikke kende spillereglerne, og controlleren skulle ikke ende som en skrammeskuffe på 3.000 linjer.
+Det vigtigste var adskillelse. Rendereren skulle ikke bestemme scoren, netværkslaget skulle ikke kende spillereglerne, og controlleren skulle ikke ende som en rodekasse på 3.000 linjer.
 
 Den endelige implementering er opdelt efter ansvar:
 
 - **Forbindelse:** `network.ts`, `handshake.ts` og `protocol.ts` håndterer WebRTC-opsætning, delbare invitationskoder og kompakte spilbeskeder.
-- **Spillets sandhed:** `simulation.ts` ejer den autoritative tilstand, fysik, kollisioner, point og rundeflow.
-- **Præsentation:** `renderer.ts` tegner bane, puck, bat, spor, partikler, squash og screen shake med PixiJS.
-- **Lim:** `controller.ts` og `input.ts` forbinder DOM, touchinput, netværksbeskeder, øjebliksbilleder fra simuleringen og oprydning i livscyklussen.
+- **Spiltilstanden:** `simulation.ts` ejer den autoritative tilstand, fysik, kollisioner, point og rundeforløb.
+- **Præsentation:** `renderer.ts` tegner bane, puck, bat, spor, partikler, squash og skærmrystelser med PixiJS.
+- **Bindeleddet:** `controller.ts` og `input.ts` forbinder DOM, touchinput, netværksbeskeder, øjebliksbilleder fra simuleringen og oprydning i livscyklussen.
 
 Grænserne var en del af acceptkriterierne. I en prototype ville det være let at smide alt i én fil og kalde den færdig. Jeg ville have noget, jeg stadig kunne forstå, efter AI'en havde genereret det.
 
@@ -79,7 +79,7 @@ Grænserne var en del af acceptkriterierne. I en prototype ville det være let a
 
 Dette var den første WebRTC-skelnen, der faldt på plads for mig: Signalering er ikke peer-to-peer-delen. Det er bare introduktionen. Begge peers skal udveksle nok information til at forbinde, men den udveksling behøver ikke foregå gennem en server, jeg ejer.
 
-I eksperimentet ville jeg slet ikke have en signaleringsserver. Derfor er flowet manuelt:
+I eksperimentet ville jeg slet ikke have en signaleringsserver. Derfor foregår forbindelsen manuelt:
 
 1. Værten opretter et lokalt WebRTC-tilbud.
 2. Tilbuddet serialiseres til en invitationskode.
@@ -96,7 +96,7 @@ Det manuelle flow er klodset sammenlignet med en normal matchmakingserver, men d
 
 Værten er autoritativ. Den kører simuleringen, håndterer kollisioner, giver point og udsender øjebliksbilleder af tilstanden med 30 Hz.
 
-Klienten sender input med 60 Hz. Inputtet er bevidst enkelt: battets X-position og hastighed, rolle og tick. Det er absolut og ikke relativt, så tabte pakker ikke samler sig til afdrift. Hvis værten mangler én input-frame, indeholder den næste stadig battets aktuelle position.
+Klienten sender input med 60 Hz. Inputtet er bevidst enkelt: battets X-position og hastighed, rolle og tick. Det er absolut og ikke relativt, så tabte pakker ikke fører til voksende positionsfejl. Hvis værten mangler én input-frame, indeholder den næste stadig battets aktuelle position.
 
 Datakanalen oprettes med:
 
@@ -150,22 +150,22 @@ Jeg gav meget direkte feedback:
 - Vedvarende hjælpetekst skal forsvinde, når spilleren har forstået styringen.
 
 <Wide>
-	<Figure
-		src={earlyMatchUi}
-		alt="Tidligt skærmbillede af Browser Multiplayer-kampen med alt for stor vindertekst, indrammede pointkort og rå touchstyring"
-		caption="Den første fungerende kampskærm. WebRTC-delen virkede. Brugerfladen så ud, som om den havde tabt en slåskamp mod en wireframe."
-	/>
+  <Figure
+    src={earlyMatchUi}
+    alt="Tidligt skærmbillede af Browser Multiplayer-kampen med alt for stor vindertekst, indrammede pointkort og rå touchstyring"
+    caption="Den første fungerende kampskærm. WebRTC-delen virkede. Brugerfladen så ud, som om den havde tabt en slåskamp mod en wireframe."
+  />
 </Wide>
 
 <Wide>
-	<Figure
-		src={earlyHandshakeUi}
-		alt="Tidligt skærmbillede af håndtrykket i Browser Multiplayer med stablede knapper, generering af invitationskode og råt mobillayout"
-		caption="Den første håndtryks-UI under generering af invitationen. Teknisk nyttig, visuelt skyldig."
-	/>
+  <Figure
+    src={earlyHandshakeUi}
+    alt="Tidligt skærmbillede af håndtrykket i Browser Multiplayer med stablede knapper, generering af invitationskode og råt mobillayout"
+    caption="Den første håndtryks-UI under generering af invitationen. Teknisk nyttig, visuelt skyldig."
+  />
 </Wide>
 
-Her føles agentisk kodning mindre som generering og mere som instruktion. Agenten kan lave ændringerne hurtigt, men jeg skal stadig opdage, hvad der er galt. Smag og begrænsninger er ikke valgfrie.
+Her føles arbejdet med AI-agenter mindre som generering og mere som instruktion. Agenten kan lave ændringerne hurtigt, men jeg skal stadig opdage, hvad der er galt. Smag og begrænsninger er ikke valgfrie.
 
 ## Passet med visuel retning
 
@@ -173,7 +173,7 @@ Den visuelle stil begyndte for generisk. Jeg skubbede den mod pop-art: klar gul 
 
 Flere små rettelser betød noget:
 
-- Canvaset havde brug for en massiv baggrund for at være læsbart.
+- Canvaset havde brug for en dækkende, ensfarvet baggrund for at være læsbart.
 - Arenaen havde brug for en midterlinje og en cirkel.
 - Scoren skulle længere ned, omtrent en fjerdedel fra toppen.
 - Touchområdet skulle læses som noget, man kan trække i, uden at dække spillet.
@@ -182,7 +182,7 @@ Flere små rettelser betød noget:
 
 Det er en af de mere ærlige dele af processen. AI kan generere visuel behandling meget hurtigt, men den overdekorerer også hurtigt. Jeg brugte meget af sessionen på at sige nej. Fjern den boks. Dæmp baggrunden. Flyt teksten. Lad ikke effekten blokere pucken.
 
-Den endelige version er stadig en prototype, men den har et standpunkt. Det betyder noget i et portfolioeksperiment.
+Den endelige version er stadig en prototype, men den har fået sit eget tydelige udtryk. Det betyder noget i et porteføljeeksperiment.
 
 ## Det lærte jeg ved at læse koden
 
@@ -195,16 +195,16 @@ Efter projektet er formen langt tydeligere:
 - SDP beskriver, hvad en peer kan, og hvordan den måske kan nås.
 - Udvekslingen af tilbud og svar er bare signalering. Den behøver ikke være en server.
 - En STUN-server hjælper peers med at opdage netværkskandidater. Den er ikke det samme som en spilserver.
-- Når datakanalen er åben, føles den som ethvert andet beskedrør.
+- Når datakanalen er åben, føles den som enhver anden beskedkanal.
 - I spil betyder autoritet og pakkestrategi mere end den rå API-kompleksitet.
 
 Det lærte jeg ved at læse kode, agenterne skrev. Ikke ved først at se en guide. Ikke ved at sætte en uge af til at bygge den perfekte mentale model. Jeg byggede tingen og brugte derefter den genererede kode som lærebog.
 
-Det virker kun, hvis jeg faktisk læser den. Vibe coding uden review efterlader en magisk bunke. Agentisk kodning med review efterlader et fungerende system og en ny mental model.
+Det virker kun, hvis jeg faktisk læser den. Vibe coding uden gennemgang efterlader en uigennemskuelig bunke kode. Arbejde med AI-agenter og grundig gennemgang efterlader et fungerende system og en ny forståelse.
 
-## Den uglamourøse oprydning
+## Den kedelige, men vigtige oprydning
 
-Det sidste pass var oprydning med `npm run check`. Det er ikke prangende, men det er vigtigt.
+Den sidste runde var oprydning med `npm run check`. Det er ikke prangende, men det er vigtigt.
 
 AI-assisteret kode skal leve op til de samme standarder som alt andet i repositoriet. TypeScript skal bestå. Astro skal være tilfreds. Eksperimentet skal montere og rydde op korrekt på tværs af View Transitions. Ugyldige håndtryksstrenge skal fejle sikkert. Rå SDP må ikke sprøjtes ud i logs.
 
@@ -212,27 +212,27 @@ Oprydningen er forskellen på "jeg lavede en fed demo" og "jeg kan beholde det i
 
 ## Det ville jeg ændre næste gang
 
-Det er ikke et multiplayer-spil til produktion. Det er et fokuseret eksperiment.
+Det er ikke et produktionsklart multiplayer-spil. Det er et fokuseret eksperiment.
 
 Hvis jeg fortsatte, ville jeg forbedre:
 
 - **Håndtrykkets ergonomi.** Manuelle koder beviser pointen godt, men er stadig klodsede.
 - **Feedback ved forbindelsesfejl.** WebRTC-fejl kan kommunikeres tydeligere til rigtige brugere.
 - **Finere interpolation.** Klienten kan altid føles glattere på dårlige netværk.
-- **Lyd og haptik.** Spillet har visuel saft, men lyd ved sammenstød ville gøre meget.
+- **Lyd og haptik.** Spillet har gode visuelle effekter, men lyd ved sammenstød ville gøre en stor forskel.
 - **Playtesting.** Fysikkonstanterne er plausible, ikke bevist gode.
 
 Jeg ville ikke tilføje konti, matchmaking, persistens eller genforbindelse endnu. Det ville være et andet projekt. Begrænsningen er det, der gør dette interessant.
 
-## Konklusionen
+## Det lærte jeg
 
 Projektet ændrede min måde at tænke læring med AI på.
 
-Gevinsten var ikke, at en agent skrev WebRTC-kode for mig. Gevinsten var, at jeg kunne styre et nyt teknisk område fra idé til spilbar prototype og derefter læse systemet, indtil det blev forståeligt.
+Gevinsten var ikke, at en agent skrev WebRTC-kode for mig. Gevinsten var, at jeg kunne styre et nyt teknisk område fra idé til spilbar prototype og derefter forstå systemet ved at læse koden.
 
 Den nyttige lektie var ikke "AI kan bygge et WebRTC-spil". Den var: "AI kan gøre en smal teknisk plan til en fungerende ting hurtigt nok til, at jeg kan bruge mere energi på dømmekraft, produktretning og læring."
 
-Loopet så sådan ud:
+Arbejdsgangen så sådan ud:
 
 1. Skriv planen.
 2. Lad agenten udføre den tekniske del.
@@ -240,15 +240,15 @@ Loopet så sådan ud:
 4. Opdag det, planen glemte.
 5. Iterér dér, hvor smag betyder noget.
 6. Læs den genererede kode, indtil arkitekturen bliver din egen.
-7. Validér repositoriet, før du kalder arbejdet færdigt.
+7. Kontrollér hele repositoriet, før du kalder arbejdet færdigt.
 
-WebRTC var det perfekte emne til det loop. Det er kraftfuldt, indbygget i browseren og mærkeligt nok til at være værd at udforske. To telefoner, ingen server, ét lille airhockeyspil. Det er stadig en god påmindelse om, hvor meget webplatformen kan.
+WebRTC var det perfekte emne til det forløb. Det er kraftfuldt, indbygget i browseren og mærkeligt nok til at være værd at udforske. To telefoner, ingen server, ét lille airhockeyspil. Det er stadig en god påmindelse om, hvor meget webplatformen kan.
 
 ## Kildekode
 
 Hele hjemmesiden er open source på GitHub, inklusive browser-multiplayer-eksperimentet: [tehwave/peterchrjoergensen.dk](https://github.com/tehwave/peterchrjoergensen.dk).
 
-Jeg holder den offentlig, så folk kan læse, lære og kigge bag gardinet. Ophavsretten gælder stadig, så brug den som reference og ikke som en skabelon, der kan kopieres direkte.
+Jeg holder den offentlig, så folk kan læse, lære og kigge med bag kulissen. Ophavsretten gælder stadig, så brug den som reference og ikke som en skabelon, der kan kopieres direkte.
 
 ## Prøv det
 
@@ -256,6 +256,6 @@ Eksperimentet findes her:
 
 [Prøv WebRTC-airhockey med multiplayer i browseren](/experiments/browser-multiplayer/)
 
-Det er med vilje lidt råt i kanterne. Du skal bruge to browsere, en fungerende peer-to-peer-netværksvej og lidt tålmodighed med det manuelle invitationsflow. Men når datakanalen åbner, og pucken begynder at bevæge sig, lander pointen med det samme.
+Det er med vilje lidt råt i kanterne. Du skal bruge to browsere, en fungerende peer-to-peer-netværksvej og lidt tålmodighed med det manuelle invitationsforløb. Men når datakanalen åbner, og pucken begynder at bevæge sig, står idéen med det samme klart.
 
-Browseren er platformen. AI var acceleratoren. Læringen skete i loopet mellem dem.
+Browseren er platformen. AI satte fart på. Læringen opstod i samspillet mellem dem.
