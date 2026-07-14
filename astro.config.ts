@@ -20,7 +20,8 @@ export default defineConfig({
   // Integrations for SEO and functionality
   integrations: [
     sitemap({
-      filter: (page) => !page.includes("/__i18n/"),
+      filter: (page) =>
+        !page.includes("/__i18n/") && !page.includes("/experiments/") && !page.endsWith("/tracker/"),
       customPages: PUBLIC_CONTENT_PATHS.map((path) => new URL(path, "https://peterchrjoergensen.dk").toString()),
       // Customize sitemap entries with frontmatter data
       serialize: (item) => serializeSitemap(item, ChangeFreqEnum),

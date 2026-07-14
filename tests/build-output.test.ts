@@ -5,11 +5,19 @@ import { DANISH_CONTENT_PATHS, PUBLIC_CONTENT_PATHS } from "../src/i18n/public-r
 const readOutput = (path: string) => readFileSync(new URL(`../dist/${path}`, import.meta.url), "utf8");
 
 describe("localized build output", () => {
+  it("excludes experiment routes from the sitemap", () => {
+    const sitemap = readOutput("sitemap-0.xml");
+    const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+
+    expect(locations.some((location) => new URL(location).pathname.startsWith("/experiments/"))).toBe(false);
+  });
+
   it("emits only canonical public content paths in the sitemap", () => {
     const sitemap = readOutput("sitemap-0.xml");
     const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 
     expect(sitemap).not.toContain("__i18n");
+    expect(locations).not.toContain("https://peterchrjoergensen.dk/tracker/");
     for (const publicPath of PUBLIC_CONTENT_PATHS) {
       const canonical = `https://peterchrjoergensen.dk${publicPath}`;
       expect(locations.filter((location) => location === canonical)).toHaveLength(1);
