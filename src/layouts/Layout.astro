@@ -34,6 +34,7 @@ const documentLanguage = localeMetadata[locale];
 const contentLanguage = localeMetadata[contentLocale];
 
 const publicPath = Astro.url.pathname.replace(/^\/__i18n\/(?:en|da)(?=\/|$)/, "") || "/";
+const robots = publicPath.startsWith("/experiments/") ? "noindex, nofollow" : "index, follow";
 const canonicalURL = new URL(publicPath, Astro.site);
 const socialImageURL = new URL(image, Astro.site);
 ---
@@ -49,7 +50,7 @@ const socialImageURL = new URL(image, Astro.site);
     <meta name="title" content={title} />
     <meta name="description" content={resolvedDescription} />
     <meta name="author" content="Peter Chr. Jørgensen" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={robots} />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Canonical URL -->

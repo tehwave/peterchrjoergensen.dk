@@ -5,6 +5,17 @@ import { DANISH_CONTENT_PATHS, PUBLIC_CONTENT_PATHS } from "../src/i18n/public-r
 const readOutput = (path: string) => readFileSync(new URL(`../dist/${path}`, import.meta.url), "utf8");
 
 describe("localized build output", () => {
+  it.each([
+    "experiments/browser-multiplayer/index.html",
+    "experiments/groovy-waves/index.html",
+    "experiments/idle-game/index.html",
+    "experiments/surfaces/index.html",
+  ])("marks %s as noindex", (outputPath) => {
+    const output = readOutput(outputPath);
+
+    expect(output).toMatch(/<meta\b(?=[^>]*\bname=robots)(?=[^>]*\bcontent="noindex, nofollow")[^>]*>/);
+  });
+
   it("excludes experiment routes from the sitemap", () => {
     const sitemap = readOutput("sitemap-0.xml");
     const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
