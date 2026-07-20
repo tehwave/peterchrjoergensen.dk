@@ -14,6 +14,7 @@ heroImageCaption: "Foto af [Tomáš Stanislavský
 
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
+import RelatedPost from "../../components/RelatedPost.astro";
 
 ## Beslutningen om at begynde forfra
 
@@ -104,6 +105,14 @@ Jeg elsker den nye arbejdsgang. Ingen database. Indholdet bor i Markdown-filer i
 **Billeder forbliver ensartede.** Når jeg har brug for et visuelt element, bruger jeg den indbyggede `<Picture />`-komponent med ordentlig alt-tekst. Astro håndterer responsive `srcset`, formatoptimering til AVIF og WebP og størrelser automatisk. Det er jeg vild med.
 
 **MDX giver fleksibilitet.** Jeg kan indlejre komponenter som demoer og diagrammer, når jeg har brug for dem, uden at vælge en hel SPA.
+
+<RelatedPost
+  href="/blog/adding-comments-with-giscus/"
+  lead="For resten"
+  prefix="skrev jeg også om, hvordan"
+  linkText="jeg tilføjede kommentarer med giscus"
+  suffix="via GitHub Discussions i stedet for at bringe en database eller et administrationssystem tilbage i stakken."
+/>
 
 Ingen Nova-administration. Ingen databaseforespørgsler. Bare filer i versionsstyring. Det føles let at udgive nu.
 

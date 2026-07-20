@@ -14,6 +14,7 @@ heroImageCaption: "Photo by [Tomáš Stanislavský
 
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
+import RelatedPost from "../../components/RelatedPost.astro";
 
 ## The decision to start over
 
@@ -104,6 +105,14 @@ I love the new workflow. No database. Content lives in Markdown files in git, an
 **Images stay consistent.** When I need a visual, I use the built-in `<Picture />` component with proper alt text. Astro handles the responsive srcsets, format optimization (AVIF, WebP), and sizing automatically. I love it.
 
 **MDX for flexibility.** I can embed components when I need them (demos, diagrams) without reaching for a full SPA.
+
+<RelatedPost
+  href="/blog/adding-comments-with-giscus/"
+  lead="By the way,"
+  prefix="I also wrote about"
+  linkText="how I added comments with giscus"
+  suffix="using GitHub Discussions instead of bringing a database or admin system back into the stack."
+/>
 
 No Nova admin. No database queries. Just files in version control. Publishing feels lightweight now.
 

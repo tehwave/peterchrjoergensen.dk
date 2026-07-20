@@ -1,0 +1,58 @@
+---
+interface Props {
+  href: string;
+  lead?: string;
+  prefix: string;
+  linkText: string;
+  suffix?: string;
+}
+
+const { href, lead, prefix, linkText, suffix } = Astro.props;
+---
+
+<p class="related-post">
+  {lead && <span class="related-post__lead">{lead}</span>}
+  {lead && " "}
+  {prefix}{" "}
+  <a class="related-post__link" href={href}>{linkText}</a>
+  {suffix && <> {suffix}</>}
+</p>
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .related-post {
+    margin-block: $space-xl;
+  }
+
+  .related-post__lead {
+    font-style: italic;
+  }
+
+  .related-post__link {
+    color: $color-accent;
+    font-weight: $font-weight-semibold;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.15em;
+    @include transition(opacity);
+    @include focus-visible;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  @include reduced-motion {
+    .related-post__link {
+      transition: none;
+    }
+  }
+
+  @include respond-to(md) {
+    .related-post {
+      margin-block: $space-lg;
+    }
+  }
+</style>
