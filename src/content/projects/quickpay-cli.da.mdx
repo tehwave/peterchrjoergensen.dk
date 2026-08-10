@@ -12,93 +12,97 @@ heroImageAlt: "Terminal, hvor Quickpay CLI holder øje med betalingsændringer o
 ogDescription: "Det tekniske design af Quickpay CLI, fra API-grænse og betalingskommandoer til polling på kontoniveau, signerede callbacks og PHAR-distribution."
 ---
 
-Quickpay CLI er en selvstændig PHP 8.4-klient til Quickpay API v10. Den håndterer de almindelige betalingsoperationer, giver maskinlæsbar adgang til API'et og kan levere signerede betalingscallbacks til en lokal applikation.
+Quickpay CLI er en selvstændig PHP 8.4-klient til Quickpay API v10. Jeg byggede den til betalingsarbejde i terminalen og til scripts, der skal kunne parse JSON-outputtet. Den kan også levere signerede betalingscallbacks til en lokal applikation.
 
-Callback-funktionen udsprang af lokale tests af WordPress- og WooCommerce-integrationer. Quickpay kan ikke nå en route på `localhost`, mens tunneller kan påvirke hostnavn, HTTPS-opsætning og de URL'er, WordPress gemmer i databasen. Betalingens tilstand findes allerede hos Quickpay, så CLI'en henter den gennem API'et og genskaber det request, den lokale applikation skal bruge.
+Callback-funktionen begyndte med et problem, jeg mødte under lokale tests af WordPress- og WooCommerce-integrationer. Quickpay kan ikke nå `localhost`. En tunnel gør ruten tilgængelig, men den kan samtidig påvirke hostnavn, HTTPS-opsætning og de URL'er, WordPress gemmer i databasen. Quickpay har allerede betalingens tilstand, så jeg byggede CLI'en til at hente den og genskabe requestet lokalt.
 
-Implementationen har to forløb oven på det samme API-lag. Betalingskommandoerne sender et request og returnerer resultatet. Watcheren bliver kørende. Den poller efter nye operationer og omsætter hver af dem til et signeret request til den lokale applikation. PHAR-buildet pakker de samme regler i den executable, Composer installerer.
+CLI'en endte med to forløb oven på det samme API-lag. Betalingskommandoerne sender et request og returnerer resultatet. Watcheren bliver kørende, leder efter nye operationer og omsætter dem til signerede requests til den lokale applikation. Jeg pakker begge forløb i den PHAR-fil, Composer installerer.
 
 ## Det fælles API-lag
 
-Alle requests til Quickpay passerer den samme HTTP-grænse. Origin er låst til `https://api.quickpay.net`, HTTP Basic authentication bruger et tomt brugernavn og API-nøglen som password, og hvert request angiver Quickpay API version 10. Requests og responses bruger JSON og har en timeout på 30 sekunder.
+Jeg holdt API-laget bevidst smalt. Den rå `api`-kommando gør CLI'en anvendelig til endpoints, før jeg tilføjer en dedikeret kommando, mens CLI'en fortsat ejer origin og authentication. Fleksibiliteten stopper ved endpointets path. Kommandoen understøtter de almindelige HTTP-metoder, så den kan nå andre endpoints i API v10 uden en dedikeret kommando til hver af dem.
 
-Kommandoerne leverer relative API-paths. De kan ikke erstatte authorization, host, API-version eller content-headers. Dermed følger credentials kun requests til det forventede origin, og de dedikerede kommandoer deler transportregler med rå API-kald.
+Alle requests til Quickpay går derfor til `https://api.quickpay.net`. HTTP Basic authentication bruger et tomt brugernavn og API-nøglen som password. CLI'en låser også Quickpay API version 10, JSON-headers og en timeout på 30 sekunder.
 
-Den rå API-kommando understøtter de almindelige HTTP-metoder til endpoints, som ikke har deres egen kommando. Den bruger stadig relative paths og de beskyttede headers. CLI'en kan derfor dække flere dele af Quickpay API'et uden at lempe reglerne omkring betalingskommandoerne.
+Kommandoerne leverer relative API-paths. De kan ikke erstatte authorization, host eller protokol-headers. Dermed følger credentials kun requests til det forventede origin, og dedikerede kommandoer deler transportregler med rå API-kald.
 
-Pagination følger den `Link`-header, Quickpay sender. En URL til næste side accepteres kun, hvis den peger tilbage på det forventede HTTPS-origin. Brugeroplysninger, fragmenter, usædvanlige porte, ugyldige links og fremmede hosts bliver afvist. Normaliserede URL'er bliver gemt for at opdage cyklusser, og en sidegrænse forhindrer et ugyldigt svar i at holde kommandoen kørende på ubestemt tid.
+Jeg behandler pagination som en del af samme grænse. CLI'en følger kun Quickpays `Link`-header, når den næste URL peger tilbage på det forventede HTTPS-origin. Den afviser brugeroplysninger, fragmenter, usædvanlige porte, ugyldige links og fremmede hosts. Normaliserede URL'er afslører cyklusser, mens en sidegrænse stopper et dårligt response fra at holde kommandoen kørende på ubestemt tid.
 
 ### Betalingskommandoer og sikre ændringer
 
-De dedikerede betalingskommandoer tager den korte vej gennem dette lag. De dækker oprettelse og opslag af betalinger, herunder betalingslinks og operationer. Capture, refundering og annullering bliver håndteret som eksplicitte ændringer.
+Til det daglige betalingsarbejde lagde jeg et mindre interface oven på den fælles transport. De dedikerede kommandoer opretter og henter betalinger. Betalingslinks og opslag af operationer har også deres egne kommandoer. Capture, refundering og annullering bliver behandlet som eksplicitte ændringer.
 
-Før capture, refundering eller annullering henter CLI'en den aktuelle betaling. Den viser betalingens identitet, status og balance samt det ønskede beløb, når kommandoen har et beløb. Kommandoerne kræver bekræftelse, og automatiserede kald skal angive `--yes`. Rå API-kald med andre metoder end GET følger samme regel for bekræftelse. De viser HTTP-metoden i stedet for betalingskontekst.
+Før capture, refundering eller annullering henter CLI'en den aktuelle betaling. Den viser, hvilken betaling der bliver ændret, dens status og balance samt det ønskede beløb, når kommandoen har et beløb. Brugeren skal bekræfte kommandoen. Et automatiseret kald skal angive `--yes`. Rå API-kald med andre metoder end GET følger samme regel og viser HTTP-metoden i stedet for betalingskontekst.
 
-Requests, der ændrer en betaling, bliver sendt én gang. En netværksfejl gør resultatet usikkert, fordi Quickpay kan have behandlet requestet, før forbindelsen forsvandt. Et automatisk nyt forsøg på capture eller refundering kan gentage en handling, der allerede lykkedes. Polling er read-only og har sin egen retry-politik.
+Jeg sender requests, der ændrer en betaling, én gang. Hvis forbindelsen fejler, kan Quickpay stadig have behandlet requestet, så et automatisk retry kan gentage en vellykket capture eller refundering. Read-only polling har sin egen retry-politik, fordi en gentagelse ikke kan ændre betalingen.
 
-Læsbart terminaloutput er standarden. Med `--json` bliver det maskinlæsbare resultat på stdout, mens prompts og diagnostik går til stderr. Scripts kan parse stdout som ét JSON-dokument uden statustekst blandet ind i resultatet. Den aktive API-nøgle og dens Basic Auth-repræsentation bliver fjernet fra indholdet. Det samme gælder percent-encoded og form-encoded varianter.
+Outputtet har også to forskellige læsere. Læsbart terminaloutput er standarden. Med `--json` bliver det maskinlæsbare resultat på stdout, mens prompts og diagnostik går til stderr. Et script kan parse stdout som ét JSON-dokument uden statustekst blandet ind i resultatet. Før CLI'en skriver indhold fra API'et, fjerner den den aktive API-nøgle, dens Basic Auth-repræsentation og kodede varianter.
 
-API-nøglen læses fra `QUICKPAY_API_KEY` eller en lokal konfigurationsfil. Miljøvariablen har førsteprioritet i CI og midlertidige sessioner. Når nøglen gemmes lokalt, opretter CLI'en en privat konfigurationsmappe, skriver gennem en midlertidig fil og erstatter den endelige fil atomisk. Kun den aktuelle bruger får adgang til mappen og filen.
+API-nøglen kommer fra `QUICKPAY_API_KEY` eller en lokal konfigurationsfil. Miljøvariablen har førsteprioritet, hvilket passer til CI og midlertidige sessioner. Lokal lagring bruger en privat mappe og atomisk erstatning af filen. Kun den aktuelle bruger får adgang til begge dele.
 
 ## Fra polling til et lokalt callback
 
-`callbacks:watch` bruger det samme API-lag og holder processen i live mellem requests. Uden en betalingsvælger holder den øje med ændringer på hele kontoen. Et betalings-ID eller ordre-ID indsnævrer processen til én betaling.
+Watcheren skal gøre gentagne API-opslag til nye operationer uden at udsende hele kontoens eksisterende tilstand igen. Det svære er at afgøre, hvad der er nyt, når tidsvinduer overlapper, eller en scanning fejler undervejs.
+
+`callbacks:watch` holder processen i live mellem requests. Uden en betalingsvælger holder den øje med ændringer på hele kontoen. Et betalings-ID eller ordre-ID indsnævrer processen til én betaling.
 
 ```bash
 quickpay callbacks:watch \
   --to=http://127.0.0.1:8000/quickpay/callback
 ```
 
-Watcheren venter til næste hele UTC-sekund, før den melder sig klar. Den første forespørgsel får dermed en entydig nedre grænse, og operationer fra før opstarten falder uden for sessionen.
+Ved overvågning af hele kontoen venter jeg til næste hele UTC-sekund, før kommandoen melder sig klar. Den første forespørgsel får dermed en tydelig nedre grænse, og operationer fra før opstarten falder uden for sessionen.
 
-Hver poll beder Quickpay om betalinger, hvis `updated_at` ligger mellem watermark minus ét sekund og det seneste hele UTC-sekund. Overlappet beskytter operationer tæt på en tidsgrænse mod at blive overset.
+Hver poll beder Quickpay om betalinger, hvis `updated_at` ligger mellem watermark minus ét sekund og det seneste hele UTC-sekund. Overlappet beskytter operationer tæt på en tidsgrænse.
 
-De overlappende vinduer kan returnere samme betaling igen. Betalings-ID'er bliver fjernet som dubletter, før CLI'en henter hver komplet betalingsressource. Derefter fjernes operationer med samme betalings-ID og operations-ID. Watcheren beholder denne tilstand i hukommelsen, så længe processen kører.
+Overlappet kan returnere samme betaling igen, så CLI'en fjerner dubletter blandt betalings-ID'erne, før den henter de komplette ressourcer. Derefter fjerner den operationer med samme betalings-ID og operations-ID. Watcheren beholder denne tilstand i hukommelsen, så længe processen kører.
 
-Listen over ændrede betalinger bruger afgrænset pagination. En komplet scanning på kontoniveau må højst hente 100 sider med 100 betalinger på hver. Watermark flyttes først, når hele scanningen er gennemført. Netværksfejl, HTTP 429 og serverfejl får hele scanningen til at starte igen fra det tidligere watermark. Andre HTTP-fejl og ugyldige responses stopper watcheren.
+Listen over ændrede betalinger bruger afgrænset pagination. En komplet scanning på kontoniveau kan hente op til 100 sider med 100 betalinger på hver. Jeg flytter først watermark, når hele scanningen er gennemført. Netværksfejl, HTTP 429 og serverfejl starter scanningen igen fra det tidligere watermark. Andre HTTP-fejl og ugyldige responses stopper watcheren.
 
-Når watcheren er begrænset til én betaling, udgør de eksisterende operationer den første baseline. Senere opslag udsender kun operationer, som er tilføjet efter den baseline. Starttidsstemplet bruges kun, når watcheren følger hele kontoen. Begge former fjerner dubletter ud fra operations-ID før levering.
+Overvågning af én betaling kræver et andet startpunkt. De eksisterende operationer bliver baseline, og senere opslag udsender kun operationer, som er tilføjet bagefter. Starttidsstemplet hører til overvågning af hele kontoen. Begge former fjerner dubletter ud fra operations-ID før levering.
 
-Nye operationer sorteres efter deres Unix-timestamp, derefter mikrosekunderne i tidsstemplet og til sidst operations-ID'et. Det bevarer rækkefølgen inden for en betaling, når flere operationer deler samme sekund. Watcheren lover ingen global rækkefølge på tværs af uafhængige betalinger.
+Jeg bevarer rækkefølgen inden for hver betaling. Nye operationer sorteres efter Unix-timestamp og derefter efter mikrosekunder og operations-ID, når flere deler samme sekund. Watcheren kan ikke love en global rækkefølge på tværs af uafhængige betalinger.
 
 ### En operation bliver til et signeret request
 
-En ny operation er grundlaget for callback-leveringen. Watcheren bruger den komplette betalingsressource fra Quickpay som callback body. Enhver forekomst af den aktive API-nøgle bliver fjernet før serialisering. De færdige JSON-bytes forbliver uændrede under hele leveringen.
+Jeg signerer præcis de bytes, jeg sender. Når watcheren finder en ny operation, bruger den den komplette betalingsressource fra Quickpay som callback body. Den fjerner enhver forekomst af den aktive API-nøgle før serialisering og holder derefter JSON-bytes uændrede under resten af leveringen.
 
-Checksummen er en HMAC-SHA256-signatur af præcis de bytes og bruger kontoens private nøgle. Requestet indeholder `QuickPay-Resource-Type`, `QuickPay-Account-ID`, `QuickPay-API-Version` og `QuickPay-Checksum-Sha256`. Den lokale integration kan derfor køre den samme signaturkontrol som ved et callback fra Quickpay.
+Checksummen er en HMAC-SHA256-signatur af de bytes og bruger kontoens private nøgle. Requestet har de samme headers til ressourcetype, konto, API-version og checksum, som den lokale integration forventer fra Quickpay. Den kan derfor køre sin normale signaturkontrol. De præcise navne er `QuickPay-Resource-Type`, `QuickPay-Account-ID`, `QuickPay-API-Version` og `QuickPay-Checksum-Sha256`.
 
-Den private nøgle kommer fra `QUICKPAY_PRIVATE_KEY`, når den allerede er tilgængelig. Ellers henter CLI'en den fra konto-endpointet og beholder den i hukommelsen. Den bliver aldrig skrevet i callback body eller diagnostik.
+Den private nøgle kommer fra `QUICKPAY_PRIVATE_KEY`, når den er tilgængelig. Ellers henter CLI'en den fra konto-endpointet og beholder den i hukommelsen. Den skriver aldrig nøglen i callback body eller diagnostik.
 
-API-trafik og callback-levering bruger adskilte HTTP-klienter. Basic authentication og Quickpays API-headers hører til det faste API-origin. De følger ikke requestet til den lokale callback-destination.
+Jeg bruger adskilte HTTP-klienter til API-trafik og callback-levering. Basic authentication og Quickpays API-headers bliver hos det faste API-origin. De følger aldrig requestet til den lokale callback-destination.
 
-Hver operation får sin egen uforanderlige request-envelope. Alle retry-forsøg bruger samme body og checksum. Hvis flere operationer findes i samme poll, kan deres callbacks indeholde det samme aktuelle snapshot af betalingen. Watcheren genskaber formen på Quickpays nuværende betalingsressource efter operationen. Den har ikke adgang til de historiske bytes fra det oprindelige webhook.
+Quickpay udstiller den aktuelle betalingsressource gennem API'et. API'et udstiller ikke de historiske bytes fra et tidligere webhook. Watcheren genskaber derfor den aktuelle form efter operationen. Hvis samme poll finder flere operationer, kan deres callbacks indeholde det samme nyeste snapshot af betalingen.
 
 ### Levering uden at ændre requestet
 
-Body og checksum bliver låst før første leveringsforsøg. Leveringsreglerne bevarer begge dele derefter. Callback-destinationen skal bruge HTTP eller HTTPS. URL'er med brugeroplysninger, fragmenter eller kontroltegn bliver afvist før levering.
+Den lokale route er ofte den kode, jeg er ved at fejlfinde, så en leveringsfejl skal stoppe på en måde, der er til at arbejde med. Før første forsøg opretter CLI'en én request-envelope til operationen. Alle retries bruger samme body og checksum.
 
-Redirects bliver håndteret eksplicit, så callbacket forbliver et POST-request med sin oprindelige body og signatur. HTTP 301 og 307 kan følges gennem højst fem hop. Cyklusser, manglende eller ugyldige locations og et skift fra HTTPS til HTTP stopper leveringen. Quickpay betragter 2xx, 302 og 303 som vellykket levering, og CLI'en følger den kontrakt.
+Callback-destinationen skal bruge HTTP eller HTTPS. CLI'en afviser URL'er med brugeroplysninger, fragmenter eller kontroltegn, før den sender noget.
 
-Netværksfejl, HTTP 408, 425, 429 og serverfejl bliver behandlet som midlertidige. Der er som standard fem leveringsforsøg med et justerbart interval. Andre fejlsvar er permanente og stopper processen med det samme.
+Jeg håndterer redirects eksplicit, så callbacket forbliver et POST-request med sin oprindelige body og signatur. CLI'en kan følge HTTP 301 og 307 gennem højst fem hop. En cyklus, en manglende eller ugyldig location eller et skift fra HTTPS til HTTP stopper leveringen. Quickpay betragter 2xx, 302 og 303 som vellykket levering, så CLI'en gør det samme.
 
-En operation, der ikke kan leveres, blokerer senere operationer i samme kørsel. Kommandoen afslutter med en fejlkode i stedet for at springe forbi fejlen og ændre den observerede rækkefølge. Den henviser operatøren til `callbacks:replay`, når den lokale route er blevet rettet.
+Retry-politikken ændrede sig, efter jeg brugte watcheren mod et endpoint, der returnerede HTTP 405. En tidligere version blev ved med at prøve for at bevare rækkefølgen. Dermed blev en permanent route-fejl til et endeløst loop. Den nuværende politik prøver igen ved netværksfejl, HTTP 408, 425, 429 og serverfejl. Der er som standard fem forsøg med et justerbart interval. Andre fejlsvar stopper processen med det samme.
 
-Replay henter betalingens aktuelle tilstand, bygger et nyt signeret callback-request og sender det igen. Funktionen er beregnet til at teste det rettede endpoint. Den kan ikke genskabe det oprindelige webhooks historiske body, fordi API'et udstiller den aktuelle betalingsressource.
+En operation, der ikke kan leveres, blokerer senere operationer i samme kørsel. Kommandoen afslutter med en fejlkode i stedet for at springe forbi fejlen og ændre den observerede rækkefølge. Den peger på `callbacks:replay`, som kan teste den lokale route efter en rettelse.
+
+Replay henter betalingens aktuelle tilstand, bygger et nyt signeret callback-request og sender det én gang. Den kan stadig ikke genskabe det oprindelige webhooks historiske body.
 
 ## Pakning af den testede applikation
 
-Den samme runtime-adfærd skal følge med den binary, Composer-brugere installerer. Laravel Zero leverer konsolmiljøet under udvikling. Dets egen build-kommando samler applikationen og dens dependencies i `builds/quickpay`, som er en versioneret PHAR-fil committed til repository'et. Composer eksponerer filen som pakkens binary, mens de udgivne runtime-krav kun indeholder PHP.
+Jeg ville have `composer global require tehwave/quickpay-cli` til at installere én executable. Laravel Zero leverer konsolmiljøet under udvikling, og dets egen build-kommando samler applikationen og dens dependencies i `builds/quickpay`. Den versionerede PHAR-fil er committed til repository'et og eksponeret som Composers binary. De udgivne runtime-krav indeholder kun PHP.
 
-Pakkens nuværende form kom efter en fejl i den første release. Releasen lagde en verificeret PHAR på GitHub, men `composer global require tehwave/quickpay-cli` installerede det taggede repository fra Packagist. Det beskrev stadig Laravel Zero som en dependency, der skulle installeres, så Composer hentede frameworkets dependency graph frem for den selvstændige executable.
+Den første release viste, hvorfor repository'ets form betyder noget. GitHub havde en verificeret PHAR, mens Packagist installerede indholdet af det taggede repository. Arkivet beskrev stadig Laravel Zero som en runtime-dependency, så en ren Composer-installation hentede frameworkets dependency graph.
 
-Distributionstesten håndhæver pakkens struktur: Composer har ingen eksterne runtime-pakker, Laravel Zero ligger fortsat i `require-dev`, og binary-indgangen peger på `builds/quickpay`. Den kontrollerer også Box-indstillingen, som beholder filerne fra udviklingsafhængighederne i PHAR-buildet. Releaseproceduren kører den committed PHAR, før den bliver tagget. Efter udgivelsen sammenligner den det downloadede artefakt med filen i tagget og tester en ren Composer-installation.
+Jeg tilføjede en distributionstest for den kontrakt. Composer har ingen eksterne runtime-pakker, Laravel Zero ligger fortsat i `require-dev`, og binary-indgangen peger på `builds/quickpay`. Testen kontrollerer også Box-indstillingen, som beholder udviklingsafhængighederne i PHAR-buildet. Før jeg tagger en release, kører jeg den committed PHAR. Efter udgivelsen sammenligner jeg det downloadede artefakt med filen i tagget og tester en ren Composer-installation.
 
 ## Verifikation og begrænsninger
 
-Testsuiten følger de samme grænser som implementeringen. Den dækker kommandoadfærd, HTTP-grænser, håndtering af credentials, polling-vinduer, deduplikering, signering, leveringsfejl og pakkens struktur. Den nuværende suite har 541 tests med 1.829 assertions. Statisk analyse og formateringskontrol kører i samme verifikationskommando.
+Testsuiten følger beslutningerne ovenfor. Den dækker kommandoadfærd, HTTP-grænser, credentials, polling-vinduer, deduplikering, signering, leveringsfejl og pakkens struktur. Den nuværende suite har 541 tests med 1.829 assertions. Statisk analyse og formatering kører i samme verifikationskommando.
 
-Callback-tests bruger kontrollerede HTTP-responses. De verificerer de bytes, headers, rækkefølger og fejlforløb, som CLI'en producerer. De erstatter ikke en integrationstest mod Quickpays live-tjeneste.
+Callback-tests bruger kontrollerede HTTP-responses. De verificerer de bytes og headers, CLI'en producerer, sammen med rækkefølge og fejlforløb. De erstatter ikke en integrationstest mod Quickpays live-tjeneste.
 
-Watcheren er beregnet til lokal udvikling. Den kører i forgrunden, gemmer sin cursor i hukommelsen og ignorerer operationer, der findes, når den bliver klar. En genstart opretter et nyt observationsvindue. Den holder kun øje med betalingsoperationer; subscription-callbacks ligger uden for dens scope.
+Watcheren er et værktøj til lokal udvikling. Den kører i forgrunden, gemmer sin cursor i hukommelsen og ignorerer operationer, der findes, når den bliver klar. En genstart opretter et nyt observationsvindue. Den holder kun øje med betalingsoperationer. Subscription-callbacks ligger uden for dens scope.
 
 Den kortere artikel [Quickpay CLI til lokale betalingscallbacks](/blog/quickpay-cli-payment-callbacks-localhost/) introducerer anvendelsen. [Quickpay CLI-repository'et](https://github.com/tehwave/quickpay-cli) indeholder kommandoreference, kildekode og den nuværende release.
