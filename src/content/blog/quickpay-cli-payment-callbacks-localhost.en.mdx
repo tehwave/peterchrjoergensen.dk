@@ -1,0 +1,54 @@
+---
+locale: en
+translationKey: quickpay-cli-payment-callbacks-localhost
+title: "Quickpay CLI brings payment callbacks to localhost"
+description: "Quickpay CLI watches payment changes and delivers signed callbacks to WordPress or WooCommerce on localhost, without exposing the site through a tunnel."
+pubDate: 2026-08-10
+author: "Peter Chr. Jørgensen"
+tags: ["quickpay", "cli", "php", "open-source", "local-development"]
+heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero-launch.png
+heroImageAlt: "Terminal diagram showing a signed Quickpay payment callback delivered to localhost with HTTP 204"
+---
+
+A payment can succeed in Quickpay and still leave your `localhost` webshop waiting. Quickpay sends a [payment callback](https://learn.quickpay.net/tech-talk/api/callback/) with the new state, but `localhost` ends at your laptop. Nothing outside your machine can reach it.
+
+I kept running into this while working on local WordPress and WooCommerce projects. A tunnel can expose the callback route, but its temporary hostname gets mixed into a system that cares about its own URL. Redirects and HTTPS behaviour start getting in the way of the payment flow I am trying to test.
+
+## Quickpay callbacks without a tunnel
+
+The payment data already exists in Quickpay's API, so I built [Quickpay CLI](https://github.com/tehwave/quickpay-cli) to fetch that data and deliver a signed callback request straight to the local application, much like a webhook would from a live server.
+
+Quickpay CLI is an open-source command-line client for Quickpay API v10. It can create payment links and manage payments from the terminal. JSON output gives scripts and coding agents a stable interface, with no PHP SDK integration required in the project under test.
+
+## Watching payment changes from localhost
+
+The callback watcher is the part that removes the local development papercut. Install the CLI globally with Composer and log in with a Quickpay merchant API key:
+
+```bash
+composer global require tehwave/quickpay-cli
+```
+
+Prepare an API key and log in to Quickpay CLI:
+
+```bash
+quickpay login
+```
+
+Then start the watcher before you go through checkout:
+
+```bash
+quickpay callbacks:watch \
+  --to=http://127.0.0.1:8000/quickpay/callback
+```
+
+The command watches the account for payment operations that appear after it starts. When Quickpay reports a change, the CLI fetches the current payment as JSON and signs those exact bytes with HMAC-SHA256. It sends the request to the local route with the `Quickpay-Checksum-Sha256` header, so the application can run its usual callback handler and signature check.
+
+The Quickpay API key stays with requests to Quickpay. It is never forwarded to the callback destination.
+
+By default, the watcher covers the whole account. You can narrow it to a payment or order when that is useful. Existing operations are ignored when the watcher starts, and `callbacks:replay` can resend one payment after you fix a local route.
+
+The process runs in the foreground beside the application. WordPress keeps its normal local URL, and the callback route stays private on your machine.
+
+Quickpay CLI is available in the [public repository](https://github.com/tehwave/quickpay-cli). It requires PHP 8.4 or newer and is released under the MIT licence.
+
+The [case study on how I built Quickpay CLI with Laravel Zero](/projects/quickpay-cli/) explains the API boundary, polling model, callback signing, and delivery rules in detail.

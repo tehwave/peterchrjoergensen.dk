@@ -4,11 +4,12 @@ export const BLOG_TRANSLATION_KEYS = [
   "godot-cli-on-macos-zsh",
   "localizing-this-website-without-changing-its-urls",
   "quick-dirty-webrtc-manual-signaling",
+  "quickpay-cli-payment-callbacks-localhost",
   "rebuilt-my-site-with-astro",
   "welcome",
 ] as const;
 
-export const PROJECT_TRANSLATION_KEYS = ["browser-multiplayer", "github-brick-breaker"] as const;
+export const PROJECT_TRANSLATION_KEYS = ["browser-multiplayer", "github-brick-breaker", "quickpay-cli"] as const;
 
 export const DANISH_BLOG_TRANSLATION_KEYS = [...BLOG_TRANSLATION_KEYS] as const;
 export const DANISH_PROJECT_TRANSLATION_KEYS = [...PROJECT_TRANSLATION_KEYS] as const;

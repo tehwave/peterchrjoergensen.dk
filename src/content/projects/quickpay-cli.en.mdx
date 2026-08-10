@@ -1,0 +1,108 @@
+---
+locale: en
+translationKey: quickpay-cli
+title: "How I built Quickpay CLI"
+description: "A technical case study of the PHP CLI I built for Quickpay payments, machine-readable API access, and signed payment callbacks to local development environments."
+category: "web"
+tags: ["PHP", "Laravel Zero", "CLI", "Quickpay", "API"]
+externalUrl: "https://github.com/tehwave/quickpay-cli"
+publishedDate: 2026-08-10
+heroImage: ../../assets/projects/quickpay-cli.png
+heroImageAlt: "Terminal showing Quickpay CLI watching payment changes and delivering a callback to localhost"
+ogDescription: "How Quickpay CLI handles API access, payment commands, account-wide polling, and signed callbacks for local WordPress and WooCommerce development."
+---
+
+import RelatedPost from "../../components/RelatedPost.astro";
+
+Quickpay CLI is a standalone PHP 8.4 client for [Quickpay API v10](https://learn.quickpay.net/tech-talk/api/). I built it to handle payment work from the terminal and to give scripts JSON output they can parse. It can also deliver signed payment callbacks to a local application.
+
+The callback feature started with a problem I hit while testing WordPress and WooCommerce integrations locally. Quickpay cannot reach `localhost`. A tunnel exposes the route, but it can also interfere with the hostname, HTTPS settings and URLs WordPress stores in its database. Quickpay already has the payment state, so I built the CLI to retrieve it and reconstruct the request locally.
+
+The CLI ended up with two routes through the same API layer. Payment commands make a request and return the result. The watcher remains active, looks for new operations and turns each one into a signed request for the local application.
+
+## The shared API layer
+
+I kept the API layer deliberately narrow. The raw `api` command makes the CLI useful for endpoints before I add a dedicated command, while the CLI still owns the origin and authentication. That flexibility stops at the endpoint path. The command supports the standard HTTP methods, so it can reach other API v10 endpoints without a dedicated command for each one.
+
+Every Quickpay request therefore goes to `https://api.quickpay.net`. HTTP Basic authentication uses an empty username and the API key as its password. The CLI also fixes Quickpay API version 10, JSON headers and a 30-second timeout.
+
+Commands provide relative API paths. They cannot replace the authorization, host or protocol headers. This keeps credentials attached to the intended origin and gives dedicated commands and raw API calls the same transport rules.
+
+I treat pagination as part of that boundary. The CLI follows the `Link` header from Quickpay only when the next URL points back to the expected HTTPS origin. It rejects user information, fragments, unexpected ports, malformed links and foreign hosts. Canonicalized URLs catch cycles, while a page limit stops a bad response from keeping the command alive indefinitely.
+
+### Payment commands and mutation safety
+
+For routine payment work, I put a smaller interface over the shared transport. The dedicated commands create and inspect payments. Payment links and operation lookups have their own commands too. Capture, refund and cancellation are treated as explicit mutations.
+
+Before capture, refund or cancellation, the CLI fetches the current payment. It shows which payment will change, its state and balance, along with the requested amount when there is one. The user must confirm the command. An unattended call has to pass `--yes`. Non-GET raw API calls use the same confirmation rule and show the HTTP method instead of payment context.
+
+I send mutation requests once. If the connection fails, Quickpay may still have processed the request, so an automatic retry could repeat a successful capture or refund. Read-only polling has a separate retry policy because repeating it cannot change a payment.
+
+The output also has two different readers. Human-readable text is the default. With `--json`, machine-readable output stays on stdout while prompts and diagnostics go to stderr. A script can parse stdout as one JSON document without terminal status text mixed into it. Before I print remote content, the CLI removes the active API key, its Basic Auth representation and encoded variants.
+
+The API key comes from `QUICKPAY_API_KEY` or a local configuration file. The environment variable takes priority, which works well for CI and temporary sessions. Local storage uses a private directory and an atomic file replacement. Both the directory and file are restricted to the current user.
+
+## From polling to a local callback
+
+The watcher has to turn repeated API reads into new operations without replaying the entire account state. The difficult part is deciding what counts as new when timestamps overlap or a scan fails halfway through.
+
+`callbacks:watch` keeps the process alive between requests. With no payment selector, it watches changes across the account. A payment ID or order ID narrows the process to one payment.
+
+```bash
+quickpay callbacks:watch \
+  --to=http://127.0.0.1:8000/quickpay/callback
+```
+
+For an account-wide watch, I wait for the next whole UTC second before the command reports that it is ready. That gives the first query a clear lower boundary and leaves operations from before startup outside the session.
+
+Each poll asks Quickpay for payments whose `updated_at` value falls between the watermark minus one second and the latest whole UTC second. The overlap protects operations near a timestamp boundary.
+
+That overlap can return the same payment again, so the CLI removes duplicate payment IDs before fetching the complete resources. It then deduplicates operations by payment ID and operation ID. The watcher keeps this state in memory for the lifetime of the process.
+
+Changed-payment results use bounded pagination. A complete account-wide scan can read up to 100 pages with 100 payments on each page. I advance the watermark only after the whole scan succeeds. Network failures, HTTP 429 and server errors restart the scan from the previous watermark. Other HTTP failures and malformed responses stop the watcher.
+
+Watching one payment needs a different starting point. Its existing operations become the baseline, and later reads emit only the operations added after it. The readiness timestamp belongs to account-wide watching. Both modes deduplicate operation IDs before delivery.
+
+I preserve the order within each payment. New operations are sorted by Unix timestamp, then by the microsecond part and operation ID when several share the same second. The watcher cannot promise a global order across unrelated payments.
+
+### Turning an operation into a signed request
+
+I sign the exact bytes that I send. When the watcher finds an unseen operation, it uses the complete payment resource returned by Quickpay as the callback body. It removes any occurrence of the active API key before serialization, then keeps the resulting JSON bytes unchanged for the rest of that delivery.
+
+The checksum is an HMAC-SHA256 signature of those bytes using the account private key. The request carries the same resource type, account, API version and checksum headers that the local integration expects from Quickpay. It can therefore run its normal callback signature check. The exact header names are `QuickPay-Resource-Type`, `QuickPay-Account-ID`, `QuickPay-API-Version` and `QuickPay-Checksum-Sha256`.
+
+The private key comes from `QUICKPAY_PRIVATE_KEY` when it is available. Otherwise, the CLI retrieves it from the account endpoint and keeps it in memory. It never writes the key into a callback body or diagnostic message.
+
+I use separate HTTP clients for API traffic and callback delivery. Basic authentication and Quickpay API headers stay with the fixed API origin. They never follow the request to the local callback destination.
+
+Quickpay exposes the current payment resource through the API. It does not expose the historical bytes of an earlier webhook. The watcher therefore reconstructs the current post-operation shape. If one poll discovers several operations, their callbacks can contain the same latest payment snapshot.
+
+### Delivery without changing the request
+
+The local route is often the code being debugged, so a delivery error needs to stop at a useful point. Before the first attempt, the CLI fixes one request envelope for the operation. Every retry uses the same body and checksum.
+
+The callback destination must use HTTP or HTTPS. The CLI rejects URLs containing user information, fragments or control characters before it sends anything.
+
+I handle redirects explicitly so the callback remains a POST with its original body and signature. The CLI can follow HTTP 301 and 307 responses for up to five hops. A cycle, a missing or malformed location, or a redirect from HTTPS to HTTP stops delivery. Quickpay treats 2xx, 302 and 303 responses as successful callback delivery, so the CLI does the same.
+
+The retry policy changed after I used the watcher against an endpoint that returned HTTP 405. An earlier version kept retrying to preserve order, which turned a permanent route error into an endless loop. The current policy retries network failures, HTTP 408, 425, 429 and server errors. The default budget is five attempts with a configurable interval. Other failed responses stop immediately.
+
+An operation that cannot be delivered blocks later operations in the same run. The command exits with a non-zero status instead of skipping past the failure and changing the observed order. It points to `callbacks:replay` for testing the local route after it has been corrected.
+
+Replay fetches the payment's current state, builds a new signed callback-shaped request and sends it once. It still cannot reproduce the original historical webhook body.
+
+## Verification and limits
+
+The tests follow the design decisions above. They cover command behavior, HTTP boundaries, credentials, polling windows, deduplication, signing and delivery failures. The current suite contains 541 tests with 1,829 assertions. Static analysis and formatting run in the same verification command.
+
+The callback tests use controlled HTTP responses. They verify the bytes and headers produced by the CLI, along with ordering and failure behavior. They do not replace an integration test against Quickpay's live service.
+
+The watcher is a local development tool. It runs in the foreground, stores its cursor in memory and ignores operations present when it becomes ready. Restarting it creates a new observation window. It watches payment operations only. Subscription callbacks are outside its scope.
+
+<RelatedPost
+  href="/blog/quickpay-cli-payment-callbacks-localhost/"
+  lead="The localhost problem:"
+  prefix="Read"
+  linkText="Quickpay CLI brings payment callbacks to localhost"
+  suffix="to see how signed callbacks reach a local WordPress or WooCommerce route without a tunnel."
+/>

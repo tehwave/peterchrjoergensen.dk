@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <title>Quickpay CLI feedback loop</title>
+  <desc>Two terminal and paper panels are connected by hand-drawn correction arrows, showing how an HTTP 405 failure changed the retry decision.</desc>
+  <metadata>
+    Deterministic source artwork created for peterchrjoergensen.dk on 2026-08-10.
+    The HTTP 405 refers to a deliberately invalid local callback destination, not a Quickpay API response.
+    No credentials, merchant data, generated imagery, or third-party assets are included.
+  </metadata>
+  <defs>
+    <filter id="paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.54" numOctaves="3" seed="27" result="noise" />
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono" />
+      <feComponentTransfer in="mono" result="faded">
+        <feFuncA type="table" tableValues="0 0.12" />
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faded" mode="screen" />
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="170%" height="190%">
+      <feDropShadow dx="0" dy="24" stdDeviation="18" flood-color="#000" flood-opacity="0.32" />
+    </filter>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0v44" fill="none" stroke="#2988fa" stroke-width="2" opacity="0.16" />
+    </pattern>
+    <marker id="pinkArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0 0l10 5-10 5z" fill="#fc1154" />
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#091057" />
+  <rect width="1600" height="900" fill="url(#grid)" />
+  <rect width="1600" height="900" fill="#091057" opacity="0.25" filter="url(#paper)" />
+  <path d="M0 0h497L301 900H0z" fill="#0a49b1" opacity="0.65" />
+  <circle cx="1445" cy="735" r="310" fill="#fc1154" opacity="0.92" />
+  <path d="M1289 900c32-163 115-284 311-357v357z" fill="#ec8305" opacity="0.9" />
+
+  <g transform="translate(0 -70)">
+    <g transform="translate(104 302) rotate(-2 0 0)" filter="url(#shadow)">
+      <rect width="650" height="405" rx="26" fill="#171b2b" stroke="#525c72" stroke-width="2" />
+      <path d="M0 66h650" stroke="#3a4257" stroke-width="2" />
+      <circle cx="40" cy="34" r="9" fill="#fc1154" />
+      <circle cx="70" cy="34" r="9" fill="#ec8305" />
+      <circle cx="100" cy="34" r="9" fill="#64d991" />
+      <text x="325" y="42" text-anchor="middle" font-family="Menlo, monospace" font-size="17" fill="#97a1b2">local callback destination</text>
+      <g font-family="Menlo, monospace">
+        <text x="42" y="132" font-size="21" fill="#97a1b2">POST /quickpay/callback</text>
+        <text x="42" y="196" font-size="32" font-weight="700" fill="#fc1154">HTTP 405</text>
+        <text x="42" y="238" font-size="22" fill="#f7f8fa">Method Not Allowed</text>
+        <text x="42" y="306" font-size="20" fill="#fa9b29">delivery failed</text>
+        <text x="42" y="344" font-size="20" fill="#fa9b29">retrying forever</text>
+      </g>
+      <path d="M35 363c136 20 271 18 406-8" fill="none" stroke="#fc1154" stroke-width="7" stroke-linecap="round" />
+      <path d="M453 334l42 14-34 29" fill="none" stroke="#fc1154" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+
+    <g transform="translate(890 270) rotate(3 0 0)" filter="url(#shadow)">
+      <rect width="558" height="446" rx="8" fill="#fbfbfb" />
+      <rect x="0" y="0" width="558" height="17" fill="#fc1154" />
+      <text x="48" y="83" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="800" letter-spacing="4" fill="#0a49b1">CORRECTION</text>
+      <text x="48" y="145" font-family="Inter, Arial, sans-serif" font-size="39" font-weight="900" fill="#1a1a1a">Permanent error</text>
+      <text x="48" y="192" font-family="Inter, Arial, sans-serif" font-size="39" font-weight="900" fill="#1a1a1a">→ stop.</text>
+      <path d="M48 226h458" stroke="#c8c0be" stroke-width="2" />
+      <text x="48" y="280" font-family="Menlo, monospace" font-size="21" fill="#2b3d5c">network / 408 / 425 / 429 / 5xx</text>
+      <text x="48" y="318" font-family="Menlo, monospace" font-size="21" fill="#2b3d5c">→ bounded retries</text>
+      <rect x="48" y="356" width="426" height="54" rx="27" fill="#091057" />
+      <text x="261" y="390" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="2" fill="#fbfbfb">TEST THE INSTALL USERS GET</text>
+    </g>
+
+    <path d="M733 502c57-83 108-106 174-72" fill="none" stroke="#fc1154" stroke-width="12" stroke-linecap="round" marker-end="url(#pinkArrow)" />
+    <path d="M796 762c170 50 325 37 465-38" fill="none" stroke="#fbfbfb" stroke-width="7" stroke-linecap="round" stroke-dasharray="5 18" opacity="0.78" />
+  </g>
+</svg>
