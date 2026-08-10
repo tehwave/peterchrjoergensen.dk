@@ -41,7 +41,7 @@
   <path d="M1260-10c139 82 225 173 280 300" fill="none" stroke="#fbfbfb" stroke-width="8" stroke-linecap="round" opacity="0.72" />
   <rect x="42" y="50" width="360" height="210" fill="url(#dots)" transform="rotate(-7 42 50)" />
 
-  <g filter="url(#shadow)">
+  <g filter="url(#shadow)" transform="translate(0 -85)">
     <rect x="192" y="300" width="1216" height="470" rx="30" fill="url(#terminal)" stroke="#596276" stroke-width="2" />
     <path d="M192 368h1216" stroke="#3b4256" stroke-width="2" />
     <circle cx="240" cy="334" r="10" fill="#fc1154" />
@@ -77,7 +77,7 @@
     </g>
   </g>
 
-  <g transform="translate(1138 738) rotate(-4)">
+  <g transform="translate(1138 653) rotate(-4)">
     <rect width="318" height="82" rx="8" fill="#fc1154" />
     <text x="159" y="52" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="900" letter-spacing="3" fill="#fbfbfb">SIGNED CALLBACKS</text>
   </g>
