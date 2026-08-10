@@ -32,11 +32,11 @@ Pagination følger den `Link`-header, Quickpay sender. En URL til næste side ac
 
 CLI'en har dedikerede kommandoer til at oprette og undersøge betalinger. Den kan vise betalingslister, oprette betalingslinks og hente operationer. Capture, refundering og annullering bliver håndteret som eksplicitte ændringer.
 
-Før en ændring henter CLI'en den aktuelle betaling og viser den kontekst, operatøren skal bruge for at kontrollere mål og beløb. Interaktive kald kræver bekræftelse. Et automatiseret kald skal angive `--yes`, så en manglende prompt i CI ikke kan godkende en betalingsændring uden videre.
+Før capture, refundering eller annullering henter CLI'en den aktuelle betaling. Den viser betalingens identitet, status og balance samt det ønskede beløb, når kommandoen har et beløb. Kommandoerne kræver bekræftelse, og automatiserede kald skal angive `--yes`. Rå API-kald med andre metoder end GET følger samme regel for bekræftelse. De viser HTTP-metoden i stedet for betalingskontekst.
 
 Requests, der ændrer en betaling, bliver sendt én gang. En netværksfejl gør resultatet usikkert, fordi Quickpay kan have behandlet requestet, før forbindelsen forsvandt. Et automatisk nyt forsøg på capture eller refundering kan gentage en handling, der allerede lykkedes. Polling er read-only og har sin egen retry-politik.
 
-Læsbart terminaloutput er standarden. Med `--json` bliver response body på stdout, mens prompts og diagnostik går til stderr. Scripts kan parse stdout som ét JSON-dokument uden statustekst blandet ind i resultatet. Værdier, der ligner den aktive API-nøgle, bliver fjernet fra indhold, før det skrives til terminalen.
+Læsbart terminaloutput er standarden. Med `--json` bliver det maskinlæsbare resultat på stdout, mens prompts og diagnostik går til stderr. Scripts kan parse stdout som ét JSON-dokument uden statustekst blandet ind i resultatet. Den aktive API-nøgle og dens Basic Auth-repræsentation bliver fjernet fra indholdet. Det samme gælder percent-encoded og form-encoded varianter.
 
 API-nøglen læses fra `QUICKPAY_API_KEY` eller en lokal konfigurationsfil. Miljøvariablen har førsteprioritet i CI og midlertidige sessioner. Når nøglen gemmes lokalt, opretter CLI'en en privat konfigurationsmappe, skriver gennem en midlertidig fil og erstatter den endelige fil atomisk. Kun den aktuelle bruger får adgang til mappen og filen.
 
@@ -51,13 +51,13 @@ quickpay callbacks:watch \
 
 Watcheren venter til næste hele UTC-sekund, før den melder sig klar. Den første forespørgsel får dermed en entydig nedre grænse, og operationer fra før opstarten falder uden for sessionen.
 
-Hver poll beder Quickpay om betalinger, hvis `updated_at` ligger mellem det aktuelle watermark og det seneste afsluttede sekund. Den nedre grænse flyttes ét sekund tilbage og overlapper det forrige vindue. Overlappet beskytter operationer tæt på en tidsgrænse mod at blive overset.
+Hver poll beder Quickpay om betalinger, hvis `updated_at` ligger mellem watermark minus ét sekund og det seneste hele UTC-sekund. Overlappet beskytter operationer tæt på en tidsgrænse mod at blive overset.
 
 De overlappende vinduer kan returnere samme betaling igen. Betalings-ID'er bliver fjernet som dubletter, før CLI'en henter hver komplet betalingsressource. Derefter fjernes operationer med samme betalings-ID og operations-ID. Watcheren beholder denne tilstand i hukommelsen, så længe processen kører.
 
-Listen over ændrede betalinger bruger afgrænset pagination. En komplet scanning på kontoniveau må højst hente 100 sider med 100 betalinger på hver. Watermark flyttes først, når hele scanningen er gennemført. Hvis polling fejler undervejs, bliver scanningen gentaget fra det tidligere watermark, så et delvist resultat ikke skaber et hul.
+Listen over ændrede betalinger bruger afgrænset pagination. En komplet scanning på kontoniveau må højst hente 100 sider med 100 betalinger på hver. Watermark flyttes først, når hele scanningen er gennemført. Netværksfejl, HTTP 429 og serverfejl får hele scanningen til at starte igen fra det tidligere watermark. Andre HTTP-fejl og ugyldige responses stopper watcheren.
 
-Når watcheren er begrænset til én betaling, udgør de eksisterende operationer den første baseline. Senere opslag udsender kun operationer, som er tilføjet efter den baseline. Begge former bruger samme starttidspunkt og deduplikering før levering.
+Når watcheren er begrænset til én betaling, udgør de eksisterende operationer den første baseline. Senere opslag udsender kun operationer, som er tilføjet efter den baseline. Starttidsstemplet bruges kun, når watcheren følger hele kontoen. Begge former fjerner dubletter ud fra operations-ID før levering.
 
 Nye operationer sorteres efter deres Unix-timestamp, derefter mikrosekunderne i tidsstemplet og til sidst operations-ID'et. Det bevarer rækkefølgen inden for en betaling, når flere operationer deler samme sekund. Watcheren lover ingen global rækkefølge på tværs af uafhængige betalinger.
 
@@ -91,7 +91,7 @@ Laravel Zero leverer konsolmiljøet under udvikling. Dets egen build-kommando sa
 
 Pakkens nuværende form kom efter en fejl i den første release. Releasen lagde en verificeret PHAR på GitHub, men `composer global require tehwave/quickpay-cli` installerede det taggede repository fra Packagist. Det beskrev stadig Laravel Zero som en dependency, der skulle installeres, så Composer hentede frameworkets dependency graph frem for den selvstændige executable.
 
-Releasekontrollen validerer nu det artefakt, som Composer-brugere modtager. Den kontrollerer, at PHAR-filen findes, at Composers binary peger på den fil, og at Laravel Zero forbliver en udviklingsafhængighed. Verifikationen omfatter også en ren, global-lignende Composer-installation og en kørsel af den installerede executable.
+Distributionstesten håndhæver pakkens struktur: Composer har ingen eksterne runtime-pakker, Laravel Zero ligger fortsat i `require-dev`, og binary-indgangen peger på `builds/quickpay`. Den kontrollerer også Box-indstillingen, som beholder filerne fra udviklingsafhængighederne i PHAR-buildet. Releaseproceduren kører den committed PHAR, før den bliver tagget. Efter udgivelsen sammenligner den det downloadede artefakt med filen i tagget og tester en ren Composer-installation.
 
 ## Nuværende garantier og begrænsninger
 

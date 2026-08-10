@@ -32,11 +32,11 @@ Pagination follows the `Link` header returned by Quickpay. A next-page URL is ac
 
 The CLI has dedicated commands for creating and inspecting payments. It can list payments, create payment links, and show operations. Capture, refund, and cancellation are handled as explicit mutations.
 
-Before a mutation, the CLI fetches the current payment and displays enough context for the operator to check the target and amount. Interactive calls require confirmation. An automated caller has to supply `--yes`, so a missing prompt in CI cannot silently approve a payment change.
+Before capture, refund, or cancellation, the CLI fetches the current payment. It displays the payment identity, state and balance, along with the requested amount when there is one. These commands require confirmation, and unattended calls must pass `--yes`. Non-GET raw API calls use the same confirmation rule. They show the HTTP method instead of payment context.
 
 Mutation requests are sent once. A network error leaves their outcome uncertain because Quickpay may have processed the request before the connection failed. Retrying a capture or refund automatically could repeat a successful action. Polling requests are read-only and use a separate retry policy.
 
-Human-readable output is the default. With `--json`, the response body stays on stdout while prompts and diagnostic messages go to stderr. Scripts can parse stdout as one JSON document without terminal status text mixed into it. Values that resemble the active API key are redacted before remote content is printed.
+Human-readable output is the default. With `--json`, machine-readable output stays on stdout while prompts and diagnostic messages go to stderr. Scripts can parse stdout as one JSON document without terminal status text mixed into it. The active API key and its Basic Auth representation are removed from remote content. Percent-encoded and form-encoded variants are covered as well.
 
 The API key is read from `QUICKPAY_API_KEY` or a local configuration file. The environment variable takes priority for CI and temporary sessions. When credentials are stored locally, the CLI creates a private configuration directory, writes through a temporary file, and replaces the final file atomically. The directory and file are restricted to the current user.
 
@@ -51,13 +51,13 @@ quickpay callbacks:watch \
 
 The account-wide watcher waits for the next whole UTC second before it declares itself ready. Its first query therefore has an unambiguous lower boundary, and operations that existed before startup are outside the session.
 
-Each poll asks Quickpay for payments whose `updated_at` value falls between the current watermark and the latest complete second. The lower boundary moves back by one second, creating an overlap with the previous window. That overlap protects operations near a timestamp boundary from being missed.
+Each poll asks Quickpay for payments whose `updated_at` value falls between the watermark minus one second and the latest whole UTC second. The overlap protects operations near a timestamp boundary from being missed.
 
 Overlapping windows can return the same payment again. Payment IDs are deduplicated before the CLI fetches each complete payment resource. Operations are then deduplicated by payment ID and operation ID. The watcher keeps this state in memory for the lifetime of the process.
 
-Changed-payment results use bounded pagination. A complete account-wide scan is limited to 100 pages of 100 payments. The watermark advances after the full scan succeeds. If polling fails partway through, the scan is retried from the previous watermark, so a partial result cannot create a gap.
+Changed-payment results use bounded pagination. A complete account-wide scan is limited to 100 pages of 100 payments. The watermark advances after the full scan succeeds. Network failures, HTTP 429, and server errors retry the complete scan from the previous watermark. Other HTTP failures and malformed responses stop the watcher.
 
-For a watcher scoped to one payment, the existing operations form the initial baseline. Subsequent reads only emit operations added after that baseline. Both modes apply the same readiness time and operation deduplication before delivery.
+For a watcher scoped to one payment, the existing operations form the initial baseline. Subsequent reads only emit operations added after that baseline. Only account-wide mode uses the readiness timestamp. Both modes deduplicate operation IDs before delivery.
 
 New operations are ordered by their Unix timestamp, then by the microsecond part of the timestamp and the operation ID. This preserves the sequence within a payment when several operations share a second. The watcher makes no claim about a global order across unrelated payments.
 
@@ -91,7 +91,7 @@ Laravel Zero supplies the console runtime during development. Its native build c
 
 This package shape came from a release failure. The first release attached a verified PHAR to GitHub, but `composer global require tehwave/quickpay-cli` installed the tagged repository contents from Packagist. That archive still described Laravel Zero as an installable dependency, so Composer downloaded the framework dependency graph instead of installing the standalone executable.
 
-The release check now validates the artifact that Composer users receive. It checks that the PHAR is present, that Composer points its binary entry to that file, and that Laravel Zero remains a development dependency. Release verification also performs a clean global-style Composer installation and runs the installed executable.
+The distribution test enforces the package shape: Composer has no external runtime packages, Laravel Zero remains in `require-dev`, and the binary entry points to `builds/quickpay`. It also checks the Box setting that keeps files from development dependencies available to the PHAR build. The release procedure runs the committed PHAR before it is tagged. After publication, it compares the downloaded asset with the tagged file and tests a clean Composer installation.
 
 ## Current guarantees and limits
 
