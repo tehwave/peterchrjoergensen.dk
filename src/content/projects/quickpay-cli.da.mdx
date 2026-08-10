@@ -9,14 +9,14 @@ externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal, hvor Quickpay CLI holder øje med betalingsændringer og leverer et callback til localhost"
-ogDescription: "Det tekniske design af Quickpay CLI, fra API-grænse og betalingskommandoer til polling på kontoniveau, signerede callbacks og PHAR-distribution."
+ogDescription: "Det tekniske design af Quickpay CLI, fra API-grænse og betalingskommandoer til polling på kontoniveau og levering af signerede callbacks."
 ---
 
 Quickpay CLI er en selvstændig PHP 8.4-klient til Quickpay API v10. Jeg byggede den til betalingsarbejde i terminalen og til scripts, der skal kunne parse JSON-outputtet. Den kan også levere signerede betalingscallbacks til en lokal applikation.
 
 Callback-funktionen begyndte med et problem, jeg mødte under lokale tests af WordPress- og WooCommerce-integrationer. Quickpay kan ikke nå `localhost`. En tunnel gør ruten tilgængelig, men den kan samtidig påvirke hostnavn, HTTPS-opsætning og de URL'er, WordPress gemmer i databasen. Quickpay har allerede betalingens tilstand, så jeg byggede CLI'en til at hente den og genskabe requestet lokalt.
 
-CLI'en endte med to forløb oven på det samme API-lag. Betalingskommandoerne sender et request og returnerer resultatet. Watcheren bliver kørende, leder efter nye operationer og omsætter dem til signerede requests til den lokale applikation. Jeg pakker begge forløb i den PHAR-fil, Composer installerer.
+CLI'en endte med to forløb oven på det samme API-lag. Betalingskommandoerne sender et request og returnerer resultatet. Watcheren bliver kørende, leder efter nye operationer og omsætter dem til signerede requests til den lokale applikation.
 
 ## Det fælles API-lag
 
@@ -89,17 +89,9 @@ En operation, der ikke kan leveres, blokerer senere operationer i samme kørsel.
 
 Replay henter betalingens aktuelle tilstand, bygger et nyt signeret callback-request og sender det én gang. Den kan stadig ikke genskabe det oprindelige webhooks historiske body.
 
-## Pakning af den testede applikation
-
-Jeg ville have `composer global require tehwave/quickpay-cli` til at installere én executable. Laravel Zero leverer konsolmiljøet under udvikling, og dets egen build-kommando samler applikationen og dens dependencies i `builds/quickpay`. Den versionerede PHAR-fil er committed til repository'et og eksponeret som Composers binary. De udgivne runtime-krav indeholder kun PHP.
-
-Den første release viste, hvorfor repository'ets form betyder noget. GitHub havde en verificeret PHAR, mens Packagist installerede indholdet af det taggede repository. Arkivet beskrev stadig Laravel Zero som en runtime-dependency, så en ren Composer-installation hentede frameworkets dependency graph.
-
-Jeg tilføjede en distributionstest for den kontrakt. Composer har ingen eksterne runtime-pakker, Laravel Zero ligger fortsat i `require-dev`, og binary-indgangen peger på `builds/quickpay`. Testen kontrollerer også Box-indstillingen, som beholder udviklingsafhængighederne i PHAR-buildet. Før jeg tagger en release, kører jeg den committed PHAR. Efter udgivelsen sammenligner jeg det downloadede artefakt med filen i tagget og tester en ren Composer-installation.
-
 ## Verifikation og begrænsninger
 
-Testsuiten følger beslutningerne ovenfor. Den dækker kommandoadfærd, HTTP-grænser, credentials, polling-vinduer, deduplikering, signering, leveringsfejl og pakkens struktur. Den nuværende suite har 541 tests med 1.829 assertions. Statisk analyse og formatering kører i samme verifikationskommando.
+Testsuiten følger beslutningerne ovenfor. Den dækker kommandoadfærd, HTTP-grænser, credentials, polling-vinduer, deduplikering, signering og leveringsfejl. Den nuværende suite har 541 tests med 1.829 assertions. Statisk analyse og formatering kører i samme verifikationskommando.
 
 Callback-tests bruger kontrollerede HTTP-responses. De verificerer de bytes og headers, CLI'en producerer, sammen med rækkefølge og fejlforløb. De erstatter ikke en integrationstest mod Quickpays live-tjeneste.
 

@@ -9,14 +9,14 @@ externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal showing Quickpay CLI watching payment changes and delivering a callback to localhost"
-ogDescription: "The technical design of Quickpay CLI, from its API boundary and payment commands to account-wide polling, signed callbacks, and PHAR distribution."
+ogDescription: "The technical design of Quickpay CLI, from its API boundary and payment commands to account-wide polling and signed callback delivery."
 ---
 
 Quickpay CLI is a standalone PHP 8.4 client for Quickpay API v10. I built it to handle payment work from the terminal and to give scripts JSON output they can parse. It can also deliver signed payment callbacks to a local application.
 
 The callback feature started with a problem I hit while testing WordPress and WooCommerce integrations locally. Quickpay cannot reach `localhost`. A tunnel exposes the route, but it can also interfere with the hostname, HTTPS settings and URLs WordPress stores in its database. Quickpay already has the payment state, so I built the CLI to retrieve it and reconstruct the request locally.
 
-The CLI ended up with two routes through the same API layer. Payment commands make a request and return the result. The watcher remains active, looks for new operations and turns each one into a signed request for the local application. I package both routes in the PHAR that Composer installs.
+The CLI ended up with two routes through the same API layer. Payment commands make a request and return the result. The watcher remains active, looks for new operations and turns each one into a signed request for the local application.
 
 ## The shared API layer
 
@@ -89,17 +89,9 @@ An operation that cannot be delivered blocks later operations in the same run. T
 
 Replay fetches the payment's current state, builds a new signed callback-shaped request and sends it once. It still cannot reproduce the original historical webhook body.
 
-## Packaging the tested application
-
-I wanted `composer global require tehwave/quickpay-cli` to install one executable. Laravel Zero supplies the console runtime during development, and its native build command compiles the application and dependencies into `builds/quickpay`. That versioned PHAR is committed to the repository and exposed as the Composer binary. The published runtime requirements contain PHP alone.
-
-The first release showed why the repository shape matters. GitHub had a verified PHAR, while Packagist installed the contents of the tagged repository. That archive still described Laravel Zero as a runtime dependency, so a clean Composer install downloaded the framework dependency graph.
-
-I added a distribution test for that contract. Composer has no external runtime packages, Laravel Zero remains in `require-dev`, and the binary entry points to `builds/quickpay`. The test also checks the Box setting that keeps development dependencies available to the PHAR build. Before tagging a release, I run the committed PHAR. After publication, I compare the downloaded asset with the tagged file and test a clean Composer installation.
-
 ## Verification and limits
 
-The tests follow the design decisions above. They cover command behavior, HTTP boundaries, credentials, polling windows, deduplication, signing, delivery failures and package shape. The current suite contains 541 tests with 1,829 assertions. Static analysis and formatting run in the same verification command.
+The tests follow the design decisions above. They cover command behavior, HTTP boundaries, credentials, polling windows, deduplication, signing and delivery failures. The current suite contains 541 tests with 1,829 assertions. Static analysis and formatting run in the same verification command.
 
 The callback tests use controlled HTTP responses. They verify the bytes and headers produced by the CLI, along with ordering and failure behavior. They do not replace an integration test against Quickpay's live service.
 
