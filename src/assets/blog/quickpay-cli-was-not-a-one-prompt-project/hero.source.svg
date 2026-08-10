@@ -35,8 +35,8 @@
 
   <g transform="translate(95 145)">
     <text x="0" y="0" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" letter-spacing="7" fill="#fa9b29">BUILDING WITH CODING AGENTS</text>
-    <text x="0" y="70" font-family="Inter, Arial, sans-serif" font-size="66" font-weight="900" letter-spacing="-3" fill="#fbfbfb">Not one prompt.</text>
-    <text x="0" y="136" font-family="Inter, Arial, sans-serif" font-size="66" font-weight="900" letter-spacing="-3" fill="#fbfbfb">A feedback loop.</text>
+    <text x="0" y="70" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="900" letter-spacing="-3" fill="#fbfbfb">HTTP 405 changed retries.</text>
+    <text x="0" y="136" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="900" letter-spacing="-3" fill="#fbfbfb">Composer changed packaging.</text>
   </g>
 
   <g transform="translate(104 302) rotate(-2 0 0)" filter="url(#shadow)">
@@ -50,8 +50,8 @@
       <text x="42" y="132" font-size="21" fill="#97a1b2">POST /quickpay/callback</text>
       <text x="42" y="196" font-size="32" font-weight="700" fill="#fc1154">HTTP 405</text>
       <text x="42" y="238" font-size="22" fill="#f7f8fa">Method Not Allowed</text>
-      <text x="42" y="306" font-size="20" fill="#fa9b29">attempt 1 of 5</text>
-      <text x="42" y="344" font-size="20" fill="#fa9b29">retry forever?</text>
+      <text x="42" y="306" font-size="20" fill="#fa9b29">delivery failed</text>
+      <text x="42" y="344" font-size="20" fill="#fa9b29">retrying forever</text>
     </g>
     <path d="M35 363c136 20 271 18 406-8" fill="none" stroke="#fc1154" stroke-width="7" stroke-linecap="round" />
     <path d="M453 334l42 14-34 29" fill="none" stroke="#fc1154" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
@@ -73,8 +73,8 @@
   <path d="M733 502c57-83 108-106 174-72" fill="none" stroke="#fc1154" stroke-width="12" stroke-linecap="round" marker-end="url(#pinkArrow)" />
   <path d="M796 762c170 50 325 37 465-38" fill="none" stroke="#fbfbfb" stroke-width="7" stroke-linecap="round" stroke-dasharray="5 18" opacity="0.78" />
 
-  <g transform="translate(570 630) rotate(-5)">
-    <rect width="470" height="74" rx="8" fill="#fa9b29" />
-    <text x="235" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="3" fill="#091057">TEST · CORRECT · REPEAT</text>
+  <g transform="translate(640 630) rotate(-5)">
+    <rect width="360" height="74" rx="8" fill="#fa9b29" />
+    <text x="180" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="3" fill="#091057">TEST · CORRECT</text>
   </g>
 </svg>

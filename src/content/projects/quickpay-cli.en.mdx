@@ -2,160 +2,91 @@
 locale: en
 translationKey: quickpay-cli
 title: "I built a Quickpay CLI to test payment callbacks locally"
-description: "I built a universal Quickpay command-line client after local WordPress and WooCommerce sites made payment callbacks painful to test. It manages payments and can poll for new operations, sign callback-shaped payloads, and deliver them to localhost without a tunnel."
+description: "I built a Quickpay command-line client because payment callbacks were awkward to test in local WordPress and WooCommerce projects. It manages payments and sends signed callback-shaped requests to localhost by polling Quickpay for new operations."
 category: "web"
 tags: ["PHP", "Laravel Zero", "CLI", "Quickpay", "AI-Assisted"]
 externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal showing Quickpay CLI watching payment changes and delivering a callback to localhost"
-ogDescription: "A case study about turning a local Quickpay callback papercut into a secure, agent-friendly PHP CLI with payment commands and tunnel-free callback emulation."
+ogDescription: "How a local Quickpay callback problem became a PHP CLI for payments and signed callback emulation."
 ---
 
-## The papercut
+I was testing a Quickpay payment flow in a local WordPress and WooCommerce project. The payment worked, then Quickpay had no route to the callback on my laptop. It cannot send a request to my `localhost`.
 
-I was working on a local WordPress and WooCommerce site that depended on callbacks from Quickpay. The payment happened on Quickpay's side, but the callback could not reach my machine. `localhost` is useful to me and meaningless to a payment processor on the internet.
+A tunnel gives Quickpay a public URL that forwards requests to my machine. WordPress cares about its URL, so the tunnel brings extra work. A temporary hostname can affect redirects and cookies. It can also change generated links and HTTPS behaviour. I wanted to test the payment integration without reconfiguring the site around a tunnel.
 
-The usual answer is a tunnel. Give the tunnel a public URL, point Quickpay at it, and forward the request to the local server.
+Quickpay already had the payment state I needed. My local application already knew how to receive a callback and verify its signature. The CLI could fetch the payment, build the expected body, sign its bytes, and send it straight to the local callback route.
 
-That sounds easy until the application cares about its own URL. WordPress does. WooCommerce does. A temporary hostname can affect redirects, cookies, generated links, HTTPS handling, and the distinction between the site URL and the callback URL. I could make it work, but I did not want every callback test to begin with changing local configuration and debugging the tunnel around the thing I was actually trying to test.
+I could have put that code into the WordPress project. Then I would have to build it again for the next shop. A standalone CLI could sit beside any project.
 
-Then the problem flipped in my head. I did not need Quickpay to discover my laptop. I needed the payment state that Quickpay already had.
+It also gave coding agents a small interface to work with. They can inspect `--help` and run a command without learning the PHP structure of the host application. JSON output gives them a stable result. A developer can use the same tool from a terminal. That is how [Quickpay CLI](https://github.com/tehwave/quickpay-cli) began.
 
-The API could give me that state. My local application already knew how to receive and validate a Quickpay callback. The missing piece was a small tool that could fetch the payment, shape and sign the payload correctly, and send it to the local callback handler.
+I chose Laravel Zero because I knew Laravel's conventions and wanted to spend my time on the commands. The project targets PHP 8.4 and Quickpay API v10. Composer installs a PHAR, so the tool does not become part of the application it is helping me test.
 
-That was the papercut that became [Quickpay CLI](https://github.com/tehwave/quickpay-cli).
+The first version handled payments. It could create and inspect them, make payment links, show operations, capture funds, refund a payment, or cancel it. A guarded raw command covered API calls that had no dedicated command.
 
-## Why I chose a CLI
+Human-readable output goes to the terminal. `--json` gives scripts and agents a stable result. Commands that change a payment ask for confirmation unless the caller passes `--yes`. The API key can come from `QUICKPAY_API_KEY` or a protected local file.
 
-My first option was a normal PHP integration. Install a client library in the project, add a temporary command or controller, fetch the payment, and remove the code when I was done.
+The payment commands worked. The local callback problem remained.
 
-It would solve one test in one codebase. It would also make me repeat the integration in the next WordPress site, Laravel app, or isolated reproduction.
+I added `callbacks:replay` and an early version of `callbacks:watch`. The first watcher required a payment ID. That made sense in code and felt clumsy at the terminal. When I test a shop, I want to start the watcher before I create the payment.
 
-A command-line tool was a better boundary. It could work beside any application instead of inside it. A developer could use it interactively. A shell script could use stable JSON. A coding agent could inspect `--help`, run an explicit command, and read machine-friendly output without needing to understand the host project's PHP architecture first.
-
-That last part mattered. Coding agents are good at tools with discoverable commands, explicit flags, predictable exit codes, and clean streams. A universal CLI gave them a smaller and safer interface to Quickpay than asking them to add a payment SDK to whichever repository happened to be open.
-
-I chose Laravel Zero because I already knew Laravel's conventions and wanted a focused console application rather than a custom pile of argument parsing. The project targets PHP 8.4 and Quickpay API v10, and it is distributed as a PHAR through Composer.
-
-## The first version was only the beginning
-
-The original MVP was a payment client. It could authenticate, create and inspect payments, make hosted payment links, list operations, and capture, refund, or cancel a payment. A guarded raw command covered API endpoints that did not have a first-class command yet.
-
-It had readable terminal output for people and `--json` for scripts and agents. Mutations required confirmation, with `--yes` as the explicit automation escape hatch. Credentials could come from `QUICKPAY_API_KEY` or a protected local configuration file.
-
-That was useful, but a launch-readiness review exposed the missing product. The tool could inspect Quickpay, yet it did not solve the local callback problem that made the idea interesting.
-
-The first callback implementation added `callbacks:replay` and a watcher for one selected payment. That still made the developer do bookkeeping. You had to know which payment to watch before the operation happened.
-
-I pushed back on that limitation. If the tool was supposed to sit beside a local shop while I tested its payment flow, the natural command should watch the account for new payment operations. A payment ID or order ID could narrow the scope, but it should not be required.
-
-That changed `callbacks:watch` from a useful debugging command into the feature I had wanted from the beginning.
-
-## How local callback watching works
-
-The basic command is deliberately small:
+The command now watches for new operations across the account. A payment ID or order ID can narrow the search when I need it.
 
 ```bash
 quickpay callbacks:watch \
   --to=http://127.0.0.1:8000/quickpay/callback
 ```
 
-When it becomes ready, the watcher records a timestamp and starts polling Quickpay for payments changed after that point. It queries by `updated_at`, overlaps each polling window by one second, and deduplicates by payment ID plus operation ID. The overlap protects the boundary between two scans without forwarding the same operation twice.
+The watcher records the time when it becomes ready, then asks Quickpay for payments changed after that point. Each polling window overlaps the previous one by a second. A payment ID paired with an operation ID prevents duplicate delivery across that overlap.
 
-For each changed payment, the CLI fetches the current payment resource and finds operations it has not seen in this session. It produces one callback-shaped body per new operation, signs the exact JSON bytes with HMAC-SHA256, and posts the body to the explicit destination from `--to`.
+When a payment changes, the CLI fetches its current state and finds operations it has not seen during the session. It creates one request for each new operation. The exact JSON bytes are signed with HMAC-SHA256 and sent to the URL from `--to`.
 
-The signature matters because a real Quickpay callback is authenticated through the `Quickpay-Checksum-Sha256` header. The local application should exercise its normal callback verification instead of receiving a convenient but unrealistic unsigned request. Quickpay documents the same checksum calculation in its [callback documentation](https://learn.quickpay.net/tech-talk/api/callback).
+Quickpay callbacks use the `Quickpay-Checksum-Sha256` header. My local code therefore runs its usual signature check instead of accepting a convenient unsigned request. Quickpay describes the checksum in its [callback documentation](https://learn.quickpay.net/tech-talk/api/callback).
 
-The delivery client is separate from the Quickpay API client. API authentication and `Accept-Version` headers cannot accidentally follow the callback to another host. The private key is used in memory for signing and is not written into command output.
+The callback client is separate from the API client. Quickpay credentials stay with requests to `https://api.quickpay.net`, and the callback destination receives none of the API headers. The private key stays in memory while the request is signed.
 
-Polling also changes what the tool can honestly promise. It sees the latest payment resource, not the historical body Quickpay sent at the exact moment an operation happened. If two operations appear between polls, the watcher sends one request for each operation, but those requests can contain the same latest payment snapshot.
+Polling returns the latest payment state from Quickpay. The callback body is not a copy of the historical request sent when the operation first happened. If two operations appear between polls, both requests may contain the same payment snapshot.
 
-That is still the right trade-off for local development. My callback endpoint receives a correctly shaped and signed payment resource without making the whole WordPress site public.
+For local testing, I accept that difference. The application gets a correctly shaped request with a valid signature, while the rest of the WordPress site remains on my machine.
 
-## The safety boundaries
+Payment commands need stricter rules than a normal read-only API tool. Quickpay's base URL and API version live in one client. Commands supply relative paths. Pagination accepts HTTPS links back to the Quickpay API and rejects foreign hosts. It also rejects unusual ports, fragments, cycles, user information, or too many pages.
 
-Payment tooling deserves boring boundaries.
+Polling can retry a failed read. Payment mutations stop after a network failure because the result may be uncertain. If a capture reached Quickpay and only the response was lost, an automatic retry could repeat the action.
 
-The CLI owns the Quickpay API origin. Commands provide relative paths and business input, while the client centralizes `https://api.quickpay.net`, API v10, JSON handling, authentication, and timeouts. Pagination follows only validated HTTPS `rel="next"` links back to the Quickpay API. Foreign hosts, user information, unusual ports, fragments, cycles, and excessive page counts are rejected.
+Capture and refund commands ask for confirmation. Cancellation and non-GET raw requests do the same. Stored credentials use atomic writes with private directory and file permissions. An environment variable takes priority, which keeps a key out of the local config in CI.
 
-Read operations can retry when polling fails. Payment mutations do not retry automatically. A network interruption after a capture request creates uncertainty: retrying could repeat an action whose response was merely lost. The safe behavior is to stop and make the operator inspect the payment.
+JSON stays on stdout. Prompts and diagnostics go to stderr. This lets a script parse the result without a status line appearing inside the JSON document.
 
-Capture, refund, cancellation, and non-GET raw requests ask for confirmation. Automation has to say `--yes`. Stored credentials use atomic writes, a private configuration directory, and a private file. An environment variable takes precedence so CI and short-lived automation do not need to persist a key.
+The retry policy for callbacks changed after a blunt manual test. I pointed the watcher at a route that returned HTTP 405. The original version kept retrying forever to preserve callback order. My terminal filled with requests that could never succeed.
 
-The output contract is just as deliberate. JSON stays on stdout. Prompts, warnings, and diagnostics go to stderr. A script or coding agent can parse the result without a friendly status sentence appearing in the middle of the JSON document.
+The watcher now retries network failures, 408, 425, 429, and server errors. It makes five attempts in total by default. Other failed HTTP responses stop immediately. The command exits with an error and suggests `callbacks:replay` once the route has been fixed.
 
-Callback destinations are explicit HTTP or HTTPS URLs. Redirects are handled under a bounded policy instead of being followed blindly. The callback request does not inherit Quickpay API credentials.
+The first release verified the wrong artifact. Our workflow produced a checked PHAR and attached it to GitHub. I then followed the README and installed the package through Composer. Composer pulled Laravel Zero and its dependency graph instead of the standalone executable I expected.
 
-None of these choices are visually exciting. Together, they make the difference between a demo command and a tool I am comfortable letting an agent use around payments.
+The workflow had checked the GitHub asset. Packagist installs the files in the tagged repository archive.
 
-## The product changed when I disagreed with the agent
+The repository now contains the versioned `builds/quickpay` PHAR and exposes it as the Composer binary. Laravel Zero stays in `require-dev` and is bundled inside the PHAR. A distribution test checks that package shape, and the release instructions include a clean Composer installation.
 
-ChatGPT and Codex did most of the implementation work. They researched APIs and framework behavior, wrote plans, produced code and tests, ran reviews, and debugged failures. That description is accurate, but incomplete.
+ChatGPT and Codex wrote most of the implementation. They researched the APIs, drafted plans, wrote code, and ran reviews. I chose the product scope and the command interface. I set the safety requirements and tested the awkward paths. I rejected answers that solved a smaller problem than the one I had described.
 
-The important turns happened when I did not accept the first answer.
+During an architecture review, I mentioned the test folders while explaining that the repository felt disorganised. The first answer reorganised the tests. I had to send it back and ask for the whole repository. The next pass grouped production code and tests around the same capabilities.
 
-I made callbacks prominent without turning the whole project into a callback-only product. I rejected the requirement to select one payment before watching. I asked whether the repository represented professional work or looked like unreviewed generated code. When an architecture review treated my example about test folders as the entire problem, I corrected the scope and required a repository-wide pass.
+The README took several passes too. Some versions made callbacks sound like the entire product. Others read like sales copy. I kept cutting until the text matched the tool I was using.
 
-That pass reorganized the application around capabilities: commands, callbacks, console behavior, credentials, and the Quickpay boundary. It removed grab-bag support code and hidden command traits. The tests followed the same capability structure.
+The companion article, [Quickpay CLI took more than one prompt](/blog/quickpay-cli-was-not-a-one-prompt-project/), covers those corrections in more detail.
 
-I also rejected README copy that sounded generated or promotional. The tool needed a clear promise, not inflated language. And I tested the watcher with a deliberately invalid endpoint. That exposed a retry policy that looked defensible in code and was miserable in actual use.
+`callbacks:watch` remains a local development tool. It watches payment operations, while subscription callbacks are outside its scope. The process runs in the foreground and keeps its cursor in memory. Operations that already exist when the watcher becomes ready are ignored. Ordering is preserved for each payment, while operations from different payments have no global order.
 
-The detailed story of those correction loops is in [Quickpay CLI was not a one-prompt project](/blog/quickpay-cli-was-not-a-one-prompt-project/).
+The automated callback tests use HTTP fakes. They prove the CLI's behaviour against the fake transport. The live Quickpay contract remains outside the test. I keep those limits in the documentation because they change how the command should be used.
 
-## The retry policy failed a real-use test
-
-The watcher originally retried failed delivery forever to preserve ordering. The reasoning was understandable: do not silently skip an operation and deliver later callbacks out of sequence.
-
-Then I pointed it at an endpoint that returned HTTP 405. The terminal filled with retries for a request that would never become valid by waiting.
-
-The revised policy keeps the ordering guarantee without pretending every failure is temporary. Network failures, 408, 425, 429, and server errors receive bounded retries. Five total attempts are made by default, including the first request. Other unsuccessful HTTP responses, including 405, stop immediately. The command exits non-zero, keeps the failed operation visible, and suggests `callbacks:replay` after the endpoint is fixed.
-
-That behavior came from using the feature, not admiring its test suite.
-
-## The release tested the wrong artifact
-
-The first release process also looked stronger than it was. A workflow built a PHAR, checked it, and attached it to a GitHub release. The artifact was fine.
-
-Then I installed the package the way the README told users to install it. Composer pulled Laravel Zero and its dependency graph instead of giving me the standalone executable I expected.
-
-The verification had tested the GitHub artifact. Packagist distributes the contents of the tagged repository archive. Those were not the same thing.
-
-The fix was to make the distribution contract literal. The versioned `builds/quickpay` PHAR is committed to the repository and exposed as the Composer binary. Laravel Zero stays in `require-dev`, so its runtime is bundled inside the PHAR without appearing as the consumer's external dependency graph. A distribution-contract test checks the package shape, and release verification includes a clean Composer installation of what users actually receive.
-
-It is less clever than manufacturing a separate artifact in CI. It is also much easier to reason about.
-
-## What the watcher deliberately does not do
-
-`callbacks:watch` is local-development emulation. It is not a webhook stream supplied by Quickpay.
-
-- It forwards current payment state, not an authentic historical callback snapshot.
-- It covers payment-operation callbacks, not subscription callbacks.
-- It runs in the foreground and keeps its cursor in memory.
-- It ignores operations that already exist when the session becomes ready.
-- It preserves operation order for each payment, but cannot guarantee a global order across payments.
-- Its automated tests use HTTP fakes. They test the CLI's behavior, not the live Quickpay contract.
-
-Those limits are part of the feature. A development tool becomes dangerous when its documentation quietly promotes an approximation into a guarantee.
-
-## Using Quickpay CLI
-
-Quickpay CLI is open source and installs globally through Composer:
+Quickpay CLI installs globally through Composer:
 
 ```bash
 composer global require tehwave/quickpay-cli
 ```
 
-After `quickpay login`, the command list covers payment creation, inspection, payment links, capture, refund, cancellation, raw API access, callback replay, and callback watching. Every command has focused help, and the repository includes an agent-facing skill for safe discovery and automation.
+After `quickpay login`, the commands cover the full payment flow as well as callback replay and watching. The [public repository](https://github.com/tehwave/quickpay-cli) has the command reference and current limitations.
 
-The source, installation instructions, and current limitations are available in the [Quickpay CLI repository](https://github.com/tehwave/quickpay-cli).
-
-## What I built, and what I directed
-
-I did not type every line of Quickpay CLI. I also did not ask for an application and wait for an agent to finish it.
-
-I chose the product, framework direction, command boundaries, safety requirements, and standard of proof. I tested the awkward paths. I rejected narrow answers and weak copy. I decided what belonged in the product and what should remain a documented limitation.
-
-The agents compressed the distance between those decisions and working code. That let me spend more time on whether the tool solved the right problem.
-
-The result started with a local WordPress callback that could not arrive. It became a universal Quickpay client, a signed callback emulator, and a much better example of how I want to build with coding agents.
+I now have one tool I can run beside WordPress or Laravel projects. It gives me the payment data I need and delivers a signed request to my local callback route. That solves the papercut I started with.

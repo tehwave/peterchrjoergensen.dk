@@ -2,160 +2,91 @@
 locale: da
 translationKey: quickpay-cli
 title: "Jeg byggede en Quickpay CLI til at teste betalingscallbacks lokalt"
-description: "Jeg byggede en universel Quickpay-klient til kommandolinjen, fordi betalingscallbacks var besværlige at teste i lokale WordPress- og WooCommerce-løsninger. Den håndterer betalinger og kan holde øje med nye operationer, signere callback-lignende payloads og levere dem til localhost uden en tunnel."
+description: "Jeg byggede en Quickpay-klient til kommandolinjen, fordi betalingscallbacks var besværlige at teste i lokale WordPress- og WooCommerce-projekter. Den håndterer betalinger og sender signerede, callback-lignende requests til localhost ved at holde øje med nye operationer hos Quickpay."
 category: "web"
 tags: ["PHP", "Laravel Zero", "CLI", "Quickpay", "AI-Assisted"]
 externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal, hvor Quickpay CLI holder øje med betalingsændringer og leverer et callback til localhost"
-ogDescription: "En case om at gøre et lille problem med lokale Quickpay-callbacks til en sikker og agentvenlig PHP CLI med betalingskommandoer og callback-emulering uden en tunnel."
+ogDescription: "Sådan blev et problem med lokale Quickpay-callbacks til en PHP CLI for betalinger og signeret callback-emulering."
 ---
 
-## Det lille problem
+Jeg testede et Quickpay-betalingsflow i et lokalt WordPress- og WooCommerce-projekt. Betalingen virkede, hvorefter Quickpay manglede en route til callbacket på min bærbare. Den kan ikke sende et request til mit `localhost`.
 
-Jeg arbejdede på en lokal WordPress- og WooCommerce-løsning, der var afhængig af callbacks fra Quickpay. Betalingen foregik hos Quickpay, men callbacket kunne ikke nå min maskine. `localhost` giver mening for mig og ingen mening for en betalingsudbyder på internettet.
+En tunnel giver Quickpay en offentlig URL, som sender requests videre til min maskine. WordPress går op i sin egen URL, så tunnellen giver ekstra arbejde. Et midlertidigt hostnavn kan påvirke redirects og cookies. Det kan også ændre genererede links og sidens HTTPS-adfærd. Jeg ville teste betalingsintegrationen uden at indrette siden efter en tunnel.
 
-Det sædvanlige svar er en tunnel. Tunnellen får en offentlig URL, Quickpay peger på den, og requestet bliver sendt videre til den lokale server.
+Quickpay havde allerede den betalingsstatus, jeg skulle bruge. Min lokale applikation kunne modtage et callback og kontrollere signaturen. CLI'en kunne hente betalingen, bygge den forventede body, signere dens bytes og sende den direkte til den lokale callback-route.
 
-Det lyder nemt, indtil applikationen går op i sin egen URL. Det gør WordPress. Det gør WooCommerce. Et midlertidigt hostnavn kan påvirke redirects, cookies, genererede links, HTTPS og forskellen på sidens URL og callback-URL'en. Jeg kunne godt få det til at virke, men jeg havde ikke lyst til at begynde hver callback-test med at ændre lokal konfiguration og fejlfinde tunnellen rundt om det, jeg faktisk skulle teste.
+Jeg kunne have lagt koden i WordPress-projektet. Så skulle jeg bygge den igen til den næste shop. En selvstændig CLI kunne køre ved siden af ethvert projekt.
 
-Så vendte problemet sig i mit hoved. Jeg behøvede ikke få Quickpay til at opdage min bærbare. Jeg skulle bruge den betalingsstatus, Quickpay allerede havde.
+Den gav samtidig kodeagenter en lille grænseflade. De kan læse `--help` og køre en kommando uden først at forstå PHP-strukturen i applikationen. JSON-output giver dem et stabilt resultat. En udvikler kan bruge det samme værktøj fra terminalen. Sådan begyndte [Quickpay CLI](https://github.com/tehwave/quickpay-cli).
 
-API'et kunne give mig den status. Min lokale applikation kunne allerede modtage og validere et Quickpay-callback. Det eneste, der manglede, var et lille værktøj, der kunne hente betalingen, forme og signere payloaden korrekt og sende den til den lokale callback-handler.
+Jeg valgte Laravel Zero, fordi jeg kendte Laravels konventioner og helst ville bruge tiden på kommandoerne. Projektet kræver PHP 8.4 og bruger Quickpay API v10. Composer installerer en PHAR, så værktøjet ikke bliver en del af den applikation, det hjælper mig med at teste.
 
-Det var irritationsmomentet, der blev til [Quickpay CLI](https://github.com/tehwave/quickpay-cli).
+Den første version håndterede betalinger. Den kunne oprette og vise dem, lave betalingslinks, vise operationer, capture funds, refundere en betaling eller annullere den. En beskyttet raw-kommando dækkede API-kald uden en særlig kommando.
 
-## Hvorfor jeg valgte en CLI
+Læsbart output går til terminalen. `--json` giver scripts og agenter et stabilt resultat. Kommandoer, der ændrer en betaling, beder om bekræftelse, medmindre kaldet bruger `--yes`. API-nøglen kan komme fra `QUICKPAY_API_KEY` eller en beskyttet lokal fil.
 
-Min første mulighed var en almindelig PHP-integration. Installér et klientbibliotek i projektet, tilføj en midlertidig kommando eller controller, hent betalingen, og fjern koden igen bagefter.
+Betalingskommandoerne virkede. Det lokale callback-problem var stadig uløst.
 
-Det ville løse én test i én kodebase. Det ville også få mig til at gentage integrationen i den næste WordPress-side, Laravel-applikation eller isolerede fejlsøgning.
+Jeg tilføjede `callbacks:replay` og en tidlig udgave af `callbacks:watch`. Den første watcher krævede et betalings-ID. Det gav mening i koden og var besværligt i terminalen. Når jeg tester en shop, vil jeg starte watcheren, før jeg opretter betalingen.
 
-Et kommandolinjeværktøj var en bedre grænse. Det kunne arbejde ved siden af enhver applikation i stedet for inde i den. En udvikler kunne bruge det interaktivt. Et shell-script kunne bruge stabil JSON. En kodeagent kunne læse `--help`, køre en tydelig kommando og forstå maskinvenligt output uden først at kende PHP-arkitekturen i det åbne projekt.
-
-Den sidste del var vigtig. Kodeagenter er gode til værktøjer med kommandoer, de kan opdage, tydelige flag, forudsigelige exit-koder og rene outputstrømme. En universel CLI gav dem en mindre og sikrere grænseflade til Quickpay end at bede dem installere et betalings-SDK i det tilfældige projekt, der var åbent.
-
-Jeg valgte Laravel Zero, fordi jeg kendte Laravels konventioner og ville have en fokuseret konsolapplikation i stedet for min egen bunke argument-parsing. Projektet kræver PHP 8.4, bruger Quickpay API v10 og bliver distribueret som en PHAR gennem Composer.
-
-## Første version var kun begyndelsen
-
-Den oprindelige MVP var en betalingsklient. Den kunne autentificere, oprette og vise betalinger, lave betalingslinks, vise operationer og capture, refundere eller annullere en betaling. En beskyttet raw-kommando dækkede API-endpoints, der endnu ikke havde deres egen kommando.
-
-Den havde læsbart terminaloutput til mennesker og `--json` til scripts og agenter. Ændringer krævede bekræftelse, og `--yes` var den udtrykkelige vej til automatisering. Credentials kunne komme fra `QUICKPAY_API_KEY` eller en beskyttet lokal konfigurationsfil.
-
-Det var nyttigt, men en gennemgang før lancering afslørede det manglende produkt. Værktøjet kunne inspicere Quickpay, men løste ikke det lokale callback-problem, som havde gjort idéen interessant.
-
-Den første callback-implementering tilføjede `callbacks:replay` og en watcher til én valgt betaling. Det efterlod stadig bogholderiet hos udvikleren. Man skulle kende betalingen, før operationen skete.
-
-Jeg sagde fra over for den begrænsning. Hvis værktøjet skulle køre ved siden af en lokal shop, mens jeg testede dens betalingsflow, burde den naturlige kommando holde øje med nye betalingsoperationer på hele kontoen. Et betalings-ID eller ordre-ID kunne indsnævre overvågningen, men det skulle ikke være et krav.
-
-Det ændrede `callbacks:watch` fra en nyttig debug-kommando til den feature, jeg havde ønsket fra starten.
-
-## Sådan virker lokal callback-overvågning
-
-Den grundlæggende kommando er bevidst lille:
+Kommandoen holder nu øje med nye operationer på hele kontoen. Et betalings-ID eller ordre-ID kan indsnævre søgningen.
 
 ```bash
 quickpay callbacks:watch \
   --to=http://127.0.0.1:8000/quickpay/callback
 ```
 
-Når watcheren er klar, gemmer den et tidspunkt og begynder at spørge Quickpay efter betalinger, der er ændret efter det tidspunkt. Den søger på `updated_at`, lader hvert søgevindue overlappe med ét sekund og deduplikerer på betalings-ID og operations-ID. Overlappet beskytter grænsen mellem to scanninger uden at sende samme operation to gange.
+Watcheren gemmer tidspunktet, hvor den bliver klar, og spørger derefter Quickpay efter betalinger, der er ændret siden da. Hvert søgevindue overlapper det forrige med ét sekund. Kombinationen af betalings-ID og operations-ID forhindrer dobbelt levering i overlapningen.
 
-For hver ændret betaling henter CLI'en den aktuelle betalingsressource og finder operationer, den ikke har set i denne session. Den laver én callback-lignende body for hver ny operation, signerer de præcise JSON-bytes med HMAC-SHA256 og sender dem til destinationen fra `--to`.
+Når en betaling ændrer sig, henter CLI'en dens aktuelle status og finder operationer, den ikke har set i sessionen. Den laver ét request for hver ny operation. De præcise JSON-bytes bliver signeret med HMAC-SHA256 og sendt til URL'en fra `--to`.
 
-Signaturen er vigtig, fordi et rigtigt Quickpay-callback bliver autentificeret gennem headeren `Quickpay-Checksum-Sha256`. Den lokale applikation skal bruge sin normale callback-validering i stedet for at få et bekvemt, men urealistisk, usigneret request. Quickpay dokumenterer samme checksum-beregning i sin [callback-dokumentation](https://learn.quickpay.net/tech-talk/api/callback).
+Quickpay-callbacks bruger headeren `Quickpay-Checksum-Sha256`. Min lokale kode kører derfor sit sædvanlige signaturcheck i stedet for at acceptere et praktisk, usigneret request. Quickpay beskriver sin checksum i [dokumentationen om callbacks](https://learn.quickpay.net/tech-talk/api/callback).
 
-Klienten til levering er adskilt fra Quickpay API-klienten. API-autentificering og `Accept-Version`-headers kan derfor ikke ved et uheld følge callbacket til en anden host. Den private nøgle bruges i hukommelsen til signering og bliver ikke skrevet i terminalens output.
+Callback-klienten er adskilt fra API-klienten. Quickpay-credentials følger kun requests til `https://api.quickpay.net`, og callback-destinationen modtager ingen API-headers. Den private nøgle bliver i hukommelsen, mens requestet signeres.
 
-Polling ændrer også, hvad værktøjet ærligt kan love. Det ser den seneste betalingsressource, ikke den historiske body, Quickpay sendte i det præcise øjeblik, hvor en operation skete. Hvis to operationer dukker op mellem to polls, sender watcheren ét request for hver operation, men de kan indeholde samme seneste snapshot af betalingen.
+Polling henter den seneste betalingsstatus fra Quickpay. Callbackets body er ikke en kopi af det historiske request, som Quickpay sendte, da operationen skete. Hvis to operationer dukker op mellem polls, kan begge requests indeholde samme snapshot.
 
-Det er stadig den rigtige afvejning til lokal udvikling. Mit callback-endpoint modtager en korrekt formet og signeret betalingsressource, uden at hele WordPress-siden bliver gjort offentlig.
+Til lokal test accepterer jeg den forskel. Applikationen får et korrekt formet request med en gyldig signatur, mens resten af WordPress-siden bliver på min maskine.
 
-## Sikkerhedsgrænserne
+Betalingskommandoer kræver strammere regler end et almindeligt read-only API-værktøj. Quickpays base-URL og API-version ligger i én klient. Kommandoerne leverer relative paths. Pagination accepterer HTTPS-links tilbage til Quickpay API'et og afviser fremmede hosts. Den afviser også usædvanlige porte, fragmenter, cyklusser, brugerinfo eller for mange sider.
 
-Betalingsværktøjer har godt af kedelige grænser.
+Polling må prøve en fejlet læsning igen. Ændringer af betalinger stopper efter en netværksfejl, fordi resultatet kan være usikkert. Hvis et capture nåede Quickpay, og kun svaret forsvandt, kan et automatisk forsøg gentage handlingen.
 
-CLI'en ejer Quickpay API'ets origin. Kommandoerne leverer relative paths og forretningsdata, mens klienten samler `https://api.quickpay.net`, API v10, JSON-håndtering, autentificering og timeouts ét sted. Pagination følger kun validerede HTTPS-links med `rel="next"` tilbage til Quickpay API'et. Fremmede hosts, brugerinfo, usædvanlige porte, fragmenter, cyklusser og for mange sider bliver afvist.
+Capture og refundering kræver bekræftelse. Det samme gælder annullering og raw-requests, der ikke er GET. Credentials bliver skrevet atomisk med private rettigheder på mappen og filen. En miljøvariabel har førsteprioritet, så CI kan undgå den lokale konfiguration.
 
-Læsninger må forsøges igen, når polling fejler. Ændringer af betalinger bliver ikke automatisk gentaget. Hvis forbindelsen forsvinder efter et capture-request, er resultatet usikkert. Et nyt forsøg kan gentage en handling, selv om det kun var svaret, der forsvandt. Den sikre adfærd er at stoppe og få operatøren til at inspicere betalingen.
+JSON bliver på stdout. Prompts og diagnostik går til stderr. Et script kan derfor parse resultatet uden at møde en statustekst midt i JSON-dokumentet.
 
-Capture, refundering, annullering og raw-requests, der ikke er GET, beder om bekræftelse. Automatisering skal sige `--yes`. Gemte credentials bliver skrevet atomisk i en privat konfigurationsmappe og fil. En miljøvariabel har førsteprioritet, så CI og kortlivet automatisering ikke behøver gemme en nøgle.
+Retry-politikken for callbacks ændrede sig efter en meget enkel manuel test. Jeg pegede watcheren på en route, der svarede med HTTP 405. Den oprindelige version forsøgte for evigt for at bevare rækkefølgen. Min terminal blev fyldt med requests, der aldrig kunne lykkes.
 
-Outputkontrakten er lige så bevidst. JSON bliver på stdout. Prompts, advarsler og diagnostik går til stderr. Et script eller en kodeagent kan parse resultatet uden at få en venlig statustekst midt i JSON-dokumentet.
+Watcheren prøver nu netværksfejl, 408, 425, 429 og serverfejl igen. Den laver som standard fem forsøg i alt. Andre fejlede HTTP-svar stopper med det samme. Kommandoen slutter med en fejl og foreslår `callbacks:replay`, når routen er rettet.
 
-Callback-destinationer er tydelige HTTP- eller HTTPS-URL'er. Redirects bliver håndteret under en begrænset politik i stedet for at blive fulgt blindt. Callback-requestet arver ikke credentials fra Quickpay API'et.
+Den første release verificerede det forkerte artefakt. Vores workflow producerede en kontrolleret PHAR og lagde den på GitHub. Derefter fulgte jeg README'en og installerede pakken gennem Composer. Composer hentede Laravel Zero og dens dependency graph i stedet for den selvstændige executable, jeg forventede.
 
-Ingen af de valg ser spændende ud. Tilsammen er de forskellen på en demo-kommando og et værktøj, jeg er tryg ved at lade en agent bruge omkring betalinger.
+Workflowet havde kontrolleret GitHub-artefaktet. Packagist installerer filerne fra repository'et ved det taggede commit.
 
-## Produktet ændrede sig, da jeg var uenig med agenten
+Repository'et indeholder nu den versionerede `builds/quickpay` PHAR og eksponerer den som Composer-binary. Laravel Zero bliver i `require-dev` og er pakket inde i PHAR-filen. En distributionstest kontrollerer pakkens struktur, og releasevejledningen omfatter en ren Composer-installation.
 
-ChatGPT og Codex stod for det meste af implementeringsarbejdet. De undersøgte API'er og framework-adfærd, skrev planer, producerede kode og tests, kørte reviews og fejlrettede. Den beskrivelse er rigtig, men ikke komplet.
+ChatGPT og Codex skrev det meste af implementeringen. De undersøgte API'erne, lavede planer, skrev kode og kørte reviews. Jeg valgte produktets scope og kommandogrænsefladen. Jeg fastlagde sikkerhedskravene og testede de besværlige veje. Svar, der kun løste en lille del af problemet, blev sendt tilbage.
 
-De vigtige skift skete, når jeg ikke accepterede det første svar.
+Under et arkitekturreview nævnte jeg testmapperne, mens jeg forklarede, at repository'et virkede uorganiseret. Det første svar organiserede testene. Jeg måtte sende det tilbage og bede om hele repository'et. Næste gennemgang samlede produktionskode og tests omkring de samme evner.
 
-Jeg gjorde callbacks fremtrædende uden at gøre hele projektet til et callback-produkt. Jeg afviste kravet om at vælge én betaling før overvågning. Jeg spurgte, om repository'et viste professionelt arbejde eller lignede ukritisk genereret kode. Da et arkitekturreview gjorde mit eksempel om testmapper til hele problemet, rettede jeg scope og krævede en gennemgang af hele repository'et.
+Jeg skrev også README'en om flere gange. Nogle versioner fik callbacks til at lyde som hele produktet. Andre lød som salgstekst. Jeg blev ved med at skære, indtil teksten lignede det værktøj, jeg brugte.
 
-Den gennemgang organiserede applikationen omkring dens evner: kommandoer, callbacks, konsoladfærd, credentials og grænsen mod Quickpay. Den fjernede generel supportkode og skjulte command traits. Testene fulgte samme struktur.
+Den tilhørende artikel, [Quickpay CLI krævede mere end én prompt](/blog/quickpay-cli-was-not-a-one-prompt-project/), handler om de rettelser.
 
-Jeg afviste også README-tekst, der lød genereret eller salgsagtig. Værktøjet havde brug for et klart løfte, ikke oppustet sprog. Og jeg testede watcheren mod et endpoint, jeg med vilje havde gjort ugyldigt. Det afslørede en retry-politik, som så forsvarlig ud i koden og var elendig i virkelig brug.
+`callbacks:watch` er fortsat et værktøj til lokal udvikling. Den holder øje med betalingsoperationer, mens subscription-callbacks ligger uden for dens scope. Processen kører i forgrunden og gemmer sin cursor i hukommelsen. Operationer, der findes, når watcheren bliver klar, bliver ignoreret. Rækkefølgen bevares for hver betaling, mens operationer fra forskellige betalinger ikke har en global orden.
 
-Den detaljerede historie om de rettelser findes i [Quickpay CLI blev ikke bygget med én prompt](/blog/quickpay-cli-was-not-a-one-prompt-project/).
+De automatiserede callback-tests bruger HTTP-fakes. De viser CLI'ens adfærd og siger intet om, hvordan Quickpays live API opfører sig. Begrænsningerne står i dokumentationen, fordi de ændrer måden kommandoen bør bruges på.
 
-## Retry-politikken fejlede i virkelig brug
-
-Watcheren forsøgte oprindeligt en mislykket levering igen for evigt for at bevare rækkefølgen. Argumentet gav mening: spring ikke lydløst en operation over og lever senere callbacks i forkert orden.
-
-Så pegede jeg den på et endpoint, der svarede med HTTP 405. Terminalen blev fyldt med nye forsøg på et request, der aldrig ville blive gyldigt af at vente.
-
-Den nye politik beholder rækkefølgen uden at lade som om, alle fejl er midlertidige. Netværksfejl, 408, 425, 429 og serverfejl får et begrænset antal forsøg. Som standard bliver der lavet fem forsøg i alt, inklusive det første request. Andre mislykkede HTTP-svar, herunder 405, stopper med det samme. Kommandoen slutter med en fejlkode, gør den fejlede operation synlig og foreslår `callbacks:replay`, når endpointet er rettet.
-
-Den adfærd kom af at bruge featuren, ikke af at beundre dens testsuite.
-
-## Releasen testede den forkerte fil
-
-Den første releaseproces så også stærkere ud, end den var. Et workflow byggede en PHAR, kontrollerede den og vedhæftede den til en GitHub-release. Artefaktet var i orden.
-
-Så installerede jeg pakken på den måde, README'en bad brugerne gøre det. Composer hentede Laravel Zero og hele dens dependency graph i stedet for at give mig den selvstændige executable, jeg forventede.
-
-Verifikationen havde testet GitHub-artefaktet. Packagist distribuerer indholdet af repository'et ved det taggede commit. Det var ikke den samme ting.
-
-Løsningen var at gøre distributionskontrakten bogstavelig. Den versionerede `builds/quickpay` PHAR bliver committed til repository'et og eksponeret som Composer-binary. Laravel Zero bliver i `require-dev`, så dens runtime er pakket inde i PHAR-filen uden at optræde som brugerens eksterne dependency graph. En distributionstest kontrollerer pakkens form, og releaseverifikationen omfatter en ren Composer-installation af det, brugerne faktisk modtager.
-
-Det er mindre smart end at fremstille et separat artefakt i CI. Det er også meget nemmere at forstå.
-
-## Det watcheren bevidst ikke gør
-
-`callbacks:watch` er emulering til lokal udvikling. Det er ikke en webhook-strøm leveret af Quickpay.
-
-- Den sender den aktuelle betalingsstatus, ikke et autentisk historisk snapshot af callbacket.
-- Den dækker callbacks for betalingsoperationer, ikke subscription-callbacks.
-- Den kører i forgrunden og gemmer sin cursor i hukommelsen.
-- Den ignorerer operationer, der allerede findes, når sessionen bliver klar.
-- Den bevarer rækkefølgen for hver betaling, men kan ikke garantere en global rækkefølge på tværs af betalinger.
-- De automatiserede tests bruger HTTP-fakes. De tester CLI'ens adfærd, ikke den levende kontrakt med Quickpay.
-
-De begrænsninger er en del af featuren. Et udviklingsværktøj bliver farligt, når dokumentationen stille og roligt gør en tilnærmelse til en garanti.
-
-## Brug Quickpay CLI
-
-Quickpay CLI er open source og kan installeres globalt gennem Composer:
+Quickpay CLI kan installeres globalt gennem Composer:
 
 ```bash
 composer global require tehwave/quickpay-cli
 ```
 
-Efter `quickpay login` dækker kommandolisten oprettelse og visning af betalinger, betalingslinks, capture, refundering, annullering, raw API-adgang, genafspilning af callbacks og callback-overvågning. Alle kommandoer har fokuseret hjælp, og repository'et indeholder en agent-skill til sikker opdagelse og automatisering.
+Efter `quickpay login` dækker kommandoerne hele betalingsflowet samt replay og overvågning af callbacks. Det [offentlige repository](https://github.com/tehwave/quickpay-cli) har kommandoreferencen og de aktuelle begrænsninger.
 
-Kildekoden, installationsvejledningen og de aktuelle begrænsninger findes i [Quickpay CLI-repository'et](https://github.com/tehwave/quickpay-cli).
-
-## Det jeg byggede, og det jeg instruerede
-
-Jeg skrev ikke hver linje i Quickpay CLI. Jeg bad heller ikke om en applikation og ventede på, at en agent blev færdig.
-
-Jeg valgte produktet, framework-retningen, kommandogrænserne, sikkerhedskravene og bevisbyrden. Jeg testede de besværlige veje. Jeg afviste smalle svar og svag tekst. Jeg besluttede, hvad der hørte til i produktet, og hvad der skulle forblive en dokumenteret begrænsning.
-
-Agenterne forkortede afstanden mellem de beslutninger og fungerende kode. Det gav mig mere tid til at vurdere, om værktøjet løste det rigtige problem.
-
-Resultatet begyndte med et callback til en lokal WordPress-side, der ikke kunne nå frem. Det blev til en universel Quickpay-klient, en emulator af signerede callbacks og et meget bedre eksempel på, hvordan jeg gerne vil bygge med kodeagenter.
+Jeg har nu ét værktøj, som kan køre ved siden af WordPress- eller Laravel-projekter. Det henter de betalingsdata, jeg mangler, og leverer et signeret request til min lokale callback-route. Det løser problemet, jeg begyndte med.
