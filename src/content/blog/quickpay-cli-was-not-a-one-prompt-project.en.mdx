@@ -1,0 +1,121 @@
+---
+locale: en
+translationKey: quickpay-cli-was-not-a-one-prompt-project
+title: "Quickpay CLI was not a one-prompt project"
+description: "Coding agents implemented Quickpay CLI quickly, but the useful product emerged through disagreement, manual testing, rewrites, and following the same installation path as a real user."
+pubDate: 2026-08-10
+author: "Peter Chr. Jørgensen"
+tags: ["ai", "coding-agents", "php", "open-source", "product-development"]
+heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero.png
+heroImageAlt: "Two terminal panels connected by pink correction marks showing an HTTP 405 failure and a revised retry decision"
+---
+
+I pointed Quickpay CLI at a callback endpoint that I knew was wrong.
+
+The endpoint returned HTTP 405. The watcher tried again. And again. And again.
+
+The behavior had an argument behind it. Callback order matters, so the watcher should not skip a failed operation and continue with later ones. Retrying forever preserved that ordering.
+
+It also produced an endless wall of terminal output for a mistake that waiting could never repair.
+
+That small test captures more of how I built [Quickpay CLI](/projects/quickpay-cli/) than the test count or the amount of generated code does. The agents moved quickly. The useful product emerged when I used it, disagreed with it, and made the next constraint more precise.
+
+## The test that would not stop
+
+The retry loop was not an obscure race condition. I deliberately supplied a bad destination because that is a normal way to test a command-line tool. Misspell a path. Point at the wrong route. See whether the failure helps you recover.
+
+The original implementation treated every delivery failure as temporary. That is defensible if preserving FIFO order is the only goal. It is awful if the server has already told you that the request is not allowed.
+
+The fix separated failures that might improve with time from failures that need human action. Network errors, rate limits, selected timeout statuses, and server errors receive bounded retries. A permanent response such as 405 stops immediately. The command exits with an error and tells me how to replay the failed operation after fixing the endpoint.
+
+The code became better because I did something impolite to it.
+
+This is the part of agentic coding that gets flattened in success stories. A strong plan and a capable model can produce an impressive first pass. Neither can replace the person who notices that the technically consistent behavior is miserable to use.
+
+## The useful feature was not in the first plan
+
+Quickpay CLI began as a payment client. The first plan covered authentication, payment creation and inspection, payment links, capture, refund, cancellation, raw API access, JSON output, credentials, tests, CI, and PHAR packaging.
+
+It did not include the feature that now makes the project memorable.
+
+The original papercut came from local WordPress and WooCommerce development. Quickpay could not deliver callbacks to localhost. A tunnel could expose the site, but WordPress is sensitive to URLs, redirects, cookies, and HTTPS. I did not want to reshape a local site just to observe a payment event.
+
+The simpler idea was to ask Quickpay for the payment state and deliver a correctly signed callback-shaped request locally. That became `callbacks:replay` and `callbacks:watch`.
+
+Even then, the first watcher only followed one selected payment. The agent had produced a coherent implementation of the requirement it had been given. I rejected the requirement.
+
+If the watcher had to sit beside a shop while I tested its payment flow, it should discover new payment operations across the account. A payment ID could remain a filter, but not a prerequisite.
+
+That change did not come from a smarter implementation prompt. It came from using the proposed interface and asking whether it matched the actual job.
+
+## An example is not the whole problem
+
+At one point I said the repository felt disorganized. I mentioned that the tests did not mirror the production structure as one example.
+
+The first response focused on reorganizing the tests.
+
+It was a reasonable answer to the sentence and a bad answer to the concern. I had not asked for tidier test folders. I had asked whether the repository made sense as a whole.
+
+I corrected the scope forcefully. The next pass reviewed production code, configuration, packaging, CI, documentation, skills, and tests. It reorganized the application around capabilities such as commands, callbacks, console behavior, credentials, and the Quickpay boundary. General support code and hidden command traits disappeared. The tests then followed those boundaries.
+
+The lesson was not that agents need longer prompts. The lesson was that examples are dangerous when the listener treats them as the acceptance criteria.
+
+I have to notice when an answer is locally correct and globally wrong.
+
+## Taste still has to come from somewhere
+
+The README went through repeated rewrites.
+
+One version made callbacks the whole identity. Another explained the features but sounded promotional. Several sentences had the smooth, generic rhythm that signals generated copy before the reader can point to a single false claim.
+
+I kept removing things.
+
+Make callbacks prominent, but do not pretend the payment commands are secondary. Lead with what the user can accomplish. Keep JSON and non-interactive operation visible because agents and scripts need them. Remove claims that sound bigger than the tool. Remove em dashes. Remove phrases I would never say.
+
+None of those changes improved coverage or architecture. They changed whether I wanted my name on the project.
+
+Coding agents can imitate a tone, but they do not own the taste behind it. They cannot decide that a technically accurate sentence still feels dishonest, needy, or inflated unless I give them that standard and apply it consistently.
+
+## Test the thing people actually install
+
+The first release looked solid. The workflow built a PHAR, verified it, and attached it to GitHub. The checks were green.
+
+Then I followed the README and installed Quickpay CLI globally with Composer.
+
+Instead of the clean standalone tool I expected, Composer installed Laravel Zero and its dependency graph. The release process had tested the GitHub artifact. Packagist was distributing the contents of the tagged repository archive.
+
+Both statements were true: the PHAR was valid, and the package installation was wrong.
+
+The correction was architectural and procedural. The repository now tracks the versioned PHAR that Composer exposes as its binary. Laravel Zero remains a development dependency and is bundled inside that PHAR. A distribution-contract test checks the package shape, and the release instructions verify a clean consumer installation.
+
+This failure matters to me because I caused it by behaving like a user instead of a maintainer. I followed the documented command and looked at what arrived.
+
+A green workflow is evidence about the path it tested. It is not evidence about a different path that happens to end with the same release name.
+
+## What the agents did, and what I did
+
+It would be misleading to say I wrote Quickpay CLI by hand. It would be just as misleading to say an agent built it autonomously.
+
+I chose Laravel Zero and the Flare-inspired direction. I set the product scope, command signatures, safety boundaries, and output expectations. I decided that local callbacks mattered, that the watcher should work account-wide, that payment mutations should be conservative, and that the release process should stay simple.
+
+ChatGPT and Codex researched Quickpay, Laravel Zero, Symfony Console behavior, GitHub release verification, and Packagist distribution. They wrote implementation plans, production code, tests, and documentation. They ran static analysis, coverage, packaging checks, security reviews, architecture reviews, and clean-install simulations.
+
+Then I tried the result, challenged the recommendations, rejected weak copy, and decided what should be changed or left alone.
+
+That division is not a disclaimer. It is the working method.
+
+The agents gave me much faster implementation and review loops. My job moved toward product direction, acceptance criteria, adversarial testing, and taste. It did not disappear.
+
+## Disagreement is part of the engineering
+
+The most valuable prompts in this project were not the longest ones. They were corrections.
+
+Tests were only an example. Watch all payments. Do not oversell this. A 405 should not retry forever. Install the package exactly like a user. Keep the release process simple.
+
+Each correction reduced the distance between code that passed and a product I trusted.
+
+That is why I do not think of Quickpay CLI as a one-prompt project, even though agents wrote most of its code. The interesting work was iterative and sometimes argumentative. Plans made the agents fast. Real use made the plan incomplete. Judgment decided which failure deserved another pass.
+
+The finished tool can manage Quickpay payments and emulate signed payment callbacks on localhost without a tunnel. The fuller product and implementation story is in the [Quickpay CLI case study](/projects/quickpay-cli/), and the source is available in the [public repository](https://github.com/tehwave/quickpay-cli).
+
+What I am taking into the next project is simpler: do not measure the collaboration by how much code the agent produced. Measure it by how quickly the feedback loop turns a plausible first answer into something worth keeping.

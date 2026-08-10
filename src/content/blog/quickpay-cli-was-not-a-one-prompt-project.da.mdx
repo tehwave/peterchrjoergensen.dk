@@ -1,0 +1,121 @@
+---
+locale: da
+translationKey: quickpay-cli-was-not-a-one-prompt-project
+title: "Quickpay CLI blev ikke bygget med én prompt"
+description: "Kodeagenter implementerede Quickpay CLI hurtigt, men det nyttige produkt opstod gennem uenighed, manuel test, omskrivninger og ved at følge samme installationsvej som en rigtig bruger."
+pubDate: 2026-08-10
+author: "Peter Chr. Jørgensen"
+tags: ["ai", "coding-agents", "php", "open-source", "produktudvikling"]
+heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero.png
+heroImageAlt: "To terminalpaneler forbundet af lyserøde rettelser, som viser en HTTP 405-fejl og en ændret beslutning om retries"
+---
+
+Jeg pegede Quickpay CLI mod et callback-endpoint, som jeg vidste var forkert.
+
+Endpointet svarede med HTTP 405. Watcheren prøvede igen. Og igen. Og igen.
+
+Der var et argument bag adfærden. Rækkefølgen på callbacks er vigtig, så watcheren bør ikke springe en fejlet operation over og fortsætte med de næste. Uendelige forsøg bevarede den rækkefølge.
+
+De gav også en endeløs væg af terminaloutput for en fejl, som aldrig kunne blive løst ved at vente.
+
+Den lille test fortæller mere om, hvordan jeg byggede [Quickpay CLI](/projects/quickpay-cli/), end antallet af tests eller mængden af genereret kode gør. Agenterne arbejdede hurtigt. Det nyttige produkt opstod, når jeg brugte det, var uenig med det og gjorde det næste krav mere præcist.
+
+## Testen, der ikke ville stoppe
+
+Retry-loopet var ikke en obskur race condition. Jeg gav med vilje kommandoen en forkert destination, fordi det er en normal måde at teste et kommandolinjeværktøj på. Stav en path forkert. Peg på den forkerte route. Se, om fejlen hjælper dig videre.
+
+Den oprindelige implementering behandlede alle leveringsfejl som midlertidige. Det kan forsvares, hvis det eneste mål er at bevare FIFO-rækkefølgen. Det er elendigt, når serveren allerede har fortalt, at requestet ikke er tilladt.
+
+Løsningen skilte fejl, der kan blive bedre med tiden, fra fejl, der kræver en handling fra et menneske. Netværksfejl, rate limits, udvalgte timeout-statusser og serverfejl får et begrænset antal nye forsøg. Et permanent svar som 405 stopper med det samme. Kommandoen slutter med en fejlkode og fortæller, hvordan den fejlede operation kan afspilles igen, når endpointet er rettet.
+
+Koden blev bedre, fordi jeg opførte mig uhøfligt over for den.
+
+Det er den del af agentbaseret udvikling, der ofte bliver gjort flad i succeshistorierne. En stærk plan og en dygtig model kan producere en imponerende første version. Ingen af dem kan erstatte personen, der opdager, at den teknisk konsekvente adfærd er forfærdelig at bruge.
+
+## Den nyttige feature var ikke med i den første plan
+
+Quickpay CLI begyndte som en betalingsklient. Den første plan dækkede autentificering, oprettelse og visning af betalinger, betalingslinks, capture, refundering, annullering, raw API-adgang, JSON-output, credentials, tests, CI og PHAR-packaging.
+
+Den indeholdt ikke den feature, der nu gør projektet mindeværdigt.
+
+Det oprindelige irritationsmoment kom fra lokal WordPress- og WooCommerce-udvikling. Quickpay kunne ikke levere callbacks til localhost. En tunnel kunne gøre siden offentlig, men WordPress er følsom over for URL'er, redirects, cookies og HTTPS. Jeg ville ikke omforme en lokal side for at se en betalingshændelse.
+
+Den enklere idé var at spørge Quickpay efter betalingsstatus og levere et korrekt signeret, callback-lignende request lokalt. Det blev til `callbacks:replay` og `callbacks:watch`.
+
+Selv da fulgte den første watcher kun én valgt betaling. Agenten havde lavet en sammenhængende implementering af det krav, den havde fået. Jeg afviste kravet.
+
+Hvis watcheren skulle køre ved siden af en shop, mens jeg testede dens betalingsflow, skulle den opdage nye betalingsoperationer på hele kontoen. Et betalings-ID kunne stadig være et filter, men ikke en forudsætning.
+
+Den ændring kom ikke fra en smartere implementeringsprompt. Den kom af at bruge den foreslåede grænseflade og spørge, om den passede til det virkelige arbejde.
+
+## Et eksempel er ikke hele problemet
+
+På et tidspunkt sagde jeg, at repository'et føltes uorganiseret. Som ét eksempel nævnte jeg, at testene ikke afspejlede strukturen i produktionskoden.
+
+Det første svar fokuserede på at organisere testene.
+
+Det var et rimeligt svar på sætningen og et dårligt svar på bekymringen. Jeg havde ikke bedt om pænere testmapper. Jeg havde spurgt, om hele repository'et gav mening.
+
+Jeg rettede scope meget direkte. Næste gennemgang omfattede produktionskode, konfiguration, packaging, CI, dokumentation, skills og tests. Den organiserede applikationen omkring dens evner: kommandoer, callbacks, konsoladfærd, credentials og grænsen mod Quickpay. Generel supportkode og skjulte command traits forsvandt. Derefter fulgte testene de samme grænser.
+
+Læren var ikke, at agenter har brug for længere prompts. Læren var, at eksempler er farlige, når modtageren behandler dem som acceptkriterier.
+
+Jeg skal opdage, når et svar er rigtigt lokalt og forkert globalt.
+
+## Smag skal stadig komme et sted fra
+
+README'en blev skrevet om flere gange.
+
+Én version gjorde callbacks til hele identiteten. En anden forklarede funktionerne, men lød som salg. Flere sætninger havde den glatte, generelle rytme, der afslører genereret tekst, før læseren kan pege på én bestemt forkert påstand.
+
+Jeg blev ved med at fjerne ting.
+
+Gør callbacks synlige, men lad være med at lade som om betalingskommandoerne er sekundære. Begynd med det, brugeren kan gøre. Behold JSON og ikke-interaktiv brug, fordi agenter og scripts har brug for det. Fjern påstande, der lyder større end værktøjet. Fjern em dashes. Fjern formuleringer, jeg aldrig selv ville bruge.
+
+Ingen af de ændringer forbedrede coverage eller arkitektur. De ændrede, om jeg havde lyst til at sætte mit navn på projektet.
+
+Kodeagenter kan efterligne en tone, men de ejer ikke smagen bag den. De kan ikke beslutte, at en teknisk korrekt sætning stadig føles uærlig, trængende eller oppustet, medmindre jeg giver dem den standard og anvender den konsekvent.
+
+## Test det, folk faktisk installerer
+
+Den første release så solid ud. Workflowet byggede en PHAR, verificerede den og vedhæftede den til GitHub. Alle checks var grønne.
+
+Så fulgte jeg README'en og installerede Quickpay CLI globalt med Composer.
+
+I stedet for det rene, selvstændige værktøj, jeg forventede, installerede Composer Laravel Zero og dens dependency graph. Releaseprocessen havde testet GitHub-artefaktet. Packagist distribuerede indholdet af repository'et ved det taggede commit.
+
+Begge udsagn var sande: PHAR-filen var gyldig, og pakkeinstallationen var forkert.
+
+Rettelsen var både arkitektonisk og praktisk. Repository'et tracker nu den versionerede PHAR, som Composer eksponerer som binary. Laravel Zero er stadig en udviklingsafhængighed og er pakket inde i PHAR-filen. En distributionstest kontrollerer pakkens form, og releasevejledningen verificerer en ren installation som forbruger.
+
+Den fejl er vigtig for mig, fordi jeg fremkaldte den ved at opføre mig som bruger i stedet for maintainer. Jeg fulgte den dokumenterede kommando og så på, hvad der ankom.
+
+Et grønt workflow er bevis for den vej, det testede. Det er ikke bevis for en anden vej, bare fordi begge ender med samme releasenavn.
+
+## Det agenterne gjorde, og det jeg gjorde
+
+Det ville være misvisende at sige, at jeg skrev Quickpay CLI i hånden. Det ville være lige så misvisende at sige, at en agent byggede den selvstændigt.
+
+Jeg valgte Laravel Zero og retningen inspireret af Flare. Jeg satte produktets scope, kommandosignaturer, sikkerhedsgrænser og forventninger til output. Jeg besluttede, at lokale callbacks var vigtige, at watcheren skulle fungere på hele kontoen, at ændringer af betalinger skulle være konservative, og at releaseprocessen skulle forblive enkel.
+
+ChatGPT og Codex undersøgte Quickpay, Laravel Zero, Symfony Console-adfærd, verificering af GitHub-releases og Packagist-distribution. De skrev implementeringsplaner, produktionskode, tests og dokumentation. De kørte statisk analyse, coverage, packaging-checks, sikkerhedsreviews, arkitekturreviews og simulationer af rene installationer.
+
+Derefter prøvede jeg resultatet, udfordrede anbefalingerne, afviste svag tekst og besluttede, hvad der skulle ændres eller forblive urørt.
+
+Den fordeling er ikke en disclaimer. Det er arbejdsformen.
+
+Agenterne gav mig meget hurtigere loops for implementering og review. Mit arbejde flyttede sig mod produktretning, acceptkriterier, fjendtlig test og smag. Det forsvandt ikke.
+
+## Uenighed er en del af udviklingsarbejdet
+
+De mest værdifulde prompts i projektet var ikke de længste. De var rettelser.
+
+Tests var kun et eksempel. Hold øje med alle betalinger. Lad være med at oversælge det. En 405-fejl skal ikke prøves igen for evigt. Installér pakken præcis som en bruger. Hold releaseprocessen enkel.
+
+Hver rettelse forkortede afstanden mellem kode, der bestod sine tests, og et produkt, jeg havde tillid til.
+
+Derfor ser jeg ikke Quickpay CLI som et projekt bygget med én prompt, selv om agenter skrev det meste af koden. Det interessante arbejde var iterativt og nogle gange diskuterende. Planer gjorde agenterne hurtige. Virkelig brug gjorde planen ufuldstændig. Dømmekraft afgjorde, hvilken fejl der fortjente endnu en runde.
+
+Det færdige værktøj kan håndtere Quickpay-betalinger og emulere signerede betalingscallbacks på localhost uden en tunnel. Den fulde produkt- og implementeringshistorie findes i [casen om Quickpay CLI](/projects/quickpay-cli/), og kildekoden ligger i det [offentlige repository](https://github.com/tehwave/quickpay-cli).
+
+Det, jeg tager med til det næste projekt, er enklere: Mål ikke samarbejdet på, hvor meget kode agenten producerede. Mål det på, hvor hurtigt feedback-loopet gør et plausibelt første svar til noget, der er værd at beholde.
