@@ -12,6 +12,8 @@ heroImageAlt: "Terminal, hvor Quickpay CLI holder øje med betalingsændringer o
 ogDescription: "Det tekniske design af Quickpay CLI, fra API-grænse og betalingskommandoer til polling på kontoniveau og levering af signerede callbacks."
 ---
 
+import RelatedPost from "../../components/RelatedPost.astro";
+
 Quickpay CLI er en selvstændig PHP 8.4-klient til Quickpay API v10. Jeg byggede den til betalingsarbejde i terminalen og til scripts, der skal kunne parse JSON-outputtet. Den kan også levere signerede betalingscallbacks til en lokal applikation.
 
 Callback-funktionen begyndte med et problem, jeg mødte under lokale tests af WordPress- og WooCommerce-integrationer. Quickpay kan ikke nå `localhost`. En tunnel gør ruten tilgængelig, men den kan samtidig påvirke hostnavn, HTTPS-opsætning og de URL'er, WordPress gemmer i databasen. Quickpay har allerede betalingens tilstand, så jeg byggede CLI'en til at hente den og genskabe requestet lokalt.
@@ -97,4 +99,10 @@ Callback-tests bruger kontrollerede HTTP-responses. De verificerer de bytes og h
 
 Watcheren er et værktøj til lokal udvikling. Den kører i forgrunden, gemmer sin cursor i hukommelsen og ignorerer operationer, der findes, når den bliver klar. En genstart opretter et nyt observationsvindue. Den holder kun øje med betalingsoperationer. Subscription-callbacks ligger uden for dens scope.
 
-Den kortere artikel [Quickpay CLI til lokale betalingscallbacks](/blog/quickpay-cli-payment-callbacks-localhost/) introducerer anvendelsen. [Quickpay CLI-repository'et](https://github.com/tehwave/quickpay-cli) indeholder kommandoreference, kildekode og den nuværende release.
+<RelatedPost
+  href="/blog/quickpay-cli-payment-callbacks-localhost/"
+  lead="Problemet med localhost:"
+  prefix="Læs"
+  linkText="Quickpay CLI sender betalingscallbacks til localhost"
+  suffix="for at se, hvordan signerede callbacks når en lokal WordPress- eller WooCommerce-route uden en tunnel."
+/>
