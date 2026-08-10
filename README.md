@@ -51,24 +51,6 @@ npm run dev
 
 `npm run dev` builds the static assets and starts the complete Worker locally. Use `npm test`, `npm run check`, and `npm run build` for validation.
 
-## Preview and Production Rollout
-
-Do not move the production custom domain before validating a Worker preview deployment.
-
-1. Run `npm test`, `npm run check`, `npm run build`, and `npx wrangler deploy --dry-run`.
-2. Upload a preview/version using the Cloudflare account intended to own the Worker, without attaching the production custom domain.
-3. Compare `/`, `/blog/`, representative articles, both case studies, localized 404s, `/tracker/`, and every `/experiments/` route in EN and DA.
-4. Verify Workers observability reports less than 10 ms CPU for representative HTML routing requests. Local wall-clock timings are useful but do not replace preview CPU measurements.
-5. Review the checked-in Danish translations before approving the domain cutover.
-6. Before moving either production hostname, create a Cloudflare zone redirect rule matching `http.host eq "www.peterchrjoergensen.dk"` and redirect to the HTTPS apex hostname while preserving path and query. This must cover asset-first paths such as `/tracker/`, favicons, and sitemaps as well as localized HTML.
-7. Move the custom domain from the existing Pages project only after explicit approval.
-
-The isolated preview deployed on 2026-07-11 is `peterchrjoergensen-preview.peterchrjoergensen.workers.dev` (version `84c5ca27-9639-4174-8c94-8148021608fb`). Live EN/DA, cookie override, trailing-slash, internal-path, localized 404, and tracker pass-through checks succeeded. Representative localized HTML invocations reported 0–1 ms CPU in Workers Tail.
-
-Keep the existing Pages project intact during validation. Rollback is to remove the Worker custom-domain route and restore the Pages custom-domain/DNS assignment. The public URLs, comments mapping, canonical links, images, and inbound links do not change during either cutover or rollback.
-
-Because both languages intentionally share canonical URLs, the site does not emit `hreflang`; search engines and social crawlers receive whichever language their request headers select.
-
 ## License
 
 Code's open source. Use it to learn, reference it for your own projects. That's what it's here for. Content's mine though.
