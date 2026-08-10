@@ -4,7 +4,7 @@ export const BLOG_TRANSLATION_KEYS = [
   "godot-cli-on-macos-zsh",
   "localizing-this-website-without-changing-its-urls",
   "quick-dirty-webrtc-manual-signaling",
-  "quickpay-cli-was-not-a-one-prompt-project",
+  "quickpay-cli-payment-callbacks-localhost",
   "rebuilt-my-site-with-astro",
   "welcome",
 ] as const;

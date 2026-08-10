@@ -48,6 +48,15 @@ describe("contentLanguageForPath", () => {
 });
 
 describe("worker", () => {
+  it.each(["/blog/quickpay-cli-was-not-a-one-prompt-project", "/blog/quickpay-cli-was-not-a-one-prompt-project/"])("redirects the former Quickpay article URL %s to its new slug", async (pathname) => {
+    const { env, recorded } = assetEnvironment();
+    const response = await fetchWorker(new Request(`https://example.com${pathname}?ref=test`), env);
+
+    expect(response.status).toBe(301);
+    expect(response.headers.get("Location")).toBe("https://example.com/blog/quickpay-cli-payment-callbacks-localhost/?ref=test");
+    expect(recorded).toHaveLength(0);
+  });
+
   it.each(["/blog", "/blog/welcome", "/projects/browser-multiplayer"])("redirects %s to its canonical trailing-slash URL", async (pathname) => {
     const { env, recorded } = assetEnvironment();
     const response = await fetchWorker(new Request(`https://example.com${pathname}?ref=test`), env);
