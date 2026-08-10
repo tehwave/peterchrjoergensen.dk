@@ -75,7 +75,7 @@ Under et arkitekturreview nævnte jeg testmapperne, mens jeg forklarede, at repo
 
 Jeg skrev også README'en om flere gange. Nogle versioner fik callbacks til at lyde som hele produktet. Andre lød som salgstekst. Jeg blev ved med at skære, indtil teksten lignede det værktøj, jeg brugte.
 
-Den tilhørende artikel, [Quickpay CLI krævede mere end én prompt](/blog/quickpay-cli-was-not-a-one-prompt-project/), handler om de rettelser.
+Læs [Quickpay CLI sender betalingscallbacks til localhost](/blog/quickpay-cli-was-not-a-one-prompt-project/) for en kortere introduktion til værktøjet.
 
 `callbacks:watch` er fortsat et værktøj til lokal udvikling. Den holder øje med betalingsoperationer, mens subscription-callbacks ligger uden for dens scope. Processen kører i forgrunden og gemmer sin cursor i hukommelsen. Operationer, der findes, når watcheren bliver klar, bliver ignoreret. Rækkefølgen bevares for hver betaling, mens operationer fra forskellige betalinger ikke har en global orden.
 

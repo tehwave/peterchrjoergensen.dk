@@ -75,7 +75,7 @@ During an architecture review, I mentioned the test folders while explaining tha
 
 The README took several passes too. Some versions made callbacks sound like the entire product. Others read like sales copy. I kept cutting until the text matched the tool I was using.
 
-The companion article, [Quickpay CLI took more than one prompt](/blog/quickpay-cli-was-not-a-one-prompt-project/), covers those corrections in more detail.
+For a shorter introduction to the tool, read [Quickpay CLI brings payment callbacks to localhost](/blog/quickpay-cli-was-not-a-one-prompt-project/).
 
 `callbacks:watch` remains a local development tool. It watches payment operations, while subscription callbacks are outside its scope. The process runs in the foreground and keeps its cursor in memory. Operations that already exist when the watcher becomes ready are ignored. Ordering is preserved for each payment, while operations from different payments have no global order.
 

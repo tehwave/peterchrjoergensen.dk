@@ -1,65 +1,45 @@
 ---
 locale: da
 translationKey: quickpay-cli-was-not-a-one-prompt-project
-title: "Quickpay CLI krævede mere end én prompt"
-description: "Kodeagenter implementerede Quickpay CLI hurtigt. Det nyttige produkt tog form gennem manuelle tests og gentagne rettelser."
+title: "Quickpay CLI sender betalingscallbacks til localhost"
+description: "Quickpay CLI holder øje med ændringer i betalinger og leverer signerede callback-requests til din lokale applikation, uden at hele projektet skal ligge bag en tunnel."
 pubDate: 2026-08-10
 author: "Peter Chr. Jørgensen"
-tags: ["ai", "coding-agents", "php", "open-source", "produktudvikling"]
+tags: ["quickpay", "cli", "php", "open-source", "lokal-udvikling"]
 heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero.png
 heroImageAlt: "To terminalpaneler forbundet af lyserøde rettelser, som viser en HTTP 405-fejl og en ændret beslutning om retries"
 ---
 
-Jeg pegede Quickpay CLI mod en callback-route, som jeg vidste var forkert. Routen svarede med HTTP 405, og watcheren blev ved med at prøve.
+En betaling kan gå igennem hos Quickpay og stadig efterlade din lokale shop i den forkerte tilstand. Quickpay sender et callback med betalingens nye status, men `localhost` stopper ved din bærbare. Intet uden for maskinen kan nå det.
 
-Loopet beskyttede rækkefølgen på callbacks. Hvis en fejlet operation bliver sprunget over, kan et senere callback komme først, så koden ventede på en vellykket levering.
+Jeg stødte på problemet igen og igen i lokale WordPress- og WooCommerce-projekter. En tunnel kan gøre callback-routen offentlig, men dens midlertidige hostnavn bliver blandet ind i et system, der går meget op i sin egen URL. Redirects og HTTPS-adfærd begynder at stå i vejen for det betalingsflow, jeg prøver at teste.
 
-Min terminal blev fyldt med requests, der aldrig ville virke.
+Betalingsdataene findes allerede i Quickpays API. Jeg byggede [Quickpay CLI](https://github.com/tehwave/quickpay-cli) til at hente dem og levere et signeret callback-request direkte til den lokale applikation.
 
-ChatGPT og Codex gik hurtigt fra planer til fungerende kommandoer. Jeg fandt den nyttige version af [Quickpay CLI](/projects/quickpay-cli/) ved at køre kommandoerne og sende svage beslutninger tilbage til endnu en omgang.
+Quickpay CLI er en open source-klient til Quickpay API v10. Den kan oprette betalingslinks og håndtere betalinger fra terminalen. JSON-output giver scripts og kodeagenter en stabil grænseflade, uden at projektet under test skal integrere et PHP SDK.
 
-HTTP 405-svaret førte til en mindre retry-politik. Netværksfejl kan forsvinde, og servere kommer sig nogle gange. De fejl får et begrænset antal forsøg. Et svar som 405 kræver, at et menneske retter routen, så kommandoen stopper og henviser til `callbacks:replay`.
+Callback-watcheren fjerner problemet fra den lokale udvikling. Installér CLI'en globalt med Composer, og log ind med en Quickpay merchant API key:
 
-Den første plan manglede lokal levering af callbacks. Quickpay CLI begyndte som en betalingsklient med autentificering, betalingslinks, JSON-output, kommandoer til ændringer, opbevaring af credentials, tests, CI og PHAR-packaging.
+```bash
+composer global require tehwave/quickpay-cli
+quickpay login
+```
 
-Callbacks havde skabt det oprindelige problem. Jeg arbejdede på en lokal WordPress- og WooCommerce-side. Quickpay kunne gennemføre betalingen, mens callback-routen på min bærbare var utilgængelig. Tunneller medførte URL-ændringer, som WordPress gjorde svære at ignorere.
+Start derefter watcheren, før du gennemfører betalingen i shoppen:
 
-Quickpays API havde allerede det, jeg skulle bruge. CLI'en kunne hente betalingen, bygge JSON-bodyen, signere dens bytes og sende requestet til localhost. Det blev til `callbacks:replay` og `callbacks:watch`.
+```bash
+quickpay callbacks:watch \
+  --to=http://127.0.0.1:8000/quickpay/callback
+```
 
-Den første watcher fulgte én valgt betaling. Den var nem at implementere og irriterende at bruge. Jeg ville have kommandoen kørende, før jeg gennemførte en betaling i shoppen. På det tidspunkt fandtes der intet betalings-ID.
+Kommandoen holder øje med betalingsoperationer, der dukker op på kontoen efter start. Når Quickpay melder om en ændring, henter CLI'en den aktuelle betaling som JSON og signerer de præcise bytes med HMAC-SHA256. Requestet bliver sendt til den lokale route med headeren `Quickpay-Checksum-Sha256`, så applikationen kan bruge sin normale callback-handler og kontrollere signaturen.
 
-Jeg ændrede kravet. Watcheren finder nu nye betalingsoperationer på hele kontoen, mens betalings-ID og ordre-ID stadig kan bruges som filtre.
+API-nøglen bliver hos de requests, der går til Quickpay. Den bliver aldrig sendt videre til callback-destinationen.
 
-Jeg sagde, at repository'et virkede uorganiseret, og nævnte testmapperne. Den første gennemgang tog eksemplet bogstaveligt og organiserede testene.
+Watcheren dækker som udgangspunkt hele kontoen. Du kan afgrænse den til en betaling eller ordre, når det er nyttigt. Eksisterende operationer bliver ignoreret ved start, og `callbacks:replay` kan gensende en betaling, efter du har rettet en lokal route.
 
-Svaret rettede eksemplet. Repository'et havde stadig samme problem.
+Processen kører i forgrunden ved siden af applikationen. WordPress beholder sin normale lokale URL, og callback-routen forbliver privat på din maskine.
 
-Jeg bad om en gennemgang af hele projektet. Næste gennemgang så på produktionskode og tests samlet sammen med packaging og dokumentation. Kommandoer, callbacks, credentials og konsoladfærd blev tydelige grænser i både kode og tests. Generelle supportklasser og skjulte command traits forsvandt.
+Quickpay CLI ligger i det [offentlige repository](https://github.com/tehwave/quickpay-cli). Den kræver PHP 8.4 eller nyere og er udgivet under MIT-licensen.
 
-Jeg skulle selv opdage, at svaret var for smalt. Ekstra længde i prompten ville ikke have ændret noget.
-
-Jeg skrev README'en om flere gange. En version fik callback-levering til at lyde som hele produktet. En anden lød som almindelig lanceringstekst. Påstandene var teknisk forsvarlige, men siden lød som om, ingen havde brugt værktøjet.
-
-Jeg fjernede de store beskrivelser og begyndte med det, kommandoerne gør. Betalingshåndtering blev stående ved siden af callback-levering. JSON-output var stadig nemt at finde, fordi scripts og kodeagenter bruger det.
-
-Releaseworkflowet verificerede det forkerte artefakt. Det producerede en kontrolleret PHAR og lagde filen på GitHub. Alle checks bestod.
-
-Så installerede jeg Quickpay CLI med Composer-kommandoen fra README'en. Composer hentede Laravel Zero og dens dependency graph. Den selvstændige executable, jeg forventede, lå på GitHub-releasen, mens Packagist installerede repository'et ved det taggede commit.
-
-Verifikationen havde bevist, at det ene artefakt virkede. Brugerne modtog et andet.
-
-Repository'et tracker nu den versionerede PHAR, som Composer eksponerer som binary. Laravel Zero bliver i `require-dev` og er pakket inde i den executable fil. En distributionstest kontrollerer pakkens struktur. Releasevejledningen kører også en ren Composer-installation.
-
-Jeg fandt fejlen ved at følge dokumentationen som bruger. Det grønne workflow kunne ikke dække en vej, det aldrig kørte.
-
-ChatGPT og Codex skrev det meste af koden. De undersøgte bibliotekerne og skrev testene. De kørte også gentagne reviews. Jeg valgte Laravel Zero og kommandogrænsefladen. Jeg fastlagde sikkerhedsreglerne og besluttede, at watcheren skulle dække hele kontoen. Jeg vurderede også, hvornår en anbefaling var teknisk acceptabel og stadig forkert for produktet.
-
-Agenterne kunne levere en ny version på få minutter. Produktansvaret blev hos mig, også når jeg bad om den næste version.
-
-De prompts, der ændrede projektet, var ofte korte. Hold øje med hele kontoen. En 405-fejl skal stoppe. Gennemgå repository'et i stedet for eksemplet. Installér pakken gennem Composer.
-
-De kom alle fra at prøve den aktuelle version.
-
-Quickpay CLI kan nu håndtere betalinger og levere signerede, callback-lignende requests til localhost. [Casen](/projects/quickpay-cli/) beskriver kommandodesignet og dets begrænsninger. Koden ligger i det [offentlige repository](https://github.com/tehwave/quickpay-cli).
-
-Jeg vurderer den slags samarbejde på, hvor kort tid der går fra en dårlig beslutning bliver opdaget, til dens afløser er testet. Mængden af kode fortæller mig meget lidt.
+Hvis du vil læse historien om arbejdet med watcheren, signering af callbacks, retry-regler og Composer-pakken, har jeg skrevet en separat [case](/projects/quickpay-cli/).
