@@ -133,30 +133,8 @@ const structuredData = {
 };
 ---
 
-<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={socialDescription}>
+<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={socialDescription} image={heroImage?.src}>
   <Fragment slot="head">
-    <!-- 
-			Social Media Meta Tags
-			These control how the project appears when shared on social platforms
-		-->
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={socialDescription} />
-    {heroImage && <meta property="og:image" content={new URL(heroImage.src, Astro.site)} />}
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content={heroImage ? "summary_large_image" : "summary"} />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={socialDescription} />
-    {heroImage && <meta property="twitter:image" content={new URL(heroImage.src, Astro.site)} />}
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href={canonicalURL} />
-
     <!-- Structured data -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </Fragment>

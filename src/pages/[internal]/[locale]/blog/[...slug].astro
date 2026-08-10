@@ -151,35 +151,13 @@ const structuredData = {
 };
 ---
 
-<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={description}>
+<Layout locale={locale} contentLocale={contentLocale} localized type="article" title={`${title} | Peter Chr. Jørgensen`} description={description} image={heroImage?.src}>
   <Fragment slot="head">
-    <!-- 
-			Social Media Meta Tags
-			These control how the post appears when shared on social platforms
-		-->
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    {heroImage && <meta property="og:image" content={new URL(heroImage.src, Astro.site)} />}
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content={heroImage ? "summary_large_image" : "summary"} />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    {heroImage && <meta property="twitter:image" content={new URL(heroImage.src, Astro.site)} />}
-
     <!-- Article metadata -->
     <meta property="article:published_time" content={pubDate.toISOString()} />
     {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
     <meta property="article:author" content={author} />
     {tags?.map((tag) => <meta property="article:tag" content={tag} />)}
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href={canonicalURL} />
 
     <!-- Structured data -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />

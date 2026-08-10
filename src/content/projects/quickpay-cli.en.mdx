@@ -9,12 +9,12 @@ externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal showing Quickpay CLI watching payment changes and delivering a callback to localhost"
-ogDescription: "The technical design of Quickpay CLI, from its API boundary and payment commands to account-wide polling and signed callback delivery."
+ogDescription: "How Quickpay CLI handles API access, payment commands, account-wide polling, and signed callbacks for local WordPress and WooCommerce development."
 ---
 
 import RelatedPost from "../../components/RelatedPost.astro";
 
-Quickpay CLI is a standalone PHP 8.4 client for Quickpay API v10. I built it to handle payment work from the terminal and to give scripts JSON output they can parse. It can also deliver signed payment callbacks to a local application.
+Quickpay CLI is a standalone PHP 8.4 client for [Quickpay API v10](https://learn.quickpay.net/tech-talk/api/). I built it to handle payment work from the terminal and to give scripts JSON output they can parse. It can also deliver signed payment callbacks to a local application.
 
 The callback feature started with a problem I hit while testing WordPress and WooCommerce integrations locally. Quickpay cannot reach `localhost`. A tunnel exposes the route, but it can also interfere with the hostname, HTTPS settings and URLs WordPress stores in its database. Quickpay already has the payment state, so I built the CLI to retrieve it and reconstruct the request locally.
 

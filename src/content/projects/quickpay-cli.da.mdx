@@ -9,12 +9,12 @@ externalUrl: "https://github.com/tehwave/quickpay-cli"
 publishedDate: 2026-08-10
 heroImage: ../../assets/projects/quickpay-cli.png
 heroImageAlt: "Terminal, hvor Quickpay CLI holder øje med betalingsændringer og leverer et callback til localhost"
-ogDescription: "Det tekniske design af Quickpay CLI, fra API-grænse og betalingskommandoer til polling på kontoniveau og levering af signerede callbacks."
+ogDescription: "Sådan håndterer Quickpay CLI API-adgang, betalingskommandoer, polling på kontoniveau og signerede callbacks til lokal udvikling med WordPress og WooCommerce."
 ---
 
 import RelatedPost from "../../components/RelatedPost.astro";
 
-Quickpay CLI er en selvstændig PHP 8.4-klient til Quickpay API v10. Jeg byggede den til betalingsarbejde i terminalen og til scripts, der skal kunne parse JSON-outputtet. Den kan også levere signerede betalingscallbacks til en lokal applikation.
+Quickpay CLI er en selvstændig PHP 8.4-klient til [Quickpay API v10](https://learn.quickpay.net/tech-talk/api/). Jeg byggede den til betalingsarbejde i terminalen og til scripts, der skal kunne parse JSON-outputtet. Den kan også levere signerede betalingscallbacks til en lokal applikation.
 
 Callback-funktionen begyndte med et problem, jeg mødte under lokale tests af WordPress- og WooCommerce-integrationer. Quickpay kan ikke nå `localhost`. En tunnel gør ruten tilgængelig, men den kan samtidig påvirke hostnavn, HTTPS-opsætning og de URL'er, WordPress gemmer i databasen. Quickpay har allerede betalingens tilstand, så jeg byggede CLI'en til at hente den og genskabe requestet lokalt.
 
