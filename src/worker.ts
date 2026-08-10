@@ -58,14 +58,6 @@ function canonicalPathRedirect(request: Request): Response | null {
   return Response.redirect(url, 308);
 }
 
-function legacyContentRedirect(request: Request): Response | null {
-  const url = new URL(request.url);
-  if (canonicalContentPath(url.pathname) !== "/blog/quickpay-cli-was-not-a-one-prompt-project/") return null;
-
-  url.pathname = "/blog/quickpay-cli-payment-callbacks-localhost/";
-  return Response.redirect(url, 301);
-}
-
 function apexRedirect(request: Request): Response | null {
   const url = new URL(request.url);
   if (url.hostname !== "www.peterchrjoergensen.dk") return null;
@@ -100,9 +92,6 @@ export default {
 
     const hostRedirect = apexRedirect(request);
     if (hostRedirect) return hostRedirect;
-
-    const legacyRedirect = legacyContentRedirect(request);
-    if (legacyRedirect) return legacyRedirect;
 
     const pathRedirect = canonicalPathRedirect(request);
     if (pathRedirect) return pathRedirect;
