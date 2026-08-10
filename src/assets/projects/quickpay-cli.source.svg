@@ -40,13 +40,6 @@
   <circle cx="1424" cy="120" r="236" fill="url(#pinkGlow)" opacity="0.96" />
   <path d="M1260-10c139 82 225 173 280 300" fill="none" stroke="#fbfbfb" stroke-width="8" stroke-linecap="round" opacity="0.72" />
   <rect x="42" y="50" width="360" height="210" fill="url(#dots)" transform="rotate(-7 42 50)" />
-  <path d="M77 224c125-38 240-34 351 12" fill="none" stroke="#ec8305" stroke-width="18" stroke-linecap="round" />
-
-  <g transform="translate(96 92)">
-    <text x="0" y="0" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800" letter-spacing="7" fill="#091057">QUICKPAY CLI</text>
-    <text x="0" y="66" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-2" fill="#1a1a1a">Local callbacks,</text>
-    <text x="0" y="124" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-2" fill="#1a1a1a">without a tunnel.</text>
-  </g>
 
   <g filter="url(#shadow)">
     <rect x="192" y="300" width="1216" height="470" rx="30" fill="url(#terminal)" stroke="#596276" stroke-width="2" />
