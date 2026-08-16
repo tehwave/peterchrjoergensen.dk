@@ -15,9 +15,13 @@ WebRTC can feel like a locked room full of acronyms.
 
 That does not mean the basic idea is complicated. Strip away the ceremony, and WebRTC is surprisingly approachable: **two browsers exchange connection details, then talk directly.**
 
-That exchange is called signaling. WebRTC does not care how you do it. You can use WebSockets, Firebase, HTTP polling, QR codes, NFC, carrier pigeon, or one of the dumbest useful methods available: copy and paste.
+## Does WebRTC need a signaling server?
 
-That is what I used in my browser multiplayer experiment. One player creates an invite code. The other player pastes it, generates a reply code, and sends that back. Once both browsers have the information they need, the WebRTC data channel opens and the game starts.
+WebRTC requires a signaling exchange before two peers can connect, but it does not require a particular signaling server or transport. The peers only need a way to exchange offers, answers, and ICE candidates.
+
+This article uses manual copy and paste. One player creates an invite code. The other player pastes it, generates a reply code, and sends that back. Production services usually automate the same exchange through a signaling server using WebSockets, HTTP, or another transport.
+
+Once both browsers have the information they need, the WebRTC data channel opens and the game starts.
 
 No lobby server. No account system. No database.
 
@@ -112,10 +116,6 @@ Or, if you are building something that updates often, send binary frames instead
 Signaling is the introduction ceremony.
 
 One browser creates an offer. The other browser reads it and creates an answer. The first browser reads the answer. During that process, both browsers learn enough about each other to try connecting.
-
-WebRTC does **not** provide signaling for you. That is a feature, not a bug. The browser handles the peer connection, but you choose how the peers exchange the setup messages.
-
-Most apps use a signaling server because it gives a normal user experience. My experiment did not. I wanted to prove the zero-server version, so I turned the offer and answer into pasteable codes.
 
 ## A manual handshake flow
 
