@@ -15,9 +15,13 @@ WebRTC kan føles som et aflåst rum fyldt med forkortelser.
 
 Det betyder ikke, at grundidéen er kompliceret. Fjerner man ceremonien, er WebRTC overraskende tilgængeligt: **To browsere udveksler forbindelsesoplysninger og taler derefter direkte sammen.**
 
-Udvekslingen kaldes signalering. WebRTC er ligeglad med, hvordan du gør det. Du kan bruge WebSockets, Firebase, HTTP-polling, QR-koder, NFC, brevduer eller en af de mest primitive, men stadig nyttige metoder: kopiér og indsæt.
+## Har WebRTC brug for en signaleringsserver?
 
-Det brugte jeg i mit multiplayer-eksperiment i browseren. Den ene spiller opretter en invitationskode. Den anden indsætter den, genererer en svarkode og sender den tilbage. Når begge browsere har de nødvendige oplysninger, bliver WebRTC-datakanalen åbnet, og spillet kan begynde.
+WebRTC kræver en signaleringsudveksling, før to peers kan forbinde, men ikke en bestemt signaleringsserver eller transport. De skal blot kunne udveksle tilbud, svar og ICE-kandidater.
+
+I denne artikel sker det manuelt ved at kopiere og indsætte. Den ene spiller opretter en invitationskode. Den anden indsætter den, genererer en svarkode og sender den tilbage. Produktionstjenester automatiserer normalt den samme udveksling gennem en signaleringsserver med WebSockets, HTTP eller en anden transport.
+
+Når begge browsere har de nødvendige oplysninger, bliver WebRTC-datakanalen åbnet, og spillet kan begynde.
 
 Ingen lobbyserver. Intet kontosystem. Ingen database.
 
@@ -112,10 +116,6 @@ Eller send binære frames i stedet for JSON på den varme sti, hvis du bygger no
 Signalering er introduktionsceremonien.
 
 Den ene browser opretter et tilbud. Den anden browser læser det og opretter et svar. Den første browser læser svaret. Undervejs lærer begge browsere nok om hinanden til at forsøge en forbindelse.
-
-WebRTC leverer **ikke** signalering for dig. Det er en egenskab, ikke en fejl. Browseren håndterer peer-forbindelsen, men du vælger, hvordan de to peers udveksler opsætningsbeskederne.
-
-De fleste applikationer bruger en signaleringsserver, fordi det giver en normal brugeroplevelse. Det gjorde mit eksperiment ikke. Jeg ville bevise versionen uden server, så jeg gjorde tilbud og svar til koder, man kan indsætte.
 
 ## Et manuelt håndtryk
 
