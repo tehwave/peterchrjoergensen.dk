@@ -42,6 +42,8 @@ const { src, alt, caption } = Astro.props;
   @use "../styles/mixins" as *;
 
   .figure {
+    margin-inline: $space-xl + $space-sm;
+
     :global(img) {
       margin-bottom: 0 !important;
     }
