@@ -37,28 +37,6 @@ Language selection follows this order:
 
 The cookie lasts one year. HTML responses are private/no-cache and vary on the cookie and language header, while `_astro`, images, experiments, tracker, sitemap files, and other static assets stay on Cloudflare's asset-first path. Direct `__i18n` requests return a localized 404.
 
-## Related content in articles and cases
-
-Both components are inserted manually in the EN and DA MDX files. Choose useful destinations and descriptive link text in each language. Use public URLs with trailing slashes.
-
-Use [RelatedPost](src/components/RelatedPost.astro) within the text:
-
-```mdx
-import RelatedPost from "../../components/RelatedPost.astro";
-
-<RelatedPost href="/projects/quickpay-cli/" prefix="Read" linkText="how I built Quickpay CLI" suffix="for the architecture and delivery rules." />
-```
-
-Use [RelatedContent](src/components/RelatedContent.astro) at the end of the MDX file:
-
-```mdx
-import RelatedContent from "../../components/RelatedContent.astro";
-
-<RelatedContent heading="Read next" links={[{ href: "/projects/quickpay-cli/", title: "How I built Quickpay CLI" }]} />
-```
-
-Use `heading="Læs videre"` and Danish link titles in Danish files. Pick one to three relevant links, including cases or posts where useful. Omit the component when there is no useful next step. An empty `links` array also renders nothing. Existing inline links may appear again in the final list. When adding content, also consider a link to it from an existing article. There is no automatic matching or central relationship registry.
-
 ## Installation
 
 If you want to poke around:
