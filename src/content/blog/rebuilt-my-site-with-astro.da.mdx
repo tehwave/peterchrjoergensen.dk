@@ -12,6 +12,8 @@ heroImageCaption: "Foto af [Tomáš Stanislavský
 ](https://unsplash.com/@tomstanislavsky) på [Unsplash](https://unsplash.com/photos/a-photo-of-mars-on-a-space-gray-macbook-pro-screen-Fzffxyt4ACM)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
 import RelatedPost from "../../components/RelatedPost.astro";
@@ -123,3 +125,12 @@ Glem ikke den almindelige HTML. Du behøver ikke alt det smarte. Det meste af de
 Det rigtige værktøj til den rigtige opgave. Astro er det rigtige værktøj til porteføljesider. Det holder sig i baggrunden og lader dig bygge det, der betyder noget.
 
 Tak til Astros bidragydere og skabere for at bygge noget så godt.
+
+<RelatedContent
+  heading="Læs videre"
+  links={[
+    { href: "/blog/building-performance-first-websites/", title: "Byg ydeevnen ind fra starten" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "Sådan gav jeg hjemmesiden to sprog uden at ændre URL'erne" },
+    { href: "/blog/adding-comments-with-giscus/", title: "Kommentarer med giscus" },
+  ]}
+/>

@@ -11,6 +11,8 @@ heroImageAlt: "Skærmbillede af GitHub Brick Breaker med mursten formet som bidr
 ogDescription: "Jeg gjorde mine daglige GitHub-bidrag til et spilbart brick breaker-spil med bevægelsesspor og partikeleffekter. Bygget på én aften med AI."
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Ultrawide from "../../components/Ultrawide.astro";
 import Figure from "../../components/Figure.astro";
@@ -324,3 +326,5 @@ Prøv at rydde alle dine mursten uden at miste tre liv.
 <Ultrawide>
   <BrickBreaker heading="" subtitle="" locale="da" />
 </Ultrawide>
+
+<RelatedContent heading="Læs videre" links={[{ href: "/projects/browser-multiplayer/", title: "Jeg byggede et multiplayer-spil i browseren uden en server" }]} />

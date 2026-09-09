@@ -10,6 +10,8 @@ heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero-laun
 heroImageAlt: "Terminal diagram showing a signed Quickpay payment callback delivered to localhost with HTTP 204"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 A payment can succeed in Quickpay and still leave your `localhost` webshop waiting. Quickpay sends a [payment callback](https://learn.quickpay.net/tech-talk/api/callback/) with the new state, but `localhost` ends at your laptop. Nothing outside your machine can reach it.
 
 I kept running into this while working on local WordPress and WooCommerce projects. A tunnel can expose the callback route, but its temporary hostname gets mixed into a system that cares about its own URL. Redirects and HTTPS behaviour start getting in the way of the payment flow I am trying to test.
@@ -52,3 +54,5 @@ The process runs in the foreground beside the application. WordPress keeps its n
 Quickpay CLI is available in the [public repository](https://github.com/tehwave/quickpay-cli). It requires PHP 8.4 or newer and is released under the MIT licence.
 
 The [case study on how I built Quickpay CLI with Laravel Zero](/projects/quickpay-cli/) explains the API boundary, polling model, callback signing, and delivery rules in detail.
+
+<RelatedContent heading="Read next" links={[{ href: "/projects/quickpay-cli/", title: "How I built Quickpay CLI" }]} />

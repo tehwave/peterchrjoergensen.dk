@@ -12,6 +12,8 @@ heroImageCaption: "Photo by [Tomáš Stanislavský
 ](https://unsplash.com/@tomstanislavsky) on [Unsplash](https://unsplash.com/photos/a-photo-of-mars-on-a-space-gray-macbook-pro-screen-Fzffxyt4ACM)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
 import RelatedPost from "../../components/RelatedPost.astro";
@@ -123,3 +125,12 @@ Don't forget to ship basic HTML. You don't need any of the fancy stuff. Most of 
 Right tool for the right job. Astro is the right tool for portfolio sites. It gets out of your way and lets you build what matters.
 
 Thanks to the Astro contributors and makers for building something this good.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/building-performance-first-websites/", title: "Building Performance Into the Foundation" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "How I Localized This Website Without Changing Existing URLs" },
+    { href: "/blog/adding-comments-with-giscus/", title: "Adding Comments with giscus" },
+  ]}
+/>
