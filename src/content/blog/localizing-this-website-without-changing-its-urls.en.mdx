@@ -11,6 +11,8 @@ heroImageAlt: "A single building facade divided down the middle, orange with a w
 heroImageCaption: "Photo by [Martin LONGIN](https://unsplash.com/@maralalon) on [Unsplash](https://unsplash.com/photos/a-green-and-orange-building-with-a-window-j-DcciPBx-Y)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 Adding a language switch is easy. Keeping every existing link intact is the hard part.
 
 I wanted English and Danish on this website without making every address choose a language.
@@ -54,3 +56,11 @@ There is a trade-off. Search engines and caching have an easier time when each l
 The agent handled a lot of repetitive changes across the project, but it did not decide that trade-off. That part was still mine, as were the review and the tests around old links and unrelated routes.
 
 Now someone can open an existing link and get the language they expect without the address changing. That is the whole feature.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/rebuilt-my-site-with-astro/", title: "Why I Rebuilt My Site with Astro (and What Changed)" },
+    { href: "/blog/building-performance-first-websites/", title: "Building Performance Into the Foundation" },
+  ]}
+/>

@@ -12,6 +12,8 @@ heroImageAlt: "Screenshot of the Browser Multiplayer experiment showing zero-ser
 ogDescription: "A case study on building a zero-server WebRTC browser multiplayer experiment with AI agents, manual signaling, PixiJS rendering, and mobile-first game feel."
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
 import earlyMatchUi from "../../assets/projects/browser-multiplayer/Screenshot 2026-05-03 at 15.37.15.png";
@@ -259,3 +261,11 @@ The experiment lives here:
 It is intentionally rough around the edges. You need two browsers, a working peer-to-peer network path, and a little patience with the manual invite flow. But when the data channel opens and the puck starts moving, the point lands immediately.
 
 The browser is the platform. AI was the accelerator. The learning happened in the loop between them.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/quick-dirty-webrtc-manual-signaling/", title: "How WebRTC Lets Two Browsers Talk Without a Server" },
+    { href: "/projects/github-brick-breaker/", title: "I turned my GitHub contributions into a playable brick breaker game" },
+  ]}
+/>

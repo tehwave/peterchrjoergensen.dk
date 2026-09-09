@@ -3,6 +3,7 @@ import { Picture } from "astro:assets";
 import authorImage from "../assets/author-bio.png";
 import type { Locale } from "../i18n/locale";
 import { getMessages } from "../i18n/messages";
+import Wide from "./Wide.astro";
 
 interface Props {
   locale?: Locale;
@@ -16,6 +17,9 @@ const bio = copy.authorBio;
 ---
 
 <section class="author-bio" itemscope itemtype="https://schema.org/Person" itemid="https://peterchrjoergensen.dk/#person">
+  <div class="author-bio__divider">
+    <Wide><hr /></Wide>
+  </div>
   <div class="author-bio__container">
     <Picture src={authorImage} alt={copy.authorImageAlt} formats={["avif", "webp"]} widths={[80, 160]} sizes="80px" class="author-bio__image" loading="lazy" inferSize={true} itemprop="image" />
     <div class="author-bio__content">
@@ -50,7 +54,6 @@ const bio = copy.authorBio;
     gap: $space-xl;
     max-width: $max-width-text;
     margin-inline: auto;
-    border-top: 1px solid $color-border;
     padding-top: $space-3xl;
 
     @include respond-to(md) {
@@ -59,6 +62,27 @@ const bio = copy.authorBio;
       align-items: center;
       gap: $space-lg;
       text-align: center;
+    }
+  }
+
+  .author-bio__divider {
+    max-width: $max-width-text;
+    margin-inline: auto;
+    font-size: $font-size-lg;
+
+    @include respond-to(md) {
+      font-size: $font-size-base;
+    }
+
+    :global(.wide) {
+      margin-block: 0;
+    }
+
+    hr {
+      // Match the figure's inline margins inside Wide.
+      margin: 0 ($space-xl + $space-sm);
+      border: 0;
+      border-top: 1px solid $color-border;
     }
   }
 
