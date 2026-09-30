@@ -1,0 +1,59 @@
+---
+interface Props {
+  heading: string;
+  links: { href: string; title: string }[];
+}
+
+const { heading, links } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <section class="related-content" aria-label={heading}>
+      <h2 class="related-content__heading">{heading}</h2>
+      <ul class="related-content__list">
+        {links.map(({ href, title }) => (
+          <li class="related-content__item">
+            <a class="related-content__link" href={href}>
+              {title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style lang="scss">
+  @use "../styles/variables" as *;
+  @use "../styles/mixins" as *;
+
+  .related-content {
+    margin-top: $space-3xl;
+
+    .related-content__heading {
+      margin: 0 0 $space-lg;
+      font-size: $font-size-xl;
+    }
+
+    .related-content__list {
+      margin: 0;
+      padding-left: $space-lg;
+    }
+
+    .related-content__item {
+      margin: 0;
+
+      & + .related-content__item {
+        margin-top: $space-sm;
+      }
+    }
+
+    .related-content__link {
+      color: $color-accent;
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+      @include focus-visible;
+    }
+  }
+</style>

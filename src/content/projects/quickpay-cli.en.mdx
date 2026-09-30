@@ -12,6 +12,8 @@ heroImageAlt: "Terminal showing Quickpay CLI watching payment changes and delive
 ogDescription: "How Quickpay CLI handles API access, payment commands, account-wide polling, and signed callbacks for local WordPress and WooCommerce development."
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import RelatedPost from "../../components/RelatedPost.astro";
 
 Quickpay CLI is a standalone PHP 8.4 client for [Quickpay API v10](https://learn.quickpay.net/tech-talk/api/). I built it to handle payment work from the terminal and to give scripts JSON output they can parse. It can also deliver signed payment callbacks to a local application.
@@ -106,3 +108,5 @@ The watcher is a local development tool. It runs in the foreground, stores its c
   linkText="Quickpay CLI brings payment callbacks to localhost"
   suffix="to see how signed callbacks reach a local WordPress or WooCommerce route without a tunnel."
 />
+
+<RelatedContent heading="Read next" links={[{ href: "/blog/quickpay-cli-payment-callbacks-localhost/", title: "Quickpay CLI brings payment callbacks to localhost" }]} />

@@ -12,6 +12,8 @@ heroImageAlt: "Skærmbillede af Browser Multiplayer-eksperimentet med airhockey 
 ogDescription: "En case om et WebRTC-multiplayer-eksperiment uden server, bygget med AI-agenter, manuel signalering, PixiJS og fokus på spilfølelse på mobilen."
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Figure from "../../components/Figure.astro";
 import earlyMatchUi from "../../assets/projects/browser-multiplayer/Screenshot 2026-05-03 at 15.37.15.png";
@@ -259,3 +261,11 @@ Eksperimentet findes her:
 Det er med vilje lidt råt i kanterne. Du skal bruge to browsere, en fungerende peer-to-peer-netværksvej og lidt tålmodighed med det manuelle invitationsforløb. Men når datakanalen åbner, og pucken begynder at bevæge sig, står idéen med det samme klart.
 
 Browseren er platformen. AI satte fart på. Læringen opstod i samspillet mellem dem.
+
+<RelatedContent
+  heading="Læs videre"
+  links={[
+    { href: "/blog/quick-dirty-webrtc-manual-signaling/", title: "Sådan lader WebRTC to browsere tale sammen uden en server" },
+    { href: "/projects/github-brick-breaker/", title: "Jeg gjorde mine GitHub-bidrag til et spilbart brick breaker-spil" },
+  ]}
+/>

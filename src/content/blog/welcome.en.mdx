@@ -11,6 +11,8 @@ heroImageAlt: "Sunlight filters through trees onto a forest path during golden h
 heroImageCaption: "Photo by [Pedro Netto](https://unsplash.com/@pnettto) on [Unsplash](https://unsplash.com)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 I've been building websites professionally for a while now. Led teams. Shipped a lot of websites and web applications. At some point I stopped just shipping and started paying attention to _how_ I work.
 
 This is where I write about that. Thank you for being here to see it.
@@ -32,3 +34,11 @@ I build digital experiences. I run [gm(48)](https://gm48.net), a game jam I took
 I'll write about what I'm learning. Not as someone who has it figured out, but as someone figuring it out in this AI enabled world.
 
 This site is built with Astro and a lot of AI assistance. Zero JavaScript by default. Loads in under a second. It's me practicing what I care about.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/rebuilt-my-site-with-astro/", title: "Why I Rebuilt My Site with Astro (and What Changed)" },
+    { href: "/blog/building-performance-first-websites/", title: "Building Performance Into the Foundation" },
+  ]}
+/>

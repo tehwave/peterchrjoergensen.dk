@@ -11,6 +11,8 @@ heroImageAlt: "Modern Formula 1 race car speeding around track corner"
 heroImageCaption: "Photo by [Diego Gavilanez](https://unsplash.com/@gego98) on [Unsplash](https://unsplash.com)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 Most performance work happens after something is too slow. You build the thing, measure it, then spend days shaving milliseconds. I wanted to try the opposite: make choices upfront that would make speed inevitable.
 
 This site was my test case.
@@ -70,3 +72,11 @@ That's the real win: not having to optimize, because the defaults are already fa
 I wouldn't build a dashboard or SaaS app this way. Astro is optimized for content sites where most of the page is static. Anything that needs backend logic, databases, or per-request rendering? I'd reach for Laravel.
 
 For a portfolio? It's been exactly right. Fast by default, minimal JavaScript, and I haven't fought the framework once.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/rebuilt-my-site-with-astro/", title: "Why I Rebuilt My Site with Astro (and What Changed)" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "How I Localized This Website Without Changing Existing URLs" },
+  ]}
+/>

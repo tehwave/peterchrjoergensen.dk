@@ -11,6 +11,8 @@ heroImageAlt: "En enkelt bygningsfacade delt på midten, orange med et vindue ti
 heroImageCaption: "Foto af [Martin LONGIN](https://unsplash.com/@maralalon) på [Unsplash](https://unsplash.com/photos/a-green-and-orange-building-with-a-window-j-DcciPBx-Y)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 Det er nemt at tilføje en sprogskifter. Det svære er at bevare alle de eksisterende links.
 
 Jeg ville have både engelsk og dansk på hjemmesiden, uden at hver adresse skulle indeholde et sprog.
@@ -54,3 +56,11 @@ Der er en pris. Søgemaskiner og caches har lettere ved det, når hvert sprog ha
 AI-agenten tog sig af mange gentagne ændringer på tværs af projektet, men det var ikke den, der valgte den afvejning. Den del var stadig min, ligesom gennemgangen og testen af gamle links og urelaterede ruter.
 
 Nu kan man åbne et eksisterende link og få det sprog, man forventer, uden at adressen ændrer sig. Det var hele målet.
+
+<RelatedContent
+  heading="Læs videre"
+  links={[
+    { href: "/blog/rebuilt-my-site-with-astro/", title: "Hvorfor jeg byggede min hjemmeside om i Astro, og hvad der ændrede sig" },
+    { href: "/blog/building-performance-first-websites/", title: "Byg ydeevnen ind fra starten" },
+  ]}
+/>

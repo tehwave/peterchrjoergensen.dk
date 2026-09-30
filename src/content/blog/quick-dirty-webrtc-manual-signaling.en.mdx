@@ -11,6 +11,8 @@ heroImageAlt: "Two people shaking hands in front of a patterned white wall"
 heroImageCaption: "Photo by [Chris Liverani](https://unsplash.com/@chrisliverani) on [Unsplash](https://unsplash.com/photos/9cd8qOgeNIY)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 WebRTC can feel like a locked room full of acronyms.
 
 That does not mean the basic idea is complicated. Strip away the ceremony, and WebRTC is surprisingly approachable: **two browsers exchange connection details, then talk directly.**
@@ -315,3 +317,5 @@ Start with the real docs, then read code that does something concrete.
 - Try the experiment itself: [WebRTC browser multiplayer air hockey](/experiments/browser-multiplayer/)
 
 Do not start with a full app. Start with one data channel and one message. Make the browser do the weird thing first. The architecture can get serious after the spark lands.
+
+<RelatedContent heading="Read next" links={[{ href: "/projects/browser-multiplayer/", title: "I built a browser multiplayer game without a server" }]} />

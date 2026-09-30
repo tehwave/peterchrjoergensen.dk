@@ -10,6 +10,8 @@ heroImage: ../../assets/blog/quickpay-cli-was-not-a-one-prompt-project/hero-laun
 heroImageAlt: "Terminaldiagram, hvor et signeret Quickpay-betalingscallback bliver leveret til localhost med HTTP 204"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 En betaling kan gå igennem hos Quickpay uden at din `localhost` webshop bliver opdateret. Quickpay sender et [betalingscallback](https://learn.quickpay.net/tech-talk/api/callback/) med betalingens nye status, men `localhost` stopper ved din PC. Intet uden for maskinen kan nå det.
 
 Jeg stødte på problemet igen og igen i lokale WordPress- og WooCommerce-projekter. En tunnel kan gøre callback-routen offentlig, men dens midlertidige hostnavn bliver blandet ind i et system, der går meget op i sin egen URL. Redirects og HTTPS-adfærd begynder at stå i vejen for det betalingsflow, jeg prøver at teste.
@@ -52,3 +54,5 @@ Processen kører i forgrunden ved siden af applikationen. WordPress beholder sin
 Quickpay CLI ligger i det [offentlige repository](https://github.com/tehwave/quickpay-cli). Den kræver PHP 8.4 eller nyere og er udgivet under MIT-licensen.
 
 [Casen om hvordan jeg byggede Quickpay CLI med Laravel Zero](/projects/quickpay-cli/) forklarer API-grænsen, polling-modellen, signeringen af callbacks og leveringsreglerne i detaljer.
+
+<RelatedContent heading="Læs videre" links={[{ href: "/projects/quickpay-cli/", title: "Sådan byggede jeg Quickpay CLI" }]} />

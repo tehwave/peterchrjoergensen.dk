@@ -11,6 +11,8 @@ heroImageAlt: "Screenshot of GitHub Brick Breaker game showing contribution grap
 ogDescription: "I turned my daily GitHub contributions into a playable brick breaker game with motion trails and particle effects. Built in one evening with AI."
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 import Wide from "../../components/Wide.astro";
 import Ultrawide from "../../components/Ultrawide.astro";
 import Figure from "../../components/Figure.astro";
@@ -324,3 +326,5 @@ Try to clear all your bricks without losing three lives.
 <Ultrawide>
   <BrickBreaker heading="" subtitle="" />
 </Ultrawide>
+
+<RelatedContent heading="Read next" links={[{ href: "/projects/browser-multiplayer/", title: "I built a browser multiplayer game without a server" }]} />

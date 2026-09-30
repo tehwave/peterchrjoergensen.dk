@@ -11,6 +11,8 @@ heroImageAlt: "En stilfuld, bred teknisk illustration på en mørk, geometrisk b
 heroImageCaption: "Genereret med Google Gemini"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 Jeg ville have kommentarer på siden. Ikke fordi jeg forventer en strøm af diskussioner, men fordi det føltes forkert at udgive tekster uden at give læserne mulighed for at svare.
 
 Normalt ville det kræve en database, moderationsværktøjer, spamhåndtering og brugerkonti. Det har jeg bygget før. Jeg havde ikke lyst til at gøre det igen.
@@ -58,3 +60,5 @@ Jeg behøvede ikke gå på kompromis. Jeg fik kommentarer uden at drive en datab
 giscus virker bare. Jeg anbefaler det.
 
 Hvis du vil se implementeringen, kan du kigge på [committen, hvor jeg tilføjede giscus](https://github.com/tehwave/peterchrjoergensen.dk/commit/53ad4687208e74002268b868bec36bd5ddd153a9).
+
+<RelatedContent heading="Læs videre" links={[{ href: "/blog/rebuilt-my-site-with-astro/", title: "Hvorfor jeg byggede min hjemmeside om i Astro, og hvad der ændrede sig" }]} />

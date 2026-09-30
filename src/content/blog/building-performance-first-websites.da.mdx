@@ -11,6 +11,8 @@ heroImageAlt: "En moderne Formel 1-racerbil i høj fart gennem et sving"
 heroImageCaption: "Foto af [Diego Gavilanez](https://unsplash.com/@gego98) på [Unsplash](https://unsplash.com)"
 ---
 
+import RelatedContent from "../../components/RelatedContent.astro";
+
 Det meste arbejde med ydeevne begynder, efter noget er blevet for langsomt. Man bygger løsningen, måler den og bruger så flere dage på at barbere millisekunder af. Jeg ville prøve det modsatte: træffe valg fra begyndelsen, så en hurtig side blev standarden.
 
 Denne hjemmeside blev min prøve.
@@ -70,3 +72,11 @@ Det er den egentlige gevinst: Jeg behøver ikke optimere bagefter, fordi udgangs
 Jeg ville ikke bygge et dashboard eller en SaaS-applikation på denne måde. Astro er optimeret til indholdssider, hvor det meste af siden er statisk. Hvis noget kræver backend-logik, databaser eller rendering for hver forespørgsel, ville jeg vælge Laravel.
 
 Til en porteføljeside har det været helt rigtigt. Den er hurtig som udgangspunkt, bruger meget lidt JavaScript, og jeg har ikke skullet kæmpe med Astro én eneste gang.
+
+<RelatedContent
+  heading="Læs videre"
+  links={[
+    { href: "/blog/rebuilt-my-site-with-astro/", title: "Hvorfor jeg byggede min hjemmeside om i Astro, og hvad der ændrede sig" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "Sådan gav jeg hjemmesiden to sprog uden at ændre URL'erne" },
+  ]}
+/>
