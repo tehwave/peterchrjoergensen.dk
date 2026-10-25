@@ -73,7 +73,7 @@ After that, `i want to` offered "run", "wait" and "do". Picking the first word f
 
 My first build had my own prompt counts baked into a file next to the mod. That can't go in a public repo, so the history import became an opt-in command, `/predict import`, that each person runs on their own machine.
 
-I didn't want to ship Norvig's data either, because its licence isn't clear. The repo has no word data at all. On first start the mod downloads the two files from norvig.com, about 10 MB, and builds its list locally.
+I didn't want to redistribute Norvig's word files either. His code is released under the MIT licence, but his page names no licence for the word files. They are derived from a Google corpus distributed by the Linguistic Data Consortium, so I don't know whether I'm allowed to pass them on. The repo has no word data at all. On first start the mod downloads the two files from norvig.com, about 10 MB, and builds its list locally.
 
 Before publishing, Claude ran ten reviewers over the code in parallel. They found 15 problems, and two of them would have shipped without anyone noticing.
 
