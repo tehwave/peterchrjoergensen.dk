@@ -7,6 +7,7 @@ export const BLOG_TRANSLATION_KEYS = [
   "quickpay-cli-payment-callbacks-localhost",
   "rebuilt-my-site-with-astro",
   "welcome",
+  "word-prediction-for-claude-code",
 ] as const;
 
 export const PROJECT_TRANSLATION_KEYS = ["browser-multiplayer", "github-brick-breaker", "quickpay-cli"] as const;

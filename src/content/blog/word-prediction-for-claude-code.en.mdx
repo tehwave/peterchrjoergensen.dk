@@ -1,0 +1,107 @@
+---
+locale: en
+translationKey: word-prediction-for-claude-code
+title: "Phone-Keyboard Word Prediction for Claude Code"
+description: "I built a Claude Code mod that finishes words and suggests the next one like a phone keyboard, with no AI. Finding a key to pick a word was the hard part."
+pubDate: 2026-10-25
+author: "Peter Chr. Jørgensen"
+tags: ["claude-code", "mods", "typescript", "open-source"]
+heroImage: "../../assets/blog/word-prediction-for-claude-code/hero.jpg"
+heroImageAlt: 'A suggestion strip reading ⌥1 be, ⌥2 make, ⌥3 a above a prompt box containing "i want to"'
+---
+
+import RelatedContent from "../../components/RelatedContent.astro";
+
+A phone keyboard shows three words above the text as you type. The Claude Code prompt box has nothing like that, and I wanted it there.
+
+Not an AI model guessing what I mean. Just a word list and the way I write, the way a phone keyboard does it.
+
+A search for an existing mod turned up nothing that did it. So I built one with Claude, over one evening and the next morning. It's called [word-predict](https://github.com/tehwave/claude-word-predict), and it's open source.
+
+## What it does
+
+A strip above the prompt shows three words. While you're in the middle of a word, they are ways to finish it. After a space, they are likely next words. Option+1, Option+2 and Option+3 take the first, second or third, or you can click one.
+
+The suggestions come from two places.
+
+- **An English word list.** Peter Norvig's [word and word-pair counts](https://norvig.com/ngrams/), taken from Google's trillion-word web corpus.
+- **Your own prompts.** Every prompt you send updates counts of the words and word pairs you use, and those rank first. `/predict import` reads your past Claude Code sessions on your machine and counts them too. Code blocks, inline code and paths are skipped.
+
+A word the list doesn't know is only offered once you've used it twice, so one typo doesn't stick.
+
+## The hard part was a key
+
+Prediction was the easy part. Picking a word from the keyboard was not.
+
+The first version used Tab for the first word and Ctrl+2 and Ctrl+3 for the others. In the desktop app, none of them did anything.
+
+Claude added a trace that recorded every key the mod received, and I typed a few test lines. The desktop app keeps Tab for itself to move focus between buttons, so the mod never hears it. The next guess was the right arrow, the key that accepts the app's own grey suggestion. That did nothing either.
+
+A wider test covered the arrows, Ctrl+2, Ctrl+Space and Option+1. Only one got through, and only by accident. My prompt box said this.
+
+```text
+i want ¡
+```
+
+On a Mac, Option+1 types `¡`. In the desktop app, a mod only sees keys that change the text, and `¡` is text. So the mod catches that edit, removes the `¡` and puts the word there instead.
+
+That worked for Option+1. Option+2 put `“` in my prompt instead. I use a Danish layout, where Option+1, 2 and 3 type `¡ “ §`, not the US `¡ ™ £`. The mod now knows four layouts, and you tell it which one you use.
+
+```text
+/predict layout danish
+```
+
+There was one more trap. The desktop app holds back a typed space until the next key arrives, so right after `i want ` the mod still saw `i want`. Option+1 turned "want" into "wanted" instead of adding "to".
+
+One full trace with every candidate key at the start would have saved several rounds of guessing. We also never tried Cmd. It probably wouldn't reach the mod either, since Cmd+1 doesn't change the text.
+
+## Web text loves "click here"
+
+Once the keys worked, I picked the first suggestion a few times in a row and got this.
+
+```text
+i want to click here to click here is that completes
+```
+
+The word pairs come from web pages, and plenty of them say "click here". Chaining the most likely next word walks straight into that.
+
+The fix was to start from my own writing. Claude counted which words follow which in the 1,014 prompts I had typed into Claude Code on this machine, and those now rank before the web list. It also looks at the last two words instead of one, so "can you" gets different suggestions than "you". Web filler like "click", "page" and "login" is filtered out.
+
+After that, `i want to` offered "run", "wait" and "do". Picking the first word five times in a row still won't write a good sentence. It predicts one word at a time, like a phone keyboard. But the words now come from how I write and not from web pages.
+
+## Making it safe to share
+
+My first build had my own prompt counts baked into a file next to the mod. That can't go in a public repo, so the history import became an opt-in command, `/predict import`, that each person runs on their own machine.
+
+I didn't want to ship Norvig's data either, because its licence isn't clear. The repo has no word data at all. On first start the mod downloads the two files from norvig.com, about 10 MB, and builds its list locally.
+
+Before publishing, Claude ran ten reviewers over the code in parallel. They found 15 problems, and two of them would have shipped without anyone noticing.
+
+- **The download was broken.** Claude Code cuts a mod's HTTP response at 4 MiB, and the word-pair file is 5.6 MB. Every install would have built its list with about a quarter of the word pairs missing, and nothing would have looked wrong. It now downloads in pieces under the limit and checks each file against a SHA-256 hash in the repo.
+- **Open sessions erased each other's learning.** Each session wrote its own copy of the counts over the shared one. `/predict forget` in one session was undone by the next prompt in another.
+
+The Option keys also took over real characters. On my layout, Option+4 types `£`, and that inserted a suggestion too. Now only your layout's three characters count, and pressing the same key again right away types the character itself.
+
+## Submitting it to the directory
+
+I submitted it to the Claude plugin directory, and its validator put the mod on hold. One hold was a false match. The validator read a loop variable called `key` in the word list code as reading a credential from my machine. Renaming the variable cleared it.
+
+The other five come from two features, the norvig.com download and `/predict import` running `python3`. The validator flags those whenever they exist, and a human reviewer clears them. Removing both would have cleared every hold. It would also have meant losing the import of your own phrasing and rebuilding the word list from other sources.
+
+I kept them. The README's privacy section answers each hold. It names the one host and the two files the mod downloads, says that nothing is sent, and names the one command it runs and why that needs Python.
+
+It's in review now.
+
+## Try it
+
+In a Claude Code session:
+
+```text
+/plugin install word-predict --marketplace tehwave/claude-word-predict
+```
+
+Set your layout with `/predict layout` (`us`, `danish`, `german` or `british`). Then run `/predict import` once, so the suggestions start from how you write.
+
+If your layout isn't on the list, add what its Option+1, 2 and 3 type to `LAYOUTS` in [`hooks/keys.ts`](https://github.com/tehwave/claude-word-predict/blob/main/hooks/keys.ts) and send a pull request.
+
+<RelatedContent heading="Read next" links={[{ href: "/blog/quickpay-cli-payment-callbacks-localhost/", title: "Quickpay CLI brings payment callbacks to localhost" }]} />

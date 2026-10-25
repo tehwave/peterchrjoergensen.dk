@@ -1,0 +1,109 @@
+---
+locale: da
+translationKey: word-prediction-for-claude-code
+title: "Ordforslag som på mobilen i Claude Code"
+description: "Jeg byggede en Claude Code-mod, der gør ord færdige og foreslår det næste som et mobiltastatur, helt uden AI. Det svære var at finde en tast til at vælge ordet."
+pubDate: 2026-10-25
+author: "Peter Chr. Jørgensen"
+tags: ["claude-code", "mods", "typescript", "open-source"]
+heroImage: "../../assets/blog/word-prediction-for-claude-code/hero.jpg"
+heroImageAlt: 'En forslagsbjælke med ⌥1 be, ⌥2 make, ⌥3 a over en promptboks, der indeholder "i want to"'
+---
+
+import RelatedContent from "../../components/RelatedContent.astro";
+
+Et mobiltastatur viser tre ord over teksten, mens man skriver. Claude Codes promptboks har intet lignende, og det ville jeg have.
+
+Ikke en AI-model, der gætter, hvad jeg mener. Bare en ordliste og den måde, jeg skriver på, ligesom et mobiltastatur gør det.
+
+En søgning efter en eksisterende mod fandt ingen, der kunne det. Så jeg byggede en sammen med Claude, over en aften og den næste morgen. Den hedder [word-predict](https://github.com/tehwave/claude-word-predict), og den er open source.
+
+## Hvad den gør
+
+En bjælke over prompten viser tre ord. Midt i et ord er det måder at gøre ordet færdigt på. Efter et mellemrum er det sandsynlige næste ord. Option+1, Option+2 og Option+3 vælger det første, andet eller tredje, eller man kan klikke på et af dem.
+
+Forslagene kommer to steder fra.
+
+- **En engelsk ordliste.** Peter Norvigs [optællinger af ord og ordpar](https://norvig.com/ngrams/), hentet fra Googles webkorpus på en billion ord.
+- **Dine egne prompts.** Hver prompt, du sender, opdaterer optællingen af de ord og ordpar, du bruger, og de kommer først. `/predict import` læser dine tidligere Claude Code-sessioner på din egen maskine og tæller dem med. Kodeblokke, inline-kode og stier springes over.
+
+Et ord, som listen ikke kender, bliver først foreslået, når du har brugt det to gange. Så en enkelt tastefejl bider sig ikke fast.
+
+Forslagene er på engelsk, så moden passer bedst, hvis du skriver dine prompts på engelsk.
+
+## Det svære var en tast
+
+Selve forslagene var den nemme del. At vælge et ord med tastaturet var det ikke.
+
+Den første version brugte Tab til det første ord og Ctrl+2 og Ctrl+3 til de andre. I desktop-appen gjorde ingen af dem noget.
+
+Claude tilføjede en sporing, der registrerede hver tast, moden modtog, og jeg skrev et par testlinjer. Desktop-appen beholder Tab selv til at flytte fokus mellem knapper, så moden hører den aldrig. Næste gæt var højre piletast, den tast der accepterer appens egne grå forslag. Den gjorde heller ikke noget.
+
+En bredere test dækkede piletasterne, Ctrl+2, Ctrl+Space og Option+1. Kun én kom igennem, og kun ved et tilfælde. Der stod det her i min promptboks.
+
+```text
+i want ¡
+```
+
+På en Mac skriver Option+1 `¡`. I desktop-appen ser en mod kun taster, der ændrer teksten, og `¡` er tekst. Så moden fanger den ændring, fjerner `¡` og sætter ordet ind i stedet.
+
+Det virkede for Option+1. Option+2 satte `“` ind i min prompt i stedet. Jeg bruger dansk tastaturlayout, hvor Option+1, 2 og 3 skriver `¡ “ §` og ikke de amerikanske `¡ ™ £`. Moden kender nu fire layouts, og man fortæller den, hvilket man bruger.
+
+```text
+/predict layout danish
+```
+
+Der var én fælde mere. Desktop-appen holder et skrevet mellemrum tilbage, indtil den næste tast kommer, så lige efter `i want ` så moden stadig kun `i want`. Option+1 gjorde "want" til "wanted" i stedet for at tilføje "to".
+
+Én fuld sporing med alle de mulige taster fra starten ville have sparet flere runder med gætteri. Vi prøvede heller aldrig Cmd. Den ville nok heller ikke nå frem til moden, fordi Cmd+1 ikke ændrer teksten.
+
+## Webtekst elsker "click here"
+
+Da tasterne virkede, valgte jeg det første forslag et par gange i træk og fik det her.
+
+```text
+i want to click here to click here is that completes
+```
+
+Ordparrene kommer fra websider, og rigtig mange af dem siger "click here". Når man kæder det mest sandsynlige næste ord sammen, havner man lige i den.
+
+Løsningen var at starte fra min egen måde at skrive på. Claude talte, hvilke ord der følger hvilke i de 1.014 prompts, jeg havde skrevet i Claude Code på maskinen, og de kommer nu før weblisten. Den kigger også på de sidste to ord i stedet for ét, så "can you" giver andre forslag end "you". Webfyld som "click", "page" og "login" bliver filtreret fra.
+
+Derefter foreslog `i want to` "run", "wait" og "do". At vælge det første ord fem gange i træk giver stadig ikke en god sætning. Den forudsiger ét ord ad gangen, ligesom et mobiltastatur. Men ordene kommer nu fra den måde, jeg skriver på, og ikke fra websider.
+
+## Klar til at blive delt
+
+Min første version havde mine egne promptoptællinger bagt ind i en fil ved siden af moden. Den kan ikke ligge i et offentligt repo, så historikimporten blev en kommando, man selv vælger at køre, `/predict import`, på sin egen maskine.
+
+Jeg ville heller ikke distribuere Norvigs data, fordi licensen ikke er klar. Repoet indeholder slet ingen orddata. Første gang moden starter, henter den de to filer fra norvig.com, cirka 10 MB, og bygger sin liste lokalt.
+
+Inden udgivelsen lod Claude ti reviewere gennemgå koden parallelt. De fandt 15 problemer, og to af dem ville være gået ud, uden at nogen havde opdaget det.
+
+- **Downloaden virkede ikke.** Claude Code skærer en mods HTTP-svar af ved 4 MiB, og filen med ordpar fylder 5,6 MB. Hver installation ville have bygget sin liste uden omkring en fjerdedel af ordparrene, og intet ville have set forkert ud. Nu henter den filerne i stykker under grænsen og tjekker hver fil mod en SHA-256-hash i repoet.
+- **Åbne sessioner slettede hinandens læring.** Hver session skrev sin egen kopi af optællingerne oven i den fælles. `/predict forget` i én session blev rullet tilbage af den næste prompt i en anden.
+
+Option-tasterne tog også rigtige tegn. På mit layout skriver Option+4 `£`, og den satte også et forslag ind. Nu tæller kun dit layouts tre tegn, og trykker man på samme tast igen med det samme, får man selve tegnet.
+
+## Indsendt til kataloget
+
+Jeg sendte den ind til Claudes plugin-katalog, og valideringen satte moden på hold. Ét hold var en fejlmelding. Valideringen læste en løkkevariabel ved navn `key` i ordlistekoden, som om den hentede en adgangsnøgle fra min maskine. Det forsvandt, da variablen fik et nyt navn.
+
+De andre fem skyldes to funktioner, downloaden fra norvig.com og `/predict import`, der kører `python3`. Valideringen markerer dem, så længe de findes, og en person hos dem skal godkende dem. Hvis jeg fjernede begge, ville alle hold forsvinde. Men så ville man miste importen af sin egen måde at skrive på, og jeg skulle bygge ordlisten op fra andre kilder.
+
+Jeg beholdt dem. README'ens afsnit om privatliv svarer på hvert hold. Det nævner den ene vært og de to filer, moden henter, at intet bliver sendt, og den ene kommando, den kører, og hvorfor den kræver Python.
+
+Nu venter den på at blive gennemgået.
+
+## Prøv den
+
+I en Claude Code-session:
+
+```text
+/plugin install word-predict --marketplace tehwave/claude-word-predict
+```
+
+Vælg dit layout med `/predict layout` (`us`, `danish`, `german` eller `british`). Kør derefter `/predict import` én gang, så forslagene tager udgangspunkt i den måde, du skriver på.
+
+Hvis dit layout ikke er på listen, så tilføj det, Option+1, 2 og 3 skriver, til `LAYOUTS` i [`hooks/keys.ts`](https://github.com/tehwave/claude-word-predict/blob/main/hooks/keys.ts), og send en pull request.
+
+<RelatedContent heading="Læs videre" links={[{ href: "/blog/quickpay-cli-payment-callbacks-localhost/", title: "Quickpay CLI sender betalingscallbacks til localhost" }]} />
