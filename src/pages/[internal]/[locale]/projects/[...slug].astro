@@ -7,7 +7,7 @@
  *
  * Features:
  * - Full Open Graph and Twitter Card meta tags
- * - JSON-LD structured data (CreativeWork schema)
+ * - JSON-LD structured data (Article schema)
  * - Hero image support with optimization
  * - Tag display for technologies used
  * - Optional external project link
@@ -61,7 +61,7 @@ const { Content } = await render(project);
 const canonicalURL = new URL(`/projects/${translationKey}/`, Astro.site);
 
 // Extract frontmatter data from the project
-const { title, description, category, tags, externalUrl, heroImage, heroImageAlt, heroImageCaption, ogDescription } = project.data;
+const { title, description, category, tags, externalUrl, publishedDate, updatedDate, heroImage, heroImageAlt, heroImageCaption, ogDescription } = project.data;
 
 // Use ogDescription if provided, otherwise fall back to description
 const socialDescription = ogDescription || description;
@@ -69,20 +69,34 @@ const socialDescription = ogDescription || description;
 /**
  * Generate JSON-LD structured data for search engines
  *
- * Uses CreativeWork schema for project case studies
+ * Uses Article schema (a CreativeWork subtype) for project case studies,
+ * matching the page's og:type of "article"
  *
- * @see https://schema.org/CreativeWork
+ * @see https://schema.org/Article
  * @see https://schema.org/BreadcrumbList
  */
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "CreativeWork",
+      "@type": "Article",
       "@id": canonicalURL + "#project",
+      headline: title,
       name: title,
       description: description,
       url: canonicalURL.toString(),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalURL.toString(),
+      },
+      ...(publishedDate && { datePublished: publishedDate.toISOString() }),
+      ...(updatedDate && { dateModified: updatedDate.toISOString() }),
+      publisher: {
+        "@type": "Person",
+        "@id": "https://peterchrjoergensen.dk/#person",
+        name: "Peter Chr. Jørgensen",
+        url: "https://peterchrjoergensen.dk",
+      },
       author: {
         "@type": "Person",
         "@id": "https://peterchrjoergensen.dk/#person",
