@@ -1,0 +1,116 @@
+---
+locale: en
+translationKey: wow-fishing-addon-with-claude
+title: "How I Made a WoW Fishing Addon With Claude Without Writing Code"
+description: "I had Claude Opus 5.5 build a World of Warcraft addon that makes fishing bites easier to notice. This is how I did it, step by step, without writing any code."
+pubDate: 2026-11-15
+author: "Peter Chr. Jørgensen"
+tags: ["claude-code", "world-of-warcraft", "addons", "lua", "ai"]
+---
+
+import RelatedContent from "../../components/RelatedContent.astro";
+
+I kept missing bites when fishing in World of Warcraft. I'd look away for a second, the bobber would splash, and the fish was gone before I clicked.
+
+On a Saturday evening I asked Claude to make an addon for it. About three hours later it was on GitHub and uploaded to CurseForge as [Obvious Fishing](https://github.com/tehwave/wow-obvious-fishing). CurseForge approved it the next morning, and I installed it through the CurseForge app like any other addon.
+
+I didn't write any of the Lua myself. I described what I wanted, tested it in the game and told Claude what was wrong. You can do the same without knowing how to code, so this post goes through how I did it.
+
+## What you need
+
+- World of Warcraft with addons enabled. I play WoW Forever, but the steps are the same for other versions.
+- Claude Code. I used the Code tab in the Claude desktop app, with Claude Opus 5.5. It can create and edit files on your computer, so you don't have to copy code around. You could do this in a normal chat and move the files by hand, but it would take much longer.
+- Your AddOns folder, for example `World of Warcraft/_retail_/Interface/AddOns`. Open it as the folder for your Claude Code session, so the addon ends up where the game loads it from.
+
+You don't need to install Lua or know how addon files are put together. Claude sets that up.
+
+## Step 1: Describe the problem
+
+My first message was this.
+
+```text
+i need an addon that makes the fishing blobber like really fucking obvious
+when theres a bite and such. in this wow forever version
+```
+
+I wrote it quickly and didn't fix the typos. It said what the problem was and which version of the game I play, and that was enough to start.
+
+Before writing anything, Claude read through the folder. It worked out which client I was running, and it found that my master volume was at 5%, which explained some of why I kept missing the splash.
+
+It also told me that the game doesn't let addons know when a fish bites. There's no way to flash the screen at the moment of a bite, and the splash sound is the only real signal. I didn't know that. The first version worked around it. It turned the sound up while fishing, muted music and ambience, put a marker on the bobber and showed a timer bar for the cast.
+
+## Step 2: Test it in the game
+
+Claude created a folder in AddOns with two files and told me how to load it.
+
+1. Tick the addon in the AddOns list on the character select screen.
+2. If you're already in the game, type `/reload`.
+3. Type `/console scriptErrors 1` so the game shows a popup when the addon hits an error.
+
+The first version was ready about three minutes after my first message. Some of it worked. The sound and the timer bar were fine, but the addon kept saying my bobber wasn't highlighted while I was looking right at it.
+
+Claude can't run the game or see your screen, and it said so after every change. Testing is your job, and most of the evening went into it.
+
+## Step 3: Tell it what's wrong
+
+Screenshots helped the most. I sent one of the game's own cast bar next to the addon's bar, and after two rounds they matched, down to the bronze frame and the green fill. When I said there was too much padding under the spell name, Claude changed only that.
+
+When something breaks, paste the error as it is. At one point the game showed this error 511 times.
+
+```text
+BigBobberMarker:GetCenter(): Action[FrameMeasurement] failed
+because[Can't measure restricted regions]
+```
+
+I didn't know what it meant, but Claude did. WoW doesn't allow addons to measure where a bobber's nameplate is on the screen. That also settled something I had asked for earlier. I wanted to mute other players' splashes and keep my own, and that can't be done. An addon can only mute a sound for everyone, and since it can't see the bobber move, it can't tell your bite from someone else's.
+
+The marker took the longest to get right. The first one had flares and a bouncing arrow. Then came a small cyan frame that slid off the bobber at some camera angles, and then a set of animated glowing borders. I didn't like any of them, and I told Claude so in fairly strong language.
+
+What finally fixed it was explaining why. When you fish, you're watching for the bobber to move, so nothing near it should move. I told Claude the marker only had to show which bobber was mine and could never be animated. It came back with a raid target icon on the bobber's nameplate, the same icon you'd put on a mob. It uses the game's own art and never moves, and it's still the marker the addon uses.
+
+## Step 4: Point it to Blizzard's code
+
+When I wanted the marker to look like it belonged in the game, Claude first searched for documentation through Context7, but only found general summaries of the API. Then it used [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source), a GitHub repo with Blizzard's interface code for each version of the game, including Forever. It got the exact texture names and the cast bar's art from there.
+
+If you want something to look or work like the default UI, ask Claude to check that repo instead of relying on what it remembers.
+
+## Step 5: Finish it
+
+Once the basics worked, I asked for the parts that would make it usable for other people.
+
+- A settings panel under Options, AddOns. Not everyone wants their music muted, and nobody should have to type commands to change it.
+- A line in chat when the addon changes your sound settings and when it puts them back.
+- Your own sound and auto loot settings restored about 12 seconds after you stop fishing. If the game crashes while you fish, they're restored the next time you log in.
+- Auto loot while fishing, and a reminder when your pole has no lure. Both were Claude's suggestions.
+- A new name. It started as BigBobber and became Obvious Fishing, with `/obvfish` as the chat command.
+
+I also ran `/code-review`, which is built into Claude Code, twice. It found bugs I wouldn't have found by playing. One of them cancelled the restore timer if you changed a setting after you stopped fishing.
+
+## Step 6: Publish it
+
+If the addon is only for you, you're done after step 5. I wanted it on CurseForge, so I had Claude do the following.
+
+- Create a GitHub repo for it with the GitHub CLI, which I already had installed.
+- Write a README for players, and a separate file with notes for whoever works on the code next.
+- Set up a release workflow with the [BigWigsMods packager](https://github.com/BigWigsMods/packager). Pushing a version tag builds the zip and uploads it to GitHub and CurseForge.
+- Go through CurseForge's moderation policy and check the project against it, for example the 400×400 avatar and the changelog each file needs.
+
+I created the CurseForge project and the API token myself. Claude gave me the command to save the token as a GitHub secret, so it never went through the chat.
+
+## Keep the code outside AddOns
+
+When I installed the release through the CurseForge app, it replaced the addon folder with the packaged version. My git repo and the development files were in that folder, and they were deleted. Everything was on GitHub, so I only had to clone it again.
+
+If you want to keep working on your addon, keep the code in a folder outside AddOns and link it into AddOns. I asked Claude to set that up, and it cloned the repo to another drive and made the link.
+
+## If you try this
+
+Pick something that bothers you when you play and describe it the way you'd describe it to a friend, with your game version. Test each change with `/reload`, and send screenshots and errors. When something is wrong, say why. Claude will tell you when the game doesn't allow something, and you can ask it where that limit comes from.
+
+<RelatedContent
+  heading="Read next"
+  links={[
+    { href: "/blog/word-prediction-for-claude-code/", title: "Phone-Keyboard Word Prediction for Claude Code" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "How I Localized This Website Without Changing Existing URLs" },
+  ]}
+/>

@@ -8,6 +8,7 @@ export const BLOG_TRANSLATION_KEYS = [
   "rebuilt-my-site-with-astro",
   "welcome",
   "word-prediction-for-claude-code",
+  "wow-fishing-addon-with-claude",
 ] as const;
 
 export const PROJECT_TRANSLATION_KEYS = ["browser-multiplayer", "github-brick-breaker", "quickpay-cli"] as const;

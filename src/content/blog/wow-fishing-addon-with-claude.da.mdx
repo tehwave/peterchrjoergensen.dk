@@ -1,0 +1,116 @@
+---
+locale: da
+translationKey: wow-fishing-addon-with-claude
+title: "Sådan lavede jeg et WoW-fiskeaddon med Claude uden at skrive kode"
+description: "Jeg fik Claude Opus 5.5 til at bygge et World of Warcraft-addon, der gør det lettere at opdage, når en fisk bider. Her er, hvordan jeg gjorde det, trin for trin, uden at skrive kode."
+pubDate: 2026-11-15
+author: "Peter Chr. Jørgensen"
+tags: ["claude-code", "world-of-warcraft", "addons", "lua", "ai"]
+---
+
+import RelatedContent from "../../components/RelatedContent.astro";
+
+Jeg blev ved med at misse bid, når jeg fiskede i World of Warcraft. Jeg kiggede væk et øjeblik, proppen plaskede, og fisken var væk, før jeg nåede at klikke.
+
+En lørdag aften bad jeg Claude om at lave et addon til det. Cirka tre timer senere lå det på GitHub og var uploadet til CurseForge som [Obvious Fishing](https://github.com/tehwave/wow-obvious-fishing). CurseForge godkendte det næste morgen, og jeg installerede det gennem CurseForge-appen som ethvert andet addon.
+
+Jeg skrev ikke selv noget af Lua-koden. Jeg beskrev, hvad jeg ville have, testede det i spillet og fortalte Claude, hvad der var galt. Det kan du også gøre uden at kunne kode, så i det her indlæg gennemgår jeg, hvordan jeg gjorde.
+
+## Hvad du skal bruge
+
+- World of Warcraft med addons slået til. Jeg spiller WoW Forever, men trinnene er de samme i andre versioner.
+- Claude Code. Jeg brugte Code-fanen i Claudes desktop-app med Claude Opus 5.5. Den kan oprette og redigere filer på din computer, så du ikke skal kopiere kode rundt. Du kunne gøre det i en almindelig chat og flytte filerne selv, men det ville tage meget længere tid.
+- Din AddOns-mappe, for eksempel `World of Warcraft/_retail_/Interface/AddOns`. Åbn den som mappe til din Claude Code-session, så addonnet havner der, hvor spillet indlæser det fra.
+
+Du behøver ikke installere Lua eller vide, hvordan et addons filer hænger sammen. Det sætter Claude op.
+
+## Trin 1: Beskriv problemet
+
+Min første besked var den her.
+
+```text
+i need an addon that makes the fishing blobber like really fucking obvious
+when theres a bite and such. in this wow forever version
+```
+
+Jeg skrev den hurtigt og rettede ikke stavefejlene. Den sagde, hvad problemet var, og hvilken version af spillet jeg spiller, og det var nok til at komme i gang.
+
+Før Claude skrev noget, læste den mappen igennem. Den fandt ud af, hvilken klient jeg brugte, og opdagede, at min hovedlydstyrke stod på 5 %. Det forklarede en del af, hvorfor jeg blev ved med at overhøre plasket.
+
+Den fortalte mig også, at spillet ikke giver addons besked, når en fisk bider. Man kan ikke få skærmen til at blinke i det øjeblik, en fisk bider, og plasket er det eneste rigtige signal. Det vidste jeg ikke. Den første version gik uden om det. Den skruede op for lyden, mens man fisker, slog musik og baggrundslyde fra, satte en markør på proppen og viste en tidsbjælke for kastet.
+
+## Trin 2: Test det i spillet
+
+Claude oprettede en mappe i AddOns med to filer og fortalte mig, hvordan jeg indlæste den.
+
+1. Sæt flueben ved addonnet i AddOns-listen på skærmen, hvor du vælger karakter.
+2. Hvis du allerede er inde i spillet, så skriv `/reload`.
+3. Skriv `/console scriptErrors 1`, så spillet viser en popup, når addonnet rammer en fejl.
+
+Den første version var klar cirka tre minutter efter min første besked. Noget af det virkede. Lyden og tidsbjælken var fine, men addonnet blev ved med at sige, at min prop ikke var markeret, mens jeg kiggede lige på den.
+
+Claude kan ikke køre spillet eller se din skærm, og det sagde den efter hver ændring. Testen er din opgave, og det meste af aftenen gik med den.
+
+## Trin 3: Fortæl, hvad der er galt
+
+Skærmbilleder hjalp mest. Jeg sendte et af spillets egen cast-bjælke ved siden af addonnets, og efter to omgange lignede de hinanden, helt ned til den bronzefarvede ramme og den grønne fyld. Da jeg skrev, at der var for meget luft under navnet på formularen, ændrede Claude kun det.
+
+Når noget går i stykker, så indsæt fejlen, som den er. På et tidspunkt viste spillet den her fejl 511 gange.
+
+```text
+BigBobberMarker:GetCenter(): Action[FrameMeasurement] failed
+because[Can't measure restricted regions]
+```
+
+Jeg vidste ikke, hvad den betød, men det gjorde Claude. WoW tillader ikke addons at måle, hvor en props navneskilt er på skærmen. Det afgjorde også noget, jeg havde spurgt om tidligere. Jeg ville gerne slå andre spilleres plask fra og beholde mit eget, og det kan ikke lade sig gøre. Et addon kan kun slå en lyd fra for alle, og da det ikke kan se proppen bevæge sig, kan det ikke skelne dit bid fra en andens.
+
+Markøren tog længst tid at få rigtig. Den første havde blus og en hoppende pil. Så kom en lille cyan ramme, der gled væk fra proppen ved nogle kameravinkler, og derefter nogle animerede, glødende kanter. Jeg kunne ikke lide nogen af dem, og det fortalte jeg Claude i ret kraftige vendinger.
+
+Det, der til sidst løste det, var at forklare hvorfor. Når man fisker, holder man øje med, om proppen bevæger sig, så intet tæt på den bør bevæge sig. Jeg skrev til Claude, at markøren kun skulle vise, hvilken prop der var min, og aldrig måtte være animeret. Den kom tilbage med et raid-ikon på proppens navneskilt, det samme ikon man sætter på et monster. Det bruger spillets egen grafik og bevæger sig aldrig, og det er stadig den markør, addonnet bruger.
+
+## Trin 4: Henvis til Blizzards kode
+
+Da jeg ville have markøren til at se ud, som om den hørte til i spillet, søgte Claude først efter dokumentation gennem Context7, men fandt kun generelle oversigter over API'et. Så brugte den [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source), et GitHub-repo med Blizzards interfacekode til hver version af spillet, også Forever. Derfra fik den de præcise navne på grafikken og cast-bjælkens udseende.
+
+Hvis noget skal se ud eller virke som spillets standardinterface, så bed Claude om at tjekke det repo i stedet for at stole på, hvad den husker.
+
+## Trin 5: Gør det færdigt
+
+Da det grundlæggende virkede, bad jeg om de dele, der skulle gøre det brugbart for andre.
+
+- Et indstillingspanel under Options, AddOns. Ikke alle vil have musikken slået fra, og ingen skal være nødt til at skrive kommandoer for at ændre det.
+- En linje i chatten, når addonnet ændrer dine lydindstillinger, og når det sætter dem tilbage.
+- Dine egne indstillinger for lyd og auto loot sat tilbage cirka 12 sekunder efter, du stopper med at fiske. Hvis spillet går ned, mens du fisker, bliver de sat tilbage, næste gang du logger ind.
+- Auto loot, mens man fisker, og en påmindelse, når fiskestangen ikke har noget lokkemiddel. Begge var Claudes forslag.
+- Et nyt navn. Det startede som BigBobber og blev til Obvious Fishing med `/obvfish` som chatkommando.
+
+Jeg kørte også `/code-review`, som er indbygget i Claude Code, to gange. Den fandt fejl, jeg ikke ville have fundet ved at spille. En af dem annullerede timeren, der sætter indstillingerne tilbage, hvis man ændrede en indstilling efter at være stoppet med at fiske.
+
+## Trin 6: Udgiv det
+
+Hvis addonnet kun er til dig selv, er du færdig efter trin 5. Jeg ville have det på CurseForge, så jeg fik Claude til følgende.
+
+- Oprette et GitHub-repo til det med GitHub CLI, som jeg allerede havde installeret.
+- Skrive en README til spillere og en separat fil med noter til den, der arbejder på koden næste gang.
+- Sætte et release-workflow op med [BigWigsMods packager](https://github.com/BigWigsMods/packager). Når man pusher et versionstag, bygges zip-filen og uploades til GitHub og CurseForge.
+- Gennemgå CurseForges moderationsregler og tjekke projektet efter dem, for eksempel avataren på 400×400 og den changelog, hver fil skal have.
+
+Jeg oprettede selv projektet på CurseForge og API-nøglen. Claude gav mig kommandoen til at gemme nøglen som en GitHub-secret, så den aldrig gik gennem chatten.
+
+## Hold koden uden for AddOns
+
+Da jeg installerede udgivelsen gennem CurseForge-appen, erstattede den addon-mappen med den pakkede version. Mit git-repo og udviklingsfilerne lå i den mappe, og de blev slettet. Alt lå på GitHub, så jeg skulle bare klone det igen.
+
+Hvis du vil blive ved med at arbejde på dit addon, så hold koden i en mappe uden for AddOns og link den ind i AddOns. Jeg bad Claude om at sætte det op, og den klonede repoet til et andet drev og lavede linket.
+
+## Hvis du vil prøve
+
+Find noget, der irriterer dig, når du spiller, og beskriv det, som du ville beskrive det for en ven, med din version af spillet. Test hver ændring med `/reload`, og send skærmbilleder og fejl. Når noget er forkert, så sig hvorfor. Claude siger til, når spillet ikke tillader noget, og du kan spørge den, hvor den begrænsning kommer fra.
+
+<RelatedContent
+  heading="Læs videre"
+  links={[
+    { href: "/blog/word-prediction-for-claude-code/", title: "Ordforslag som på mobilen i Claude Code" },
+    { href: "/blog/localizing-this-website-without-changing-its-urls/", title: "Sådan gav jeg hjemmesiden to sprog uden at ændre URL'erne" },
+  ]}
+/>

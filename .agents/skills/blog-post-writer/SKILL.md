@@ -18,6 +18,16 @@ Write direct, thoughtful, emotionally honest technical posts in Peter's voice. E
 - Avoid corporate language, hype, padding, invented feelings, and unsupported absolutes.
 - Remove AI tells: em dashes, excessive semicolons or colons, repetitive three-part lists, canned transitions, and phrases such as "delve," "game-changer," "seamless," "at its core," or "in conclusion."
 
+Peter's own edits (for example `godot-cli-on-macos-zsh.en.mdx`) are plain and matter-of-fact. Match that register, not a punchy blog voice. These patterns read as AI even without banned words, so remove them:
+
+- Short closing verdicts: "That's the deal.", "That's it.", "Typos and all.", "Claude did."
+- A moral or lesson at the end of a section ("Explaining why is worth more than...").
+- "You don't need X. You need Y." and other set-up-then-reversal pairs.
+- Announcing importance ("The important part was...", "This is where...", "Here's the thing").
+- Bolded one-line pronouncements in prose, and headings like "One trap" or "What I'd tell you".
+- Endings that sum up the post or say what it "does well".
+- Stacks of very short sentences for rhythm. Let sentences run as long as a person would say them.
+
 Read the draft aloud. If it sounds generated, rewrite it.
 
 ## Factual Integrity
