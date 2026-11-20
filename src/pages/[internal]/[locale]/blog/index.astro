@@ -2,18 +2,15 @@
 /**
  * Blog Index Page
  *
- * Newspaper-style blog listing with minimal design:
- * - Single-column centered layout
- * - Date + reading time, title, description, tags
- * - Horizontal dividers between posts
- * - No hero images (kept for individual post pages only)
- *
- * Posts are sorted by publication date (newest first).
+ * The page header, then every post as a BlogPostCard, grouped under a heading
+ * per publication year (newest first) in a three-column grid.
+ * Posts without a hero image show their opening line in the image's place.
  */
 import { getCollection } from "astro:content";
 import Layout from "../../../../layouts/Layout.astro";
 import AnimateOnScroll from "../../../../components/AnimateOnScroll.astro";
 import BlogPostCard from "../../../../components/BlogPostCard.astro";
+import { getOpeningLine, renderOpeningLine } from "../../../../utils/opening-line";
 import { getReadingTime } from "../../../../utils/reading-time";
 import { fadeAnimation } from "../../../../utils/transitions";
 import type { Locale } from "../../../../i18n/locale";
@@ -39,14 +36,24 @@ const posts = Array.from(groupTranslations(entries).values()).map((group) => ({ 
 // Sort posts by publication date, newest first
 const sortedPosts = posts.sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
 
-// Prepare posts with reading time
-const postsWithReadingTime = sortedPosts.map((post) => ({
-  ...post,
-  readingTime: getReadingTime(post.entry.body ?? ""),
-}));
+// Prepare posts with reading time, and the opening line for posts without a hero image
+const postsWithReadingTime = sortedPosts.map((post) => {
+  const openingLine = post.entry.data.heroImage ? undefined : getOpeningLine(post.entry.body ?? "");
+  return {
+    ...post,
+    readingTime: getReadingTime(post.entry.body ?? ""),
+    openingLine: openingLine ? renderOpeningLine(openingLine) : undefined,
+  };
+});
 
-// Split into featured (latest) and remaining posts
-const [featuredPost, ...remainingPosts] = postsWithReadingTime;
+// Group by publication year, newest year first (posts are already newest first)
+const postsByYear = postsWithReadingTime.reduce<{ year: number; posts: typeof postsWithReadingTime }[]>((groups, post) => {
+  const year = post.entry.data.pubDate.getUTCFullYear();
+  const group = groups.find((existing) => existing.year === year);
+  if (group) group.posts.push(post);
+  else groups.push({ year, posts: [post] });
+  return groups;
+}, []);
 
 // SEO metadata
 const title = copy.metadata.blogTitle;
@@ -120,48 +127,33 @@ const collectionSchema = {
         postsWithReadingTime.length === 0 ? (
           <p class="journal__empty">{copy.blog.empty}</p>
         ) : (
-          <div class="journal__grid">
-            {/* Featured Post - Latest */}
-            {featuredPost && (
-              <div class="journal__featured">
-                <AnimateOnScroll animation="fade-up">
-                  <BlogPostCard
-                    title={featuredPost.entry.data.title}
-                    description={featuredPost.entry.data.description}
-                    pubDate={featuredPost.entry.data.pubDate}
-                    readingTime={featuredPost.readingTime}
-                    tags={featuredPost.entry.data.tags}
-                    href={`/blog/${featuredPost.translationKey}/`}
-                    heroImage={featuredPost.entry.data.heroImage}
-                    heroImageAlt={featuredPost.entry.data.heroImageAlt}
-                    locale={locale}
-                    englishOnly={featuredPost.isFallback}
-                  />
-                </AnimateOnScroll>
-              </div>
-            )}
-
-            {/* Remaining Posts */}
-            {remainingPosts.length > 0 && (
-              <div class="journal__list">
-                {remainingPosts.map((post) => (
-                  <AnimateOnScroll animation="fade-up">
-                    <BlogPostCard
-                      title={post.entry.data.title}
-                      description={post.entry.data.description}
-                      pubDate={post.entry.data.pubDate}
-                      readingTime={post.readingTime}
-                      tags={post.entry.data.tags}
-                      href={`/blog/${post.translationKey}/`}
-                      heroImage={post.entry.data.heroImage}
-                      heroImageAlt={post.entry.data.heroImageAlt}
-                      locale={locale}
-                      englishOnly={post.isFallback}
-                    />
-                  </AnimateOnScroll>
-                ))}
-              </div>
-            )}
+          <div class="journal__years">
+            {postsByYear.map(({ year, posts }) => (
+              <section class="journal__year" aria-labelledby={`year-${year}`}>
+                <h2 class="journal__year-title" id={`year-${year}`}>
+                  {year}
+                </h2>
+                <div class="journal__cards">
+                  {posts.map((post) => (
+                    <AnimateOnScroll animation="fade-up" class="journal__card">
+                      <BlogPostCard
+                        title={post.entry.data.title}
+                        description={post.entry.data.description}
+                        pubDate={post.entry.data.pubDate}
+                        readingTime={post.readingTime}
+                        tags={post.entry.data.tags}
+                        href={`/blog/${post.translationKey}/`}
+                        heroImage={post.entry.data.heroImage}
+                        heroImageAlt={post.entry.data.heroImageAlt}
+                        openingLine={post.openingLine}
+                        locale={locale}
+                        englishOnly={post.isFallback}
+                      />
+                    </AnimateOnScroll>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         )
       }
@@ -243,35 +235,50 @@ const collectionSchema = {
       padding: $space-3xl 0;
     }
 
-    &__grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
+    &__years {
+      display: flex;
+      flex-direction: column;
       gap: $space-3xl;
-      align-items: start;
 
       @include respond-to(md) {
-        grid-template-columns: 1fr;
         gap: $space-2xl;
       }
     }
 
-    &__featured {
-      position: sticky;
-      top: calc($header-height + $space-2xl);
-
-      @include respond-to(md) {
-        position: static;
-      }
-    }
-
-    &__list {
+    &__year {
       display: flex;
       flex-direction: column;
-      gap: $space-2xl;
+      gap: $space-xl;
+    }
+
+    // Subheading style, as the "Read next" heading
+    &__year-title {
+      font-size: $font-size-xl;
+      color: $color-text-dark;
+    }
+
+    // Three columns, two under 1024px, one under 640px (as the project grid)
+    &__cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: $space-2xl $space-xl;
+
+      @include respond-to(lg) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
       @include respond-to(md) {
         gap: $space-xl;
       }
+
+      @include respond-to(sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    // AnimateOnScroll's root carries its own scope, so reach it through the grid
+    &__cards > :global(.journal__card) {
+      display: flex;
     }
   }
 </style>
