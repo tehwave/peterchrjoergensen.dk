@@ -58,6 +58,18 @@ p {
   margin: 0;
 }
 
+// Form controls don't inherit the page font, so without this they fall back
+// to the browser's Arial at 13.33px. Line height is left alone so control
+// heights stay as they are.
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 code {
   font-family: $font-mono;
   font-size: 0.9em;

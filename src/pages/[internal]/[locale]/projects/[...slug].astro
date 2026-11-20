@@ -359,19 +359,20 @@ const structuredData = {
       font-weight: $font-weight-semibold;
       text-transform: capitalize;
 
+      // Same hues as the project card backdrops in ProjectCard.astro.
       &[data-category="web"] {
-        background: rgba(59, 130, 246, 0.1);
-        color: rgb(59, 130, 246);
+        background: $color-blue-pale;
+        color: $color-blue;
       }
 
       &[data-category="games"] {
-        background: rgba(168, 85, 247, 0.1);
-        color: rgb(168, 85, 247);
+        background: rgba($color-orange, 0.1);
+        color: $color-orange-dark;
       }
 
       &[data-category="creative"] {
-        background: rgba(236, 72, 153, 0.1);
-        color: rgb(236, 72, 153);
+        background: rgba($color-purple, 0.1);
+        color: $color-purple;
       }
     }
 
