@@ -32,6 +32,7 @@ import restudyImg from "../assets/projects/restudy.png";
 import bsiImg from "../assets/projects/bsi.png";
 import cctravelImg from "../assets/projects/cctravel.png";
 import dinbilpartnerImg from "../assets/projects/dinbilpartner.png";
+import bloomitImg from "../assets/projects/bloomit.png";
 
 /**
  * Portfolio projects displayed on the homepage.
@@ -112,6 +113,15 @@ export const projects: Project[] = [
     tags: ["Laravel", "WordPress", "AI"],
     image: cctravelImg,
     link: "https://cctravel.dk",
+    category: "web",
+  },
+  {
+    title: "Bloomit",
+    description: "Page speed, CRO and team lead on WordPress and Laravel for a flower webshop. On call when Black Friday and Mother's Day hit.",
+    alt: "Screenshot of the Bloomit flower delivery webshop homepage with a delivery checker",
+    tags: ["WordPress", "WooCommerce", "Laravel", "CRO"],
+    image: bloomitImg,
+    link: "https://www.bloomit.dk",
     category: "web",
   },
   {
@@ -331,6 +341,10 @@ const danishProjectCopy: Record<string, Pick<Project, "description" | "alt">> = 
     description:
       "Jeg byggede et administrationssystem i Laravel med AI-integrationer for et rejsebureau med 35 års erfaring i skræddersyede rejser. Hjemmesiden bruger WordPress og har et specialbygget bookingforløb.",
     alt: "Skærmbillede af C&C Travels specialbyggede rejsehjemmeside",
+  },
+  Bloomit: {
+    description: "Sidehastighed, CRO og teamledelse i WordPress og Laravel for en blomsterwebshop. På vagt, når Black Friday og mors dag rammer.",
+    alt: "Skærmbillede af forsiden på blomsterwebshoppen Bloomit med et tjek af levering",
   },
   "DM Greenkeeping": {
     description: "Jeg byggede virksomhedens CRM og tilbudssystem i Laravel. I dag er det en central del af driften i en plæneplejevirksomhed med millionomsætning.",
