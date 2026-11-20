@@ -551,7 +551,6 @@ const placementVariants = [
       const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
       const boostedFillProgress = mode === "bottom" ? Math.min(1.3, clampedFillProgress * 1.3) : clampedFillProgress;
       const coverageProgress = Math.pow(clampedFillProgress, 0.84);
-      const bandTop = mode === "bottom" ? Math.max(-height * 0.22, height * (0.7 - boostedFillProgress * 0.7)) : height * 0.12;
       const baseY = mode === "bottom" ? height * (0.86 - boostedFillProgress * 0.58) : height * 0.46;
       const maxAmplitude = mode === "bottom" ? 10 + boostedFillProgress * 18 : 10;
       const lineAlpha = mode === "bottom" ? 0.46 + clampedFillProgress * 0.2 : 0.4;
@@ -603,27 +602,6 @@ const placementVariants = [
           context.stroke();
         }
 
-        context.restore();
-      }
-
-      if (mode === "bottom") {
-        const topGlow = context.createLinearGradient(0, bandTop, 0, height);
-        topGlow.addColorStop(0, "rgba(255, 255, 255, 0)");
-        topGlow.addColorStop(1, "rgba(255, 255, 255, 0.16)");
-
-        context.save();
-        context.globalCompositeOperation = "screen";
-        context.globalAlpha = dynamicCoverage ? coverageProgress * 0.26 : 0.18 + clampedFillProgress * 0.12;
-        context.fillStyle = topGlow;
-        context.fillRect(0, bandTop, width, Math.max(1, height - bandTop));
-        context.restore();
-      }
-
-      if (mode === "inner") {
-        context.save();
-        context.globalAlpha = 0.16;
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, bandTop, width, height - bandTop * 1.1);
         context.restore();
       }
     }

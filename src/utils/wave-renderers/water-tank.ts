@@ -559,8 +559,6 @@ export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
   const { context, width, height } = scene;
   context.clearRect(0, 0, width, height);
 
-  drawBaseWash(scene);
-
   // Background wave layers → ducks → foreground wave → surface shimmer.
   for (let i = 0; i < FOOTER_WAVE_LAYERS.length - 1; i += 1) {
     drawFooterWaveLayer(scene, FOOTER_WAVE_LAYERS[i]);
@@ -574,37 +572,7 @@ export function drawWaterTankScene(scene: WaterTankScene, _time: number): void {
   }
 
   drawFooterWaveLayer(scene, FOOTER_FRONT_LAYER);
-  drawSurfaceShimmer(scene);
   drawParticles(scene);
-}
-
-function drawBaseWash(scene: WaterTankScene): void {
-  const { context, width, height } = scene;
-  const wash = context.createLinearGradient(0, height * 0.22, 0, height);
-  wash.addColorStop(0, "rgba(88, 230, 255, 0)");
-  wash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
-  wash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
-  wash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
-  wash.addColorStop(1, "rgba(255, 143, 94, 0.38)");
-
-  context.save();
-  context.fillStyle = wash;
-  context.fillRect(0, height * 0.22, width, height * 0.84);
-  context.restore();
-}
-
-function drawSurfaceShimmer(scene: WaterTankScene): void {
-  const { context, width, height } = scene;
-  const shimmer = context.createLinearGradient(0, height * 0.34, 0, height);
-  shimmer.addColorStop(0, "rgba(255, 255, 255, 0)");
-  shimmer.addColorStop(1, "rgba(255, 255, 255, 0.16)");
-
-  context.save();
-  context.globalCompositeOperation = "screen";
-  context.globalAlpha = 0.5;
-  context.fillStyle = shimmer;
-  context.fillRect(0, height * 0.34, width, height * 0.66);
-  context.restore();
 }
 
 function drawFooterWaveLayer(scene: WaterTankScene, layer: FooterWaveLayer): void {

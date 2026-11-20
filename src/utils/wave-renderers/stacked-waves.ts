@@ -1,8 +1,8 @@
 /**
  * Stacked waves renderer (sunset variant).
  *
- * Used by the footer divider. Paints a fixed gradient wash and four
- * sine-based fill layers stacked vertically.
+ * Used by the footer divider. Paints four sine-based fill layers
+ * stacked vertically.
  * Unlike the strip renderer there is no hover/fill state — the footer wave
  * is purely ambient, so the scene shape is just `WaveSceneBase`.
  */
@@ -49,20 +49,6 @@ export function drawStackedWaveScene(scene: StackedWaveScene, time: number): voi
     { base: height * 0.66, amp: height * 0.066, freq: 0.0137, speed: 0.00156, alpha: 0.52 },
     { base: height * 0.75, amp: height * 0.052, freq: 0.015, speed: -0.00188, alpha: 0.44 },
   ] as const;
-
-  const baseWash = context.createLinearGradient(0, height * 0.22, 0, height);
-  baseWash.addColorStop(0, "rgba(88, 230, 255, 0)");
-  baseWash.addColorStop(0.34, "rgba(106, 139, 255, 0.2)");
-  baseWash.addColorStop(0.62, "rgba(176, 107, 255, 0.28)");
-  baseWash.addColorStop(0.84, "rgba(255, 124, 168, 0.34)");
-  baseWash.addColorStop(1, "rgba(255, 143, 94, 0.38)");
-
-  context.save();
-  context.globalCompositeOperation = "source-over";
-  context.globalAlpha = 1;
-  context.fillStyle = baseWash;
-  context.fillRect(0, height * 0.22, width, height * 0.84);
-  context.restore();
 
   for (const [index, layer] of layers.entries()) {
     const gradient = context.createLinearGradient(0, 0, width, 0);

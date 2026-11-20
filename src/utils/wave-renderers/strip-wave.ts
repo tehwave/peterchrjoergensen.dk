@@ -125,7 +125,6 @@ function renderStripWaveFrame(context: CanvasRenderingContext2D, width: number, 
   const clampedFillProgress = Math.min(Math.max(fillProgress, 0), 1);
   const boostedFillProgress = Math.min(1.3, clampedFillProgress * 1.3);
   const coverageProgress = Math.pow(clampedFillProgress, 0.84);
-  const bandTop = Math.max(-height * 0.22, height * (0.7 - boostedFillProgress * 0.7));
   const baseY = height * (0.86 - boostedFillProgress * 0.58);
   const maxAmplitude = 10 + boostedFillProgress * 18;
   const lineAlpha = 0.46 + clampedFillProgress * 0.2;
@@ -185,17 +184,6 @@ function renderStripWaveFrame(context: CanvasRenderingContext2D, width: number, 
     context.fill();
     context.restore();
   }
-
-  const topGlow = context.createLinearGradient(0, bandTop, 0, height);
-  topGlow.addColorStop(0, "rgba(255, 255, 255, 0)");
-  topGlow.addColorStop(1, "rgba(255, 255, 255, 0.16)");
-
-  context.save();
-  context.globalCompositeOperation = "screen";
-  context.globalAlpha = dynamicCoverage ? coverageProgress * 0.26 : 0.18 + clampedFillProgress * 0.12;
-  context.fillStyle = topGlow;
-  context.fillRect(0, bandTop, width, Math.max(1, height - bandTop));
-  context.restore();
 }
 
 export function drawStripWaveScene(scene: StripWaveScene, time: number): void {
